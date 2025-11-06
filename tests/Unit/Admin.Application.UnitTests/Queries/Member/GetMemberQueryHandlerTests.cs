@@ -1,0 +1,78 @@
+using FluentAssertions;
+using Hello100Admin.Modules.Admin.Application.UnitTests.Builders;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Security;
+using Hello100Admin.Modules.Admin.Application.Queries.Member;
+using Hello100Admin.Modules.Admin.Domain.Interfaces;
+using Moq;
+using Microsoft.Extensions.Logging;
+
+namespace Hello100Admin.Modules.Admin.Application.UnitTests.Queries.Member;
+
+public class GetMemberQueryHandlerTests
+{
+    public GetMemberQueryHandlerTests()
+    {
+        // EncryptedData 테스트용 FakeCryptoService 등록
+        Hello100Admin.BuildingBlocks.Common.Domain.EncryptedData.Configure(new FakeCryptoService());
+    }
+
+    private class FakeCryptoService : ICryptoService
+    {
+        public string Encrypt(string plainText, CryptoKeyType keyType = CryptoKeyType.Default) => plainText;
+        public string Decrypt(string encryptedText, CryptoKeyType keyType = CryptoKeyType.Default) => encryptedText;
+        public string Encrypt(string plainText) => plainText;
+        public string Decrypt(string encryptedText) => encryptedText;
+        public string EncryptParameter(string plainText) => plainText;
+        public string DecryptParameter(string encryptedText) => encryptedText;
+    }
+
+    [Fact]
+    public async Task Handle_Returns_Success_When_Member_Exists()
+    {
+        // Arrange
+        var mockRepo = new Mock<IMemberRepository>();
+        var mockLogger = new Mock<ILogger<GetMemberQueryHandler>>();
+        var member = MemberTestData.Default;
+        mockRepo.Setup(r => r.GetMember(member.Uid, It.IsAny<CancellationToken>())).ReturnsAsync(member);
+        var families = MemberFamilyTestData.DefaultList;
+        mockRepo.Setup(r => r.GetMemberFamilys(member.Uid, It.IsAny<CancellationToken>())).ReturnsAsync(families);
+
+        var handler = new GetMemberQueryHandler(mockRepo.Object, mockLogger.Object);
+        var query = new GetMemberQuery(member.Uid);
+
+        // Act
+        var result = await handler.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+        result.Value.Uid.Should().Be("U0000001");
+        result.Value.Name.Should().Be("홍길동");
+        // 패밀리 값 검증
+        result.Value.MemberFamilys.Should().NotBeNull();
+        result.Value.MemberFamilys.Should().ContainSingle();
+        var familyDto = result.Value.MemberFamilys[0];
+        familyDto.Uid.Should().Be("F0000001");
+        familyDto.Mid.Should().Be(2);
+        familyDto.Name.Should().Be("가족1");
+    }
+
+    [Fact]
+    public async Task Handle_Returns_Failure_When_Member_Not_Found()
+    {
+        // Arrange
+        var mockRepo = new Mock<IMemberRepository>();
+        var mockLogger = new Mock<ILogger<GetMemberQueryHandler>>();
+        mockRepo.Setup(r => r.GetMember("U9999999", It.IsAny<CancellationToken>())).ReturnsAsync((Domain.Entities.Member?)null);
+        var handler = new GetMemberQueryHandler(mockRepo.Object, mockLogger.Object);
+        var query = new GetMemberQuery("U9999999");
+
+        // Act
+        var result = await handler.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Value.Should().BeNull();
+        result.Error.Should().Be("회원이 존재하지 않습니다.");
+    }
+}

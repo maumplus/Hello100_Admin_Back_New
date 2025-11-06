@@ -1,0 +1,11 @@
+@Hello100Admin.API_HostAddress = http://localhost:5000
+
+### ==============================================
+### Health Check
+### ==============================================
+
+### Health Check
+GET {{Hello100Admin.API_HostAddress}}/api/auth/health
+Accept: application/json
+
+###

@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>bd1a7d5a-d676-4892-87f8-6b7186da429a</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Hello100Admin.Modules.Auth.API.IntegrationTests" />
+    <InternalsVisibleTo Include="Hello100Admin.Modules.Customer.API.IntegrationTests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="12.0.0" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.0.0" />
+    <PackageReference Include="MediatR" Version="13.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.11" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.20" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.11">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+    <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1" />
+    <PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../BuildingBlocks/Common/Hello100Admin.BuildingBlocks.Common.csproj" />
+    <ProjectReference Include="../Modules/Admin/Application/Hello100Admin.Modules.Admin.Application.csproj" />
+    <ProjectReference Include="../Modules/Admin/Infrastructure/Hello100Admin.Modules.Admin.Infrastructure.csproj" />
+    <ProjectReference Include="../Modules/Auth/Application/Hello100Admin.Modules.Auth.Application.csproj" />
+    <ProjectReference Include="../Modules/Auth/Infrastructure/Hello100Admin.Modules.Auth.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

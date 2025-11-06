@@ -1,0 +1,93 @@
+# =============================================
+# .NET Core / ASP.NET Core
+# =============================================
+
+# Build results
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio / Rider / VS Code
+.vs/
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.sln.iml
+
+# User-specific files
+*.rsuser
+*.userprefs
+
+# Test results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+*.trx
+*.coverage
+TestResult.xml
+
+# NuGet
+*.nupkg
+*.snupkg
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# .NET Core
+*.log
+*.pdb
+
+# =============================================
+# macOS
+# =============================================
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# =============================================
+# Windows
+# =============================================
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# =============================================
+# Project Specific
+# =============================================
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+*.mdf
+*.ldf
+
+# Environment & Secrets
+.env
+.env.local
+.env.*.local
+appsettings.Development.json
+appsettings.*.json
+!appsettings.json
+secrets.json
+setup-secrets.sh
+
+# Docker
+docker-compose.override.yml
+
+# Logs
+logs/
+
+# Temporary files
+temp/
+tmp/
+
+# Node modules (if using npm for frontend)
+node_modules/
