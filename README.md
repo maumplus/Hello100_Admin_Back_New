@@ -370,28 +370,6 @@ curl http://localhost:5000/api/members/1
 
 ## 📚 참고 자료
 
-### 프로젝트 문서
-
-#### 시작 가이드
-- 📖 **[README.md](README.md)** - 프로젝트 개요 (이 문서)
-- ⚡ **[QUICK_START.md](docs/QUICK_START.md)** - 5분 빠른 시작
-- 📚 **[ONBOARDING.md](docs/ONBOARDING.md)** - 신규 개발자 5일 학습 커리큘럼
-- 🛠️ **[DEVELOPMENT_GUIDE.md](docs/DEVELOPMENT_GUIDE.md)** - 개발 실무 가이드
-
-#### 아키텍처 문서
-- 🏗️ **[SOLUTION_ARCHITECTURE.md](docs/SOLUTION_ARCHITECTURE.md)** - 전체 아키텍처
-- 🧱 **[BUILDINGBLOCKS.md](docs/BUILDINGBLOCKS.md)** - 공통 인프라
-- 🌐 **[API_LAYER.md](docs/API_LAYER.md)** - API 계층 가이드
-
-#### 모듈 문서
-- 🔐 **[AUTH_MODULE.md](docs/AUTH_MODULE.md)** - 인증 모듈
-- 👥 **[CUSTOMER_MODULE_PHASE2.md](docs/CUSTOMER_MODULE_PHASE2.md)** - 고객 모듈 완전 가이드
-
-#### 개발 문서
-- 📝 **[LOGGING.md](docs/LOGGING.md)** - 로깅 전략
-- 🧪 **[TESTING.md](docs/TESTING.md)** - 테스트 전략
-- 🚀 **[DEPLOYMENT.md](docs/DEPLOYMENT.md)** - 배포 가이드
-
 ### 외부 자료
 
 - [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
@@ -409,4 +387,4 @@ MIT License
 
 | 날짜 | 버전 | 변경 내용 | 작성자 |
 |------|------|-----------|--------|
-| 2025-10-30 | 1.0.0 | 초기 문서 작성 | Hello100Admin Team |
+| 2025-11-06 | 0.0.1 | 초기 문서 작성 | Hello100Admin Team |
