@@ -3,6 +3,7 @@ using Hello100Admin.BuildingBlocks.Common.Errors;
 using Hello100Admin.API.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Xunit;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Extensions;
 
 namespace API.UnitTests
 {
@@ -26,7 +27,10 @@ namespace API.UnitTests
         public void UserNotFound_Returns_NotFound()
         {
             var controller = new DummyController();
-            var result = Result.Failure<string>("no user", ErrorCodes.UserNotFound);
+
+            ErrorInfo errorInfo = GlobalErrorCode.UserNotFound.ToError();
+
+            var result = Result.Fail(errorInfo);
 
             var action = result.ToActionResult(controller);
             Assert.IsType<NotFoundObjectResult>(action);
@@ -36,7 +40,10 @@ namespace API.UnitTests
         public void ValidationError_Returns_BadRequest()
         {
             var controller = new DummyController();
-            var result = Result.Failure<string>("invalid", ErrorCodes.Validation);
+
+            ErrorInfo errorInfo = GlobalErrorCode.ValidationError.ToError();
+
+            var result = Result.Fail(errorInfo);
 
             var action = result.ToActionResult(controller);
             Assert.IsType<BadRequestObjectResult>(action);
@@ -46,7 +53,10 @@ namespace API.UnitTests
         public void AuthFailed_WithAuthEndpoint_Returns_Unauthorized()
         {
             var controller = new DummyController();
-            var result = Result.Failure<string>("auth failed", ErrorCodes.AuthFailed);
+
+            ErrorInfo errorInfo = GlobalErrorCode.AuthFailed.ToError();
+
+            var result = Result.Fail(errorInfo);
 
             var action = result.ToActionResult(controller, authEndpoint: true);
             Assert.IsType<UnauthorizedObjectResult>(action);

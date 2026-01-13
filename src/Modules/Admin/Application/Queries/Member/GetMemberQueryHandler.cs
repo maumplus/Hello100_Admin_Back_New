@@ -1,11 +1,12 @@
 using Hello100Admin.BuildingBlocks.Common.Application;
 using Hello100Admin.BuildingBlocks.Common.Errors;
-using Hello100Admin.Modules.Admin.Application.DTOs;
 using Hello100Admin.Modules.Admin.Domain.Interfaces;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
 namespace Hello100Admin.Modules.Admin.Application.Queries.Member;
+
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Extensions;
 using Hello100Admin.Modules.Admin.Application.DTOs;
 
 public class GetMemberQueryHandler : IRequestHandler<GetMemberQuery, Result<MemberDto>>
@@ -27,7 +28,7 @@ public class GetMemberQueryHandler : IRequestHandler<GetMemberQuery, Result<Memb
         if (member == null)
         {
             _logger.LogWarning("Member with UID {Uid} not found.", query.Uid);
-            return Result.Failure<MemberDto>("회원이 존재하지 않습니다.", ErrorCodes.UserNotFound);
+            return Result.SuccessWithError<MemberDto>(GlobalErrorCode.UserNotFound.ToError());
         }
 
         var memberDto = new MemberDto

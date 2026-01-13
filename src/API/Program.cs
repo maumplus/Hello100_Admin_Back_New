@@ -8,6 +8,12 @@ using Hello100Admin.BuildingBlocks.Common.Infrastructure.Security;
 using Hello100Admin.BuildingBlocks.Common.Domain;
 using Hello100Admin.Modules.Admin.Infrastructure;
 using FluentValidation;
+using Hello100Admin.Modules.Seller.Infrastructure;
+using Hello100Admin.API.Infrastructure;
+using System.IdentityModel.Tokens.Jwt;
+using Hello100Admin.Modules.Seller.Application.Features.Seller.Commands.CreateSeller;
+using Hello100Admin.Modules.Seller.Application.Features.Bank.Queries.GetBankList;
+using Hello100Admin.API.Extensions;
 
 // Dapper snake_case <-> PascalCase 자동 매핑 설정
 Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
@@ -27,6 +33,8 @@ builder.Host.UseSerilog((context, services, configuration) => configuration
 // Add services to the container.
 builder.Services.AddControllers();
 
+builder.Services.AddScoped<CustomJwtBearerEvents>();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -44,7 +52,7 @@ builder.Services.AddSwaggerGen(options =>
         Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
         Name = "Authorization",
         In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
         Scheme = "Bearer"
     });
 
@@ -88,6 +96,7 @@ builder.Services.AddAuthentication(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
     {
+        RequireExpirationTime = true,
         ValidateIssuer = true,
         ValidateAudience = true,
         ValidateLifetime = true,
@@ -95,8 +104,12 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = jwtSettings["Issuer"],
         ValidAudience = jwtSettings["Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+        NameClaimType = JwtRegisteredClaimNames.Sub,
         ClockSkew = TimeSpan.Zero
     };
+
+    options.MapInboundClaims = false;
+    options.EventsType = typeof(CustomJwtBearerEvents);
 });
 
 builder.Services.AddAuthorization();
@@ -110,12 +123,21 @@ builder.Services.AddMediatR(cfg =>
 {
     cfg.RegisterServicesFromAssembly(typeof(Hello100Admin.Modules.Admin.Application.Queries.GetAdminUsersQuery).Assembly);
 });
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterServicesFromAssembly(typeof(CreateSellerCommand).Assembly);  // Add Seller
+});
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterServicesFromAssembly(typeof(GetBankListQuery).Assembly);  // Add Seller
+});
 
 // MediatR 파이프라인에 ValidationBehavior 등록
 builder.Services.AddTransient(typeof(MediatR.IPipelineBehavior<,>), typeof(Hello100Admin.BuildingBlocks.Common.Behaviors.ValidationBehavior<,>));
 
 // FluentValidation Validator 자동 등록 (어셈블리 스캔)
 builder.Services.AddValidatorsFromAssemblyContaining<Hello100Admin.Modules.Admin.Application.Queries.Member.GetMemberQueryValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateSellerCommandValidator>(); // Add Seller
 
 // Crypto Service 등록 (암호화/복호화)
 builder.Services.AddSingleton<ICryptoService, AesCryptoService>();
@@ -134,11 +156,12 @@ builder.Services.AddSingleton<Hello100Admin.BuildingBlocks.Common.Infrastructure
 builder.Services.AddAuthInfrastructure(builder.Configuration);
 // Admin Infrastructure 등록
 builder.Services.AddAdminInfrastructure(builder.Configuration);
+// Seller Infrastructure 등록
+builder.Services.AddSellerInfrastructure(builder.Configuration);
 
 // HealthCheck: Dapper/MySQL 연결 체크
 builder.Services.AddHealthChecks()
     .AddCheck<MySqlDapperHealthCheck>("mysql-dapper", tags: new[] { "ready", "live" });
-
 
 var app = builder.Build();
 
@@ -154,6 +177,9 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+
+    // ✅ Stoplight Elements
+    app.UseStoplight();
 }
 
 // Serilog 요청 로깅 추가

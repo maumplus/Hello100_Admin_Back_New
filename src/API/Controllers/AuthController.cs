@@ -1,21 +1,18 @@
-using Hello100Admin.BuildingBlocks.Common.Errors;
 using Hello100Admin.Modules.Auth.Application.Commands.Login;
 using Hello100Admin.Modules.Auth.Application.Commands.Logout;
 using Hello100Admin.Modules.Auth.Application.Queries.GetUser;
-using Hello100Admin.Modules.Auth.Application.DTOs;
 using MediatR;
 using Hello100Admin.API.Extensions;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Hello100Admin.API.Infrastructure.Attributes;
 
 namespace Hello100Admin.API.Controllers;
 
 /// <summary>
 /// 인증 관련 API 컨트롤러
 /// </summary>
-[ApiController]
-[Route("api/[controller]")]
-public class AuthController : ControllerBase
+public class AuthController : BaseController
 {
     private readonly IMediator _mediator;
     private readonly ILogger<AuthController> _logger;
@@ -30,6 +27,7 @@ public class AuthController : ControllerBase
     /// 로그인
     /// </summary>
     [HttpPost("login")]
+    [AllowAnonymous]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Login([FromBody] LoginCommand command)
@@ -78,7 +76,7 @@ public class AuthController : ControllerBase
     /// 로그아웃
     /// </summary>
     [HttpPost("logout")]
-    [Authorize]
+    [Auth]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Logout([FromBody] LogoutCommand command)
@@ -97,7 +95,7 @@ public class AuthController : ControllerBase
     /// 현재 사용자 정보 조회
     /// </summary>
     [HttpGet("me")]
-    [Authorize]
+    [Auth]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetMe()

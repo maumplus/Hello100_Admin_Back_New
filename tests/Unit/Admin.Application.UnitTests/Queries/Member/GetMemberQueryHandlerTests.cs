@@ -45,13 +45,13 @@ public class GetMemberQueryHandlerTests
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        result.Value.Should().NotBeNull();
-        result.Value.Uid.Should().Be("U0000001");
-        result.Value.Name.Should().Be("홍길동");
+        result.Data.Should().NotBeNull();
+        result.Data.Uid.Should().Be("U0000001");
+        result.Data.Name.Should().Be("홍길동");
         // 패밀리 값 검증
-        result.Value.MemberFamilys.Should().NotBeNull();
-        result.Value.MemberFamilys.Should().ContainSingle();
-        var familyDto = result.Value.MemberFamilys[0];
+        result.Data.MemberFamilys.Should().NotBeNull();
+        result.Data.MemberFamilys.Should().ContainSingle();
+        var familyDto = result.Data.MemberFamilys[0];
         familyDto.Uid.Should().Be("F0000001");
         familyDto.Mid.Should().Be(2);
         familyDto.Name.Should().Be("가족1");
@@ -72,7 +72,7 @@ public class GetMemberQueryHandlerTests
 
         // Assert
         result.IsSuccess.Should().BeFalse();
-        result.Value.Should().BeNull();
-        result.Error.Should().Be("회원이 존재하지 않습니다.");
+        result.Data.Should().BeNull();
+        result.ErrorInfo?.Message.Should().Be("회원이 존재하지 않습니다.");
     }
 }

@@ -1,21 +1,17 @@
-using Hello100Admin.BuildingBlocks.Common.Errors;
 using Hello100Admin.Modules.Admin.Application.DTOs;
 using Hello100Admin.Modules.Admin.Application.Queries.Member;
 using MediatR;
 using Hello100Admin.API.Extensions;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
+using Hello100Admin.API.Infrastructure.Attributes;
 
 namespace Hello100Admin.API.Controllers;
 
 /// <summary>
 /// 멤버 관리 API Controller
 /// </summary>
-[ApiController]
-[Route("api/[controller]")]
-[Authorize]
-public class MembersController : ControllerBase
+[Auth]
+public class MembersController : BaseController
 {
     private readonly IMediator _mediator;
     private readonly ILogger<MembersController> _logger;

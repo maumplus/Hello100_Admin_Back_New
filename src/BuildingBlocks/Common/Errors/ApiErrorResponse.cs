@@ -5,12 +5,13 @@ public class ApiErrorResponse
     public bool Success { get; set; } = false;
     public ApiErrorDetail Error { get; set; }
 
-    public ApiErrorResponse(string code, string message, object? details = null)
+    public ApiErrorResponse(int errorCode, string errorName, string message, object? details = null)
     {
         Success = false;
         Error = new ApiErrorDetail
         {
-            Code = code,
+            ErrorCode = errorCode,
+            ErrorName = errorName,
             Message = message,
             Details = details
         };
@@ -19,7 +20,8 @@ public class ApiErrorResponse
 
 public class ApiErrorDetail
 {
-    public string Code { get; set; } = ErrorCodes.Unknown;
+    public int ErrorCode { get; set; } = (int)GlobalErrorCode.UnexpectedError;
+    public string ErrorName { get; set; } = GlobalErrorCode.UnexpectedError.ToString();
     public string Message { get; set; } = string.Empty;
     public object? Details { get; set; }
 }

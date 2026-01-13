@@ -24,7 +24,7 @@ public class AesCryptoService : ICryptoService
         var ivString = configuration["Crypto:IV"]
             ?? throw new InvalidOperationException("Crypto:IV is not configured");
 
-        _aesIv = Convert.FromBase64String(ivString);
+        _aesIv = Encoding.UTF8.GetBytes(ivString);
         if (_aesIv.Length != 16)
             throw new InvalidOperationException($"Invalid IV length: {_aesIv.Length} bytes. AES requires 16 bytes.");
 
@@ -48,6 +48,17 @@ public class AesCryptoService : ICryptoService
         {
             _aesKeys[CryptoKeyType.Email] = _aesKeys[CryptoKeyType.Default];
             _aesKeys[CryptoKeyType.Name] = _aesKeys[CryptoKeyType.Default];
+        }
+
+        var sellerKeyString = configuration["Crypto:Key:Seller"];
+        if (!string.IsNullOrEmpty(sellerKeyString))
+        {
+            var key = ValidateAndConvertAesKey(sellerKeyString, "Seller");
+            _aesKeys[CryptoKeyType.Seller] = key;
+        }
+        else
+        {
+            _aesKeys[CryptoKeyType.Seller] = _aesKeys[CryptoKeyType.Default];
         }
 
         // DES 파라미터 키 로드 (선택적 - 없으면 기본값)

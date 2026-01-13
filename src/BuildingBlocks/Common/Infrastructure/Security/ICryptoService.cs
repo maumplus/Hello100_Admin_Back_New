@@ -18,7 +18,12 @@ public enum CryptoKeyType
     /// <summary>
     /// 이메일 전용 키 (_AES256Key_Email_Name)
     /// </summary>
-    Email = 92
+    Email = 92,
+
+    /// <summary>
+    /// 송금 전용 키 (_AES256Key_Seller)
+    /// </summary>
+    Seller = 93
 }
 
 /// <summary>

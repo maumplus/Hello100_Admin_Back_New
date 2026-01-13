@@ -1,5 +1,6 @@
 using Hello100Admin.BuildingBlocks.Common.Application;
 using Hello100Admin.BuildingBlocks.Common.Errors;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Extensions;
 using Hello100Admin.Modules.Auth.Application.DTOs;
 using Hello100Admin.Modules.Auth.Application.Interfaces;
 using Hello100Admin.Modules.Auth.Domain.Interfaces;
@@ -45,7 +46,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginRes
         {
             _logger.LogWarning("Login failed: User not found for AccountId: {AccountId}", request.AccountId);
             // return Result.Failure<LoginResponseDto>("계정 ID 또는 비밀번호가 올바르지 않습니다.");
-            return Result.Failure<LoginResponseDto>("계정 ID 또는 비밀번호가 올바르지 않습니다.", ErrorCodes.AuthFailed);
+            return Result.SuccessWithError<LoginResponseDto>(GlobalErrorCode.AuthFailed.ToError());
         }
 
         // 2. 계정 상태 확인 (CanLogin 헬퍼 메서드 사용)
@@ -78,8 +79,8 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginRes
 
             user.RecordLoginFailure();
             await _userRepository.UpdateLoginFailureAsync(user, cancellationToken);
-            
-            return Result.Failure<LoginResponseDto>("계정 ID 또는 비밀번호가 올바르지 않습니다.", ErrorCodes.AuthFailed);
+
+            return Result.SuccessWithError<LoginResponseDto>(GlobalErrorCode.AuthFailed.ToError());
         }
 
         _logger.LogInformation("Password verified successfully for UserId: {UserId}, AccountId: {AccountId}", 
