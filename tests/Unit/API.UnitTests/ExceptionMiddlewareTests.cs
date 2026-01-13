@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 using Hello100Admin.API.Middleware;
 using Hello100Admin.BuildingBlocks.Common.Errors;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Extensions;
 
 namespace Hello100Admin.Tests.API
 {
@@ -32,21 +33,23 @@ namespace Hello100Admin.Tests.API
         [Fact]
         public async System.Threading.Tasks.Task ValidationException_Returns_400()
         {
-            var ex = new ValidationException(ErrorCodes.Validation, "invalid", new[] { "a", "b" });
+            var errorInfo = GlobalErrorCode.ValidationError.ToError();
+            var ex = new ValidationException(errorInfo.Code, errorInfo.Name, errorInfo.Message, new[] { "a", "b" });
             var json = await InvokeWithExceptionAsync(ex);
             using var doc = JsonDocument.Parse(json);
-            var code = doc.RootElement.GetProperty("Error").GetProperty("Code").GetString();
-            Assert.Equal(ErrorCodes.Validation, code);
+            var code = doc.RootElement.GetProperty("Error").GetProperty("ErrorName").GetString();
+            Assert.Equal(errorInfo.Name, code);
         }
 
         [Fact]
         public async System.Threading.Tasks.Task NotFoundException_Returns_404()
         {
-            var ex = new NotFoundException(ErrorCodes.UserNotFound, "not found");
+            var errorInfo = GlobalErrorCode.UserNotFound.ToError();
+            var ex = new NotFoundException(errorInfo.Code, errorInfo.Name, errorInfo.Message, "not found");
             var json = await InvokeWithExceptionAsync(ex);
             using var doc = JsonDocument.Parse(json);
-            var code = doc.RootElement.GetProperty("Error").GetProperty("Code").GetString();
-            Assert.Equal(ErrorCodes.UserNotFound, code);
+            var code = doc.RootElement.GetProperty("Error").GetProperty("ErrorName").GetString();
+            Assert.Equal(errorInfo.Name, code);
         }
 
         [Fact]

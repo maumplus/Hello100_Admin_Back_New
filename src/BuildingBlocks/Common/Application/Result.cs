@@ -1,35 +1,44 @@
 namespace Hello100Admin.BuildingBlocks.Common.Application;
 
+// 임시 경로 추후 경로 변경 예정
+public sealed record ErrorInfo(int Code, string Name, string Message);
+
 /// <summary>
 /// 작업 결과를 나타내는 클래스
 /// </summary>
-
 public class Result
 {
     public bool IsSuccess { get; }
-    public string? Error { get; }
-    public string? ErrorCode { get; }
+    public ErrorInfo? ErrorInfo { get; }
     public object? Details { get; }
-    public bool IsFailure => !IsSuccess;
 
-    protected Result(bool isSuccess, string? error, string? errorCode = null, object? details = null)
+    protected Result(bool isSuccess, ErrorInfo? errorInfo = null, object? details = null)
     {
-        if (isSuccess && error != null)
-            throw new InvalidOperationException("성공한 결과는 에러를 가질 수 없습니다.");
-        if (!isSuccess && error == null)
-            throw new InvalidOperationException("실패한 결과는 에러를 가져야 합니다.");
         IsSuccess = isSuccess;
-        Error = error;
-        ErrorCode = errorCode;
+        ErrorInfo = errorInfo;
         Details = details;
     }
 
-    public static Result Success() => new(true, null);
-    public static Result Failure(string error, string? errorCode = null, object? details = null)
-        => new(false, error, errorCode, details);
-    public static Result<T> Success<T>(T value) => new Result<T>(value, true, null, null, null);
-    public static Result<T> Failure<T>(string error, string? errorCode = null, object? details = null)
-    => new Result<T>(default!, false, error, errorCode, details);
+    public static Result Success()
+        => new(true);
+
+    public static Result SuccessWithError(ErrorInfo errorInfo, object? details = null)
+        => new(true, errorInfo);
+
+    public static Result Fail(ErrorInfo errorInfo, object? details = null)
+        => new(false, errorInfo);
+
+    public static Result<T> Success<T>(T data)
+        => new Result<T>(data, true);
+
+    public static Result<T> SuccessWithError<T>(ErrorInfo errorInfo, object? details = null)
+        => new Result<T>(default!, true, errorInfo, details);
+
+    public static Result<T> SuccessWithError<T>(T data, ErrorInfo errorInfo, object? details = null)
+        => new Result<T>(data, true, errorInfo, details);
+
+    public static Result<T> Fail<T>(ErrorInfo errorInfo, object? details = null)
+        => new Result<T>(default!, false, errorInfo, details);
 }
 
 /// <summary>
@@ -37,11 +46,11 @@ public class Result
 /// </summary>
 public class Result<T> : Result
 {
-    public T Value { get; }
+    public T Data { get; }
 
-    protected internal Result(T value, bool isSuccess, string? error, string? errorCode, object? details)
-        : base(isSuccess, error, errorCode, details)
+    protected internal Result(T data, bool isSuccess, ErrorInfo? errorInfo = null, object? details = null)
+        : base(isSuccess, errorInfo, details)
     {
-        Value = value;
+        this.Data = data;
     }
 }

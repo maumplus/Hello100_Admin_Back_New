@@ -23,7 +23,8 @@ public class GetUserQueryHandler : IRequestHandler<GetUserQuery, Result<UserDto>
         
         if (user == null)
         {
-            return Result.Failure<UserDto>("사용자를 찾을 수 없습니다.");
+            // 임시 적용
+            return Result.SuccessWithError<UserDto>(new ErrorInfo(0, "UserNotFound", "사용자를 찾을 수 없습니다."));
         }
 
         // Grade 기반 역할 설정

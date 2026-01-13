@@ -34,6 +34,17 @@
     <ProjectReference Include="../Modules/Admin/Infrastructure/Hello100Admin.Modules.Admin.Infrastructure.csproj" />
     <ProjectReference Include="../Modules/Auth/Application/Hello100Admin.Modules.Auth.Application.csproj" />
     <ProjectReference Include="../Modules/Auth/Infrastructure/Hello100Admin.Modules.Auth.Infrastructure.csproj" />
+    <ProjectReference Include="..\Modules\Seller\Application\Hello100Admin.Modules.Seller.Application.csproj" />
+    <ProjectReference Include="..\Modules\Seller\Infrastructure\Hello100Admin.Modules.Seller.Infrastructure.csproj" />
+  </ItemGroup>
+	
+  <ItemGroup>
+    <None Update="KCP_AUTH_AJNIL_CERT.pem">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="KCP_AUTH_DEV_CERT.pem">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

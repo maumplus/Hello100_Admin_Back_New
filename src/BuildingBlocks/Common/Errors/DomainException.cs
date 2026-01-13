@@ -8,7 +8,8 @@ namespace Hello100Admin.BuildingBlocks.Common.Errors;
 /// </summary>
 public class DomainException : Exception
 {
-    public string ErrorCode { get; }
+    public int ErrorCode { get; }
+    public string ErrorName { get; }
     public object? Details { get; }
 
     /// <summary>
@@ -16,10 +17,11 @@ public class DomainException : Exception
     /// </summary>
     public virtual HttpStatusCode StatusCode => HttpStatusCode.BadRequest;
 
-    public DomainException(string errorCode, string message, object? details = null)
+    public DomainException(int errorCode, string errorName, string message, object? details = null)
         : base(message)
     {
         ErrorCode = errorCode;
+        ErrorName = errorName;
         Details = details;
     }
 }
@@ -28,20 +30,20 @@ public class DomainException : Exception
 public class NotFoundException : DomainException
 {
     public override HttpStatusCode StatusCode => HttpStatusCode.NotFound;
-    public NotFoundException(string errorCode, string message, object? details = null)
-        : base(errorCode, message, details) { }
+    public NotFoundException(int errorCode, string errorName, string message, object? details = null)
+        : base(errorCode, errorName, message, details) { }
 }
 
 public class ConflictException : DomainException
 {
     public override HttpStatusCode StatusCode => HttpStatusCode.Conflict;
-    public ConflictException(string errorCode, string message, object? details = null)
-        : base(errorCode, message, details) { }
+    public ConflictException(int errorCode, string errorName, string message, object? details = null)
+        : base(errorCode, errorName, message, details) { }
 }
 
 public class ValidationException : DomainException
 {
     // 기본적으로 400 BadRequest를 사용
-    public ValidationException(string errorCode, string message, object? details = null)
-        : base(errorCode, message, details) { }
+    public ValidationException(int errorCode, string errorName, string message, object? details = null)
+        : base(errorCode, errorName, message, details) { }
 }

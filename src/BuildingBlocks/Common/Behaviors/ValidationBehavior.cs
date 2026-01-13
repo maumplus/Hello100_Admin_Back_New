@@ -1,6 +1,7 @@
 using FluentValidation;
 using MediatR;
 using Hello100Admin.BuildingBlocks.Common.Errors;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Extensions;
 
 namespace Hello100Admin.BuildingBlocks.Common.Behaviors;
 
@@ -25,8 +26,10 @@ public class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TReques
                 {
                     var messages = failures.Select(f => f.ErrorMessage).ToArray();
                     // Validation 예외는 명시적 ValidationException을 던져 미들웨어에서 적절히 매핑되도록 함
-                    throw new Hello100Admin.BuildingBlocks.Common.Errors.ValidationException(
-                        Hello100Admin.BuildingBlocks.Common.Errors.ErrorCodes.Validation,
+                    throw new Errors.ValidationException(
+                        (int)GlobalErrorCode.ValidationError,
+                        GlobalErrorCode.ValidationError.ToString(),
+                        //GlobalErrorCode.ValidationError.ToError().Message,
                         string.Join("; ", messages),
                         messages);
                 }

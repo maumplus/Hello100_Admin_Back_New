@@ -36,18 +36,18 @@ public class GetUserQueryHandlerTests
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        result.Value.Should().NotBeNull();
-        result.Value.Id.Should().Be(user.Aid);
-        result.Value.AccountId.Should().Be(user.AccId);
-        result.Value.Name.Should().Be(user.Name);
-        result.Value.HospNo.Should().Be(user.HospNo);
-        result.Value.Grade.Should().Be(user.Grade);
-        result.Value.Enabled.Should().BeTrue();
-        result.Value.Approved.Should().BeTrue();
-        result.Value.AccountLocked.Should().BeTrue();
-        result.Value.LastLoginAt.Should().Be(user.LastLoginDt);
-        result.Value.Roles.Should().ContainSingle();
-        result.Value.Roles[0].Should().Be("SuperAdmin");
+        result.Data.Should().NotBeNull();
+        result.Data.Id.Should().Be(user.Aid);
+        result.Data.AccountId.Should().Be(user.AccId);
+        result.Data.Name.Should().Be(user.Name);
+        result.Data.HospNo.Should().Be(user.HospNo);
+        result.Data.Grade.Should().Be(user.Grade);
+        result.Data.Enabled.Should().BeTrue();
+        result.Data.Approved.Should().BeTrue();
+        result.Data.AccountLocked.Should().BeTrue();
+        result.Data.LastLoginAt.Should().Be(user.LastLoginDt);
+        result.Data.Roles.Should().ContainSingle();
+        result.Data.Roles[0].Should().Be("SuperAdmin");
     }
 
     [Fact]
@@ -64,6 +64,6 @@ public class GetUserQueryHandlerTests
 
         // Assert
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be("사용자를 찾을 수 없습니다.");
+        result.ErrorInfo?.Message.Should().Be("사용자를 찾을 수 없습니다.");
     }
 }

@@ -46,10 +46,10 @@ namespace Hello100Admin.Modules.Auth.Application.UnitTests.Commands
 
 			// Assert
 			result.IsSuccess.Should().BeTrue();
-			result.Value.Should().NotBeNull();
-			result.Value.Token.AccessToken.Should().Be("access-token");
-			result.Value.Token.RefreshToken.Should().Be("refresh-token");
-			result.Value.User.Id.Should().Be(user.Aid);
+			result.Data.Should().NotBeNull();
+			result.Data.Token.AccessToken.Should().Be("access-token");
+			result.Data.Token.RefreshToken.Should().Be("refresh-token");
+			result.Data.User.Id.Should().Be(user.Aid);
 		}
 
 		[Fact]
@@ -70,7 +70,7 @@ namespace Hello100Admin.Modules.Auth.Application.UnitTests.Commands
 
 			// Assert
 			result.IsSuccess.Should().BeFalse();
-			result.Error.Should().Be("계정 ID 또는 비밀번호가 올바르지 않습니다.");
+			result.ErrorInfo?.Message.Should().Be("계정 ID 또는 비밀번호가 올바르지 않습니다.");
 		}
 
 		[Fact]
@@ -107,7 +107,7 @@ namespace Hello100Admin.Modules.Auth.Application.UnitTests.Commands
 
 			// Assert
 			result.IsSuccess.Should().BeFalse();
-			result.Error.Should().Be("계정 ID 또는 비밀번호가 올바르지 않습니다.");
+			result.ErrorInfo?.Message.Should().Be("계정 ID 또는 비밀번호가 올바르지 않습니다.");
 		}
 	}
 }
