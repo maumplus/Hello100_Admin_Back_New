@@ -1,35 +1,35 @@
 ﻿namespace Hello100Admin.API.Constracts.Seller
 {
-    public class GetSellerRemitListRequest
+    public record GetSellerRemitListRequest
     {
         /// <summary>
         /// 페이지 번호
         /// </summary>
-        public required int PageNo { get; set; } = 1;
+        public required int PageNo { get; init; }
 
         /// <summary>
         /// 페이지 사이즈
         /// </summary>
-        public required int PageSize { get; set; } = 20;
+        public required int PageSize { get; init; }
 
         /// <summary>
         /// 검색어
         /// </summary>
-        public string? SearchText { get; set; }
+        public string? SearchText { get; init; }
 
         /// <summary>
         /// 시작일자
         /// </summary>
-        public required string StartDt { get; set; }
+        public required string StartDt { get; init; }
 
         /// <summary>
         /// 종료일자
         /// </summary>
-        public required string EndDt { get; set; }
+        public required string EndDt { get; init; }
 
         /// <summary>
         /// 송금상태
         /// </summary>
-        public string? RemitStatus { get; set; }
+        public string? RemitStatus { get; init; }
     }
 }

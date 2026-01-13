@@ -1,10 +1,10 @@
 using FluentAssertions;
-using Hello100Admin.Modules.Auth.Application.Commands.Login;
 using Hello100Admin.Modules.Auth.Domain.Entities;
-using Hello100Admin.Modules.Auth.Domain.Interfaces;
-using Hello100Admin.Modules.Auth.Application.Interfaces;
 using Moq;
 using Microsoft.Extensions.Logging;
+using Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.Login;
+using Hello100Admin.Modules.Auth.Application.Common.Abstractions.Services;
+using Hello100Admin.Modules.Auth.Application.Common.Abstractions.Persistence.Auth;
 
 namespace Hello100Admin.Modules.Auth.Application.UnitTests.Commands
 {
@@ -14,7 +14,7 @@ namespace Hello100Admin.Modules.Auth.Application.UnitTests.Commands
 		public async Task Handle_ShouldReturnSuccess_WhenCredentialsAreValid()
 		{
 			// Arrange
-			var user = new User
+			var user = new UserEntity
 			{
 				Aid = "A0000001",
 				AccId = "testuser",
@@ -29,16 +29,16 @@ namespace Hello100Admin.Modules.Auth.Application.UnitTests.Commands
 				// CreatedAt은 테스트에서 할당하지 않음
 				LastLoginDt = DateTime.UtcNow
 			};
-			var mockUserRepo = new Mock<IUserRepository>();
-			mockUserRepo.Setup(r => r.GetByUsernameAsync(user.AccId, It.IsAny<CancellationToken>())).ReturnsAsync(user);
+			var authStore = new Mock<IAuthStore>();
+			authStore.Setup(r => r.GetByUsernameAsync(user.AccId, It.IsAny<CancellationToken>())).ReturnsAsync(user);
 			var mockPasswordHasher = new Mock<IPasswordHasher>();
 			mockPasswordHasher.Setup(h => h.VerifyPassword(user.AccPwd, "password", user.Aid)).Returns(true);
 			var mockTokenService = new Mock<ITokenService>();
 			mockTokenService.Setup(t => t.GenerateAccessToken(user, It.IsAny<string[]>())).Returns("access-token");
-			mockTokenService.Setup(t => t.GenerateRefreshToken(user.Aid, It.IsAny<string>())).Returns(new Hello100Admin.Modules.Auth.Domain.Entities.RefreshToken(user.Aid, "refresh-token", DateTime.UtcNow.AddMinutes(10)));
-			var mockRefreshTokenRepo = new Mock<IRefreshTokenRepository>();
+			mockTokenService.Setup(t => t.GenerateRefreshToken(user.Aid, It.IsAny<string>())).Returns(new Hello100Admin.Modules.Auth.Domain.Entities.RefreshTokenEntity(user.Aid, "refresh-token", DateTime.UtcNow.AddMinutes(10)));
+			var authRepo = new Mock<IAuthRepository>();
 			var mockLogger = new Mock<ILogger<LoginCommandHandler>>();
-			var handler = new LoginCommandHandler(mockUserRepo.Object, mockPasswordHasher.Object, mockTokenService.Object, mockRefreshTokenRepo.Object, mockLogger.Object);
+			var handler = new LoginCommandHandler(mockPasswordHasher.Object, mockTokenService.Object, authRepo.Object, authStore.Object, mockLogger.Object);
 			var command = new LoginCommand { AccountId = user.AccId, Password = "password", IpAddress = "127.0.0.1" };
 
 			// Act
@@ -56,13 +56,13 @@ namespace Hello100Admin.Modules.Auth.Application.UnitTests.Commands
 		public async Task Handle_ShouldReturnFailure_WhenUserDoesNotExist()
 		{
 			// Arrange
-			var mockUserRepo = new Mock<IUserRepository>();
-			mockUserRepo.Setup(r => r.GetByUsernameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync((User?)null);
+			var authStore = new Mock<IAuthStore>();
+			authStore.Setup(r => r.GetByUsernameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync((UserEntity?)null);
 			var mockPasswordHasher = new Mock<IPasswordHasher>();
 			var mockTokenService = new Mock<ITokenService>();
-			var mockRefreshTokenRepo = new Mock<IRefreshTokenRepository>();
+			var authRepo = new Mock<IAuthRepository>();
 			var mockLogger = new Mock<ILogger<LoginCommandHandler>>();
-			var handler = new LoginCommandHandler(mockUserRepo.Object, mockPasswordHasher.Object, mockTokenService.Object, mockRefreshTokenRepo.Object, mockLogger.Object);
+			var handler = new LoginCommandHandler(mockPasswordHasher.Object, mockTokenService.Object, authRepo.Object, authStore.Object, mockLogger.Object);
 			var command = new LoginCommand { AccountId = "notfound", Password = "password", IpAddress = "127.0.0.1" };
 
 			// Act
@@ -77,7 +77,7 @@ namespace Hello100Admin.Modules.Auth.Application.UnitTests.Commands
 		public async Task Handle_ShouldReturnFailure_WhenPasswordIsInvalid()
 		{
 			// Arrange
-			var user = new User
+			var user = new UserEntity
 			{
 				Aid = "A0000001",
 				AccId = "testuser",
@@ -92,14 +92,14 @@ namespace Hello100Admin.Modules.Auth.Application.UnitTests.Commands
 				// CreatedAt은 테스트에서 할당하지 않음
 				LastLoginDt = DateTime.UtcNow
 			};
-			var mockUserRepo = new Mock<IUserRepository>();
-			mockUserRepo.Setup(r => r.GetByUsernameAsync(user.AccId, It.IsAny<CancellationToken>())).ReturnsAsync(user);
+			var authStore = new Mock<IAuthStore>();
+			authStore.Setup(r => r.GetByUsernameAsync(user.AccId, It.IsAny<CancellationToken>())).ReturnsAsync(user);
 			var mockPasswordHasher = new Mock<IPasswordHasher>();
 			mockPasswordHasher.Setup(h => h.VerifyPassword(user.AccPwd, "wrongpassword", user.Aid)).Returns(false);
 			var mockTokenService = new Mock<ITokenService>();
-			var mockRefreshTokenRepo = new Mock<IRefreshTokenRepository>();
+			var authRepo = new Mock<IAuthRepository>();
 			var mockLogger = new Mock<ILogger<LoginCommandHandler>>();
-			var handler = new LoginCommandHandler(mockUserRepo.Object, mockPasswordHasher.Object, mockTokenService.Object, mockRefreshTokenRepo.Object, mockLogger.Object);
+			var handler = new LoginCommandHandler(mockPasswordHasher.Object, mockTokenService.Object, authRepo.Object, authStore.Object, mockLogger.Object);
 			var command = new LoginCommand { AccountId = user.AccId, Password = "wrongpassword", IpAddress = "127.0.0.1" };
 
 			// Act

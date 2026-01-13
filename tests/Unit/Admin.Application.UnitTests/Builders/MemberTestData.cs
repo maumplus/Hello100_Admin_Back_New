@@ -6,7 +6,7 @@ namespace Hello100Admin.Modules.Admin.Application.UnitTests.Builders
 {
     public static class MemberTestData
     {
-        public static Member Default => new Member
+        public static MemberEntity Default => new MemberEntity
         {
             Uid = "U0000001",
             Mid = 1,

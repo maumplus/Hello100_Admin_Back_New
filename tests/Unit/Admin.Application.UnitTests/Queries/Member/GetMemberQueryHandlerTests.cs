@@ -1,10 +1,10 @@
 using FluentAssertions;
 using Hello100Admin.Modules.Admin.Application.UnitTests.Builders;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Security;
-using Hello100Admin.Modules.Admin.Application.Queries.Member;
-using Hello100Admin.Modules.Admin.Domain.Interfaces;
 using Moq;
 using Microsoft.Extensions.Logging;
+using Hello100Admin.Modules.Admin.Application.Features.Member.Queries.GetMember;
+using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Member;
 
 namespace Hello100Admin.Modules.Admin.Application.UnitTests.Queries.Member;
 
@@ -30,7 +30,7 @@ public class GetMemberQueryHandlerTests
     public async Task Handle_Returns_Success_When_Member_Exists()
     {
         // Arrange
-        var mockRepo = new Mock<IMemberRepository>();
+        var mockRepo = new Mock<IMemberStore>();
         var mockLogger = new Mock<ILogger<GetMemberQueryHandler>>();
         var member = MemberTestData.Default;
         mockRepo.Setup(r => r.GetMember(member.Uid, It.IsAny<CancellationToken>())).ReturnsAsync(member);
@@ -61,9 +61,9 @@ public class GetMemberQueryHandlerTests
     public async Task Handle_Returns_Failure_When_Member_Not_Found()
     {
         // Arrange
-        var mockRepo = new Mock<IMemberRepository>();
+        var mockRepo = new Mock<IMemberStore>();
         var mockLogger = new Mock<ILogger<GetMemberQueryHandler>>();
-        mockRepo.Setup(r => r.GetMember("U9999999", It.IsAny<CancellationToken>())).ReturnsAsync((Domain.Entities.Member?)null);
+        mockRepo.Setup(r => r.GetMember("U9999999", It.IsAny<CancellationToken>())).ReturnsAsync((Domain.Entities.MemberEntity?)null);
         var handler = new GetMemberQueryHandler(mockRepo.Object, mockLogger.Object);
         var query = new GetMemberQuery("U9999999");
 

@@ -1,10 +1,10 @@
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Hello100Admin.Modules.Auth.Domain.Interfaces;
 using Moq;
-using Hello100Admin.Modules.Auth.Application.Services;
 using Hello100Admin.Modules.Auth.Domain.Entities;
+using Hello100Admin.Modules.Auth.Application.Common.Services;
+using Hello100Admin.Modules.Auth.Application.Common.Abstractions.Persistence.Auth;
 
 namespace Hello100Admin.Modules.Auth.Application.UnitTests.Services
 {
@@ -12,8 +12,8 @@ namespace Hello100Admin.Modules.Auth.Application.UnitTests.Services
     {
         private JwtTokenService CreateService(
             IConfiguration? config = null,
-            IRefreshTokenRepository? refreshRepo = null,
-            IUserRepository? userRepo = null,
+            IAuthRepository? authRepo = null,
+            IAuthStore? authStore = null,
             ILogger<JwtTokenService>? logger = null)
         {
             var configuration = config ?? new ConfigurationBuilder()
@@ -25,10 +25,10 @@ namespace Hello100Admin.Modules.Auth.Application.UnitTests.Services
                     {"Jwt:AccessTokenExpirationMinutes", "10"},
                     {"Jwt:RefreshTokenExpirationDays", "7"}
                 }).Build();
-            var refreshTokenRepo = refreshRepo ?? new Moq.Mock<IRefreshTokenRepository>().Object;
-            var userRepository = userRepo ?? new Moq.Mock<IUserRepository>().Object;
+            var mockAuthRepository = authRepo ?? new Moq.Mock<IAuthRepository>().Object;
+            var mockAuthStore = authStore ?? new Moq.Mock<IAuthStore>().Object;
             var log = logger ?? new Moq.Mock<ILogger<JwtTokenService>>().Object;
-            return new JwtTokenService(configuration, refreshTokenRepo, userRepository, log);
+            return new JwtTokenService(configuration, mockAuthRepository, mockAuthStore, log);
         }
 
         [Fact]
@@ -36,7 +36,7 @@ namespace Hello100Admin.Modules.Auth.Application.UnitTests.Services
         {
             // Arrange
             var service = CreateService();
-            var user = new User
+            var user = new UserEntity
             {
                 Aid = "A0000001",
                 AccId = "testuser",
@@ -80,10 +80,10 @@ namespace Hello100Admin.Modules.Auth.Application.UnitTests.Services
         public async Task ValidateRefreshTokenAsync_ShouldReturnFalse_WhenTokenNotFound()
         {
             // Arrange
-            var refreshRepoMock = new Moq.Mock<IRefreshTokenRepository>();
+            var refreshRepoMock = new Moq.Mock<IAuthStore>();
             refreshRepoMock.Setup(r => r.GetByTokenAsync(Moq.It.IsAny<string>(), Moq.It.IsAny<CancellationToken>()))
-                .ReturnsAsync((RefreshToken?)null);
-            var service = CreateService(refreshRepo: refreshRepoMock.Object);
+                .ReturnsAsync((RefreshTokenEntity?)null);
+            var service = CreateService(authStore: refreshRepoMock.Object);
 
             // Act
             var result = await service.ValidateRefreshTokenAsync("invalidtoken");
@@ -96,11 +96,11 @@ namespace Hello100Admin.Modules.Auth.Application.UnitTests.Services
         public async Task ValidateRefreshTokenAsync_ShouldReturnFalse_WhenTokenExpired()
         {
             // Arrange
-            var expiredToken = new RefreshToken("A0000001", "token", DateTime.UtcNow.AddDays(-1));
-            var refreshRepoMock = new Moq.Mock<IRefreshTokenRepository>();
-            refreshRepoMock.Setup(r => r.GetByTokenAsync(Moq.It.IsAny<string>(), Moq.It.IsAny<CancellationToken>()))
+            var expiredToken = new RefreshTokenEntity("A0000001", "token", DateTime.UtcNow.AddDays(-1));
+            var authStoreMock = new Moq.Mock<IAuthStore>();
+            authStoreMock.Setup(r => r.GetByTokenAsync(Moq.It.IsAny<string>(), Moq.It.IsAny<CancellationToken>()))
                 .ReturnsAsync(expiredToken);
-            var service = CreateService(refreshRepo: refreshRepoMock.Object);
+            var service = CreateService(authStore: authStoreMock.Object);
 
             // Act
             var result = await service.ValidateRefreshTokenAsync("expiredtoken");
@@ -113,11 +113,11 @@ namespace Hello100Admin.Modules.Auth.Application.UnitTests.Services
         public async Task ValidateRefreshTokenAsync_ShouldReturnTrue_WhenTokenValid()
         {
             // Arrange
-            var validToken = new RefreshToken("A0000001", "token", DateTime.UtcNow.AddDays(1));
-            var refreshRepoMock = new Moq.Mock<IRefreshTokenRepository>();
-            refreshRepoMock.Setup(r => r.GetByTokenAsync(Moq.It.IsAny<string>(), Moq.It.IsAny<CancellationToken>()))
+            var validToken = new RefreshTokenEntity("A0000001", "token", DateTime.UtcNow.AddDays(1));
+            var authStoreMock = new Moq.Mock<IAuthStore>();
+            authStoreMock.Setup(r => r.GetByTokenAsync(Moq.It.IsAny<string>(), Moq.It.IsAny<CancellationToken>()))
                 .ReturnsAsync(validToken);
-            var service = CreateService(refreshRepo: refreshRepoMock.Object);
+            var service = CreateService(authStore: authStoreMock.Object);
 
             // Act
             var result = await service.ValidateRefreshTokenAsync("validtoken");

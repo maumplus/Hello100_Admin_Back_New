@@ -4,6 +4,7 @@ namespace Hello100Admin.BuildingBlocks.Common.Errors;
 
 /// <summary>
 /// 범위 : 1001 ~ 2000 && 900000 ~ 999999
+/// 추후 에러코드 관련 정의 필요 [Module당 Number or 별도 Code 세팅]
 /// </summary>
 public enum GlobalErrorCode
 {

@@ -11,7 +11,7 @@ public class MemberTests
     public void Member_Properties_Should_Set_And_Get_Correctly()
     {
         // Arrange
-        var member = new Member
+        var member = new MemberEntity
         {
             Uid = "U0000001",
             Mid = 123,
@@ -50,7 +50,7 @@ public class MemberTests
     public void Member_WithMembers_Should_Set_Members_Collection()
     {
         // Arrange
-        var member = new Member
+        var member = new MemberEntity
         {
             Uid = "U0000001",
             Name = EncryptedData.FromEncrypted("encryptedName"),
@@ -58,7 +58,7 @@ public class MemberTests
             LoginTypeName = "이메일",
             RegDtView = "2025-10-29 10:00:00"
         };
-        var family1 = new MemberFamily
+        var family1 = new MemberFamilyEntity
         {
             Mid = 1,
             Uid = "U0000001",
@@ -66,7 +66,7 @@ public class MemberTests
             Birthday = EncryptedData.FromEncrypted("19900101"),
             Sex = EncryptedData.FromEncrypted("M")
         };
-        var family2 = new MemberFamily
+        var family2 = new MemberFamilyEntity
         {
             Mid = 2,
             Uid = "U0000001",
@@ -74,7 +74,7 @@ public class MemberTests
             Birthday = EncryptedData.FromEncrypted("19950101"),
             Sex = EncryptedData.FromEncrypted("F")
         };
-        var families = new List<MemberFamily> { family1, family2 };
+        var families = new List<MemberFamilyEntity> { family1, family2 };
 
         // Act
         member.WithMembers(families);

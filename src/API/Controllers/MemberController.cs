@@ -1,9 +1,9 @@
-using Hello100Admin.Modules.Admin.Application.DTOs;
-using Hello100Admin.Modules.Admin.Application.Queries.Member;
 using MediatR;
 using Hello100Admin.API.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Hello100Admin.API.Infrastructure.Attributes;
+using Hello100Admin.Modules.Admin.Application.Features.Member.Responses.GetMember;
+using Hello100Admin.Modules.Admin.Application.Features.Member.Queries.GetMember;
 
 namespace Hello100Admin.API.Controllers;
 
@@ -28,7 +28,7 @@ public class MembersController : BaseController
     /// 고객 상세 조회
     /// </summary>
     [HttpGet("{uid}")]
-    [ProducesResponseType(typeof(MemberDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(GetMemberResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetMember(
         string uid,
