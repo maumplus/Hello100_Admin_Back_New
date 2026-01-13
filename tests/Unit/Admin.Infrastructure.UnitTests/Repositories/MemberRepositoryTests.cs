@@ -2,8 +2,8 @@ using FluentAssertions;
 using System.Data;
 using Dapper;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence;
-using Hello100Admin.Modules.Admin.Infrastructure.Repositories;
 using Microsoft.Data.Sqlite;
+using Hello100Admin.Modules.Admin.Infrastructure.Repositories.Member;
 
 namespace Hello100Admin.Modules.Admin.Infrastructure.UnitTests.Repositories;
 
@@ -37,8 +37,8 @@ public class MemberRepositoryInMemoryTests
         conn.Execute("INSERT INTO VM_USERS (Uid, Name, LoginType, LoginTypeName, RegDt, UserRole, LastLoginDt) VALUES (@Uid, @Name, @LoginType, @LoginTypeName, @RegDt, @UserRole, @LastLoginDt)",
             new { Uid = "U0000001", Name = "name", LoginType = "E", LoginTypeName = "이메일", RegDt = 1700000000, UserRole = 0, LastLoginDt = 1700000000 });
         var factory = new TestDbConnectionFactory(conn);
-        var logger = new Moq.Mock<Microsoft.Extensions.Logging.ILogger<MemberRepository>>().Object;
-        var repo = new MemberRepository(factory, logger);
+        var logger = new Moq.Mock<Microsoft.Extensions.Logging.ILogger<MemberStore>>().Object;
+        var repo = new MemberStore(factory, logger);
 
         // Act
         var member = await repo.GetByIdAsync("U0000001");
@@ -55,8 +55,8 @@ public class MemberRepositoryInMemoryTests
         // Arrange
         using var conn = CreateInMemoryConnection();
         var factory = new TestDbConnectionFactory(conn);
-        var logger = new Moq.Mock<Microsoft.Extensions.Logging.ILogger<MemberRepository>>().Object;
-        var repo = new MemberRepository(factory, logger);
+        var logger = new Moq.Mock<Microsoft.Extensions.Logging.ILogger<MemberStore>>().Object;
+        var repo = new MemberStore(factory, logger);
 
         // Act
         var member = await repo.GetByIdAsync("U9999999");

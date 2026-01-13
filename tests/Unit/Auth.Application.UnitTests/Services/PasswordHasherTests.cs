@@ -1,7 +1,7 @@
 using FluentAssertions;
 using System;
 using Xunit;
-using Hello100Admin.Modules.Auth.Application.Services;
+using Hello100Admin.Modules.Auth.Application.Common.Services;
 
 namespace Hello100Admin.Modules.Auth.Application.UnitTests.Services
 {

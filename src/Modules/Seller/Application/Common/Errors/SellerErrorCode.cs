@@ -4,6 +4,7 @@ namespace Hello100Admin.Modules.Seller.Application.Common.Errors
 {
     /// <summary>
     /// 범위 : 2001 ~ 4000
+    /// 추후 에러코드 관련 정의 필요 [Module당 Number or 별도 Code 세팅]
     /// </summary>
     public enum SellerErrorCode
     {

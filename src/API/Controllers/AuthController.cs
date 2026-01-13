@@ -1,11 +1,11 @@
-using Hello100Admin.Modules.Auth.Application.Commands.Login;
-using Hello100Admin.Modules.Auth.Application.Commands.Logout;
-using Hello100Admin.Modules.Auth.Application.Queries.GetUser;
 using MediatR;
 using Hello100Admin.API.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Hello100Admin.API.Infrastructure.Attributes;
+using Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.Login;
+using Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.Logout;
+using Hello100Admin.Modules.Auth.Application.Features.Auth.Queries.GetUser;
 
 namespace Hello100Admin.API.Controllers;
 

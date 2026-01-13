@@ -14,6 +14,9 @@ using System.IdentityModel.Tokens.Jwt;
 using Hello100Admin.Modules.Seller.Application.Features.Seller.Commands.CreateSeller;
 using Hello100Admin.Modules.Seller.Application.Features.Bank.Queries.GetBankList;
 using Hello100Admin.API.Extensions;
+using Hello100Admin.Modules.Admin.Application.Features.AdminUser.Queries.GetAdminUser;
+using Hello100Admin.Modules.Admin.Application.Features.Member.Queries.GetMember;
+using Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.Login;
 
 // Dapper snake_case <-> PascalCase 자동 매핑 설정
 Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
@@ -117,11 +120,11 @@ builder.Services.AddAuthorization();
 // MediatR 등록
 builder.Services.AddMediatR(cfg =>
 {
-    cfg.RegisterServicesFromAssembly(typeof(Hello100Admin.Modules.Auth.Application.Commands.Login.LoginCommand).Assembly);
+    cfg.RegisterServicesFromAssembly(typeof(LoginCommand).Assembly);
 });
 builder.Services.AddMediatR(cfg =>
 {
-    cfg.RegisterServicesFromAssembly(typeof(Hello100Admin.Modules.Admin.Application.Queries.GetAdminUsersQuery).Assembly);
+    cfg.RegisterServicesFromAssembly(typeof(GetAdminUserQuery).Assembly);
 });
 builder.Services.AddMediatR(cfg =>
 {
@@ -136,7 +139,7 @@ builder.Services.AddMediatR(cfg =>
 builder.Services.AddTransient(typeof(MediatR.IPipelineBehavior<,>), typeof(Hello100Admin.BuildingBlocks.Common.Behaviors.ValidationBehavior<,>));
 
 // FluentValidation Validator 자동 등록 (어셈블리 스캔)
-builder.Services.AddValidatorsFromAssemblyContaining<Hello100Admin.Modules.Admin.Application.Queries.Member.GetMemberQueryValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<GetMemberQueryValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateSellerCommandValidator>(); // Add Seller
 
 // Crypto Service 등록 (암호화/복호화)

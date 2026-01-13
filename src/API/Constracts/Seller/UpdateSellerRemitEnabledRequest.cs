@@ -1,15 +1,15 @@
 ﻿namespace Hello100Admin.API.Constracts.Seller
 {
-    public class UpdateSellerRemitEnabledRequest
+    public record UpdateSellerRemitEnabledRequest
     {
         /// <summary>
         /// 일련번호
         /// </summary>
-        public required int Id { get; set; }
+        public required int Id { get; init; }
 
         /// <summary>
         /// 활성 여부
         /// </summary>
-        public required bool Enabled { get; set; }
+        public required bool Enabled { get; init; }
     }
 }

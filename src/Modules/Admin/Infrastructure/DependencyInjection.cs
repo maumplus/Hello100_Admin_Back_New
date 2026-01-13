@@ -1,9 +1,11 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence;
-using Hello100Admin.Modules.Admin.Domain.Interfaces;
 using Hello100Admin.Modules.Admin.Infrastructure.Persistence;
-using Hello100Admin.Modules.Admin.Infrastructure.Repositories;
+using Hello100Admin.Modules.Admin.Infrastructure.Repositories.AdminUser;
+using Hello100Admin.Modules.Admin.Infrastructure.Repositories.Member;
+using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.AdminUser;
+using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Member;
 
 namespace Hello100Admin.Modules.Admin.Infrastructure;
 
@@ -19,7 +21,9 @@ public static class DependencyInjection
 
         services.AddScoped<IDbConnectionFactory>(provider => new DbConnectionFactory(connectionString));
         services.AddScoped<IAdminUserRepository, AdminUserRepository>();
+        services.AddScoped<IAdminUserStore, AdminUserStore>();
         services.AddScoped<IMemberRepository, MemberRepository>();
+        services.AddScoped<IMemberStore, MemberStore>();
         
         return services;
     }

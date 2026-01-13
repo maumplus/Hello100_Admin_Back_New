@@ -1,7 +1,7 @@
 using FluentAssertions;
-using Hello100Admin.Modules.Auth.Application.Queries.GetUser;
+using Hello100Admin.Modules.Auth.Application.Common.Abstractions.Persistence.Auth;
+using Hello100Admin.Modules.Auth.Application.Features.Auth.Queries.GetUser;
 using Hello100Admin.Modules.Auth.Domain.Entities;
-using Hello100Admin.Modules.Auth.Domain.Interfaces;
 using Moq;
 
 namespace Hello100Admin.Modules.Auth.Application.UnitTests.Queries;
@@ -11,7 +11,7 @@ public class GetUserQueryHandlerTests
     public async Task Handle_ShouldReturnUserDto_WhenUserExists()
     {
         // Arrange
-        var user = new User
+        var user = new UserEntity
         {
             Aid = "A0000001",
             AccId = "testuser",
@@ -26,7 +26,7 @@ public class GetUserQueryHandlerTests
             LastLoginDt = DateTime.UtcNow,
             HospNo = "H1234"
         };
-        var mockRepo = new Mock<IUserRepository>();
+        var mockRepo = new Mock<IAuthStore>();
         mockRepo.Setup(r => r.GetByAidAsync(user.Aid, It.IsAny<CancellationToken>())).ReturnsAsync(user);
         var handler = new GetUserQueryHandler(mockRepo.Object);
         var query = new GetUserQuery { UserId = user.Aid };
@@ -54,8 +54,8 @@ public class GetUserQueryHandlerTests
     public async Task Handle_ShouldReturnFailure_WhenUserDoesNotExist()
     {
         // Arrange
-        var mockRepo = new Mock<IUserRepository>();
-        mockRepo.Setup(r => r.GetByAidAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync((User?)null);
+        var mockRepo = new Mock<IAuthStore>();
+        mockRepo.Setup(r => r.GetByAidAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync((UserEntity?)null);
         var handler = new GetUserQueryHandler(mockRepo.Object);
         var query = new GetUserQuery { UserId = "NOT_EXIST" };
 

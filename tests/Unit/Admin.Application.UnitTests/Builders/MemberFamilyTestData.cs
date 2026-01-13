@@ -7,7 +7,7 @@ namespace Hello100Admin.Modules.Admin.Application.UnitTests.Builders
 {
     public static class MemberFamilyTestData
     {
-        public static MemberFamily Default => new MemberFamily
+        public static MemberFamilyEntity Default => new MemberFamilyEntity
         {
             Uid = "F0000001",
             Mid = 2,
@@ -17,6 +17,6 @@ namespace Hello100Admin.Modules.Admin.Application.UnitTests.Builders
             RegDt = new DateTime(2020, 1, 1, 12, 0, 0)
         };
 
-        public static List<MemberFamily> DefaultList => new List<MemberFamily> { Default };
+        public static List<MemberFamilyEntity> DefaultList => new List<MemberFamilyEntity> { Default };
     }
 }

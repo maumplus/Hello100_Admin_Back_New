@@ -5,10 +5,10 @@ namespace Hello100Admin.Modules.Auth.Domain.UnitTests.Entities;
 
 public class RefreshTokenTests
 {
-        private RefreshToken CreateRefreshToken(DateTime? expiresAt = null)
+        private RefreshTokenEntity CreateRefreshToken(DateTime? expiresAt = null)
         {
             // Arrange
-            return new RefreshToken(
+            return new RefreshTokenEntity(
                 "A0000001",
                 "sample-token",
                 expiresAt ?? DateTime.UtcNow.AddMinutes(10),
@@ -23,7 +23,7 @@ public class RefreshTokenTests
             var expires = DateTime.UtcNow.AddMinutes(5);
 
             // Act
-            var token = new RefreshToken("AID", "TOKEN", expires, "1.2.3.4");
+            var token = new RefreshTokenEntity("AID", "TOKEN", expires, "1.2.3.4");
 
             // Assert
             token.Aid.Should().Be("AID");

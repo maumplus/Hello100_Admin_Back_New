@@ -17,8 +17,8 @@ public class UserRepositoryTests
         var mockFactory = new Mock<IDbConnectionFactory>();
 
         // Act
-        var mockLogger = new Moq.Mock<Microsoft.Extensions.Logging.ILogger<UserRepository>>();
-        var repo = new UserRepository(mockFactory.Object, mockLogger.Object);
+        var mockLogger = new Moq.Mock<Microsoft.Extensions.Logging.ILogger<AuthStore>>();
+        var repo = new AuthStore(mockFactory.Object, mockLogger.Object);
 
         // Assert
         repo.Should().NotBeNull();

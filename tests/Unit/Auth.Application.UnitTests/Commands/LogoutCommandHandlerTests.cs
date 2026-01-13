@@ -1,7 +1,8 @@
 using FluentAssertions;
-using Hello100Admin.Modules.Auth.Application.Commands.Logout;
+using Hello100Admin.Modules.Auth.Application.Common.Abstractions.Persistence.Auth;
+using Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.Logout;
 using Hello100Admin.Modules.Auth.Domain.Entities;
-using Hello100Admin.Modules.Auth.Domain.Interfaces;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace Hello100Admin.Modules.Auth.Application.UnitTests.Commands;
@@ -11,11 +12,13 @@ public class LogoutCommandHandlerTests
     public async Task Handle_ShouldRevokeSpecificRefreshToken_WhenRefreshTokenProvided()
     {
         // Arrange
-        var refreshToken = new RefreshToken("A0000001", "token123", System.DateTime.UtcNow.AddMinutes(10));
-        var mockRepo = new Mock<IRefreshTokenRepository>();
-        mockRepo.Setup(r => r.GetByTokenAsync("token123", It.IsAny<CancellationToken>())).ReturnsAsync(refreshToken);
-        mockRepo.Setup(r => r.UpdateAsync(refreshToken, It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
-        var handler = new LogoutCommandHandler(mockRepo.Object);
+        var refreshToken = new RefreshTokenEntity("A0000001", "token123", System.DateTime.UtcNow.AddMinutes(10));
+        var authStore = new Mock<IAuthStore>();
+        var authRepo = new Mock<IAuthRepository>();
+        var mockLogger = new Mock<ILogger<LogoutCommandHandler>>();
+        authStore.Setup(r => r.GetByTokenAsync("token123", It.IsAny<CancellationToken>())).ReturnsAsync(refreshToken);
+        authRepo.Setup(r => r.UpdateAsync(refreshToken, It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+        var handler = new LogoutCommandHandler(mockLogger.Object, authRepo.Object, authStore.Object);
         var command = new LogoutCommand { UserId = "A0000001", RefreshToken = "token123" };
 
         // Act
@@ -24,16 +27,18 @@ public class LogoutCommandHandlerTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         refreshToken.IsRevoked.Should().BeTrue();
-        mockRepo.Verify(r => r.UpdateAsync(refreshToken, It.IsAny<CancellationToken>()), Times.Once);
+        authRepo.Verify(r => r.UpdateAsync(refreshToken, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
     public async Task Handle_ShouldRevokeAllUserTokens_WhenNoRefreshTokenProvided()
     {
         // Arrange
-        var mockRepo = new Mock<IRefreshTokenRepository>();
+        var mockRepo = new Mock<IAuthRepository>();
+        var mockStore = new Mock<IAuthStore>();
+        var mockLogger = new Mock<ILogger<LogoutCommandHandler>>();
         mockRepo.Setup(r => r.RevokeUserTokensAsync("A0000001", It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
-        var handler = new LogoutCommandHandler(mockRepo.Object);
+        var handler = new LogoutCommandHandler(mockLogger.Object, mockRepo.Object, mockStore.Object);
         var command = new LogoutCommand { UserId = "A0000001", RefreshToken = null };
 
         // Act
@@ -48,9 +53,11 @@ public class LogoutCommandHandlerTests
     public async Task Handle_ShouldSucceed_WhenRefreshTokenNotFound()
     {
         // Arrange
-        var mockRepo = new Mock<IRefreshTokenRepository>();
-        mockRepo.Setup(r => r.GetByTokenAsync("notfound", It.IsAny<CancellationToken>())).ReturnsAsync((RefreshToken?)null);
-        var handler = new LogoutCommandHandler(mockRepo.Object);
+        var mockStore = new Mock<IAuthStore>();
+        var mockRepo = new Mock<IAuthRepository>();
+        var mockLogger = new Mock<ILogger<LogoutCommandHandler>>();
+        mockStore.Setup(r => r.GetByTokenAsync("notfound", It.IsAny<CancellationToken>())).ReturnsAsync((RefreshTokenEntity?)null);
+        var handler = new LogoutCommandHandler(mockLogger.Object, mockRepo.Object, mockStore.Object);
         var command = new LogoutCommand { UserId = "A0000001", RefreshToken = "notfound" };
 
         // Act
@@ -58,6 +65,6 @@ public class LogoutCommandHandlerTests
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        mockRepo.Verify(r => r.UpdateAsync(It.IsAny<RefreshToken>(), It.IsAny<CancellationToken>()), Times.Never);
+        mockRepo.Verify(r => r.UpdateAsync(It.IsAny<RefreshTokenEntity>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 }
