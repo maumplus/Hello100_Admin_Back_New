@@ -8,7 +8,7 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Errors
     /// </summary>
     public enum AdminErrorCode
     {
-        [Description("임시 description 입니다.")]
-        TempEnum = 4001,
+        [Description("비밀번호 변경에 실패하였습니다. 다시 시도해주세요.")]
+        PasswordChangeFailed = 4001,
     }
 }

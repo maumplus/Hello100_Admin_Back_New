@@ -54,7 +54,7 @@ public class AdminUserController : BaseController
     }
 
     /// <summary>
-    /// 
+    /// 비밀번호 변경
     /// </summary>
     /// <param name="req"></param>
     /// <param name="cancellationToken"></param>
@@ -65,7 +65,7 @@ public class AdminUserController : BaseController
     {
         _logger.LogInformation("PATCH /api/adminuser/update-password [{AId}]", AId);
 
-        var command = req.Adapt<UpdatePasswordCommand>();
+        var command = req.Adapt<UpdatePasswordCommand>() with { AId = base.AId };
 
         var result = await _mediator.Send(command, cancellationToken);
 

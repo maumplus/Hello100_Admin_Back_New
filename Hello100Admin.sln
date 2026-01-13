@@ -63,6 +63,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hello100Admin.Modules.Selle
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seller.API.IntegrationTests", "tests\Integration\Seller.API.IntegrationTests\Seller.API.IntegrationTests.csproj", "{57DA2856-8662-419A-BA7D-432AEE63A71C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdminUser.API.IntegrationTests", "tests\Integration\AdminUser.API.IntegrationTests\AdminUser.API.IntegrationTests.csproj", "{90F6A6CD-CDA3-4FF5-BFC2-6EE990F8F422}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -153,6 +155,10 @@ Global
 		{57DA2856-8662-419A-BA7D-432AEE63A71C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{57DA2856-8662-419A-BA7D-432AEE63A71C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{57DA2856-8662-419A-BA7D-432AEE63A71C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{90F6A6CD-CDA3-4FF5-BFC2-6EE990F8F422}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{90F6A6CD-CDA3-4FF5-BFC2-6EE990F8F422}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{90F6A6CD-CDA3-4FF5-BFC2-6EE990F8F422}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{90F6A6CD-CDA3-4FF5-BFC2-6EE990F8F422}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -186,6 +192,7 @@ Global
 		{2C302E46-C928-7BC5-AC0B-6416413255EE} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{4747275B-5F61-EAEA-225B-5238169FC569} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{57DA2856-8662-419A-BA7D-432AEE63A71C} = {DFE21D34-F6CA-499E-A43A-1416958880D2}
+		{90F6A6CD-CDA3-4FF5-BFC2-6EE990F8F422} = {DFE21D34-F6CA-499E-A43A-1416958880D2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3A68F74A-EA14-4372-B3DF-A41D03A8D251}
