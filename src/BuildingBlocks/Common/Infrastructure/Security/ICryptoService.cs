@@ -29,7 +29,7 @@ public enum CryptoKeyType
 /// <summary>
 /// 암호화/복호화 서비스 인터페이스
 /// 레거시 시스템의 AES-256 암호화와 호환
-/// </summary>
+/// </summary>  
 public interface ICryptoService
 {
     /// <summary>
