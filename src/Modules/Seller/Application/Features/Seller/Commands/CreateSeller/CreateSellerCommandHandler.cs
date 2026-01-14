@@ -52,7 +52,7 @@ namespace Hello100Admin.Modules.Seller.Application.Features.Seller.Commands.Crea
 
             if (hospInfo == null)
             {
-                return Result.SuccessWithError(SellerErrorCode.HospitalNotFound.ToError());
+                return Result.Success().WithError(SellerErrorCode.HospitalNotFound.ToError());
             }
 
             // 관리자 셀러 등록 된 병원 수 조회
@@ -65,7 +65,7 @@ namespace Hello100Admin.Modules.Seller.Application.Features.Seller.Commands.Crea
 
             if (hospSellerId <= 0)
             {
-                return Result.SuccessWithError(SellerErrorCode.HospitalSellerInsertError.ToError());
+                return Result.Success().WithError(SellerErrorCode.HospitalSellerInsertError.ToError());
             }
 
             // Set Request Info
@@ -88,7 +88,7 @@ namespace Hello100Admin.Modules.Seller.Application.Features.Seller.Commands.Crea
 
             if (sellerResult?.ResCd != "0000")
             {
-                return Result.SuccessWithError(SellerErrorCode.KcpSellerSyncError.ToError());
+                return Result.Success().WithError(SellerErrorCode.KcpSellerSyncError.ToError());
             }
             else
             {
@@ -99,7 +99,7 @@ namespace Hello100Admin.Modules.Seller.Application.Features.Seller.Commands.Crea
 
                 if (updateResult < 0)
                 {
-                    return Result.SuccessWithError(SellerErrorCode.KcpSellerSyncUpdateError.ToError());
+                    return Result.Success().WithError(SellerErrorCode.KcpSellerSyncUpdateError.ToError());
                 }
             }
 

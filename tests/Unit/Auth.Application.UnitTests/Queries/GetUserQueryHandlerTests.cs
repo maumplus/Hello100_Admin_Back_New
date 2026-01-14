@@ -13,13 +13,13 @@ public class GetUserQueryHandlerTests
         // Arrange
         var user = new UserEntity
         {
-            Aid = "A0000001",
+            AId = "A0000001",
             AccId = "testuser",
             AccPwd = "password",
             Grade = "S",
             Name = "테스트유저",
             DelYn = "N",
-            AccountLocked = "0",
+            AccountLocked = "N",
             LoginFailCount = 0,
             Approved = "1",
             Enabled = "1",
@@ -27,17 +27,16 @@ public class GetUserQueryHandlerTests
             HospNo = "H1234"
         };
         var mockRepo = new Mock<IAuthStore>();
-        mockRepo.Setup(r => r.GetByAidAsync(user.Aid, It.IsAny<CancellationToken>())).ReturnsAsync(user);
+        mockRepo.Setup(r => r.GetAdminInfoByAIdAsync(user.AId, It.IsAny<CancellationToken>())).ReturnsAsync(user);
         var handler = new GetUserQueryHandler(mockRepo.Object);
-        var query = new GetUserQuery { UserId = user.Aid };
+        var query = new GetUserQuery { AId = user.AId };
 
         // Act
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
         result.Data.Should().NotBeNull();
-        result.Data.Id.Should().Be(user.Aid);
+        result.Data.Id.Should().Be(user.AId);
         result.Data.AccountId.Should().Be(user.AccId);
         result.Data.Name.Should().Be(user.Name);
         result.Data.HospNo.Should().Be(user.HospNo);
@@ -55,15 +54,14 @@ public class GetUserQueryHandlerTests
     {
         // Arrange
         var mockRepo = new Mock<IAuthStore>();
-        mockRepo.Setup(r => r.GetByAidAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync((UserEntity?)null);
+        mockRepo.Setup(r => r.GetAdminInfoByAIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync((UserEntity?)null);
         var handler = new GetUserQueryHandler(mockRepo.Object);
-        var query = new GetUserQuery { UserId = "NOT_EXIST" };
+        var query = new GetUserQuery { AId = "NOT_EXIST" };
 
         // Act
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.IsSuccess.Should().BeFalse();
         result.ErrorInfo?.Message.Should().Be("사용자를 찾을 수 없습니다.");
     }
 }

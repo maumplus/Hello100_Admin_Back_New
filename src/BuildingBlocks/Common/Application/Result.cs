@@ -8,37 +8,20 @@ public sealed record ErrorInfo(int Code, string Name, string Message);
 /// </summary>
 public class Result
 {
-    public bool IsSuccess { get; }
-    public ErrorInfo? ErrorInfo { get; }
-    public object? Details { get; }
+    public ErrorInfo? ErrorInfo { get; set; }
+    public object? Details { get; set; }
 
-    protected Result(bool isSuccess, ErrorInfo? errorInfo = null, object? details = null)
+    protected Result(ErrorInfo? errorInfo = null, object? details = null)
     {
-        IsSuccess = isSuccess;
         ErrorInfo = errorInfo;
         Details = details;
     }
 
     public static Result Success()
-        => new(true);
+        => new();
 
-    public static Result SuccessWithError(ErrorInfo errorInfo, object? details = null)
-        => new(true, errorInfo);
-
-    public static Result Fail(ErrorInfo errorInfo, object? details = null)
-        => new(false, errorInfo);
-
-    public static Result<T> Success<T>(T data)
-        => new Result<T>(data, true);
-
-    public static Result<T> SuccessWithError<T>(ErrorInfo errorInfo, object? details = null)
-        => new Result<T>(default!, true, errorInfo, details);
-
-    public static Result<T> SuccessWithError<T>(T data, ErrorInfo errorInfo, object? details = null)
-        => new Result<T>(data, true, errorInfo, details);
-
-    public static Result<T> Fail<T>(ErrorInfo errorInfo, object? details = null)
-        => new Result<T>(default!, false, errorInfo, details);
+    public static Result<T> Success<T>(T data = default!)
+        => new Result<T>(data);
 }
 
 /// <summary>
@@ -48,8 +31,8 @@ public class Result<T> : Result
 {
     public T Data { get; }
 
-    protected internal Result(T data, bool isSuccess, ErrorInfo? errorInfo = null, object? details = null)
-        : base(isSuccess, errorInfo, details)
+    protected internal Result(T data)
+        : base()
     {
         this.Data = data;
     }

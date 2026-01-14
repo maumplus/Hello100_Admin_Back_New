@@ -10,7 +10,7 @@ public class UserEntity : AggregateRoot<string>
     /// <summary>
     /// 관리자아이디 (PK)
     /// </summary>
-    public required string Aid { get; set; } // varchar(8)
+    public required string AId { get; set; } // varchar(8)
 
     /// <summary>
     /// 계정아이디
@@ -21,6 +21,11 @@ public class UserEntity : AggregateRoot<string>
     /// 계정비밀번호
     /// </summary>
     public required string AccPwd { get; set; } // varchar(128)
+
+    /// <summary>
+    /// 요양기관키
+    /// </summary>
+    public string? HospKey { get; set; } // varchar(128)
 
     /// <summary>
     /// 요양기관번호
@@ -47,7 +52,7 @@ public class UserEntity : AggregateRoot<string>
     /// </summary>
     public DateTime? LastLoginDt { get; set; } 
     /// <summary>
-    /// 계정 잠금 여부 (0: 미사용, 1: 사용)
+    /// 계정 잠금 여부 (Y/N)
     /// </summary>
     public required string AccountLocked { get; set; }
 
@@ -87,7 +92,7 @@ public class UserEntity : AggregateRoot<string>
     {
         LastLoginDt = DateTime.UtcNow;
         LoginFailCount = 0;  // 로그인 성공 시 실패 횟수 초기화
-        AccountLocked = "1";
+        AccountLocked = "N";
     }
 
     /// <summary>
@@ -98,12 +103,12 @@ public class UserEntity : AggregateRoot<string>
         LoginFailCount++;
         if (LoginFailCount >= 5)  // 5회 실패 시 계정 잠금
         {
-            AccountLocked = "1";
+            AccountLocked = "Y";
         }
     }
 
     /// <summary>
     /// 로그인 가능 여부 체크
     /// </summary>
-    public bool CanLogin() => DelYn == "N" && Approved == "0"  && Enabled == "1" && AccountLocked == "0";
+    public bool CanLogin() => DelYn == "N" && Approved == "0"  && Enabled == "1" && AccountLocked == "N";
 }

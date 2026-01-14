@@ -44,7 +44,6 @@ public class GetMemberQueryHandlerTests
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
         result.Data.Should().NotBeNull();
         result.Data.Uid.Should().Be("U0000001");
         result.Data.Name.Should().Be("홍길동");
@@ -71,7 +70,6 @@ public class GetMemberQueryHandlerTests
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.IsSuccess.Should().BeFalse();
         result.Data.Should().BeNull();
         result.ErrorInfo?.Message.Should().Be("회원이 존재하지 않습니다.");
     }

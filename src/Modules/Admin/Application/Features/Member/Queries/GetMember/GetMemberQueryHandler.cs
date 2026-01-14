@@ -28,7 +28,7 @@ public class GetMemberQueryHandler : IRequestHandler<GetMemberQuery, Result<GetM
         if (member == null)
         {
             _logger.LogWarning("Member with UID {Uid} not found.", query.Uid);
-            return Result.SuccessWithError<GetMemberResponse>(GlobalErrorCode.UserNotFound.ToError());
+            return Result.Success<GetMemberResponse>().WithError(GlobalErrorCode.UserNotFound.ToError());
         }
 
         var memberDto = new GetMemberResponse

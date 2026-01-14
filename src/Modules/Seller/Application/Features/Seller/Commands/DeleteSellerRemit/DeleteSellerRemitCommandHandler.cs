@@ -28,15 +28,15 @@ namespace Hello100Admin.Modules.Seller.Application.Features.Seller.Commands.Dele
             switch (deleteCount)
             {
                 case 0:
-                    return Result.SuccessWithError(SellerErrorCode.SellerRemitDeleteFailed.ToError());
+                    return Result.Success().WithError(SellerErrorCode.SellerRemitDeleteFailed.ToError());
                 case 1:
                     break;
                 case -2:
-                    return Result.SuccessWithError(SellerErrorCode.SellerRemitAlreadyCompleted.ToError());
+                    return Result.Success().WithError(SellerErrorCode.SellerRemitAlreadyCompleted.ToError());
                 case -3:
-                    return Result.SuccessWithError(SellerErrorCode.SellerRemitAlreadyDeleted.ToError());
+                    return Result.Success().WithError(SellerErrorCode.SellerRemitAlreadyDeleted.ToError());
                 case -5:
-                    return Result.SuccessWithError(SellerErrorCode.SellerRemitDeleteFailedError.ToError());
+                    return Result.Success().WithError(SellerErrorCode.SellerRemitDeleteFailedError.ToError());
                 default:
                     _logger.LogError("DeleteSellerRemitAsync returned unexpected deleteCount: {DeleteCount}", deleteCount);
                     break;

@@ -20,7 +20,7 @@ public enum GlobalErrorCode
     AuthFailed = 1003,
     [Description("데이터 충돌이 발생했습니다. 다시 시도해주세요.")]
     Conflict = 1004,
-    [Description("인증 또는 권한이 없습니다. 다시 시도해주세요.")]
+    [Description("인증 또는 권한이 없습니다. 확인 후 다시 시도해주세요.")]
     UnauthorizedError = 1005,
     [Description("인증정보가 만료되었습니다. 다시 로그인해주세요.")]
     ExpiredAuthenticationInfo = 1006,
@@ -30,4 +30,8 @@ public enum GlobalErrorCode
     AuthDecryptionFailed = 1008,
     [Description("토큰 형식이 올바르지 않습니다.")]
     AuthMalformed = 1009,
+    [Description("접근 권한이 없습니다. 관리자에게 권한 요청 후 다시 시도하세요.")]
+    ForbiddenRoleRequired = 1010,
+    [Description("액세스 토큰 정보가 유효하지 않습니다.")]
+    InvalidAccessToken = 1011,
 }

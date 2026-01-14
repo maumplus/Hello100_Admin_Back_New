@@ -38,13 +38,13 @@ namespace Hello100Admin.Modules.Auth.Application.UnitTests.Services
             var service = CreateService();
             var user = new UserEntity
             {
-                Aid = "A0000001",
+                AId = "A0000001",
                 AccId = "testuser",
                 AccPwd = "password",
                 Grade = "S",
                 Name = "테스트유저",
                 DelYn = "N",
-                AccountLocked = "0",
+                AccountLocked = "N",
                 LoginFailCount = 0,
                 Approved = "1",
                 Enabled = "1"

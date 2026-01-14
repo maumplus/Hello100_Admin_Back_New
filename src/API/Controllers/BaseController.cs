@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Hello100Admin.API.Controllers
 {
@@ -11,5 +12,8 @@ namespace Hello100Admin.API.Controllers
 
         protected string AId => User.FindFirst("sub")?.Value ?? "";
         protected string AccId => User.FindFirst("account_id")?.Value ?? "";
+        protected string HospNo => User.FindFirst("hospital_number")?.Value ?? "";
+        protected string HospKey => User.FindFirst("hospital_key")?.Value ?? "";
+        protected string Role => User.FindFirst(ClaimTypes.Role)?.Value ?? "";
     }
 }

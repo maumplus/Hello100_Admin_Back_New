@@ -9,5 +9,5 @@ namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Queries.GetUser;
 /// </summary>
 public class GetUserQuery : IRequest<Result<UserResponse>>
 {
-    public string UserId { get; set; } = string.Empty;
+    public string AId { get; set; } = string.Empty;
 }

@@ -25,12 +25,12 @@ namespace Hello100Admin.Modules.Admin.Application.Features.AdminUser.Commands.Up
         {
             _logger.LogInformation("Processing update password. [{id}]", command.AId);
 
-            var encryptedPwd = _hash.HashWithSalt(command.NewPassword, command.UserId);
+            var encryptedPwd = _hash.HashWithSalt(command.NewPassword, command.AId);
 
             var updateCount = await _adminUserRepository.UpdatePassword(command.AId, encryptedPwd);
 
             if (updateCount <= 0)
-                return Result.Success(AdminErrorCode.PasswordChangeFailed.ToError());
+                return Result.Success().WithError(AdminErrorCode.PasswordChangeFailed.ToError());
 
             return Result.Success();
         }

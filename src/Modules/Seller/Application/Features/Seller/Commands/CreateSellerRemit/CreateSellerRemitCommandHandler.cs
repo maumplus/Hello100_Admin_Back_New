@@ -32,7 +32,7 @@ namespace Hello100Admin.Modules.Seller.Application.Features.Seller.Commands.Crea
 
             if (result <= 0)
             {
-                return Result.SuccessWithError(SellerErrorCode.SellerRemitInsertError.ToError());
+                return Result.Success().WithError(SellerErrorCode.SellerRemitInsertError.ToError());
             }
 
             return Result.Success();

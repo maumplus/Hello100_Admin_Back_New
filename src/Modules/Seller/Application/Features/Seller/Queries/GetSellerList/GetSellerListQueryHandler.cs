@@ -4,7 +4,6 @@ using Hello100Admin.Modules.Seller.Application.Common.Errors;
 using Hello100Admin.Modules.Seller.Application.Common.Extensions;
 using Hello100Admin.Modules.Seller.Application.Features.Seller.Responses.GetSellerList;
 using Hello100Admin.Modules.Seller.Application.Features.Seller.Responses.Shared;
-using Mapster;
 using MediatR;
 
 namespace Hello100Admin.Modules.Seller.Application.Features.Seller.Queries.GetSellerList
@@ -25,7 +24,7 @@ namespace Hello100Admin.Modules.Seller.Application.Features.Seller.Queries.GetSe
             // DB Error와 구분 필요
             if (sellerList == null || sellerList.Any() == false)
             {
-                return Result.SuccessWithError<PagedResult<GetSellerListResponse>>(SellerErrorCode.NotFoundSeller.ToError());
+                return Result.Success<PagedResult<GetSellerListResponse>>().WithError(SellerErrorCode.NotFoundSeller.ToError());
             }
 
             var dtos = sellerList.Select(seller => new GetSellerListResponse

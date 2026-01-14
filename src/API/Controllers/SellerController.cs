@@ -50,7 +50,7 @@ namespace Hello100Admin.API.Controllers
         /// <returns>응답 결과 <see cref="Result"/></returns>
         /// <returns></returns>
         [HttpPost("add")]
-        [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> CreateSeller(CreateSellerRequest req, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("POST /api/seller/add [{AId}], [{HospNo}]", base.AId, req.HospNo);
@@ -71,7 +71,7 @@ namespace Hello100Admin.API.Controllers
         /// <param name="req">셀러 등록 시 요청 정보 <see cref="GetSellerListRequest"/></param>
         /// <returns>응답 리스트가 포함된 결과 <see cref="PagedResult{GetSellerListResponse}"/></returns>
         [HttpPost("list")]
-        [ProducesResponseType(typeof(ApiSuccessResponse<PagedResult<GetSellerListResponse>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<PagedResult<GetSellerListResponse>>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetSellerList(GetSellerListRequest req, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("POST /api/seller/list [{AId}]", AId);
@@ -89,7 +89,7 @@ namespace Hello100Admin.API.Controllers
         /// <param name="id">셀러 일련번호</param>
         /// <returns></returns>
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(ApiSuccessResponse<GetSellerDetailResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<GetSellerDetailResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetSellerDetail(int id, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("GET /api/seller/{id} [{AId}]", id, AId);
@@ -107,7 +107,7 @@ namespace Hello100Admin.API.Controllers
         /// <param name="req">송금 시 요청 정보</param>
         /// <returns></returns>
         [HttpPost("remit-add")]
-        [ProducesResponseType(typeof(ApiSuccessResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> CreateSellerRemit(CreateSellerRemitRequest req, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("POST /api/seller/remit-add [{SellerId}] [{AId}]", req.HospSellerId, AId);
@@ -128,7 +128,7 @@ namespace Hello100Admin.API.Controllers
         /// <param name="req">송금 시 요청 정보</param>
         /// <returns></returns>
         [HttpPatch("remit-request")]
-        [ProducesResponseType(typeof(ApiSuccessResponse<UpdateSellerRemitResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<UpdateSellerRemitResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> UpdateSellerRemit(UpdateSellerRemitRequest req, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("PATCH /api/seller/remit-request [{Id}] [{AId}]", req.Id, AId);
@@ -145,7 +145,7 @@ namespace Hello100Admin.API.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost("remit-balance")]
-        [ProducesResponseType(typeof(ApiSuccessResponse<GetRemitBalanceResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<GetRemitBalanceResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetRemitBalance(CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("POST /api/seller/remit-balance [{AId}]", AId);
@@ -160,7 +160,7 @@ namespace Hello100Admin.API.Controllers
         /// </summary>  
         /// <returns></returns>
         [HttpPost("remit-list")]
-        [ProducesResponseType(typeof(ApiSuccessResponse<PagedResult<GetSellerRemitListResponse>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<PagedResult<GetSellerRemitListResponse>>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetSellerRemitList(GetSellerRemitListRequest req, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("POST /api/seller/remit-list [{AId}]", AId);
@@ -177,7 +177,7 @@ namespace Hello100Admin.API.Controllers
         /// </summary>  
         /// <returns></returns>
         [HttpPost("remit-wait-list")]
-        [ProducesResponseType(typeof(ApiSuccessResponse<GetSellerRemitWaitListResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<GetSellerRemitWaitListResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetSellerRemitWaitList(GetSellerRemitWaitListRequest req, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("POST /api/seller/remit-wait-list [{AId}]", AId);
@@ -194,7 +194,7 @@ namespace Hello100Admin.API.Controllers
         /// </summary>  
         /// <returns></returns>
         [HttpPatch("remit-delete")]
-        [ProducesResponseType(typeof(ApiSuccessResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> DeleteSellerRemit(DeleteSellerRemitRequest req, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("PATCH /api/seller/remit-delete [{AId}]", AId);
@@ -211,7 +211,7 @@ namespace Hello100Admin.API.Controllers
         /// </summary>  
         /// <returns></returns>
         [HttpPatch("seller-enable")]
-        [ProducesResponseType(typeof(ApiSuccessResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> UpdateSellerRemitEnabled(UpdateSellerRemitEnabledRequest req, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("PATCH /api/seller/seller-enable [{AId}]", AId);

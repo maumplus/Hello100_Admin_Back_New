@@ -47,7 +47,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginRes
         {
             _logger.LogWarning("Login failed: User not found for AccountId: {AccountId}", request.AccountId);
             // return Result.Failure<LoginResponseDto>("계정 ID 또는 비밀번호가 올바르지 않습니다.");
-            return Result.SuccessWithError<LoginResponse>(GlobalErrorCode.AuthFailed.ToError());
+            return Result.Success<LoginResponse>().WithError(GlobalErrorCode.AuthFailed.ToError());
         }
 
         // 2. 계정 상태 확인 (CanLogin 헬퍼 메서드 사용)
@@ -65,7 +65,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginRes
         // }
 
         // 3. 비밀번호 검증 (SHA256 + Salt(aid))
-        if (!_passwordHasher.VerifyPassword(user.AccPwd, request.Password, user.Aid))
+        if (!_passwordHasher.VerifyPassword(user.AccPwd, request.Password, user.AId))
         {
             // 실패 관련 동작은 이게 아닌듯?
             // _logger.LogWarning("Login failed: Invalid password for UserId={UserId}, AccountId={AccountId}, FailCount={FailCount}", 
@@ -81,7 +81,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginRes
             user.RecordLoginFailure();
             await _authRepository.UpdateLoginFailureAsync(user, cancellationToken);
 
-            return Result.SuccessWithError<LoginResponse>(GlobalErrorCode.AuthFailed.ToError());
+            return Result.Success<LoginResponse>().WithError(GlobalErrorCode.AuthFailed.ToError());
         }
 
         _logger.LogInformation("Password verified successfully for UserId: {UserId}, AccountId: {AccountId}", 
@@ -95,7 +95,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginRes
 
         // 9. 토큰 생성
         var accessToken = _tokenService.GenerateAccessToken(user, roleNames);
-        var refreshToken = _tokenService.GenerateRefreshToken(user.Aid, request.IpAddress);  // string aid
+        var refreshToken = _tokenService.GenerateRefreshToken(user.AId, request.IpAddress);  // string aid
 
         // 10. User 테이블에 토큰 저장
         user.RefreshToken = refreshToken.Token;
@@ -103,20 +103,20 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginRes
         await _authRepository.UpdateLoginSuccessAsync(user, cancellationToken);
 
         _logger.LogInformation("Login successful for Aid: {Aid}, AccountId: {AccountId}, Grade: {Grade}, Role: {Role}",
-            user.Aid, request.AccountId, user.Grade, roleNames[0]);
+            user.AId, request.AccountId, user.Grade, roleNames[0]);
 
         // 5. 응답 생성
         var response = new LoginResponse
         {
             User = new UserResponse
             {
-                Id = user.Aid,
+                Id = user.AId,
                 AccountId = user.AccId,
                 Name = user.Name,
                 Grade = user.Grade,
                 Enabled = user.Enabled == "1",
                 Approved = user.Approved == "1",
-                AccountLocked = user.AccountLocked == "1",
+                AccountLocked = user.AccountLocked == "Y",
                 LastLoginAt = user.LastLoginDt,
                 Roles = roleNames.ToList()
             },

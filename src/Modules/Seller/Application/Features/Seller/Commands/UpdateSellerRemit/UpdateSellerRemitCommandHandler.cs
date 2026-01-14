@@ -44,7 +44,7 @@ namespace Hello100Admin.Modules.Seller.Application.Features.Seller.Commands.Upda
                     ResEnMsg = "Invalid request state"
                 };
 
-                return Result<UpdateSellerRemitResponse>.SuccessWithError(failedResult, SellerErrorCode.InvalidStateForRequest.ToError());
+                return Result<UpdateSellerRemitResponse>.Success(failedResult).WithError(SellerErrorCode.InvalidStateForRequest.ToError());
             }
 
             // KCP 송금 요청
@@ -71,7 +71,7 @@ namespace Hello100Admin.Modules.Seller.Application.Features.Seller.Commands.Upda
                     ResEnMsg = "No response from KCP"
                 };
 
-                return Result<UpdateSellerRemitResponse>.SuccessWithError(failedResult, SellerErrorCode.KcpNoResponse.ToError());
+                return Result<UpdateSellerRemitResponse>.Success(failedResult).WithError(SellerErrorCode.KcpNoResponse.ToError());
             }
 
             var updateParams = new UpdateSellerRemitParams

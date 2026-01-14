@@ -32,7 +32,7 @@ public class DeleteAdminUserCommandHandler : IRequestHandler<DeleteAdminUserComm
         if (adminUser is null)
         {
             _logger.LogWarning("Delete failed: Admin user not found for Uid: {Uid}", command.Uid);
-            return Result.Success(new ErrorInfo(0, "NotFoundUserId", "관리자 계정이 존재하지 않습니다."));
+            return Result.Success().WithError(new ErrorInfo(0, "NotFoundUserId", "관리자 계정이 존재하지 않습니다."));
         }
 
         adminUser.Delete();

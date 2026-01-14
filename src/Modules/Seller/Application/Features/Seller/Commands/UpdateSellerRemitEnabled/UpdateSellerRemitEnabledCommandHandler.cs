@@ -27,7 +27,7 @@ namespace Hello100Admin.Modules.Seller.Application.Features.Seller.Commands.Upda
 
             if (updateCount <= 0)
             {
-                return Result.SuccessWithError(SellerErrorCode.UpdateSellerRemitEnabledFailedError.ToError());
+                return Result.Success().WithError(SellerErrorCode.UpdateSellerRemitEnabledFailedError.ToError());
             }
 
             _logger.LogInformation("Successfully updated seller remit enabled for Id [{Id}] to [{Enabled}]", command.Id, command.Enabled);

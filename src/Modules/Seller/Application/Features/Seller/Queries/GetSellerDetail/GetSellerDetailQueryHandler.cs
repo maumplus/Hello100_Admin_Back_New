@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using Hello100Admin.BuildingBlocks.Common.Application;
+﻿using Hello100Admin.BuildingBlocks.Common.Application;
 using Hello100Admin.Modules.Seller.Application.Common.Abstractions.Persistence.Seller;
 using Hello100Admin.Modules.Seller.Application.Common.Errors;
 using Hello100Admin.Modules.Seller.Application.Common.Extensions;
@@ -28,15 +27,17 @@ namespace Hello100Admin.Modules.Seller.Application.Features.Seller.Queries.GetSe
             var remitInfo = await _sellerStore.GetSellerRemitCountAsync(request.Id, cancellationToken);
 
             if (hospSeller == null) 
-                return Result.SuccessWithError<GetSellerDetailResponse>(SellerErrorCode.NotFoundSeller.ToError());
+                return Result.Success<GetSellerDetailResponse>().WithError(SellerErrorCode.NotFoundSeller.ToError());
 
             hospSeller.BankImgPath = $"{_imagePath}{hospSeller.BankImgPath}";
 
-            TypeAdapterConfig<GetHospSellerDetailInfoReadModel, SellerInfo>.NewConfig()
+            // 추후 필요 시 Global setting으로 뺄 예정
+            var config = new TypeAdapterConfig();
+            config.NewConfig<GetHospSellerDetailInfoReadModel, SellerInfo>()
                 .Map(d => d.IsSync, s => s.IsSync == "1")
                 .Map(d => d.Enabled, s => s.Enabled == "1");
 
-            var sellerInfo = hospSeller.Adapt<SellerInfo>();
+            var sellerInfo = hospSeller.Adapt<SellerInfo>(config);
 
             var remitCountInfo = remitInfo.Adapt<SellerRemitCountInfo>();
 

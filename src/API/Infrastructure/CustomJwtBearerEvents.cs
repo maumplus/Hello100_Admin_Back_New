@@ -1,7 +1,10 @@
-﻿using System.Net.Mime;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Net;
+using System.Net.Mime;
 using Hello100Admin.BuildingBlocks.Common.Application;
 using Hello100Admin.BuildingBlocks.Common.Errors;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Extensions;
+using Hello100Admin.Modules.Auth.Application.Common.Abstractions.Persistence.Auth;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
@@ -37,12 +40,6 @@ namespace Hello100Admin.API.Infrastructure
         {
             var path = context.HttpContext.Request.Path;
 
-            if (this.SkipTokenValidation(path) == true)
-            {
-                context.NoResult();
-                return Task.CompletedTask;
-            }
-
             var bearerToken = context.Request.Headers[HeaderNames.Authorization].FirstOrDefault();
 
             if (string.IsNullOrWhiteSpace(bearerToken) == false
@@ -62,6 +59,29 @@ namespace Hello100Admin.API.Infrastructure
         /// <returns></returns>
         public override async Task TokenValidated(TokenValidatedContext context)
         {
+            // AId, HospNo 검증
+            var adminId = context.Principal?.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            var hospNo = context.Principal?.FindFirst("hospital_number")?.Value;
+
+            if (string.IsNullOrWhiteSpace(adminId) == true
+             || string.IsNullOrWhiteSpace(hospNo) == true)
+            {
+                context.Fail("Admin Id or Hospital No is null or empty");
+                this.SetCutomAuthErrorContext(context.HttpContext, GlobalErrorCode.InvalidAccessToken.ToError());
+                return;
+            }
+
+            var authStore = context.HttpContext.RequestServices.GetRequiredService<IAuthStore>();
+
+            var adminInfo = await authStore.GetAdminInfoByAIdAsync(adminId);
+
+            if (adminInfo == null || adminInfo.HospNo != hospNo)
+            {
+                context.Fail("Not found admin info");
+                this.SetCutomAuthErrorContext(context.HttpContext, GlobalErrorCode.InvalidAccessToken.ToError());
+                return;
+            }
+
             await Task.CompletedTask;
         }
 
@@ -76,9 +96,7 @@ namespace Hello100Admin.API.Infrastructure
 
             var errorInfo = this.MapException(context.Exception);
 
-            context.HttpContext.Items["AuthErrorCode"] = errorInfo.Code;
-            context.HttpContext.Items["AuthErrorName"] = errorInfo.Name;
-            context.HttpContext.Items["AuthMessage"] = errorInfo.Message;
+            this.SetCutomAuthErrorContext(context.HttpContext, errorInfo);
 
             return Task.CompletedTask;
         }
@@ -107,30 +125,29 @@ namespace Hello100Admin.API.Infrastructure
                 inheritedError = new ErrorInfo(preCode, preName, preMessage);
             }
 
-            await this.ResponseError(context.HttpContext, inheritedError ?? defaultErrorInfo);
+            await this.ResponseError(context.HttpContext, inheritedError ?? defaultErrorInfo, HttpStatusCode.Unauthorized);
+        }
+
+        /// <summary>
+        /// EndPoint 접근 권한 검증 실패
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        public override async Task Forbidden(ForbiddenContext context)
+        {
+            var forbiddenError = GlobalErrorCode.ForbiddenRoleRequired.ToError();
+
+            await this.ResponseError(context.HttpContext, forbiddenError, HttpStatusCode.Forbidden);
         }
         #endregion
 
         #region INTERNAL METHOD AREA *******************************************
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="path"></param>
-        /// <returns></returns>
-        private bool SkipTokenValidation(PathString path)
+        private async Task ResponseError(HttpContext context, ErrorInfo errorCode, HttpStatusCode status)
         {
-            if (string.IsNullOrEmpty(path) == true) return false;
-
-            return false;
-            //return path.StartsWithSegments("/stoplight", StringComparison.OrdinalIgnoreCase);
-        }
-
-        private async Task ResponseError(HttpContext context, ErrorInfo errorCode)
-        {
-            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            context.Response.StatusCode = (int)status;
             context.Response.ContentType = MediaTypeNames.Application.Json;
 
-            var response = new ApiErrorResponse(errorCode.Code, errorCode.Name, errorCode.Message);
+            var response = new ApiResponse(errorCode.Code, errorCode.Name, errorCode.Message);
 
             await context.Response.WriteAsync(response.ToSerializedJsonStringCamelCase());
         }
@@ -174,6 +191,13 @@ namespace Hello100Admin.API.Infrastructure
                 _ =>
                     GlobalErrorCode.UnauthorizedError.ToError()
             };
+        }
+
+        private void SetCutomAuthErrorContext(HttpContext context, ErrorInfo errorInfo)
+        {
+            context.Items["AuthErrorCode"] = errorInfo.Code;
+            context.Items["AuthErrorName"] = errorInfo.Name;
+            context.Items["AuthMessage"] = errorInfo.Message;
         }
         #endregion
     }

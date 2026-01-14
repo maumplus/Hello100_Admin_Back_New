@@ -19,12 +19,12 @@ public class GetUserQueryHandler : IRequestHandler<GetUserQuery, Result<UserResp
 
     public async Task<Result<UserResponse>> Handle(GetUserQuery request, CancellationToken cancellationToken)
     {
-        var user = await _authStore.GetByAidAsync(request.UserId, cancellationToken);
+        var user = await _authStore.GetAdminInfoByAIdAsync(request.AId, cancellationToken);
         
         if (user == null)
         {
             // 임시 적용
-            return Result.SuccessWithError<UserResponse>(new ErrorInfo(0, "UserNotFound", "사용자를 찾을 수 없습니다."));
+            return Result.Success<UserResponse>().WithError(new ErrorInfo(0, "UserNotFound", "사용자를 찾을 수 없습니다."));
         }
 
         // Grade 기반 역할 설정
@@ -32,14 +32,14 @@ public class GetUserQueryHandler : IRequestHandler<GetUserQuery, Result<UserResp
 
         var userDto = new UserResponse
         {
-            Id = user.Aid,
+            Id = user.AId,
             AccountId = user.AccId,
             Name = user.Name,
             HospNo = user.HospNo,
             Grade = user.Grade,
             Enabled = user.Enabled == "1",
             Approved = user.Approved == "1",
-            AccountLocked = user.AccountLocked == "0",
+            AccountLocked = user.AccountLocked == "Y",
             LastLoginAt = user.LastLoginDt,
             Roles = roleNames.ToList()
         };

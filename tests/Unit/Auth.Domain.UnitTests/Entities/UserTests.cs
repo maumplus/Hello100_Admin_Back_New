@@ -12,13 +12,13 @@ public class UserTests
     {
         return new UserEntity
         {
-            Aid = "A0000001",
+            AId = "A0000001",
             AccId = "testuser",
             AccPwd = "password",
             Grade = "A",
             Name = "테스트유저",
             DelYn = "N",
-            AccountLocked = "0",
+            AccountLocked = "N",
             LoginFailCount = 0,
             Approved = "0",
             Enabled = "1"
@@ -65,7 +65,7 @@ public class UserTests
         // Arrange
         var user = CreateDefaultUser();
         user.LoginFailCount = 3;
-        user.AccountLocked = "0";
+        user.AccountLocked = "N";
         var before = user.LastLoginDt;
 
         // Act
@@ -73,7 +73,7 @@ public class UserTests
 
         // Assert
         user.LoginFailCount.Should().Be(0);
-        user.AccountLocked.Should().Be("1");
+        user.AccountLocked.Should().Be("N");
         (user.LastLoginDt > before || user.LastLoginDt != null).Should().BeTrue();
     }
 
@@ -83,14 +83,14 @@ public class UserTests
         // Arrange
         var user = CreateDefaultUser();
         user.LoginFailCount = 2;
-        user.AccountLocked = "0";
+        user.AccountLocked = "N";
 
         // Act
         user.RecordLoginFailure();
 
         // Assert
         user.LoginFailCount.Should().Be(3);
-        user.AccountLocked.Should().Be("0");
+        user.AccountLocked.Should().Be("N");
     }
 
     [Fact]
@@ -99,13 +99,13 @@ public class UserTests
         // Arrange
         var user = CreateDefaultUser();
         user.LoginFailCount = 4;
-        user.AccountLocked = "0";
+        user.AccountLocked = "N";
 
         // Act
         user.RecordLoginFailure();
 
         // Assert
         user.LoginFailCount.Should().Be(5);
-        user.AccountLocked.Should().Be("1");
+        user.AccountLocked.Should().Be("Y");
     }
 }

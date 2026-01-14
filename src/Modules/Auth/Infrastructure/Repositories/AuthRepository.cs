@@ -74,14 +74,14 @@ VALUES (@Id, @Aid, @Token, @ExpiresAt, @IsRevoked, @RevokedByIp, @RevokedAt, @Re
         {
             try
             {
-                _logger.LogInformation("Updating User. Aid: {Aid}", user.Aid);
+                _logger.LogInformation("Updating User. Aid: {Aid}", user.AId);
                 var sql = @"UPDATE tb_admin SET acc_id = @AccId, password_hash = @PasswordHash, salt = @Salt, roles = @Roles, is_active = @IsActive, mod_dt = @ModDt WHERE aid = @Aid";
                 using var connection = _connectionFactory.CreateConnection();
                 await connection.ExecuteAsync(sql, user);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating User. Aid: {Aid}", user.Aid);
+                _logger.LogError(ex, "Error updating User. Aid: {Aid}", user.AId);
                 throw;
             }
         }
@@ -90,13 +90,13 @@ VALUES (@Id, @Aid, @Token, @ExpiresAt, @IsRevoked, @RevokedByIp, @RevokedAt, @Re
         {
             try
             {
-                _logger.LogInformation("Updating login success for User. Aid: {Aid}", user.Aid);
+                _logger.LogInformation("Updating login success for User. Aid: {Aid}", user.AId);
                 var sql = @"UPDATE tb_admin SET last_login_dt = @LastLoginDt, login_fail_count = 0, account_locked = @AccountLocked, refresh_token = @RefreshToken WHERE aid = @Aid";
                 using var connection = _connectionFactory.CreateConnection();
                 var dbUser = ToDbModel(user);
                 await connection.ExecuteAsync(sql, new
                 {
-                    Aid = dbUser.Aid,
+                    Aid = dbUser.AId,
                     LastLoginDt = dbUser.LastLoginDt,
                     AccountLocked = dbUser.AccountLocked,
                     RefreshToken = dbUser.RefreshToken,
@@ -104,7 +104,7 @@ VALUES (@Id, @Aid, @Token, @ExpiresAt, @IsRevoked, @RevokedByIp, @RevokedAt, @Re
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating login success for User. Aid: {Aid}", user.Aid);
+                _logger.LogError(ex, "Error updating login success for User. Aid: {Aid}", user.AId);
                 throw;
             }
         }
@@ -113,7 +113,7 @@ VALUES (@Id, @Aid, @Token, @ExpiresAt, @IsRevoked, @RevokedByIp, @RevokedAt, @Re
         {
             return new UserDbRow
             {
-                Aid = user.Aid,
+                AId = user.AId,
                 AccId = user.AccId,
                 AccPwd = user.AccPwd,
                 HospNo = user.HospNo,
@@ -134,19 +134,19 @@ VALUES (@Id, @Aid, @Token, @ExpiresAt, @IsRevoked, @RevokedByIp, @RevokedAt, @Re
         {
             try
             {
-                _logger.LogInformation("Updating login failure for User. Aid: {Aid}", user.Aid);
+                _logger.LogInformation("Updating login failure for User. Aid: {Aid}", user.AId);
                 var sql = @"UPDATE tb_admin SET login_fail_count = @LoginFailCount, account_locked = @AccountLocked WHERE aid = @Aid";
                 using var connection = _connectionFactory.CreateConnection();
                 await connection.ExecuteAsync(sql, new
                 {
                     user.LoginFailCount,
                     user.AccountLocked,
-                    user.Aid
+                    user.AId
                 });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating login failure for User. Aid: {Aid}", user.Aid);
+                _logger.LogError(ex, "Error updating login failure for User. Aid: {Aid}", user.AId);
                 throw;
             }
         }
@@ -155,19 +155,19 @@ VALUES (@Id, @Aid, @Token, @ExpiresAt, @IsRevoked, @RevokedByIp, @RevokedAt, @Re
         {
             try
             {
-                _logger.LogInformation("Updating tokens for User. Aid: {Aid}", user.Aid);
+                _logger.LogInformation("Updating tokens for User. Aid: {Aid}", user.AId);
                 var sql = @"UPDATE tb_admin SET refresh_token = @RefreshToken, mod_dt = @ModDt WHERE aid = @Aid";
                 using var connection = _connectionFactory.CreateConnection();
                 await connection.ExecuteAsync(sql, new
                 {
                     user.RefreshToken,
                     user.ModDt,
-                    user.Aid
+                    user.AId
                 });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating tokens for User. Aid: {Aid}", user.Aid);
+                _logger.LogError(ex, "Error updating tokens for User. Aid: {Aid}", user.AId);
                 throw;
             }
         }

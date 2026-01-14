@@ -5,15 +5,16 @@ namespace Hello100Admin.Modules.Auth.Infrastructure.Persistence.DbModels.Auth;
 /// </summary>
 internal record UserDbRow
 {
-    public string Aid { get; init; } = string.Empty;
-    public string AccId { get; init; } = string.Empty;
-    public string? AccPwd { get; init; }
+    public string AId { get; init; } = default!;
+    public string AccId { get; init; } = default!;
+    public string AccPwd { get; init; } = default!;
+    public string? HospKey { get; init; }
     public string? HospNo { get; init; }
-    public string Grade { get; init; } = string.Empty;
-    public string Name { get; init; } = string.Empty;
-    public string DelYn { get; init; } = string.Empty;
+    public string Grade { get; init; } = default!;
+    public string Name { get; init; } = default!;
+    public string DelYn { get; init; } = default!;
     public int? LastLoginDt { get; init; }
-    public string AccountLocked { get; init; } = "0";
+    public string AccountLocked { get; init; } = default!;
     public int LoginFailCount { get; init; }
     public string? RefreshToken { get; init; }
     public string? AccessToken { get; init; }

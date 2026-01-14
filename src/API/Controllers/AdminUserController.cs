@@ -60,7 +60,7 @@ public class AdminUserController : BaseController
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpPatch("update-password")]
-    [ProducesResponseType(typeof(ApiSuccessResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> UpdatePassword(UpdatePasswordRequest req, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("PATCH /api/adminuser/update-password [{AId}]", AId);

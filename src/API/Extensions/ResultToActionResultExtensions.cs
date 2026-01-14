@@ -1,6 +1,5 @@
 using Hello100Admin.BuildingBlocks.Common.Application;
 using Hello100Admin.BuildingBlocks.Common.Errors;
-using Hello100Admin.BuildingBlocks.Common.Infrastructure.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Hello100Admin.API.Extensions;
@@ -18,49 +17,46 @@ public static class ResultToActionResultExtensions
 
         var errorInfo = result.ErrorInfo;
 
-        if (result.IsSuccess == true)
+        if (errorInfo == null)
         {
-            if (errorInfo == null)
-            {
-                return controller.Ok(new ApiSuccessResponse<T>(result.Data));
-            }
-            else
-            {
-                int bizErrorCode = errorInfo.Code;
-                string bizErrorName = errorInfo.Name;
-                string bizErrorMessage = errorInfo.Message;
+            return controller.Ok(new ApiResponse<T>(result.Data));
+        }
+        else
+        {
+            int bizErrorCode = errorInfo.Code;
+            string bizErrorName = errorInfo.Name;
+            string bizErrorMessage = errorInfo.Message;
 
-                return controller.Ok(new ApiSuccessResponse<T>(result.Data, bizErrorCode, bizErrorName, bizErrorMessage));
-            }
+            return controller.Ok(new ApiResponse<T>(result.Data, bizErrorCode, bizErrorName, bizErrorMessage));
         }
 
-        var error = errorInfo ?? GlobalErrorCode.UnexpectedError.ToError();
+        //var error = errorInfo ?? GlobalErrorCode.UnexpectedError.ToError();
 
-        int errorCode = error.Code;
-        string errorName = error.Name;
-        string errorMessage = error.Message;
-        object? details = result.Details;
+        //int errorCode = error.Code;
+        //string errorName = error.Name;
+        //string errorMessage = error.Message;
+        //object? details = result.Details;
 
-        if (errorCode == (int)GlobalErrorCode.UserNotFound)
-            return controller.NotFound(new ApiErrorResponse(errorCode, errorName, errorMessage, details));
+        //if (errorCode == (int)GlobalErrorCode.UserNotFound)
+        //    return controller.NotFound(new ApiResponse(errorCode, errorName, errorMessage, details));
 
-        if (errorCode == (int)GlobalErrorCode.ValidationError)
-            return controller.BadRequest(new ApiErrorResponse(errorCode, errorName, errorMessage, details));
+        //if (errorCode == (int)GlobalErrorCode.ValidationError)
+        //    return controller.BadRequest(new ApiResponse(errorCode, errorName, errorMessage, details));
 
-        if (errorCode == (int)GlobalErrorCode.AuthFailed)
-        {
-            if (authEndpoint)
-                return controller.Unauthorized(new ApiErrorResponse(errorCode, errorName, errorMessage, details));
-            // 일반 엔드포인트에서는 BadRequest로 처리
-            return controller.BadRequest(new ApiErrorResponse(errorCode, errorName, errorMessage, details));
-        }
+        //if (errorCode == (int)GlobalErrorCode.AuthFailed)
+        //{
+        //    if (authEndpoint)
+        //        return controller.Unauthorized(new ApiResponse(errorCode, errorName, errorMessage, details));
+        //    // 일반 엔드포인트에서는 BadRequest로 처리
+        //    return controller.BadRequest(new ApiResponse(errorCode, errorName, errorMessage, details));
+        //}
 
-        // 기타 표준 매핑(예: 충돌)
-        if (errorCode == (int)GlobalErrorCode.Conflict)
-            return controller.Conflict(new ApiErrorResponse(errorCode, errorName, errorMessage, details));
+        //// 기타 표준 매핑(예: 충돌)
+        //if (errorCode == (int)GlobalErrorCode.Conflict)
+        //    return controller.Conflict(new ApiResponse(errorCode, errorName, errorMessage, details));
 
-        // 기본: 500 내부 서버 오류
-        return controller.StatusCode(500, new ApiErrorResponse(errorCode, errorName, errorMessage, details));
+        //// 기본: 500 내부 서버 오류
+        //return controller.StatusCode(500, new ApiResponse(errorCode, errorName, errorMessage, details));
     }
 
     /// <summary>
@@ -73,45 +69,43 @@ public static class ResultToActionResultExtensions
 
         var errorInfo = result.ErrorInfo;
 
-        if (result.IsSuccess == true)
+        if (errorInfo == null)
         {
-            if (errorInfo == null)
-            {
-                return controller.Ok(new ApiSuccessResponse());
-            }
-            else
-            {
-                int bizErrorCode = errorInfo.Code;
-                string bizErrorName = errorInfo.Name;
-                string bizErrorMessage = errorInfo.Message;
+            return controller.Ok(new ApiResponse());
+        }
+        else
+        {
+            int bizErrorCode = errorInfo.Code;
+            string bizErrorName = errorInfo.Name;
+            string bizErrorMessage = errorInfo.Message;
 
-                return controller.Ok(new ApiSuccessResponse(bizErrorCode, bizErrorName, bizErrorMessage));
-            }
+            return controller.Ok(new ApiResponse(bizErrorCode, bizErrorName, bizErrorMessage));
         }
 
-        var error = errorInfo ?? GlobalErrorCode.UnexpectedError.ToError();
+        //var error = errorInfo ?? GlobalErrorCode.UnexpectedError.ToError();
 
-        int errorCode = error.Code;
-        string errorName = error.Name;
-        string errorMessage = error.Message;
-        object? details = result.Details;
+        //int errorCode = error.Code;
+        //string errorName = error.Name;
+        //string errorMessage = error.Message;
+        //object? details = result.Details;
 
-        if (errorCode == (int)GlobalErrorCode.UserNotFound)
-            return controller.NotFound(new ApiErrorResponse(errorCode, errorName, errorMessage, details));
+        //if (errorCode == (int)GlobalErrorCode.UserNotFound)
+        //    return controller.NotFound(new ApiResponse(errorCode, errorName, errorMessage, details));
 
-        if (errorCode == (int)GlobalErrorCode.ValidationError)
-            return controller.BadRequest(new ApiErrorResponse(errorCode, errorName, errorMessage, details));
+        //if (errorCode == (int)GlobalErrorCode.ValidationError)
+        //    return controller.BadRequest(new ApiResponse(errorCode, errorName, errorMessage, details));
 
-        if (errorCode == (int)GlobalErrorCode.AuthFailed)
-        {
-            if (authEndpoint)
-                return controller.Unauthorized(new ApiErrorResponse(errorCode, errorName, errorMessage, details));
-            return controller.BadRequest(new ApiErrorResponse(errorCode, errorName, errorMessage, details));
-        }
+        //if (errorCode == (int)GlobalErrorCode.AuthFailed)
+        //{
+        //    if (authEndpoint)
+        //        return controller.Unauthorized(new ApiResponse(errorCode, errorName, errorMessage, details));
 
-        if (errorCode == (int)GlobalErrorCode.Conflict)
-            return controller.Conflict(new ApiErrorResponse(errorCode, errorName, errorMessage, details));
+        //    return controller.BadRequest(new ApiResponse(errorCode, errorName, errorMessage, details));
+        //}
 
-        return controller.StatusCode(500, new ApiErrorResponse(errorCode, errorName, errorMessage, details));
+        //if (errorCode == (int)GlobalErrorCode.Conflict)
+        //    return controller.Conflict(new ApiResponse(errorCode, errorName, errorMessage, details));
+
+        //return controller.StatusCode(500, new ApiResponse(errorCode, errorName, errorMessage, details));
     }
 }

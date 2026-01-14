@@ -41,10 +41,7 @@ public class AuthController : BaseController
 
         var result = await _mediator.Send(commandWithIp);
 
-        if (result.IsSuccess)
-        {
-            _logger.LogInformation("User {AccountId} logged in successfully", command.AccountId);
-        }
+        _logger.LogInformation("User {AccountId} logged in process completed", command.AccountId);
 
         // 중앙화된 매퍼 사용: 성공/실패 모두 ToActionResult에서 처리합니다.
         return result.ToActionResult(this, authEndpoint: true);
@@ -100,38 +97,17 @@ public class AuthController : BaseController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetMe()
     {
-        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-        if (userId == null)
+        if (string.IsNullOrWhiteSpace(base.AId) == true)
         {
             return Unauthorized();
         }
 
-        var query = new GetUserQuery { UserId = userId };
+        var query = new GetUserQuery { AId = base.AId };
         var result = await _mediator.Send(query);
 
         // 제네릭 Result<UserDto> 경로는 ToActionResult에서 성공/실패를 모두 처리합니다.
         return result.ToActionResult(this);
     }
-
-    /// <summary>
-    /// 모든 역할 조회
-    /// </summary>
-    // [HttpGet("roles")]
-    // [Authorize]
-    // [ProducesResponseType(StatusCodes.Status200OK)]
-    // public async Task<IActionResult> GetRoles()
-    // {
-    //     var query = new GetRolesQuery();
-    //     var result = await _mediator.Send(query);
-        
-    //     if (!result.IsSuccess)
-    //     {
-    //         return BadRequest(new { message = result.Error });
-    //     }
-
-    //     return Ok(result.Value);
-    // }
-
 
     /// <summary>
     /// 클라이언트 IP 주소 추출

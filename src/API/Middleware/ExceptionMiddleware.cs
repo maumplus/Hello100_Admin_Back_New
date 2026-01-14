@@ -48,7 +48,7 @@ public class ExceptionMiddleware
     {
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = (int)statusCode;
-        var error = new ApiErrorResponse(code, name, message, details);
+        var error = new ApiResponse(code, name, message, details);
         var json = JsonSerializer.Serialize(error);
         await context.Response.WriteAsync(json);
     }

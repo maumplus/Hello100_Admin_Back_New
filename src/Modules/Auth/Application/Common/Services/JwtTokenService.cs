@@ -53,8 +53,7 @@ public class JwtTokenService : ITokenService
 
         var claims = new List<Claim>
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Aid),  // string aid
-            new Claim(JwtRegisteredClaimNames.UniqueName, user.AccId),  // AccountId 사용
+            new Claim(JwtRegisteredClaimNames.Sub, user.AId),  // string aid
             new Claim("account_id", user.AccId),  // 추가 클레임
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
         };
@@ -64,17 +63,16 @@ public class JwtTokenService : ITokenService
         {
             claims.Add(new Claim(ClaimTypes.Role, role));
         }
-
-        // 이름 추가
-        claims.Add(new Claim(ClaimTypes.Name, user.Name));
         
         // 등급 추가
         claims.Add(new Claim("grade", user.Grade.ToString()));
         
         // 병원 번호 추가 (있는 경우)
-        if (!string.IsNullOrWhiteSpace(user.HospNo))
+        if (string.IsNullOrWhiteSpace(user.HospNo) == false
+         && string.IsNullOrEmpty(user.HospKey) == false)
         {
             claims.Add(new Claim("hospital_number", user.HospNo));
+            claims.Add(new Claim("hospital_key", user.HospKey));
         }
 
         var expiresAt = DateTime.UtcNow.AddMinutes(_accessTokenExpirationMinutes);
@@ -150,7 +148,7 @@ public class JwtTokenService : ITokenService
             return null;
         }
 
-        return await _authStore.GetByAidAsync(refreshToken.Aid, cancellationToken);
+        return await _authStore.GetAdminInfoByAIdAsync(refreshToken.Aid, cancellationToken);
     }
 
     public ClaimsPrincipal? ValidateToken(string token)

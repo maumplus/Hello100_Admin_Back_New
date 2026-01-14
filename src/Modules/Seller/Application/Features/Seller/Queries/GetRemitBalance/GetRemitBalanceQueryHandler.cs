@@ -39,7 +39,7 @@ namespace Hello100Admin.Modules.Seller.Application.Features.Seller.Queries.GetRe
 
             if (kcpResult == null || kcpResult.ResCd != "0000")
             {
-                return Result.SuccessWithError<GetRemitBalanceResponse>(SellerErrorCode.KcpBalanceInquiryFailed.ToError());
+                return Result.Success<GetRemitBalanceResponse>().WithError(SellerErrorCode.KcpBalanceInquiryFailed.ToError());
             }
 
             long.TryParse(kcpResult.CanAmount, out var canAmount);
