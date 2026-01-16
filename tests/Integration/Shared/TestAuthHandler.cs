@@ -59,6 +59,14 @@ namespace Hello100Admin.Integration.Shared
                         claims.Add(new Claim(ClaimTypes.Role, value));
                         break;
 
+                    case "hospital_number":
+                        claims.Add(new Claim("hospital_number", value));
+                        break;
+
+                    case "hospital_key":
+                        claims.Add(new Claim("hospital_key", value));
+                        break;
+
                     default:
                         claims.Add(new Claim(key, value));
                         break;

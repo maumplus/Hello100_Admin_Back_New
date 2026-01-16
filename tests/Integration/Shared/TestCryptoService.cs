@@ -62,6 +62,15 @@ public class TestCryptoService : ICryptoService
     }
 
     /// <summary>
+    /// 키 타입 지정 복호화 (기본 Decrypt 호출)
+    /// </summary>
+    [Obsolete("Not use")]
+    public string DecryptWithNoVector(string encryptedText, CryptoKeyType keyType)
+    {
+        return Decrypt(encryptedText);
+    }
+
+    /// <summary>
     /// DES 파라미터 암호화 (기본 Encrypt 호출)
     /// </summary>
     public string EncryptParameter(string plainText)

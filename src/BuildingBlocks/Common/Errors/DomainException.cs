@@ -1,4 +1,5 @@
 using System.Net;
+using Hello100Admin.BuildingBlocks.Common.Application;
 
 namespace Hello100Admin.BuildingBlocks.Common.Errors;
 
@@ -24,21 +25,48 @@ public class DomainException : Exception
         ErrorName = errorName;
         Details = details;
     }
+
+    public DomainException(ErrorInfo errorInfo, object? details = null)
+    : base(errorInfo.Message)
+    {
+        ErrorCode = errorInfo.Code;
+        ErrorName = errorInfo.Name;
+        Details = details;
+    }
 }
 
 // 자주 사용하는 도메인 예외 서브타입들
+public class BizException : DomainException
+{
+    public override HttpStatusCode StatusCode => HttpStatusCode.OK;
+
+    public BizException(int errorCode, string errorName, string message, object? details = null)
+        : base(errorCode, errorName, message, details) { }
+
+    public BizException(ErrorInfo errorInfo, object? details = null)
+       : base(errorInfo, details) { }
+}
+
 public class NotFoundException : DomainException
 {
     public override HttpStatusCode StatusCode => HttpStatusCode.NotFound;
+
     public NotFoundException(int errorCode, string errorName, string message, object? details = null)
         : base(errorCode, errorName, message, details) { }
+
+    public NotFoundException(ErrorInfo errorInfo, object? details = null)
+        : base(errorInfo, details) { }
 }
 
 public class ConflictException : DomainException
 {
     public override HttpStatusCode StatusCode => HttpStatusCode.Conflict;
+
     public ConflictException(int errorCode, string errorName, string message, object? details = null)
         : base(errorCode, errorName, message, details) { }
+
+    public ConflictException(ErrorInfo errorInfo, object? details = null)
+        : base(errorInfo, details) { }
 }
 
 public class ValidationException : DomainException
@@ -46,4 +74,7 @@ public class ValidationException : DomainException
     // 기본적으로 400 BadRequest를 사용
     public ValidationException(int errorCode, string errorName, string message, object? details = null)
         : base(errorCode, errorName, message, details) { }
+
+    public ValidationException(ErrorInfo errorInfo, object? details = null)
+        : base(errorInfo, details) { }
 }

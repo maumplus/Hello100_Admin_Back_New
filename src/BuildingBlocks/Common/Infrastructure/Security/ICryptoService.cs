@@ -61,7 +61,15 @@ public interface ICryptoService
     /// <param name="keyType">사용할 키 타입</param>
     /// <returns>복호화된 평문</returns>
     string Decrypt(string encryptedText, CryptoKeyType keyType);
-    
+
+    /// <summary>
+    /// 지정된 키 타입으로 AES-256 암호화된 문자열을 복호화 [Vector 값은 Zero]
+    /// </summary>
+    /// <param name="encryptedText">Base64 인코딩된 암호화 문자열</param>
+    /// <param name="keyType">사용할 키 타입</param>
+    /// <returns>복호화된 평문</returns>
+    string DecryptWithNoVector(string encryptedText, CryptoKeyType keyType);
+
     /// <summary>
     /// DES로 파라미터 암호화 (레거시 paramEncrypt 호환)
     /// Key와 IV에 동일한 값 사용
