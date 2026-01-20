@@ -7,6 +7,8 @@ using Hello100Admin.Modules.Admin.Infrastructure.Repositories.Member;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.AdminUser;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Member;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Security.Hash;
+using Hello100Admin.Modules.Admin.Infrastructure.Repositories.Hospital;
+using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Hospital;
 
 namespace Hello100Admin.Modules.Admin.Infrastructure;
 
@@ -25,6 +27,7 @@ public static class DependencyInjection
         services.AddScoped<IAdminUserStore, AdminUserStore>();
         services.AddScoped<IMemberRepository, MemberRepository>();
         services.AddScoped<IMemberStore, MemberStore>();
+        services.AddScoped<IHospitalStore, HospitalStore>();
         services.AddSingleton<IHasher, Sha256Hasher>();
         
         return services;
