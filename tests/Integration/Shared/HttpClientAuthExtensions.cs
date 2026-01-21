@@ -14,10 +14,10 @@
             return client;
         }
 
-        public static HttpClient AsSuperAdmin(this HttpClient client, string userId = "TEST5678", string name = "슈퍼테스트")
+        public static HttpClient AsSuperAdmin(this HttpClient client, string userId = "TEST5678", string name = "슈퍼테스트", string hospNo = "10350072", string hospKey = "MzNiMDI0OWI1MDA0MWU2YjcxNTE1YTQ2MDM0YWViYzVmYzY5ZGQ5YjY2M2I5ODBjODgwNDVhNDg3YTdkNzc4NA==")
         {
             client.DefaultRequestHeaders.Remove(TestAuthHandler.HeaderName);
-            client.DefaultRequestHeaders.Add(TestAuthHandler.HeaderName, $"sub={userId};name={name};role=SuperAdmin");
+            client.DefaultRequestHeaders.Add(TestAuthHandler.HeaderName, $"sub={userId};name={name};role=SuperAdmin;hospital_number={hospNo};hospital_key={hospKey}");
             return client;
         }
 

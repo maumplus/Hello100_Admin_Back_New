@@ -178,6 +178,49 @@ public class AesCryptoService : ICryptoService
     }
 
     /// <summary>
+    /// 지정된 키 타입으로 AES-256 복호화
+    /// </summary>
+    public string DecryptWithNoVector(string encryptedText, CryptoKeyType keyType)
+    {
+        if (string.IsNullOrEmpty(encryptedText))
+            return encryptedText;
+
+        try
+        {
+            using var aes = Aes.Create();
+            aes.Key = _aesKeys[keyType];
+            aes.IV = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+            aes.Mode = CipherMode.CBC;
+            aes.Padding = PaddingMode.PKCS7;
+
+            using var decryptor = aes.CreateDecryptor();
+            var encryptedBytes = Convert.FromBase64String(encryptedText);
+            var decryptedBytes = decryptor.TransformFinalBlock(encryptedBytes, 0, encryptedBytes.Length);
+
+            return Encoding.UTF8.GetString(decryptedBytes);
+        }
+        catch (FormatException)
+        {
+            // Base64 디코딩 실패 - 평문이거나 다른 형식일 수 있음
+            _logger.LogWarning("Failed to decode Base64 (likely plain text): {EncryptedText}",
+                encryptedText.Substring(0, Math.Min(20, encryptedText.Length)));
+            return encryptedText; // 원본 반환
+        }
+        catch (CryptographicException ex)
+        {
+            // 복호화 실패 - 잘못된 키이거나 손상된 데이터
+            _logger.LogWarning("Failed to decrypt with {KeyType} key: {Message}. Data: {EncryptedText}",
+                keyType, ex.Message, encryptedText.Substring(0, Math.Min(20, encryptedText.Length)));
+            return encryptedText; // 원본 반환
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error during decryption with {KeyType} key", keyType);
+            throw new CryptographicException($"Failed to decrypt data with {keyType} key: {ex.Message}", ex);
+        }
+    }
+
+    /// <summary>
     /// DES로 파라미터 암호화 (레거시 paramEncrypt 호환)
     /// Key와 IV에 동일한 값 사용
     /// </summary>

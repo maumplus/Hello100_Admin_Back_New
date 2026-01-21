@@ -73,9 +73,9 @@ $RECYCLE.BIN/
 .env
 .env.local
 .env.*.local
-appsettings.Development.json
-appsettings.*.json
-!appsettings.json
+#appsettings.Development.json
+#appsettings.*.json
+#!appsettings.json
 secrets.json
 setup-secrets.sh
 

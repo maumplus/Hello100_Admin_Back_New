@@ -10,7 +10,7 @@ using Hello100Admin.Modules.Seller.Infrastructure.External.Web.Seller.Models.Kcp
 using Hello100Admin.Modules.Seller.Infrastructure.External.Web.Seller.Models.KcpRemit.Response;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace Hello100Admin.Modules.Seller.Infrastructure.External.Web.Seller
 {
@@ -58,14 +58,14 @@ namespace Hello100Admin.Modules.Seller.Infrastructure.External.Web.Seller
             try
             {
                 var built = Build(parsedRequest);
-                var json = JsonConvert.SerializeObject(built);
+                var json = JsonSerializer.Serialize(built);
 
                 var res = await _webRequestService.PostAsync(GetUrl(endPoint), json);
 
                 if (string.IsNullOrWhiteSpace(res.ResponseData))
                     return default;
-
-                KcpSellerRegisterResponse? tempResult = JsonConvert.DeserializeObject<KcpSellerRegisterResponse>(res.ResponseData);
+                
+                KcpSellerRegisterResponse? tempResult = JsonSerializer.Deserialize<KcpSellerRegisterResponse>(res.ResponseData);
 
                 SellerRegisterResult? result = null;
 
@@ -111,14 +111,14 @@ namespace Hello100Admin.Modules.Seller.Infrastructure.External.Web.Seller
             try
             {
                 var built = Build(parsedRequest);
-                var json = JsonConvert.SerializeObject(built);
+                var json = JsonSerializer.Serialize(built);
 
                 var res = await _webRequestService.PostAsync(GetUrl(endPoint), json);
 
                 if (string.IsNullOrWhiteSpace(res.ResponseData))
                     return default;
 
-                KcpRemitResponse? tempResult = JsonConvert.DeserializeObject<KcpRemitResponse>(res.ResponseData);
+                KcpRemitResponse? tempResult = JsonSerializer.Deserialize<KcpRemitResponse>(res.ResponseData);
 
                 RemitResult? result = null;
 
@@ -174,14 +174,14 @@ namespace Hello100Admin.Modules.Seller.Infrastructure.External.Web.Seller
             try
             {
                 var built = Build(parsedRequest);
-                var json = JsonConvert.SerializeObject(built);
+                var json = JsonSerializer.Serialize(built);
 
                 var res = await _webRequestService.PostAsync(GetUrl(endPoint), json);
 
                 if (string.IsNullOrWhiteSpace(res.ResponseData))
                     return default;
 
-                KcpAccountBalanceResponse? tempResult = JsonConvert.DeserializeObject<KcpAccountBalanceResponse>(res.ResponseData);
+                KcpAccountBalanceResponse? tempResult = JsonSerializer.Deserialize<KcpAccountBalanceResponse>(res.ResponseData);
 
                 AccountBalanceResult? result = null;
 
