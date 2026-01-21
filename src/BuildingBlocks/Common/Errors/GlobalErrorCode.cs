@@ -34,4 +34,14 @@ public enum GlobalErrorCode
     ForbiddenRoleRequired = 1010,
     [Description("액세스 토큰 정보가 유효하지 않습니다.")]
     InvalidAccessToken = 1011,
+    [Description("데이터 조회 중 에러가 발생하였습니다. 다시 시도해주세요.")]
+    DataQueryError = 1012,
+    [Description("데이터 등록 중 에러가 발생하였습니다. 다시 시도해주세요.")]
+    DataInsertError = 1013,
+    [Description("데이터 수정 중 에러가 발생하였습니다. 다시 시도해주세요.")]
+    DataUpdateError = 1014,
+    [Description("데이터 삭제 중 에러가 발생하였습니다. 다시 시도해주세요.")]
+    DataDeleteError = 1015,
+    [Description("엑셀 조회 조건에 해당하는 데이터가 존재하지 않습니다. 조건 확인 후 다시 시도해주세요.")]
+    NoDataForExcelExport = 1016,
 }

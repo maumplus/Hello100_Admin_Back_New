@@ -2,7 +2,7 @@
 using System.Data;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
+using System.Text.Json;
 using Hello100Admin.Modules.Seller.Application.Common.Abstractions.Persistence.Seller;
 using Hello100Admin.Modules.Seller.Infrastructure.Persistence.DbModels.Seller;
 using Hello100Admin.Modules.Seller.Application.Features.Seller.Commands.CreateSeller;
@@ -83,7 +83,7 @@ namespace Hello100Admin.Modules.Seller.Infrastructure.Repositories.Seller
                 }
                 else
                 {
-                    _logger.LogError("InsertTbHospSellerAsync: 데이터 저장 실패, Param: {Param}", JsonConvert.SerializeObject(req));
+                    _logger.LogError("InsertTbHospSellerAsync: 데이터 저장 실패, Param: {Param}", JsonSerializer.Serialize(req));
                     return -1; // NotInsertData
                 }
             }

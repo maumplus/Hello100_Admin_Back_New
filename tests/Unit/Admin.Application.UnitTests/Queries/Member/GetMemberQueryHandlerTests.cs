@@ -22,6 +22,7 @@ public class GetMemberQueryHandlerTests
         public string Decrypt(string encryptedText, CryptoKeyType keyType = CryptoKeyType.Default) => encryptedText;
         public string Encrypt(string plainText) => plainText;
         public string Decrypt(string encryptedText) => encryptedText;
+        public string DecryptWithNoVector(string encryptedText, CryptoKeyType keyType) => encryptedText;
         public string EncryptParameter(string plainText) => plainText;
         public string DecryptParameter(string encryptedText) => encryptedText;
     }

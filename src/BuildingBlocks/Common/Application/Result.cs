@@ -1,3 +1,4 @@
+
 namespace Hello100Admin.BuildingBlocks.Common.Application;
 
 // 임시 경로 추후 경로 변경 예정
