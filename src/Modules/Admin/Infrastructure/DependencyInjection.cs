@@ -16,6 +16,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Common;
 using Hello100Admin.Modules.Admin.Infrastructure.Repositories.Common;
 using Hello100Admin.Modules.Admin.Infrastructure.External.Web.EghisHome;
+using Hello100Admin.Modules.Admin.Infrastructure.Repositories.Hospital;
+using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Hospital;
 
 namespace Hello100Admin.Modules.Admin.Infrastructure;
 
@@ -38,6 +40,7 @@ public static class DependencyInjection
         services.AddScoped<IServiceUsageStore, ServiceUsageStore>();
         services.AddScoped<IServiceUsageRepository, ServiceUsageRepository>();
         services.AddScoped<IExcelExporter, ClosedXmlExcelExporter>();
+        services.AddScoped<IHospitalStore, HospitalStore>();
         services.AddSingleton<IHasher, Sha256Hasher>();
 
         var kakaoBizUrl = configuration.GetSection("KakaoBizUrl").Value;
