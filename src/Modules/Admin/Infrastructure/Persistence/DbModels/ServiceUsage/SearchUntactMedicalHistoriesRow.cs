@@ -3,21 +3,6 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Persistence.DbModels.Servic
 {
     internal sealed class SearchUntactMedicalHistoriesRow
     {
-        public int TotalCount { get; set; }
-        public int TotalRsrv { get; set; }
-        public int TotalClinicEnd { get; set; }
-        public int TotalClinicFail { get; set; }
-        public int TotalClinicCancel { get; set; }
-        public int TotalSuccessAmt { get; set; }
-        public int TotalProgressAmt { get; set; }
-        public int TotalFailAmt { get; set; }
-        public int TotalSumAmt { get; set; }
-
-        public List<SearchUntactMedicalHistoryDetailRow> DetailList { get; set; } = default!;
-    }
-
-    internal sealed class SearchUntactMedicalHistoryDetailRow
-    {
         public string UId { get; set; } = default!;
         public int MId { get; set; }
         public string? DoctNm { get; set; }

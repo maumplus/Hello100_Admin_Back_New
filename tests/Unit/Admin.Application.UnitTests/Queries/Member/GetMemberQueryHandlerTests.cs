@@ -25,6 +25,7 @@ public class GetMemberQueryHandlerTests
         public string DecryptWithNoVector(string encryptedText, CryptoKeyType keyType) => encryptedText;
         public string EncryptParameter(string plainText) => plainText;
         public string DecryptParameter(string encryptedText) => encryptedText;
+        public string EncryptToBase64WithDesEcbPkcs7(string plaintext) => plaintext;
     }
 
     [Fact]

@@ -11,6 +11,7 @@ using Hello100Admin.Modules.Seller.Infrastructure.External.Web.Seller.Models.Kcp
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Serialization;
 
 namespace Hello100Admin.Modules.Seller.Infrastructure.External.Web.Seller
 {
@@ -58,7 +59,7 @@ namespace Hello100Admin.Modules.Seller.Infrastructure.External.Web.Seller
             try
             {
                 var built = Build(parsedRequest);
-                var json = JsonSerializer.Serialize(built);
+                var json = built.ToJson();
 
                 var res = await _webRequestService.PostAsync(GetUrl(endPoint), json);
 
@@ -111,7 +112,7 @@ namespace Hello100Admin.Modules.Seller.Infrastructure.External.Web.Seller
             try
             {
                 var built = Build(parsedRequest);
-                var json = JsonSerializer.Serialize(built);
+                var json = built.ToJson();
 
                 var res = await _webRequestService.PostAsync(GetUrl(endPoint), json);
 
@@ -174,7 +175,7 @@ namespace Hello100Admin.Modules.Seller.Infrastructure.External.Web.Seller
             try
             {
                 var built = Build(parsedRequest);
-                var json = JsonSerializer.Serialize(built);
+                var json = built.ToJson();
 
                 var res = await _webRequestService.PostAsync(GetUrl(endPoint), json);
 

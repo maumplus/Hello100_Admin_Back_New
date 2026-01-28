@@ -1,11 +1,11 @@
 ﻿using Dapper;
 using System.Data;
-using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.ServiceUsage;
 using Microsoft.Extensions.Logging;
 using Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Commands.SubmitAlimtalkApplication;
 using Hello100Admin.BuildingBlocks.Common.Errors;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Extensions;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 
 namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.ServiceUsage
 {
@@ -24,7 +24,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.ServiceUsage
         }
         #endregion
 
-        #region GENERAL METHOD AREA **************************************
+        #region ISERVICEUSAGEREPOSITORY IMPLEMENTS METHOD AREA **************************************
         public async Task<int> SubmitAlimtalkApplicationAsync(SubmitAlimtalkApplicationCommand req, CancellationToken cancellationToken = default)
         {
             try

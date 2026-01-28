@@ -1,5 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
+using Hello100Admin.BuildingBlocks.Common.Errors;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -276,5 +278,35 @@ public class AesCryptoService : ICryptoService
         {
             throw new CryptographicException($"Failed to decrypt parameter: {ex.Message}", ex);
         }
+    }
+
+    public string EncryptToBase64WithDesEcbPkcs7(string plaintext)
+    {
+        if (string.IsNullOrEmpty(plaintext)) 
+            throw new BizException(GlobalErrorCode.EmptyEncryptPlainText.ToError());
+
+        using var des = DES.Create();
+        des.Mode = CipherMode.ECB;
+        des.Padding = PaddingMode.PKCS7;
+        des.Key = _desKey;
+        des.IV = _desKey;
+
+        byte[] inputBytes = Encoding.UTF8.GetBytes(plaintext);
+
+        using var ms = new MemoryStream();
+        using (var cs = new CryptoStream(ms, des.CreateEncryptor(), CryptoStreamMode.Write))
+        {
+            cs.Write(inputBytes, 0, inputBytes.Length);
+            cs.FlushFinalBlock();
+        }
+
+        string strReturn = Convert.ToBase64String(ms.ToArray());
+
+        strReturn = strReturn.Replace("/", "Aa1Z_1A");
+        strReturn = strReturn.Replace("+", "Ae1ZA1_");
+        strReturn = strReturn.Replace("|", "AK_2x1A");
+        strReturn = strReturn.Replace("#", "AK_1XCA");
+
+        return strReturn;
     }
 }

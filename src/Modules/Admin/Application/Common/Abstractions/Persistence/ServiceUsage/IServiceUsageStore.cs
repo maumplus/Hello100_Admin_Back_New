@@ -18,7 +18,7 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistenc
         /// <param name="req"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        public Task<SearchUntactMedicalHistoriesReadModel?> SearchUntactMedicalHistoriesAsync(SearchUntactMedicalHistoriesQuery req, CancellationToken token);
+        public Task<SearchUntactMedicalHistoriesReadModel> SearchUntactMedicalHistoriesAsync(SearchUntactMedicalHistoriesQuery req, CancellationToken token);
 
         /// <summary>
         /// 비대면 진료 결제 내역 상세 조회

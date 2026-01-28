@@ -45,19 +45,4 @@ public static class StringExtensions
 
         return value.Length <= maxLength ? value : value.Substring(0, maxLength);
     }
-
-    public static string ToSerializedJsonStringCamelCase(this object obj)
-    {
-        if (obj == null)
-        {
-            return string.Empty;
-        }
-
-        var options = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        };
-
-        return JsonSerializer.Serialize(obj, options);
-    }
 }

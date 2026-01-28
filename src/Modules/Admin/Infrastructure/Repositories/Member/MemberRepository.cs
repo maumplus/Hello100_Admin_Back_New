@@ -1,4 +1,4 @@
-using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Member;
 using Microsoft.Extensions.Logging;
 

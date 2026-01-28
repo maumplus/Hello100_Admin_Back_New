@@ -1,5 +1,5 @@
 ﻿using Dapper;
-using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.AdminUser;
 using Hello100Admin.Modules.Admin.Domain.Entities;
 using Hello100Admin.Modules.Admin.Infrastructure.Persistence.DbModels.AdminUser;

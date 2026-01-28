@@ -4,6 +4,7 @@ using System.Net.Mime;
 using Hello100Admin.BuildingBlocks.Common.Application;
 using Hello100Admin.BuildingBlocks.Common.Errors;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Extensions;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Serialization;
 using Hello100Admin.Modules.Auth.Application.Common.Abstractions.Persistence.Auth;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -149,7 +150,7 @@ namespace Hello100Admin.API.Infrastructure
 
             var response = new ApiResponse(errorCode.Code, errorCode.Name, errorCode.Message);
 
-            await context.Response.WriteAsync(response.ToSerializedJsonStringCamelCase());
+            await context.Response.WriteAsync(response.ToJson());
         }
 
         /// <summary>

@@ -27,7 +27,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Queries.
 
             var historyInfo = await _serviceUsageStore.SearchUntactMedicalHistoriesAsync(req, token);
 
-            historyInfo?.DetailList.ForEach(s => s.Name = _cryptoService.DecryptWithNoVector(s.Name, CryptoKeyType.Name));
+            historyInfo.DetailList.ForEach(s => s.Name = _cryptoService.DecryptWithNoVector(s.Name, CryptoKeyType.Name));
 
             var result = historyInfo?.Adapt<SearchUntactMedicalHistoriesResponse>();
 

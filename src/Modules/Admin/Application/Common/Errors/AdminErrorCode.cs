@@ -18,5 +18,17 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Errors
         NotFoundCurrentHospital = 4004,
         [Description("비즈사이트 카카오 알림톡 서비스 신청에 실패하였습니다. 다시 시도해주세요.")]
         RequestKakaoAlimTalkServiceFailed = 4005,
+        [Description("내원목적 순번 및 노출 여부 수정에 실패하였습니다. 다시 시도해주세요.")]
+        VisitPurposeBulkUpdateFailed = 4006,
+        [Description("승인 요청에 실패하였습니다. 다시 시도해주세요.")]
+        VisitPurposeCreateFailed = 4007,
+        [Description("내원목적은 한 개 이상 노출이 필요합니다.")]
+        VisitPurposeExposureRequired = 4008,
+        [Description("내원목적 수정에 실패하였습니다.")]
+        VisitPurposeUpdateFailed = 4009,
+        [Description("내원목적 삭제에 실패하였습니다. 이미 삭제된 데이터이거나, 잘못된 데이터일 수 있습니다.")]
+        VisitPurposeDeleteFailed = 4010,
+        [Description("제증명문서 순번 및 노출 여부 수정에 실패하였습니다.")]
+        CertificateBulkUpdateFailed = 4011,
     }
 }

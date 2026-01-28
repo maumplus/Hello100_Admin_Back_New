@@ -85,4 +85,15 @@ public class TestCryptoService : ICryptoService
     {
         return Decrypt(encryptedText);
     }
+
+    /// <summary>
+    /// DES ECB PKCS7 방식으로 암호화 (기본 Encrypt 호출)
+    /// </summary>
+    /// <param name="plaintext"></param>
+    /// <returns></returns>
+    public string EncryptToBase64WithDesEcbPkcs7(string plaintext)
+    {
+        return Encrypt(plaintext);
+    }
+
 }

@@ -2,6 +2,7 @@ using System.Net;
 using System.Text.Json;
 using Hello100Admin.BuildingBlocks.Common.Errors;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Extensions;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Serialization;
 
 namespace Hello100Admin.API.Middleware;
 
@@ -49,7 +50,7 @@ public class ExceptionMiddleware
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = (int)statusCode;
         var error = new ApiResponse(code, name, message, details);
-        var json = JsonSerializer.Serialize(error);
+        var json = error.ToJson();
         await context.Response.WriteAsync(json);
     }
 }

@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 
 namespace Hello100Admin.BuildingBlocks.Common.Infrastructure.HealthChecks
 {

@@ -48,7 +48,6 @@ namespace Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Queries.
                     new("진료 상태", x => x.PtntState),
                 };
 
-                //var content = _excelExporter.ExportWithStyles(dtos, "비대면진료내역", columns);
                 var content = _excelExporter.Export(dtos, "비대면진료내역", "비대면 진료 결제 내역", columns);
                 return Result.Success(new ExcelFile(content, $"비대면진료내역_{DateTime.Now.ToString("yyyyMMdd")}.xlsx", GlobalConstant.ContentTypes.Xlsx));
             }

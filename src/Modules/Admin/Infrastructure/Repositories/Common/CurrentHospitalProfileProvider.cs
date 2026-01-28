@@ -1,7 +1,7 @@
 ﻿using Dapper;
 using Hello100Admin.BuildingBlocks.Common.Errors;
 using System.Data;
-using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Common;
 using Hello100Admin.Modules.Admin.Infrastructure.Persistence.DbModels.Common;
 using Microsoft.Extensions.Logging;

@@ -40,12 +40,12 @@
         /// <summary>
         /// 마감여부
         /// </summary>
-        public char ClosingYn { get; set; }
+        public string ClosingYn { get; set; } = default!;
 
         /// <summary>
         /// 삭제여부
         /// </summary>
-        public char DelYn { get; set; }
+        public string DelYn { get; set; } = default!;
 
         /// <summary>
         /// 설명

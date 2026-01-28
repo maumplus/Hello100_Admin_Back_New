@@ -85,4 +85,11 @@ public interface ICryptoService
     /// <param name="encryptedText">Base64 인코딩된 암호화 문자열</param>
     /// <returns>복호화된 평문</returns>
     string DecryptParameter(string encryptedText);
+
+    /// <summary>
+    /// Legacy-compatible encryption:
+    /// DES + ECB + PKCS7, output as Base64.
+    /// NOTE: DES/ECB is insecure; keep only for compatibility.
+    /// </summary>
+    public string EncryptToBase64WithDesEcbPkcs7(string plaintext);
 }
