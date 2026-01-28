@@ -1,11 +1,4 @@
-﻿using Hello100Admin.Modules.Admin.Infrastructure.Persistence.DbModels.Hospital;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Hello100Admin.Modules.Admin.Application.Features.Hospital.ReadModels
+﻿namespace Hello100Admin.Modules.Admin.Application.Features.Hospital.ReadModels
 {
     public class GetHospitalModel
     {

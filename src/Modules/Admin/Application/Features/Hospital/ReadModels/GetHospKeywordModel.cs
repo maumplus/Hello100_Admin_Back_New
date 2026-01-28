@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Hello100Admin.Modules.Admin.Infrastructure.Persistence.DbModels.Hospital
+namespace Hello100Admin.Modules.Admin.Application.Features.Hospital.ReadModels
 {
     public class GetHospKeywordModel
     {
