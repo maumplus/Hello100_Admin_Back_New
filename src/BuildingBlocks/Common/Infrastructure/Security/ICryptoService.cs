@@ -23,7 +23,12 @@ public enum CryptoKeyType
     /// <summary>
     /// 송금 전용 키 (_AES256Key_Seller)
     /// </summary>
-    Seller = 93
+    Seller = 93,
+
+    /// <summary>
+    /// 모바일 전용 키 (_AES256Key_Mobile)
+    /// </summary>
+    Mobile = 94
 }
 
 /// <summary>
