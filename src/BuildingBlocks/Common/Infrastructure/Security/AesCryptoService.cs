@@ -52,6 +52,18 @@ public class AesCryptoService : ICryptoService
             _aesKeys[CryptoKeyType.Name] = _aesKeys[CryptoKeyType.Default];
         }
 
+        // 이메일/이름 AES 키 (선택적 - 없으면 기본 키 사용)
+        var mobileKeyString = configuration["Crypto:Key:Mobile"];
+        if (!string.IsNullOrEmpty(mobileKeyString))
+        {
+            var key = ValidateAndConvertAesKey(mobileKeyString, "Mobile");
+            _aesKeys[CryptoKeyType.Mobile] = key;
+        }
+        else
+        {
+            _aesKeys[CryptoKeyType.Mobile] = _aesKeys[CryptoKeyType.Default];
+        }
+
         var sellerKeyString = configuration["Crypto:Key:Seller"];
         if (!string.IsNullOrEmpty(sellerKeyString))
         {
