@@ -1,6 +1,6 @@
 ﻿using Dapper;
 using Hello100Admin.BuildingBlocks.Common.Domain;
-using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Security;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Member;
 using Hello100Admin.Modules.Admin.Domain.Entities;

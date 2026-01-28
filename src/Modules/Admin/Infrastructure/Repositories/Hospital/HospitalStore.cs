@@ -1,5 +1,5 @@
 ﻿using Dapper;
-using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Hospital;
 using Hello100Admin.Modules.Admin.Application.Features.Hospital.ReadModels;
 using Hello100Admin.Modules.Admin.Domain.Entities;

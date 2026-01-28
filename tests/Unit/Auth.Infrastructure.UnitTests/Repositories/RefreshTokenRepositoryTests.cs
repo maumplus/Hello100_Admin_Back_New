@@ -2,7 +2,7 @@ using FluentAssertions;
 using System.Data;
 using Moq;
 using Hello100Admin.Modules.Auth.Infrastructure.Repositories;
-using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 
 namespace Hello100Admin.Modules.Auth.Infrastructure.UnitTests.Repositories;
 

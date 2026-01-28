@@ -1,6 +1,6 @@
 ﻿using Dapper;
 using System.Data;
-using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using Hello100Admin.Modules.Seller.Application.Common.Abstractions.Persistence.Seller;
@@ -8,6 +8,7 @@ using Hello100Admin.Modules.Seller.Infrastructure.Persistence.DbModels.Seller;
 using Hello100Admin.Modules.Seller.Application.Features.Seller.Commands.CreateSeller;
 using Hello100Admin.Modules.Seller.Application.Features.Seller.Commands.CreateSellerRemit;
 using Hello100Admin.Modules.Seller.Application.Features.Seller.Commands.UpdateSellerRemit;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Serialization;
 
 namespace Hello100Admin.Modules.Seller.Infrastructure.Repositories.Seller
 {
@@ -83,7 +84,7 @@ namespace Hello100Admin.Modules.Seller.Infrastructure.Repositories.Seller
                 }
                 else
                 {
-                    _logger.LogError("InsertTbHospSellerAsync: 데이터 저장 실패, Param: {Param}", JsonSerializer.Serialize(req));
+                    _logger.LogError("InsertTbHospSellerAsync: 데이터 저장 실패, Param: {Param}", req.ToJsonForStorage());
                     return -1; // NotInsertData
                 }
             }

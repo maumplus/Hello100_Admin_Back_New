@@ -1,5 +1,5 @@
 ﻿using Dapper;
-using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 using Hello100Admin.Modules.Seller.Application.Common.Abstractions.Persistence.Bank;
 using Hello100Admin.Modules.Seller.Application.Features.Bank.ReadModels.GetBankList;
 using Hello100Admin.Modules.Seller.Infrastructure.Persistence.DbModels.Bank;

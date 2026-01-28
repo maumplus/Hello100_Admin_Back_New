@@ -44,4 +44,8 @@ public enum GlobalErrorCode
     DataDeleteError = 1015,
     [Description("엑셀 조회 조건에 해당하는 데이터가 존재하지 않습니다. 조건 확인 후 다시 시도해주세요.")]
     NoDataForExcelExport = 1016,
+    [Description("요청 데이터가 비어있습니다. 확인 후 다시 시도해주세요.")]
+    EmptyRequestBody = 1017,
+    [Description("암호화 텍스트가 비어있습니다. 확인 후 다시 시도해주세요.")]
+    EmptyEncryptPlainText = 1018,
 }

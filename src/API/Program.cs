@@ -17,6 +17,7 @@ using Hello100Admin.API.Extensions;
 using Hello100Admin.Modules.Admin.Application.Features.AdminUser.Queries.GetAdminUser;
 using Hello100Admin.Modules.Admin.Application.Features.Member.Queries.GetMember;
 using Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.Login;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 
 // Dapper snake_case <-> PascalCase 자동 매핑 설정
 Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
@@ -148,7 +149,7 @@ builder.Services.AddSingleton<ICryptoService, AesCryptoService>();
 
 
 // HealthCheck용 DB 커넥션 팩토리 싱글턴 등록 (Auth DB 기준)
-builder.Services.AddSingleton<Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.IDbConnectionFactory>(
+builder.Services.AddSingleton<IDbConnectionFactory>(
     new Hello100Admin.Modules.Auth.Infrastructure.Persistence.DbConnectionFactory(
         builder.Configuration.GetConnectionString("DefaultConnection")
         ?? throw new InvalidOperationException("DefaultConnection is not configured")

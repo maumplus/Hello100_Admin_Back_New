@@ -22,4 +22,15 @@
         /// </summary>
         HospitalManager = 4
     }
+
+    /// <summary>
+    /// DB
+    /// </summary>
+    public enum DataSource
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        Hello100 = 0
+    }
 }

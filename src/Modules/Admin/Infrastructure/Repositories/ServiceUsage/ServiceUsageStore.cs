@@ -1,6 +1,6 @@
 ﻿using Dapper;
 using System.Data;
-using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.ServiceUsage;
 using Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Queries.SearchUntactMedicalHistories;
 using Microsoft.Extensions.Logging;
@@ -35,8 +35,8 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.ServiceUsage
         }
         #endregion
 
-        #region GENERAL METHOD AREA **************************************
-        public async Task<SearchUntactMedicalHistoriesReadModel?> SearchUntactMedicalHistoriesAsync(SearchUntactMedicalHistoriesQuery req, CancellationToken token)
+        #region ISERVICEUSAGESTORE IMPLEMENTS METHOD AREA **************************************
+        public async Task<SearchUntactMedicalHistoriesReadModel> SearchUntactMedicalHistoriesAsync(SearchUntactMedicalHistoriesQuery req, CancellationToken token)
         {
             try
             {
@@ -220,38 +220,33 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.ServiceUsage
                 using var connection = _connection.CreateConnection();
                 var multi = await connection.QueryMultipleAsync(sb.ToString(), parameters);
 
-                if (multi != null)
+                var result = new SearchUntactMedicalHistoriesReadModel();
+
+                var queryList = (await multi.ReadAsync<SearchUntactMedicalHistoriesRow>()).ToList();
+
+                result.TotalCount = await multi.ReadSingleAsync<int>();
+                result.TotalRsrv = await multi.ReadSingleAsync<int>();
+                result.TotalClinicEnd = await multi.ReadSingleAsync<int>();
+                result.TotalClinicFail = await multi.ReadSingleAsync<int>();
+                result.TotalClinicCancel = await multi.ReadSingleAsync<int>();
+                result.TotalSuccessAmt = await multi.ReadSingleAsync<int>();
+                result.TotalProgressAmt = await multi.ReadSingleAsync<int>();
+                result.TotalFailAmt = await multi.ReadSingleAsync<int>();
+                result.TotalSumAmt = await multi.ReadSingleAsync<int>();
+
+                result.DetailList = queryList.Adapt<List<SearchUntactMedicalHistoryItemReadModel>>();
+
+                if (result.DetailList != null && result.DetailList.Count > 0)
                 {
-                    var tempResult = new SearchUntactMedicalHistoriesRow();
+                    var startRowNum = result.TotalCount - (req.PageNo - 1) * req.PageSize;
 
-                    tempResult.DetailList = (await multi.ReadAsync<SearchUntactMedicalHistoryDetailRow>()).ToList();
-
-                    tempResult.TotalCount = await multi.ReadSingleAsync<int>();
-                    tempResult.TotalRsrv = await multi.ReadSingleAsync<int>();
-                    tempResult.TotalClinicEnd = await multi.ReadSingleAsync<int>();
-                    tempResult.TotalClinicFail = await multi.ReadSingleAsync<int>();
-                    tempResult.TotalClinicCancel = await multi.ReadSingleAsync<int>();
-                    tempResult.TotalSuccessAmt = await multi.ReadSingleAsync<int>();
-                    tempResult.TotalProgressAmt = await multi.ReadSingleAsync<int>();
-                    tempResult.TotalFailAmt = await multi.ReadSingleAsync<int>();
-                    tempResult.TotalSumAmt = await multi.ReadSingleAsync<int>();
-
-                    var result = tempResult.Adapt<SearchUntactMedicalHistoriesReadModel>();
-
-                    if (result != null && result.DetailList != null && result.DetailList.Count > 0)
+                    for (int i = 0; i < result.DetailList.Count; i++)
                     {
-                        var startRowNum = result.TotalCount - (req.PageNo - 1) * req.PageSize;
-
-                        for (int i = 0; i < result.DetailList.Count; i++)
-                        {
-                            result.DetailList[i].RowNum = startRowNum - i;
-                        }
+                        result.DetailList[i].RowNum = startRowNum - i;
                     }
-
-                    return result;
                 }
 
-                return null;
+                return result;
             }
             catch (Exception e)
             {
@@ -373,8 +368,6 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.ServiceUsage
 
                 using var connection = _connection.CreateConnection();
                 var queryResult = (await connection.QueryAsync<GetUntactMedicalHistoryForExportRow>(sb.ToString(), parameters)).ToList();
-
-                var test = sb.ToString();
 
                 var result = queryResult.Adapt<List<GetUntactMedicalHistoryForExportReadModel>>();
 

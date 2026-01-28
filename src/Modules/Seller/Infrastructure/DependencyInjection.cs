@@ -1,6 +1,6 @@
 ﻿using System.Net.Http.Headers;
 using System.Net.Mime;
-using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 using Hello100Admin.Modules.Seller.Application.Common.Abstractions.External;
 using Hello100Admin.Modules.Seller.Application.Common.Abstractions.Persistence.Bank;
 using Hello100Admin.Modules.Seller.Application.Common.Abstractions.Persistence.Seller;

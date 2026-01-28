@@ -1,9 +1,10 @@
 using FluentAssertions;
 using System.Data;
 using Dapper;
-using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 using Microsoft.Data.Sqlite;
 using Hello100Admin.Modules.Admin.Infrastructure.Repositories.Member;
+using Hello100Admin.BuildingBlocks.Common.Definition.Enums;
 
 namespace Hello100Admin.Modules.Admin.Infrastructure.UnitTests.Repositories;
 
@@ -71,5 +72,6 @@ public class MemberRepositoryInMemoryTests
         private readonly IDbConnection _conn;
         public TestDbConnectionFactory(IDbConnection conn) => _conn = conn;
         public IDbConnection CreateConnection() => _conn;
+        public IDbConnection CreateDbConnection(DataSource dbType) => _conn;
     }
 }

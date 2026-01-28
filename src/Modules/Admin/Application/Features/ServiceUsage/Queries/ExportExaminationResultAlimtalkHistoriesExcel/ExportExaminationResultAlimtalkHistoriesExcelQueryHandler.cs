@@ -89,15 +89,15 @@ namespace Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Queries.
                 if (resultList.Count > 0)
                 {
                     var columns = new List<ExcelColumn<GetExaminationResultAlimtalkHistoryForExportReadModel>>
-                {
-                    new("No", x => x.RowNum),
-                    new("환자명", x => x.PtntName),
-                    new("진단검사일자", x => x.ReqDate, Width: 12),
-                    new("결과발송일자", x => x.SendDate, Width: 18),
-                    new("발송상태", x => x.SendStatus),
-                    new("실패메세지", x => x.Message, Width: 20),
-                    new("발송방식", x => x.SendType),
-                };
+                    {
+                        new("No", x => x.RowNum),
+                        new("환자명", x => x.PtntName),
+                        new("진단검사일자", x => x.ReqDate, Width: 12),
+                        new("결과발송일자", x => x.SendDate, Width: 18),
+                        new("발송상태", x => x.SendStatus),
+                        new("실패메세지", x => x.Message, Width: 20),
+                        new("발송방식", x => x.SendType),
+                    };
 
                     var content = _excelExporter.Export(resultList, "진단검사결과 알림톡 발송 내역", "진단검사결과 알림톡 발송 내역", columns);
                     return Result.Success(new ExcelFile(content, $"진단검사결과 알림톡 발송 내역_{DateTime.Now.ToString("yyyyMMdd")}.xlsx", GlobalConstant.ContentTypes.Xlsx));

@@ -1,6 +1,4 @@
 using Microsoft.Extensions.Configuration;
-using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence;
-using Hello100Admin.Modules.Admin.Infrastructure.Persistence;
 using Hello100Admin.Modules.Admin.Infrastructure.Repositories.AdminUser;
 using Hello100Admin.Modules.Admin.Infrastructure.Repositories.Member;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.AdminUser;
@@ -16,8 +14,15 @@ using Microsoft.Extensions.DependencyInjection;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Common;
 using Hello100Admin.Modules.Admin.Infrastructure.Repositories.Common;
 using Hello100Admin.Modules.Admin.Infrastructure.External.Web.EghisHome;
+using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.VisitPurpose;
+using Hello100Admin.Modules.Admin.Infrastructure.Repositories.VisitPurpose;
+using Hello100Admin.Modules.Admin.Infrastructure.Persistence.MySql;
+using Hello100Admin.Modules.Admin.Infrastructure.Configuration.Options;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 using Hello100Admin.Modules.Admin.Infrastructure.Repositories.Hospital;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Hospital;
+using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.ApprovalRequest;
+using Hello100Admin.Modules.Admin.Infrastructure.Repositories.ApprovalRequest;
 
 namespace Hello100Admin.Modules.Admin.Infrastructure;
 
@@ -28,10 +33,10 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddAdminInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("DefaultConnection")
-            ?? throw new InvalidOperationException("DefaultConnection is not configured");
+        services.Configure<DbConnectionOptions>(configuration.GetSection("ConnectionStrings:DefaultConnection"));
 
-        services.AddScoped<IDbConnectionFactory>(provider => new DbConnectionFactory(connectionString));
+        services.AddScoped<IDbSessionRunner, DbSessionRunner>();
+        services.AddScoped<IDbConnectionFactory, MySqlConnectionFactory>();
         services.AddScoped<ICurrentHospitalProfileProvider, CurrentHospitalProfileProvider>();
         services.AddScoped<IAdminUserRepository, AdminUserRepository>();
         services.AddScoped<IAdminUserStore, AdminUserStore>();
@@ -39,6 +44,9 @@ public static class DependencyInjection
         services.AddScoped<IMemberStore, MemberStore>();
         services.AddScoped<IServiceUsageStore, ServiceUsageStore>();
         services.AddScoped<IServiceUsageRepository, ServiceUsageRepository>();
+        services.AddScoped<IVisitPurposeStore, VisitPurposeStore>();
+        services.AddScoped<IVisitPurposeRepository, VisitPurposeRepository>();
+        services.AddScoped<IApprovalRequestStore, ApprovalRequestStore>();
         services.AddScoped<IExcelExporter, ClosedXmlExcelExporter>();
         services.AddScoped<IHospitalStore, HospitalStore>();
         services.AddSingleton<IHasher, Sha256Hasher>();
