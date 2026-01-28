@@ -9,20 +9,20 @@ namespace Hello100Admin.Modules.Admin.Application.Features.Hospital.Queries.GetD
 {
     public class GetDoctorListQueryHandler : IRequestHandler<GetDoctorListQuery, Result<List<GetDoctorListResponse>>>
     {
-        private readonly IHospitalStore _hospitalRepository;
+        private readonly IHospitalStore _hospitalStore;
         private readonly ILogger<GetDoctorListQueryHandler> _logger;
 
         public GetDoctorListQueryHandler(
-        IHospitalStore hospitalRepository,
+        IHospitalStore hospitalStore,
         ILogger<GetDoctorListQueryHandler> logger)
         {
-            _hospitalRepository = hospitalRepository;
+            _hospitalStore = hospitalStore;
             _logger = logger;
         }
 
         public async Task<Result<List<GetDoctorListResponse>>> Handle(GetDoctorListQuery query, CancellationToken cancellationToken)
         {
-            var doctorList = await _hospitalRepository.GetDoctorList(query.HospNo, cancellationToken);
+            var doctorList = await _hospitalStore.GetDoctorList(query.HospNo, cancellationToken);
 
             var result = doctorList.Adapt<List<GetDoctorListResponse>>();
 
