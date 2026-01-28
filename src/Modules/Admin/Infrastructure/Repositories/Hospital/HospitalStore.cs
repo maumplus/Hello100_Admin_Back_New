@@ -318,6 +318,45 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Hospital
             }
         }
 
+        public async Task<GetHospSettingModel?> GetHospSetting(string hospKey, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                _logger.LogInformation("Getting Hosp Setting by HospKey: {HospKey}", hospKey);
+
+                var parameters = new DynamicParameters();
+                parameters.Add("@HospKey", hospKey, DbType.String);
+
+                var sql = @"
+                    SELECT a.st_id                                       AS StId,
+                           a.hosp_key                                    AS HospKey,
+                           a.wait_tm                                     AS WaitTm,
+                           a.role                                        AS Role,
+                           a.recept_end_time                             AS ReceptEndTime,
+                           a.await_role                                  AS AwaitRole,
+                           a.exampush_set                                AS ExamPushSet,
+                           b.noti_id                                     AS NoticeId,
+                           b.content                                     AS Content,
+                           FROM_UNIXTIME(a.reg_dt, '%Y-%m-%d %H:%mi:%s') AS RegDt
+                      FROM tb_eghis_hosp_settings_info a
+                      LEFT JOIN tb_notice b
+                        ON b.grade = '01' AND b.del_yn = 'N' AND b.hosp_key = a.hosp_key                              
+                     WHERE a.hosp_key = @HospKey
+                    ORDER BY a.reg_dt DESC, b.reg_dt DESC
+                    LIMIT 1;
+                ";
+
+                using var connection = CreateConnection();
+
+                return await connection.QueryFirstOrDefaultAsync<GetHospSettingModel>(sql, parameters);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting Hosp Setting by HospKey: {HospKey}", hospKey);
+                throw;
+            }
+        }
+
         public async Task<List<GetDoctorListModel>> GetDoctorList(string hospNo, CancellationToken cancellationToken = default)
         {
             try

@@ -7,9 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Hello100Admin.Modules.Admin.Application.Features.Hospital.Queries.GetHospital
+namespace Hello100Admin.Modules.Admin.Application.Features.Hospital.Queries.GetHospitalSetting
 {
-    public class GetHospitalQuery : IRequest<Result<GetHospitalResponse?>>
+    public class GetHospitalSettingQuery : IRequest<Result<GetHospitalSettingResponse?>>
     {
         public string HospNo { get; set; } = string.Empty;
     }
