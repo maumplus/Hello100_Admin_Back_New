@@ -1,9 +1,8 @@
 ﻿using Dapper;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence;
+using Hello100Admin.BuildingBlocks.Common.Definition.Enums;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Hospital;
 using Hello100Admin.Modules.Admin.Application.Features.Hospital.ReadModels;
-using Hello100Admin.Modules.Admin.Domain.Entities;
-using Hello100Admin.Modules.Admin.Infrastructure.Persistence.DbModels.Hospital;
 using Mapster;
 using Microsoft.Extensions.Logging;
 using System.Data;
@@ -32,6 +31,107 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Hospital
             return conn;
         }
 
+        public async Task<(List<GetHospitalModel>, int)> GetHospitalList(string chartType, HospitalListSearchType searchType, string keyword, int pageNo, int pageSize, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                _logger.LogInformation("Getting Hospital List by ChartType: {ChartType}, SearchType: {SearchType}, Keyword: {Keyword}, PageNo: {PageNo}, PageSize: {PageSize}", chartType, searchType, keyword, pageNo, pageSize);
+
+                var parameters = new DynamicParameters();
+                parameters.Add("@ChartType", chartType, DbType.String);
+                parameters.Add("@Keyword", keyword, DbType.String);
+                parameters.Add("@PageNo", pageNo, DbType.String);
+                parameters.Add("@PageSize", pageSize, DbType.String);
+
+                var sql = @$"
+                    SELECT COUNT(*) OVER()         AS TotalCount,
+                           a.hosp_key              AS HospKey,
+                           a.hosp_no               AS HospNo,
+                           a.business_no           AS BusinessNo,
+                           a.name                  AS Name,
+                           a.hosp_cls_cd           AS HospClsCd,
+                           a.addr                  AS Addr,
+                           a.post_cd               AS PostCd,
+                           a.tel                   AS Tel,
+                           a.site                  AS Site,
+                           a.lat                   AS Lat,
+                           a.lng                   AS Lng,
+                           a.closing_yn            AS ClosingYn,
+                           a.del_yn                AS DelYn,
+                           a.descrption            AS Descrption,
+                           a.reg_dt                AS RegDt,
+                           a.chart_type            AS ChartType,
+                           a.is_test               AS IsTest,
+                           a.md_cd                 AS MdCd,
+                           a.main_md_cd            AS MainMdCd,
+                           a.kiosk_cnt             AS KioskCnt,
+                           a.tablet_cnt            AS TabletCnt,
+                           a.request_appr_yn       AS RequestApprYn
+                      FROM ( SELECT b.hosp_key              AS hosp_key,
+                                    a.hosp_no               AS hosp_no,
+                                    a.business_no           AS business_no,
+                                    b.name                  AS name,
+                                    b.hosp_cls_cd           AS hosp_cls_cd,
+                                    b.addr                  AS addr,
+                                    b.post_cd               AS post_cd,
+                                    b.tel                   AS tel,
+                                    b.site                  AS site,
+                                    b.lat                   AS lat,
+                                    b.lng                   AS lng,
+                                    a.closing_yn            AS closing_yn,
+                                    a.del_yn                AS del_yn,
+                                    a.`desc`                AS descrption,
+                                    FROM_UNIXTIME(a.reg_dt) AS reg_dt,
+                                    a.chart_type            AS chart_type,
+                                    b.is_test               AS is_test,
+                                    ( SELECT GROUP_CONCAT(z.md_cd SEPARATOR ',')
+                                        FROM tb_hospital_medical_info z 
+                                       WHERE a.hosp_key = z.hosp_key ) AS md_cd,
+                                    ( SELECT MAX(z.md_cd)
+                                        FROM tb_hospital_medical_info z 
+                                       WHERE main_yn = 'Y'
+                                         AND a.hosp_key = z.hosp_key ) AS main_md_cd,
+                                    ( SELECT COUNT(1)
+                                        FROM tb_eghis_hosp_device_settings_info z
+                                       WHERE a.hosp_no = z.hosp_no
+                                         AND z.device_type = 1
+                                         AND z.use_yn = 'Y' ) AS kiosk_cnt,
+                                    ( SELECT COUNT(1)
+                                        FROM tb_eghis_hosp_device_settings_info z
+                                       WHERE a.hosp_no = z.hosp_no
+                                         AND z.device_type = 2
+                                         AND z.use_yn = 'Y' ) AS tablet_cnt,
+                                    ( SELECT COUNT(1)
+                                        FROM tb_eghis_hosp_approval_info z
+                                       WHERE z.appr_type = 'HI'
+                                         AND z.appr_yn = 'N'
+                                         AND a.hosp_key = z.hosp_key) AS request_appr_yn
+                               FROM tb_eghis_hosp_info a
+                              INNER JOIN tb_hospital_info b
+                                 ON a.hosp_key = b.hosp_key
+                              WHERE a.del_yn = 'N' ) a
+                     WHERE a.{searchType.ToString()} LIKE CONCAT('%', @Keyword, '%')
+                       AND a.chart_type LIKE @ChartType
+                    ORDER BY a.reg_dt DESC
+                    LIMIT @PageNo, @PageSize;
+                ";
+
+                using var connection = CreateConnection();
+
+                var hospitalList = await connection.QueryAsync(sql, parameters);
+
+                var result = hospitalList.Adapt<List<GetHospitalModel>>();
+                int totalCount = hospitalList.Count() > 0 ? (int)hospitalList.First().TotalCount : 0;
+
+                return (result, totalCount);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error Getting Hospital List by ChartType: {ChartType}, SearchType: {SearchType}, Keyword: {Keyword}, Offset: {PageNo}, Limit: {PageSize}", chartType, searchType, keyword, pageNo, pageSize);
+                throw;
+            }
+        }
+
         public async Task<GetHospitalModel?> GetHospital(string hospNo, CancellationToken cancellationToken = default)
         {
             try
@@ -42,50 +142,71 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Hospital
                 parameters.Add("@HospNo", hospNo, DbType.String);
 
                 var sql = @"
-                    SELECT b.hosp_key              AS HospKey,
+                    SELECT a.hosp_key              AS HospKey,
                            a.hosp_no               AS HospNo,
                            a.business_no           AS BusinessNo,
-                           b.name                  AS Name,
-                           b.hosp_cls_cd           AS HospClsCd,
-                           b.addr                  AS Addr,
-                           b.post_cd               AS PostCd,
-                           b.tel                   AS Tel,
-                           b.site                  AS Site,
-                           b.lat                   AS Lat,
-                           b.lng                   AS Lng,
+                           a.name                  AS Name,
+                           a.hosp_cls_cd           AS HospClsCd,
+                           a.addr                  AS Addr,
+                           a.post_cd               AS PostCd,
+                           a.tel                   AS Tel,
+                           a.site                  AS Site,
+                           a.lat                   AS Lat,
+                           a.lng                   AS Lng,
                            a.closing_yn            AS ClosingYn,
                            a.del_yn                AS DelYn,
                            a.`desc`                AS Descrption,
-                           FROM_UNIXTIME(a.reg_dt) AS RegDt,
+                           a.reg_dt                AS RegDt,
                            a.chart_type            AS ChartType,
-                           b.is_test               AS IsTest,
-                           ( SELECT GROUP_CONCAT(z.md_cd SEPARATOR ',')
-                               FROM tb_hospital_medical_info z 
-                              WHERE a.hosp_key = z.hosp_key ) AS MdCd,
-                           ( SELECT MAX(z.md_cd)
-                               FROM tb_hospital_medical_info z 
-                              WHERE main_yn = 'Y'
-                                AND a.hosp_key = z.hosp_key ) AS MainMdCd,
-                           ( SELECT COUNT(1)
-                               FROM tb_eghis_hosp_device_settings_info z
-                              WHERE a.hosp_no = z.hosp_no
-                                AND z.device_type = 1
-                                AND z.use_yn = 'Y' ) AS KioskCnt,
-                           ( SELECT COUNT(1)
-                               FROM tb_eghis_hosp_device_settings_info z
-                              WHERE a.hosp_no = z.hosp_no
-                                AND z.device_type = 2
-                                AND z.use_yn = 'Y' ) AS TabletCnt,
-                           ( SELECT COUNT(1)
-                               FROM tb_eghis_hosp_approval_info z
-                              WHERE z.appr_type = 'HI'
-                                AND z.appr_yn = 'N'
-                                AND a.hosp_key = z.hosp_key) AS RequestApprYn
-                      FROM tb_eghis_hosp_info a
-                     INNER JOIN tb_hospital_info b
-                        ON a.hosp_key = b.hosp_key
-                     WHERE a.hosp_no = @HospNo
-                       AND a.del_yn = 'N';
+                           a.is_test               AS IsTest,
+                           a.md_cd                 AS MdCd,
+                           a.main_md_cd            AS MainMdCd,
+                           a.kiosk_cnt             AS KioskCnt,
+                           a.tablet_cnt            AS TabletCnt,
+                           a.request_appr_yn       AS RequestApprYn
+                      FROM ( SELECT b.hosp_key              AS hosp_key,
+                                    a.hosp_no               AS hosp_no,
+                                    a.business_no           AS business_no,
+                                    b.name                  AS name,
+                                    b.hosp_cls_cd           AS hosp_cls_cd,
+                                    b.addr                  AS addr,
+                                    b.post_cd               AS post_cd,
+                                    b.tel                   AS tel,
+                                    b.site                  AS site,
+                                    b.lat                   AS lat,
+                                    b.lng                   AS lng,
+                                    a.closing_yn            AS closing_yn,
+                                    a.del_yn                AS del_yn,
+                                    a.`desc`                AS descrption,
+                                    FROM_UNIXTIME(a.reg_dt) AS reg_dt,
+                                    a.chart_type            AS chart_type,
+                                    b.is_test               AS is_test,
+                                    ( SELECT GROUP_CONCAT(z.md_cd SEPARATOR ',')
+                                        FROM tb_hospital_medical_info z 
+                                       WHERE a.hosp_key = z.hosp_key ) AS md_cd,
+                                    ( SELECT MAX(z.md_cd)
+                                        FROM tb_hospital_medical_info z 
+                                       WHERE main_yn = 'Y'
+                                         AND a.hosp_key = z.hosp_key ) AS main_md_cd,
+                                    ( SELECT COUNT(1)
+                                        FROM tb_eghis_hosp_device_settings_info z
+                                       WHERE a.hosp_no = z.hosp_no
+                                         AND z.device_type = 1
+                                         AND z.use_yn = 'Y' ) AS kiosk_cnt,
+                                    ( SELECT COUNT(1)
+                                        FROM tb_eghis_hosp_device_settings_info z
+                                       WHERE a.hosp_no = z.hosp_no
+                                         AND z.device_type = 2
+                                         AND z.use_yn = 'Y' ) AS tablet_cnt,
+                                    ( SELECT COUNT(1)
+                                        FROM tb_eghis_hosp_approval_info z
+                                       WHERE z.appr_type = 'HI'
+                                         AND z.appr_yn = 'N'
+                                         AND a.hosp_key = z.hosp_key) AS request_appr_yn
+                               FROM tb_eghis_hosp_info a
+                              INNER JOIN tb_hospital_info b
+                                 ON a.hosp_key = b.hosp_key
+                              WHERE a.del_yn = 'N' ) a
                 ";
 
                 using var connection = CreateConnection();
