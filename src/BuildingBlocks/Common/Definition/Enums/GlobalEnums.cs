@@ -33,4 +33,19 @@
         /// </summary>
         Hello100 = 0
     }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public enum HospitalListSearchType
+    {
+        /// <summary>
+        /// 1: 병원명 검색
+        /// </summary>
+        name = 0,
+        /// <summary>
+        /// 2: 요양기관번호 검색
+        /// </summary>
+        hosp_no = 1
+    }
 }

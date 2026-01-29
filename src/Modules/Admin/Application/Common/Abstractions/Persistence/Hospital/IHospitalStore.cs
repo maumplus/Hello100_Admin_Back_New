@@ -1,9 +1,11 @@
-﻿using Hello100Admin.Modules.Admin.Application.Features.Hospital.ReadModels;
+﻿using Hello100Admin.BuildingBlocks.Common.Definition.Enums;
+using Hello100Admin.Modules.Admin.Application.Features.Hospital.ReadModels;
 
 namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Hospital
 {
     public interface IHospitalStore
     {
+        Task<(List<GetHospitalModel>, int)> GetHospitalList(string chartType, HospitalListSearchType searchType, string keyword, int pageNo, int pageSize, CancellationToken cancellationToken = default);
         Task<GetHospitalModel?> GetHospital(string hospNo, CancellationToken cancellationToken = default);
         Task<List<GetHospMedicalTimeModel>> GetHospMedicalTimeList(string hospKey, CancellationToken cancellationToken = default);
         Task<List<GetHospKeywordModel>> GetHospKeywordList(string hospKey, CancellationToken cancellationToken = default);

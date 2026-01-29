@@ -6,6 +6,7 @@ using Hello100Admin.Modules.Admin.Application.Features.Hospital.Responses;
 using Hello100Admin.Modules.Admin.Application.Features.Hospital.Queries.GetDoctorList;
 using Hello100Admin.Modules.Admin.Application.Features.Hospital.Queries.GetHospital;
 using Hello100Admin.Modules.Admin.Application.Features.Hospital.Queries.GetHospitalSetting;
+using Hello100Admin.Modules.Admin.Application.Features.Hospital.Queries.GetHospitalList;
 
 namespace Hello100Admin.API.Controllers
 {
@@ -23,6 +24,37 @@ namespace Hello100Admin.API.Controllers
         {
             _mediator = mediator;
             _logger = logger;
+        }
+
+        /// <summary>
+        /// [병원정보관리 > 병원정보관리]병원 목록 API
+        /// </summary>
+        [HttpGet("/api/admin/hospitals")]
+        [ProducesResponseType(typeof(GetHospitalResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetHospitalList(CancellationToken cancellationToken = default)
+        {
+            /*var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
+            {
+                return Unauthorized();
+            }*/
+
+            _logger.LogInformation("GET /api/admin/hospitals");
+
+            var query = new GetHospitalListQuery()
+            {
+                ChartType = "%",
+                SearchType = 0,
+                Keyword = "",
+                PageNo = 0,
+                PageSize = 100
+            };
+
+            var result = await _mediator.Send(query, cancellationToken);
+
+            // 중앙화된 매퍼로 Result -> IActionResult 변환
+            return result.ToActionResult(this);
         }
 
         /// <summary>
@@ -52,7 +84,7 @@ namespace Hello100Admin.API.Controllers
         }
 
         /// <summary>
-        /// [병원정보관리 > 병원정보관리]병원정보 API
+        /// [병원정보관리 > Hello100 설정]Hello100 설정정보 API
         /// </summary>
         [HttpGet("/api/admin/hospital/setting")]
         [ProducesResponseType(typeof(GetHospitalResponse), StatusCodes.Status200OK)]
