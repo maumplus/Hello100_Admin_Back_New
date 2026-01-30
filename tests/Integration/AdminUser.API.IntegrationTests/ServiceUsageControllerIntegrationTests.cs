@@ -30,7 +30,7 @@ namespace AdminUser.API.IntegrationTests
             _client.AsSuperAdmin("B81AFBD0", "대민테스트");
 
             // Act
-            var response = await _client.PostAsJsonAsync($"/api/serviceusage/untact-medical/search", req);
+            var response = await _client.PostAsJsonAsync($"/api/service-usage/untact-medical/search", req);
 
             // Body
             var body = await response.Content.ReadAsStringAsync();
@@ -52,7 +52,7 @@ namespace AdminUser.API.IntegrationTests
             _client.AsSuperAdmin("B81AFBD0", "대민테스트");
 
             // Act
-            var response = await _client.GetAsync($"/api/serviceusage/untact-medical/payments/{paymentId}");
+            var response = await _client.GetAsync($"/api/service-usage/untact-medical/payments/{paymentId}");
 
             // Body
             var body = await response.Content.ReadAsStringAsync();
@@ -73,7 +73,7 @@ namespace AdminUser.API.IntegrationTests
             _client.AsSuperAdmin("B81AFBD0", "대민테스트");
 
             // Act
-            var response = await _client.PostAsJsonAsync($"/api/serviceusage/untact-medical/export/excel", req);
+            var response = await _client.PostAsJsonAsync($"/api/service-usage/untact-medical/export/excel", req);
 
             // Body
             var body = await response.Content.ReadAsStringAsync();
@@ -104,7 +104,7 @@ namespace AdminUser.API.IntegrationTests
             _client.AsSuperAdmin("B81AFBD0", "대민테스트");
 
             // Act
-            var response = await _client.PostAsJsonAsync($"/api/serviceusage/examination-results/alimtalk/histories/search", req);
+            var response = await _client.PostAsJsonAsync($"/api/service-usage/examination-results/alimtalk/histories/search", req);
 
             // Body
             var body = await response.Content.ReadAsStringAsync();
@@ -130,7 +130,7 @@ namespace AdminUser.API.IntegrationTests
             _client.AsSuperAdmin("B81AFBD0", "대민테스트");
 
             // Act
-            var response = await _client.PostAsJsonAsync($"/api/serviceusage/examination-results/alimtalk/histories/export/excel", req);
+            var response = await _client.PostAsJsonAsync($"/api/service-usage/examination-results/alimtalk/histories/export/excel", req);
 
             // Body
             var body = await response.Content.ReadAsStringAsync();
@@ -148,7 +148,7 @@ namespace AdminUser.API.IntegrationTests
             _client.AsSuperAdmin("B81AFBD0", "대민테스트");
 
             // Act
-            var response = await _client.GetAsync($"/api/serviceusage/alimtalk-service/registration/application-info");
+            var response = await _client.GetAsync($"/api/service-usage/alimtalk-service/registration/application-info");
 
             // Body
             var body = await response.Content.ReadAsStringAsync();
@@ -163,7 +163,7 @@ namespace AdminUser.API.IntegrationTests
             _client.AsSuperAdmin("B81AFBD0", "대민테스트");
 
             // Act
-            var response = await _client.GetAsync($"/api/serviceusage/alimtalk-service/examination-results/application-info");
+            var response = await _client.GetAsync($"/api/service-usage/alimtalk-service/examination-results/application-info");
 
             // Body
             var body = await response.Content.ReadAsStringAsync();

@@ -26,6 +26,7 @@ namespace Hello100Admin.API.Controllers
     /// 내원목적관리 API
     /// </summary>
     [Auth]
+    [Route("api/visit-purpose")]
     public class VisitPurposeController : BaseController
     {
         private readonly ILogger<VisitPurposeController> _logger;
@@ -44,7 +45,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse<GetVisitPurposesResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetVisitPurposes(CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("GET /api/visitpurpose/visit-purposes [{AId}]", AId);
+            _logger.LogInformation("GET /api/visit-purpose/visit-purposes [{AId}]", AId);
             
             var result = await _mediator.Send(new GetVisitPurposesQuery(base.HospKey), cancellationToken);
 
@@ -58,7 +59,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse<GetVisitPurposeDetailResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetVisitPurposeDetail(string vpCd, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("GET /api/visitpurpose/visit-purposes/{vpCd} [{AId}]", vpCd, AId);
+            _logger.LogInformation("GET /api/visit-purpose/visit-purposes/{vpCd} [{AId}]", vpCd, AId);
             
             var result = await _mediator.Send(new GetVisitPurposeDetailQuery(vpCd, base.HospKey, base.HospNo), cancellationToken);
 
@@ -72,7 +73,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse<GetVisitPurposesResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> BulkUpdateVisitPurposes(List<BulkUpdateVisitPurposesRequest> req, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("PUT /api/visitpurpose/visit-purposes/bulk [{AId}]", AId);
+            _logger.LogInformation("PUT /api/visit-purpose/visit-purposes/bulk [{AId}]", AId);
 
             if (req != null && req.Count <= 0)
                 return Result.Success(GlobalErrorCode.EmptyRequestBody.ToError()).ToActionResult(this);
@@ -97,7 +98,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> CreateVisitPurpose(CreateVisitPurposeRequest req, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("POST /api/visitpurpose/visit-purposes/add [{AId}]", AId);
+            _logger.LogInformation("POST /api/visit-purpose/visit-purposes/add [{AId}]", AId);
 
             var command = req.Adapt<CreateVisitPurposeCommand>() with
             {
@@ -124,7 +125,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> UpdateVisitPurposeForNhisHealthScreening(UpdateVisitPurposeForNhisHealthScreeningRequest req, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("PUT /api/visitpurpose/visit-purposes/nhis-health-screening [{AId}]", AId);
+            _logger.LogInformation("PUT /api/visit-purpose/visit-purposes/nhis-health-screening [{AId}]", AId);
 
             var command = req.Adapt<UpdateVisitPurposeForNhisHealthScreeningCommand>() with
             {
@@ -148,7 +149,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> UpdateVisitPurposeForNonNhisHealthScreening(UpdateVisitPurposeForNonNhisHealthScreeningRequest req, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("PUT /api/visitpurpose/visit-purposes/non-nhis-health-screening [{AId}]", AId);
+            _logger.LogInformation("PUT /api/visit-purpose/visit-purposes/non-nhis-health-screening [{AId}]", AId);
 
             // Request 체크 필요
             var command = req.Adapt<UpdateVisitPurposeForNonNhisHealthScreeningCommand>() with
@@ -179,7 +180,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> DeleteVisitPurpose(string vpCd, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("PATCH /api/visitpurpose/visit-purposes/{vpCd} [{AId}]", vpCd, AId);
+            _logger.LogInformation("PATCH /api/visit-purpose/visit-purposes/{vpCd} [{AId}]", vpCd, AId);
 
             var command = new DeleteVisitPurposeCommand()
             {
@@ -199,7 +200,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse<GetCertificatesResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetCertificates(CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("GET /api/visitpurpose/certificates [{AId}]", AId);
+            _logger.LogInformation("GET /api/visit-purpose/certificates [{AId}]", AId);
             
             var result = await _mediator.Send(new GetCertificatesQuery(base.HospKey), cancellationToken);
 
@@ -213,7 +214,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse<GetVisitPurposesResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> BulkUpdateCertificates(List<BulkUpdateCertificatesRequest> req, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("PUT /api/visitpurpose/certificates/bulk [{AId}]", AId);
+            _logger.LogInformation("PUT /api/visit-purpose/certificates/bulk [{AId}]", AId);
 
             if (req != null && req.Count <= 0)
                 return Result.Success(GlobalErrorCode.EmptyRequestBody.ToError()).ToActionResult(this);

@@ -13,6 +13,7 @@ namespace Hello100Admin.API.Controllers
     /// <summary>
     /// 병원정보관리 API Controller
     /// </summary>
+    [Route("api/hospital-info")]
     public class HospitalInfoController : BaseController
     {
         private readonly IMediator _mediator;
@@ -29,7 +30,7 @@ namespace Hello100Admin.API.Controllers
         /// <summary>
         /// [병원정보관리 > 병원정보관리]병원 목록 API
         /// </summary>
-        [HttpGet("/api/admin/hospitals")]
+        [HttpGet("/api/hospital-info/hospitals")]
         [ProducesResponseType(typeof(GetHospitalResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetHospitalList(CancellationToken cancellationToken = default)
@@ -40,7 +41,7 @@ namespace Hello100Admin.API.Controllers
                 return Unauthorized();
             }*/
 
-            _logger.LogInformation("GET /api/admin/hospitals");
+            _logger.LogInformation("GET /api/hospital-info/hospitals");
 
             var query = new GetHospitalListQuery()
             {
@@ -60,7 +61,7 @@ namespace Hello100Admin.API.Controllers
         /// <summary>
         /// [병원정보관리 > 병원정보관리]병원정보 API
         /// </summary>
-        [HttpGet("/api/admin/hospital")]
+        [HttpGet("/api/hospital-info/hospital")]
         [ProducesResponseType(typeof(GetHospitalResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetHospital(CancellationToken cancellationToken = default)
@@ -71,7 +72,7 @@ namespace Hello100Admin.API.Controllers
                 return Unauthorized();
             }*/
 
-            _logger.LogInformation("GET /api/admin/hospital");
+            _logger.LogInformation("GET /api/hospital-info/hospital");
 
             var query = new GetHospitalQuery()
             {
@@ -86,7 +87,7 @@ namespace Hello100Admin.API.Controllers
         /// <summary>
         /// [병원정보관리 > Hello100 설정]Hello100 설정정보 API
         /// </summary>
-        [HttpGet("/api/admin/hospital/setting")]
+        [HttpGet("/api/hospital-info/hospital/setting")]
         [ProducesResponseType(typeof(GetHospitalResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetHospitalSetting(CancellationToken cancellationToken = default)
@@ -97,7 +98,7 @@ namespace Hello100Admin.API.Controllers
                 return Unauthorized();
             }*/
 
-            _logger.LogInformation("GET /api/admin/hospital/setting");
+            _logger.LogInformation("GET /api/hospital-info/hospital/setting");
 
             var query = new GetHospitalSettingQuery()
             {
@@ -112,7 +113,7 @@ namespace Hello100Admin.API.Controllers
         /// <summary>
         /// [병원정보관리 > 의료진관리]의료진 목록 API
         /// </summary>
-        [HttpGet("/api/admin/doctors")]
+        [HttpGet("/api/hospital-info/doctors")]
         [ProducesResponseType(typeof(List<GetDoctorListResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetDoctorList(CancellationToken cancellationToken = default)
@@ -123,7 +124,7 @@ namespace Hello100Admin.API.Controllers
                 return Unauthorized();
             }*/
 
-            _logger.LogInformation("GET /api/admin/doctors");
+            _logger.LogInformation("GET /api/hospital-info/doctors");
 
             var query = new GetDoctorListQuery()
             {

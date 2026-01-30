@@ -12,6 +12,7 @@ namespace Hello100Admin.API.Controllers
     /// 
     /// </summary>
     [Auth]
+    [Route("api/bank")]
     public class BankController : BaseController
     {
         private readonly IMediator _mediator;

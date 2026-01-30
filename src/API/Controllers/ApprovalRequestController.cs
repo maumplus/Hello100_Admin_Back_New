@@ -13,6 +13,7 @@ namespace Hello100Admin.API.Controllers
     /// 승인 요청 관리 API Controller
     /// </summary>
     [Auth]
+    [Route("api/approval-request")]
     public class ApprovalRequestController : BaseController
     {
         private readonly ILogger<ApprovalRequestController> _logger;
@@ -31,7 +32,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse<GetUntactMedicalRequestsForApprovalResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetUntactMedicalRequestsForApproval(int pageNo, int pageSize, string apprYn, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("GET /api/approvalrequest/untact-medical-requests [{AId}]", AId);
+            _logger.LogInformation("GET /api/approval-request/untact-medical-requests [{AId}]", AId);
 
             var query = new GetUntactMedicalRequestsForApprovalQuery
             {
@@ -53,7 +54,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse<GetUntactMedicalRequestDetailForApprovalResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetUntactMedicalRequestDetailForApproval(int seq, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("GET /api/approvalrequest/untact-medical-requests/{seq} [{AId}]", seq, AId);
+            _logger.LogInformation("GET /api/approval-request/untact-medical-requests/{seq} [{AId}]", seq, AId);
 
             var result = await _mediator.Send(new GetUntactMedicalRequestDetailForApprovalQuery(seq), cancellationToken);
 

@@ -30,6 +30,7 @@ namespace Hello100Admin.API.Controllers
     /// 송금 API Controller
     /// </summary>
     [Auth]
+    [Route("api/seller")]
     public class SellerController : BaseController
     {
         private readonly IMediator _mediator;

@@ -25,6 +25,7 @@ using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Ap
 using Hello100Admin.Modules.Admin.Infrastructure.Repositories.ApprovalRequest;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence;
 using Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalStatistics;
+using Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalUser;
 
 namespace Hello100Admin.Modules.Admin.Infrastructure;
 
@@ -50,6 +51,7 @@ public static class DependencyInjection
         services.AddScoped<IVisitPurposeRepository, VisitPurposeRepository>();
         services.AddScoped<IApprovalRequestStore, ApprovalRequestStore>();
         services.AddScoped<IHospitalStatisticsStore, HospitalStatisticsStore>();
+        services.AddScoped<IHospitalUserStore, HospitalUserStore>();
         services.AddScoped<IExcelExporter, ClosedXmlExcelExporter>();
         services.AddScoped<IHospitalStore, HospitalStore>();
         services.AddSingleton<IHasher, Sha256Hasher>();

@@ -24,7 +24,7 @@ namespace AdminUser.API.IntegrationTests
 
             _client.AsSuperAdmin("B81AFBD0", "대민테스트");
 
-            var response = await _client.GetAsync($"/api/approvalrequest/untact-medical-requests?PageNo=1&PageSize=10&ApprYn=Y");
+            var response = await _client.GetAsync($"/api/approval-request/untact-medical-requests?PageNo=1&PageSize=10&ApprYn=Y");
             var body = await response.Content.ReadAsStringAsync();
 
             Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
@@ -37,7 +37,7 @@ namespace AdminUser.API.IntegrationTests
             _client.AsSuperAdmin("B81AFBD0", "대민테스트");
 
             // Act
-            var response = await _client.GetAsync($"/api/approvalrequest/untact-medical-requests/34");
+            var response = await _client.GetAsync($"/api/approval-request/untact-medical-requests/34");
 
             // Body
             var body = await response.Content.ReadAsStringAsync();
