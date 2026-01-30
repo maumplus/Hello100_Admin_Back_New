@@ -48,4 +48,6 @@ public enum GlobalErrorCode
     EmptyRequestBody = 1017,
     [Description("암호화 텍스트가 비어있습니다. 확인 후 다시 시도해주세요.")]
     EmptyEncryptPlainText = 1018,
+    [Description("요청에 유효하지 않거나 지원되지 않는 파라미터 값이 포함되어 있습니다. 확인 후 다시 시도해주세요.")]
+    InvalidInputParameter = 1019,
 }

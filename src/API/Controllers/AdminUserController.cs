@@ -16,6 +16,7 @@ namespace Hello100Admin.API.Controllers;
 /// 고객 관리 API Controller
 /// </summary>
 [Auth]
+[Route("api/admin-user")]
 public class AdminUserController : BaseController
 {
     private readonly IMediator _mediator;
@@ -40,7 +41,7 @@ public class AdminUserController : BaseController
         [FromQuery] bool includeDeleted = false,
         CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("GET /api/adminuser - Page: {Page}, PageSize: {PageSize}", page, pageSize);
+        _logger.LogInformation("GET /api/admin-user - Page: {Page}, PageSize: {PageSize}", page, pageSize);
 
         var query = new GetAdminUserQuery(page, pageSize, includeDeleted);
         var result = await _mediator.Send(query, cancellationToken);
@@ -63,7 +64,7 @@ public class AdminUserController : BaseController
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> UpdatePassword(UpdatePasswordRequest req, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("PATCH /api/adminuser/update-password [{AId}]", AId);
+        _logger.LogInformation("PATCH /api/admin-user/update-password [{AId}]", AId);
 
         var command = req.Adapt<UpdatePasswordCommand>() with { AId = base.AId };
 

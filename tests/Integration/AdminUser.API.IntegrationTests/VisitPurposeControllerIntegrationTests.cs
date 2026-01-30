@@ -20,7 +20,7 @@ namespace AdminUser.API.IntegrationTests
             _client.AsMySuperAdmin("B81AFBD0", "대민테스트");
 
             // Act
-            var response = await _client.GetAsync($"/api/visitpurpose/visit-purposes");
+            var response = await _client.GetAsync($"/api/visit-purpose/visit-purposes");
 
             // Body
             var body = await response.Content.ReadAsStringAsync();
@@ -36,7 +36,7 @@ namespace AdminUser.API.IntegrationTests
             _client.AsMySuperAdmin("B81AFBD0", "대민테스트");
 
             // Act
-            var response = await _client.GetAsync($"/api/visitpurpose/visit-purposes/01");
+            var response = await _client.GetAsync($"/api/visit-purpose/visit-purposes/01");
 
             // Body
             var body = await response.Content.ReadAsStringAsync();
@@ -61,7 +61,7 @@ namespace AdminUser.API.IntegrationTests
             _client.AsMySuperAdmin("B81AFBD0", "대민테스트");
 
             // Act
-            var response = await _client.PutAsJsonAsync($"/api/visitpurpose/visit-purposes/bulk", req);
+            var response = await _client.PutAsJsonAsync($"/api/visit-purpose/visit-purposes/bulk", req);
 
             // Body
             var body = await response.Content.ReadAsStringAsync();
@@ -88,7 +88,7 @@ namespace AdminUser.API.IntegrationTests
 
             _client.AsMySuperAdmin("B81AFBD0", "대민테스트");
 
-            var response = await _client.PostAsJsonAsync($"/api/visitpurpose/visit-purposes/add", req);
+            var response = await _client.PostAsJsonAsync($"/api/visit-purpose/visit-purposes/add", req);
             var body = await response.Content.ReadAsStringAsync();
             
             Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
@@ -110,7 +110,7 @@ namespace AdminUser.API.IntegrationTests
             _client.AsMySuperAdmin("B81AFBD0", "대민테스트");
 
             // Act
-            var response = await _client.PutAsJsonAsync($"/api/visitpurpose/visit-purposes/nhis-health-screening", req);
+            var response = await _client.PutAsJsonAsync($"/api/visit-purpose/visit-purposes/nhis-health-screening", req);
 
             // Body
             var body = await response.Content.ReadAsStringAsync();
@@ -157,7 +157,7 @@ namespace AdminUser.API.IntegrationTests
             _client.AsMySuperAdmin("B81AFBD0", "대민테스트");
 
             // Act
-            var response = await _client.PutAsJsonAsync($"/api/visitpurpose/visit-purposes/non-nhis-health-screening", req);
+            var response = await _client.PutAsJsonAsync($"/api/visit-purpose/visit-purposes/non-nhis-health-screening", req);
 
             // Body
             var body = await response.Content.ReadAsStringAsync();
@@ -173,7 +173,7 @@ namespace AdminUser.API.IntegrationTests
             _client.AsMySuperAdmin("B81AFBD0", "대민테스트");
 
             // Act
-            var response = await _client.PatchAsJsonAsync($"/api/visitpurpose/visit-purposes/06", "06");
+            var response = await _client.PatchAsJsonAsync($"/api/visit-purpose/visit-purposes/06", "06");
 
             // Body
             var body = await response.Content.ReadAsStringAsync();
@@ -189,7 +189,7 @@ namespace AdminUser.API.IntegrationTests
             _client.AsMySuperAdmin("B81AFBD0", "대민테스트");
 
             // Act
-            var response = await _client.GetAsync($"/api/visitpurpose/certificates");
+            var response = await _client.GetAsync($"/api/visit-purpose/certificates");
 
             // Body
             var body = await response.Content.ReadAsStringAsync();
@@ -211,7 +211,7 @@ namespace AdminUser.API.IntegrationTests
 
             _client.AsMySuperAdmin("B81AFBD0", "대민테스트");
 
-            var response = await _client.PutAsJsonAsync($"/api/visitpurpose/certificates/bulk", req);
+            var response = await _client.PutAsJsonAsync($"/api/visit-purpose/certificates/bulk", req);
             var body = await response.Content.ReadAsStringAsync();
 
             Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);

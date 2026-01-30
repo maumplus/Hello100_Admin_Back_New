@@ -17,7 +17,7 @@ namespace AdminUser.API.IntegrationTests
         {
             _client.AsSuperAdmin("B81AFBD0", "대민테스트");
 
-            var response = await _client.GetAsync($"/api/hospitalstatistics/me/patient-statistics/registrations/by-method/2025");
+            var response = await _client.GetAsync($"/api/hospital-statistics/me/patient-statistics/registrations/by-method/2025");
             var body = await response.Content.ReadAsStringAsync();
 
             Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
@@ -30,7 +30,7 @@ namespace AdminUser.API.IntegrationTests
             _client.AsSuperAdmin("B81AFBD0", "대민테스트");
 
             // Act
-            var response = await _client.GetAsync($"/api/hospitalstatistics/me/patient-statistics/registrations/status-summary/2025");
+            var response = await _client.GetAsync($"/api/hospital-statistics/me/patient-statistics/registrations/status-summary/2025");
 
             // Body
             var body = await response.Content.ReadAsStringAsync();
@@ -46,7 +46,7 @@ namespace AdminUser.API.IntegrationTests
             _client.AsSuperAdmin("B81AFBD0", "대민테스트");
 
             // Act
-            var response = await _client.GetAsync($"/api/hospitalstatistics/me/patient-statistics/registrations/by-visit-purpose/2025");
+            var response = await _client.GetAsync($"/api/hospital-statistics/me/patient-statistics/registrations/by-visit-purpose/2025");
 
             // Body
             var body = await response.Content.ReadAsStringAsync();

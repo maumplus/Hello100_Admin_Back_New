@@ -82,8 +82,6 @@ namespace Hello100Admin.API.Infrastructure
                 this.SetCutomAuthErrorContext(context.HttpContext, GlobalErrorCode.InvalidAccessToken.ToError());
                 return;
             }
-
-            await Task.CompletedTask;
         }
 
         /// <summary>

@@ -26,7 +26,7 @@ namespace AdminUser.API.IntegrationTests
             _client.AsSuperAdmin("B81AFBD0", "대민테스트");
 
             // Act
-            var response = await _client.PatchAsJsonAsync($"/api/adminuser/update-password", req);
+            var response = await _client.PatchAsJsonAsync($"/api/admin-user/update-password", req);
 
             // Body
             var body = await response.Content.ReadAsStringAsync();

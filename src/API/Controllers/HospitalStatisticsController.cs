@@ -12,6 +12,7 @@ namespace Hello100Admin.API.Controllers
     /// 통계 관리 API
     /// </summary>
     [Auth]
+    [Route("api/hospital-statistics")]
     public class HospitalStatisticsController : BaseController
     {
         private readonly ILogger<HospitalStatisticsController> _logger;
@@ -31,7 +32,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse<GetRegistrationStatsByMethodResult>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetRegistrationStatsByMethod(string year, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("GET /api/hospitalstatistics/me/patient-statistics/registrations/by-method/{year} [{AId}]", year, AId);
+            _logger.LogInformation("GET /api/hospital-statistics/me/patient-statistics/registrations/by-method/{year} [{AId}]", year, AId);
             
             var result = await _mediator.Send(new GetRegistrationStatsByMethodQuery(base.HospNo, year), cancellationToken);
 
@@ -45,7 +46,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse<GetRegistrationStatusSummaryResult>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetRegistrationStatusSummary(string year, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("GET /api/hospitalstatistics/me/patient-statistics/registrations/status-summary/{year} [{AId}]", year, AId);
+            _logger.LogInformation("GET /api/hospital-statistics/me/patient-statistics/registrations/status-summary/{year} [{AId}]", year, AId);
 
             var result = await _mediator.Send(new GetRegistrationStatusSummaryQuery(base.HospNo, year), cancellationToken);
 
@@ -59,7 +60,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse<GetRegistrationStatsByVisitPurposeResult>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetRegistrationStatsByVisitPurpose(string yearMonth, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("GET /api/hospitalstatistics/me/patient-statistics/registrations/by-visit-purpose/{yearMonth} [{AId}]", yearMonth, AId);
+            _logger.LogInformation("GET /api/hospital-statistics/me/patient-statistics/registrations/by-visit-purpose/{yearMonth} [{AId}]", yearMonth, AId);
 
             var result = await _mediator.Send(new GetRegistrationStatsByVisitPurposeQuery(base.HospNo, yearMonth), cancellationToken);
 
