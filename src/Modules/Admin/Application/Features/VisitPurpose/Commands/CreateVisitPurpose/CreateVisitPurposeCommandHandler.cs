@@ -59,7 +59,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.VisitPurpose.Commands
 
                 // 이지스병원내원목적정보 테이블에 저장
                 await _visitPurposeRepository.CreateVisitPurposeAsync(session, req, createdApprId, ct);
-            });
+            }, ct);
 
             // 현재 운영에서 정상 동작하지 않는 것으로 확인되어 해당 내용 삭제
             // "hello desk update perpose" 라는 PUSH 알림 전송하는 기능

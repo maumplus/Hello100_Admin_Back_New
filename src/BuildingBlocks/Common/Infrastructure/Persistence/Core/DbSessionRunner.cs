@@ -25,8 +25,8 @@ namespace Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core
         /// <param name="dbType"></param>
         /// <param name="action"></param>
         /// <returns></returns>
-        public Task RunAsync(DataSource dbType, Func<DbSession, Task> action)
-            => RunInternalAsync(dbType, action, useTransaction: false);
+        public Task RunAsync(DataSource dbType, Func<DbSession, Task> action, CancellationToken ct)
+            => RunInternalAsync(dbType, action, useTransaction: false, ct);
 
         /// <summary>
         /// 
@@ -34,8 +34,8 @@ namespace Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core
         /// <param name="dbType"></param>
         /// <param name="action"></param>
         /// <returns></returns>
-        public Task RunInTransactionAsync(DataSource dbType, Func<DbSession, Task> action)
-            => RunInternalAsync(dbType, action, useTransaction: true);
+        public Task RunInTransactionAsync(DataSource dbType, Func<DbSession, Task> action, CancellationToken ct)
+            => RunInternalAsync(dbType, action, useTransaction: true, ct);
 
         /// <summary>
         /// 
@@ -44,7 +44,7 @@ namespace Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core
         /// <param name="action"></param>
         /// <param name="useTransaction"></param>
         /// <returns></returns>
-        private async Task RunInternalAsync(DataSource dbType, Func<DbSession, Task> action, bool useTransaction)
+        private async Task RunInternalAsync(DataSource dbType, Func<DbSession, Task> action, bool useTransaction, CancellationToken ct)
         {
             await using var conn = (DbConnection)_connFactory.CreateDbConnection(dbType);
             await conn.OpenAsync();

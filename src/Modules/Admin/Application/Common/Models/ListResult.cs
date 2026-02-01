@@ -2,7 +2,7 @@
 {
     public sealed class ListResult<T>
     {
-        public int TotalCount { get; init; }
-        public IList<T> Items { get; init; } = [];
+        public int TotalCount { get; set; }
+        public IList<T> Items { get; set; } = [];
     }
 }
