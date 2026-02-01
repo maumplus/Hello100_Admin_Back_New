@@ -63,9 +63,9 @@ public class AdminUserController : BaseController
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> UpdatePassword(UpdatePasswordRequest req, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("PATCH /api/adminuser/update-password [{AId}]", AId);
+        _logger.LogInformation("PATCH /api/adminuser/update-password [{Aid}]", Aid);
 
-        var command = req.Adapt<UpdatePasswordCommand>() with { AId = base.AId };
+        var command = req.Adapt<UpdatePasswordCommand>() with { Aid = base.Aid };
 
         var result = await _mediator.Send(command, cancellationToken);
 

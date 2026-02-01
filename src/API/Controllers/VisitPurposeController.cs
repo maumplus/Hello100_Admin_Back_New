@@ -44,7 +44,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse<GetVisitPurposesResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetVisitPurposes(CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("GET /api/visitpurpose/visit-purposes [{AId}]", AId);
+            _logger.LogInformation("GET /api/visitpurpose/visit-purposes [{Aid}]", Aid);
             
             var result = await _mediator.Send(new GetVisitPurposesQuery(base.HospKey), cancellationToken);
 
@@ -58,7 +58,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse<GetVisitPurposeDetailResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetVisitPurposeDetail(string vpCd, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("GET /api/visitpurpose/visit-purposes/{vpCd} [{AId}]", vpCd, AId);
+            _logger.LogInformation("GET /api/visitpurpose/visit-purposes/{vpCd} [{Aid}]", vpCd, Aid);
             
             var result = await _mediator.Send(new GetVisitPurposeDetailQuery(vpCd, base.HospKey, base.HospNo), cancellationToken);
 
@@ -72,7 +72,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse<GetVisitPurposesResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> BulkUpdateVisitPurposes(List<BulkUpdateVisitPurposesRequest> req, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("PUT /api/visitpurpose/visit-purposes/bulk [{AId}]", AId);
+            _logger.LogInformation("PUT /api/visitpurpose/visit-purposes/bulk [{Aid}]", Aid);
 
             if (req != null && req.Count <= 0)
                 return Result.Success(GlobalErrorCode.EmptyRequestBody.ToError()).ToActionResult(this);
@@ -97,12 +97,12 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> CreateVisitPurpose(CreateVisitPurposeRequest req, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("POST /api/visitpurpose/visit-purposes/add [{AId}]", AId);
+            _logger.LogInformation("POST /api/visitpurpose/visit-purposes/add [{Aid}]", Aid);
 
             var command = req.Adapt<CreateVisitPurposeCommand>() with
             {
                 HospNo = base.HospNo,
-                AId = base.AId,
+                AId = base.Aid,
                 HospKey = base.HospKey,
                 InpuiryUrl = "https://paper.hello100.kr/papercheck/index/",
                 InpuiryIdx = req.InquiryIdx,
@@ -124,7 +124,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> UpdateVisitPurposeForNhisHealthScreening(UpdateVisitPurposeForNhisHealthScreeningRequest req, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("PUT /api/visitpurpose/visit-purposes/nhis-health-screening [{AId}]", AId);
+            _logger.LogInformation("PUT /api/visitpurpose/visit-purposes/nhis-health-screening [{Aid}]", Aid);
 
             var command = req.Adapt<UpdateVisitPurposeForNhisHealthScreeningCommand>() with
             {
@@ -148,13 +148,13 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> UpdateVisitPurposeForNonNhisHealthScreening(UpdateVisitPurposeForNonNhisHealthScreeningRequest req, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("PUT /api/visitpurpose/visit-purposes/non-nhis-health-screening [{AId}]", AId);
+            _logger.LogInformation("PUT /api/visitpurpose/visit-purposes/non-nhis-health-screening [{Aid}]", Aid);
 
             // Request 체크 필요
             var command = req.Adapt<UpdateVisitPurposeForNonNhisHealthScreeningCommand>() with
             {
                 HospNo = base.HospNo,
-                AId = base.AId,
+                AId = base.Aid,
                 HospKey = base.HospKey,
                 InpuiryUrl = "https://paper.hello100.kr/papercheck/index/",
                 InpuiryIdx = req.InquiryIdx,
@@ -179,7 +179,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> DeleteVisitPurpose(string vpCd, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("PATCH /api/visitpurpose/visit-purposes/{vpCd} [{AId}]", vpCd, AId);
+            _logger.LogInformation("PATCH /api/visitpurpose/visit-purposes/{vpCd} [{Aid}]", vpCd, Aid);
 
             var command = new DeleteVisitPurposeCommand()
             {
@@ -199,7 +199,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse<GetCertificatesResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetCertificates(CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("GET /api/visitpurpose/certificates [{AId}]", AId);
+            _logger.LogInformation("GET /api/visitpurpose/certificates [{Aid}]", Aid);
             
             var result = await _mediator.Send(new GetCertificatesQuery(base.HospKey), cancellationToken);
 
@@ -213,7 +213,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse<GetVisitPurposesResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> BulkUpdateCertificates(List<BulkUpdateCertificatesRequest> req, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("PUT /api/visitpurpose/certificates/bulk [{AId}]", AId);
+            _logger.LogInformation("PUT /api/visitpurpose/certificates/bulk [{Aid}]", Aid);
 
             if (req != null && req.Count <= 0)
                 return Result.Success(GlobalErrorCode.EmptyRequestBody.ToError()).ToActionResult(this);

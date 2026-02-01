@@ -45,7 +45,7 @@ namespace Hello100Admin.Modules.Seller.Application.Features.Seller.Commands.Crea
         /// <returns></returns>
         public async Task<Result> Handle(CreateSellerCommand command, CancellationToken cancellationToken)
         {
-            _logger.LogDebug("Processing create seller AId: {aId}", command.AId);
+            _logger.LogDebug("Processing create seller AId: {aid}", command.Aid);
 
             // 병원 조회
             var hospInfo = await _sellerStore.GetApprovedUntactHospitalInfoAsync(command.HospNo, cancellationToken);
@@ -58,7 +58,7 @@ namespace Hello100Admin.Modules.Seller.Application.Features.Seller.Commands.Crea
             // 관리자 셀러 등록 된 병원 수 조회
             long sellerCount = await _sellerStore.GetHospitalSellerCountAsync(command.HospNo, cancellationToken);
 
-            string sellerId = _cryptoService.Encrypt($"{command.HospNo}||{command.AId}||{sellerCount}", CryptoKeyType.Seller);
+            string sellerId = _cryptoService.Encrypt($"{command.HospNo}||{command.Aid}||{sellerCount}", CryptoKeyType.Seller);
 
             // 송금 DB 등록
             var hospSellerId = await _sellerRepository.InsertTbHospSellerAsync(command, sellerId, cancellationToken);
@@ -103,7 +103,7 @@ namespace Hello100Admin.Modules.Seller.Application.Features.Seller.Commands.Crea
                 }
             }
 
-            _logger.LogInformation("Seller created successfully for AId: {aId}", command.AId);
+            _logger.LogInformation("Seller created successfully for AId: {aid}", command.Aid);
 
             return Result.Success(); //Success : 1
         }

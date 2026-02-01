@@ -1,5 +1,6 @@
 using Hello100Admin.BuildingBlocks.Common.Application;
 using Hello100Admin.Modules.Auth.Application.Features.Auth.Responses.Login;
+using System.Text.Json.Serialization;
 
 namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.Login;
 
@@ -8,7 +9,8 @@ namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.Login;
 /// </summary>
 public record LoginCommand : ICommand<Result<LoginResponse>>
 {
-    public string AccountId { get; init; } = string.Empty;  // acc_id
+    public string AccId { get; init; } = string.Empty;
     public string Password { get; init; } = string.Empty;
-    public string? IpAddress { get; init; }  // 클라이언트 IP 주소
+    [JsonIgnore]
+    public string? IpAddress { get; init; } = string.Empty;
 }

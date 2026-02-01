@@ -4,8 +4,8 @@ namespace Hello100Admin.Modules.Auth.Application.Common.Abstractions.Persistence
 {
     public interface IAuthStore
     {
-        public Task<UserEntity?> GetAdminInfoByAIdAsync(string aid, CancellationToken cancellationToken = default);
-        public Task<UserEntity?> GetByUsernameAsync(string accId, CancellationToken cancellationToken = default);
-        public Task<RefreshTokenEntity?> GetByTokenAsync(string token, CancellationToken cancellationToken = default);
+        Task<UserEntity?> GetAdminByAidAsync(string aid, CancellationToken cancellationToken = default);
+        Task<UserEntity?> GetAdminByAccIdAsync(string accId, CancellationToken cancellationToken = default);
+        Task<RefreshTokenEntity?> GetByTokenAsync(string token, CancellationToken cancellationToken = default);
     }
 }

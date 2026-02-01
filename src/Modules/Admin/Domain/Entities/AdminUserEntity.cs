@@ -50,7 +50,10 @@ public class AdminUserEntity : AggregateRoot<string>
     /// 삭제유무 ('N': 미삭제, 'Y': 삭제)
     /// </summary>
     public required string DelYn { get; set; } // char(1) 
-
+    /// <summary>
+    /// 등록날짜
+    /// </summary>
+    public DateTime RegDt { get; set; }
     /// <summary>
     /// 마지막 로그인 일시
     /// </summary>
@@ -84,10 +87,4 @@ public class AdminUserEntity : AggregateRoot<string>
     /// 활성여부 (0: 비활성, 1:활성)
     /// </summary>
     public required string Enabled { get; set; } // char(1) 
-
-    public void Delete()
-    {
-        IsDeleted = true;
-        UpdateModifiedInfo();
-    }
 }

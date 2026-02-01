@@ -51,6 +51,10 @@ public class MemberEntity : AggregateRoot<string>
     /// 본인인증아이디
     /// </summary>
     public long? Said { get; set; }
+    /// <summary>
+    /// 등록날짜
+    /// </summary>
+    public DateTime RegDt { get; set; }
 
     /// <summary>
     /// 등록일시 뷰
@@ -124,4 +128,8 @@ public class MemberFamilyEntity : AggregateRoot<int>
     /// 성별 (암호화)
     /// </summary>
     public required EncryptedData Sex { get; set; } // varchar(50)
+    /// <summary>
+    /// 등록날짜
+    /// </summary>
+    public DateTime RegDt { get; set; }
 }

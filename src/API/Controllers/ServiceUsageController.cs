@@ -45,7 +45,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse<SearchUntactMedicalHistoriesResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> SearchUntactMedicalHistories(SearchUntactMedicalHistorysRequest req, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("POST /api/serviceusage/untact-medical/search [{AId}]", AId);
+            _logger.LogInformation("POST /api/serviceusage/untact-medical/search [{Aid}]", Aid);
 
             var query = req.Adapt<SearchUntactMedicalHistoriesQuery>() with { HospNo = base.HospNo };
             
@@ -62,7 +62,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse<GetUntactMedicalPaymentDetailResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetUntactMedicalPaymentDetail(string paymentId, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("GET /api/serviceusage/untact-medical/payments/{id} [{AId}]", paymentId, AId);
+            _logger.LogInformation("GET /api/serviceusage/untact-medical/payments/{id} [{Aid}]", paymentId, Aid);
             
             var result = await _mediator.Send(new GetUntactMedicalPaymentDetailQuery(paymentId), cancellationToken);
 
@@ -77,7 +77,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ExcelFile), StatusCodes.Status200OK)]
         public async Task<IActionResult> ExportUntactMedicalHistoriesExcel(ExportUntactMedicalHistoriesExcelRequest req, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("POST /api/serviceusage/untact-medical/export/excel [{AId}]", AId);
+            _logger.LogInformation("POST /api/serviceusage/untact-medical/export/excel [{Aid}]", Aid);
             
             var query = req.Adapt<ExportUntactMedicalHistoriesExcelQuery>() with { HospNo = base.HospNo };
 
@@ -98,7 +98,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse<SearchExaminationResultAlimtalkHistoriesResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> SearchExaminationResultAlimtalkHistories(SearchExaminationResultAlimtalkHistoriesRequest req, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("POST /api/serviceusage/examination-results/alimtalk/histories/search [{AId}]", AId);
+            _logger.LogInformation("POST /api/serviceusage/examination-results/alimtalk/histories/search [{Aid}]", Aid);
             
             var query = req.Adapt<SearchExaminationResultAlimtalkHistoriesQuery>() with 
             {
@@ -120,7 +120,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ExcelFile), StatusCodes.Status200OK)]
         public async Task<IActionResult> ExportExaminationResultAlimtalkHistoriesExcel(ExportExaminationResultAlimtalkHistoriesExcelRequest req, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("POST /api/serviceusage/examination-results/alimtalk/histories/export/excel [{AId}]", AId);
+            _logger.LogInformation("POST /api/serviceusage/examination-results/alimtalk/histories/export/excel [{Aid}]", Aid);
 
             var query = req.Adapt<ExportExaminationResultAlimtalkHistoriesExcelQuery>() with
             {
@@ -146,7 +146,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse<GetRegistrationAlimtalkApplicationInfoResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetRegistrationAlimtalkApplicationInfo(CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("GET /api/serviceusage/alimtalk-service/registration/application-info [{AId}]", AId);
+            _logger.LogInformation("GET /api/serviceusage/alimtalk-service/registration/application-info [{Aid}]", Aid);
 
             var result = await _mediator.Send(new GetRegistrationAlimtalkApplicationInfoQuery(base.HospNo), cancellationToken);
 
@@ -160,7 +160,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse<GetExaminationResultAlimtalkApplicationInfoResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetExaminationResultAlimtalkApplicationInfo(CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("GET /api/serviceusage/alimtalk-service/examination-results/application-info [{AId}]", AId);
+            _logger.LogInformation("GET /api/serviceusage/alimtalk-service/examination-results/application-info [{Aid}]", Aid);
             
             var result = await _mediator.Send(new GetExaminationResultAlimtalkApplicationInfoQuery(base.HospNo), cancellationToken);
 
@@ -174,7 +174,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> SubmitAlimtalkApplication(SubmitAlimtalkApplicationRequest req, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("POST /api/serviceusage/alimtalk-service/submit [{AId}]", AId);
+            _logger.LogInformation("POST /api/serviceusage/alimtalk-service/submit [{Aid}]", Aid);
 
             var command = req.Adapt<SubmitAlimtalkApplicationCommand>() with { HospNo = base.HospNo, HospKey = base.HospKey };
 

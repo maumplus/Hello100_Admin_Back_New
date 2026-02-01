@@ -10,7 +10,7 @@ public interface ITokenService
     /// <summary>
     /// Access Token 생성
     /// </summary>
-    string GenerateAccessToken(UserEntity user, IEnumerable<string> roles);
+    string GenerateAccessToken(UserEntity adminInfo);
 
     /// <summary>
     /// Refresh Token 생성

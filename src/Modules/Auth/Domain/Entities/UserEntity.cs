@@ -8,95 +8,98 @@ namespace Hello100Admin.Modules.Auth.Domain.Entities;
 public class UserEntity : AggregateRoot<string>
 {
     /// <summary>
-    /// 관리자아이디 (PK)
+    /// 관리자아이디
     /// </summary>
-    public required string AId { get; set; } // varchar(8)
-
+    public required string Aid { get; set; }
     /// <summary>
     /// 계정아이디
     /// </summary>
-    public required string AccId { get; set; } // varchar(50)
-
+    public required string AccId { get; set; }
     /// <summary>
     /// 계정비밀번호
     /// </summary>
-    public required string AccPwd { get; set; } // varchar(128)
-
-    /// <summary>
-    /// 요양기관키
-    /// </summary>
-    public string? HospKey { get; set; } // varchar(128)
-
+    public required string AccPwd { get; set; }
     /// <summary>
     /// 요양기관번호
     /// </summary>
-    public string? HospNo { get; set; } // varchar(50)
-
+    public string HospNo { get; set; } = string.Empty;
+    /// <summary>
+    /// 요양기관키
+    /// </summary>
+    public string HospKey { get; set; } = string.Empty;
     /// <summary>
     /// 등급(tb_common:07)
     /// </summary>
-    public required string Grade { get; set; } // char(1)
-
+    public required string Grade { get; set; }
     /// <summary>
     /// 이름
     /// </summary>
-    public required string Name { get; set; } // varchar(128)
-
+    public required string Name { get; set; }
     /// <summary>
-    /// 삭제유무 ('N': 미삭제, 'Y': 삭제)
+    /// 삭제유무
     /// </summary>
-    public required string DelYn { get; set; } // char(1) 
-
+    public required string DelYn { get; set; }
     /// <summary>
     /// 마지막 로그인 일시
     /// </summary>
-    public DateTime? LastLoginDt { get; set; } 
+    public int? LastLoginDt { get; set; }
     /// <summary>
-    /// 계정 잠금 여부 (Y/N)
+    /// 마지막 로그인 일시
     /// </summary>
-    public required string AccountLocked { get; set; }
-
+    public string? LastLoginDtStr { get; set; }
+    /// <summary>
+    /// hosp 매핑 최종 동의 시간
+    /// </summary>
+    public int? AgreeDt { get; set; }
+    /// <summary>
+    /// 권한 그룹 ID (tb_admin_role_group.role_id)
+    /// </summary>
+    public int? RoleId { get; set; }
+    /// <summary>
+    /// 투팩터 인증 사용 여부(Y/N)
+    /// </summary>
+    public string Use2fa { get; set; } = string.Empty;
+    /// <summary>
+    /// 계정 잠금 여부(Y/N)
+    /// </summary>
+    public string AccountLocked { get; set; } = string.Empty;
     /// <summary>
     /// 로그인 실패 횟수
     /// </summary>
-    public int LoginFailCount { get; set; }
-
+    public int? LoginFailCount { get; set; }
+    /// <summary>
+    /// 마지막 비밀번호 변경 일시
+    /// </summary>
+    public int? LastPwdChangeDt { get; set; }
+    /// <summary>
+    /// 마지막 비밀번호 변경 일시
+    /// </summary>
+    public string? LastPwdChangeDtStr { get; set; }
+    /// <summary>
+    /// 엑세스 토큰
+    /// </summary>
+    public string? AccessToken { get; set; }
     /// <summary>
     /// 리프레시 토큰
     /// </summary>
     public string? RefreshToken { get; set; }
 
-    /// <summary>
-    /// 엑세스 토큰
-    /// </summary>
-    public string? AccessToken { get; set; }
-
-    /// <summary>
-    /// 승인여부 (0: 미승인, 1: 승인)
-    /// </summary>
-    public required string Approved { get; set; } // char(1)
-
-    /// <summary>
-    /// 활성여부 (0: 비활성, 1:활성)
-    /// </summary>
-    public required string Enabled { get; set; } // char(1) 
-
     // ============================================================================
     // 인가(Authorization) 관련 헬퍼 메서드
     // ============================================================================
-    
+
     /// <summary>
     /// 로그인 성공 기록
     /// </summary>
     public void RecordLogin()
     {
-        LastLoginDt = DateTime.UtcNow;
         LoginFailCount = 0;  // 로그인 성공 시 실패 횟수 초기화
         AccountLocked = "N";
     }
 
     /// <summary>
     /// 로그인 실패 기록 (5회 실패 시 자동 잠금)
+    /// 엑세스 토큰
     /// </summary>
     public void RecordLoginFailure()
     {
@@ -110,5 +113,5 @@ public class UserEntity : AggregateRoot<string>
     /// <summary>
     /// 로그인 가능 여부 체크
     /// </summary>
-    public bool CanLogin() => DelYn == "N" && Approved == "0"  && Enabled == "1" && AccountLocked == "N";
+    public bool CanLogin() => DelYn == "N" && AccountLocked == "N";
 }

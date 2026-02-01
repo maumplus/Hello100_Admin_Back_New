@@ -19,7 +19,7 @@ public class GetUserQueryHandler : IRequestHandler<GetUserQuery, Result<UserResp
 
     public async Task<Result<UserResponse>> Handle(GetUserQuery request, CancellationToken cancellationToken)
     {
-        var user = await _authStore.GetAdminInfoByAIdAsync(request.AId, cancellationToken);
+        var user = await _authStore.GetAdminByAidAsync(request.Aid, cancellationToken);
         
         if (user == null)
         {
@@ -27,31 +27,17 @@ public class GetUserQueryHandler : IRequestHandler<GetUserQuery, Result<UserResp
             return Result.Success<UserResponse>().WithError(new ErrorInfo(0, "UserNotFound", "사용자를 찾을 수 없습니다."));
         }
 
-        // Grade 기반 역할 설정
-        var roleNames = new[] { GetRoleNameByGrade(user.Grade) };
-
         var userDto = new UserResponse
         {
-            Id = user.AId,
-            AccountId = user.AccId,
+            Aid = user.Aid,
+            AccId = user.AccId,
             Name = user.Name,
             HospNo = user.HospNo,
             Grade = user.Grade,
-            Enabled = user.Enabled == "1",
-            Approved = user.Approved == "1",
-            AccountLocked = user.AccountLocked == "Y",
-            LastLoginAt = user.LastLoginDt,
-            Roles = roleNames.ToList()
+            AccountLocked = user.AccountLocked,
+            LastLoginDt = user.LastLoginDtStr
         };
 
         return Result.Success(userDto);
     }
-
-    private string GetRoleNameByGrade(string grade) => grade switch
-    {
-        "S" => "SuperAdmin",
-        "C" => "HospitalAdmin",
-        "A" => "GeneralAdmin",
-        _ => "GeneralAdmin"
-    };
 }

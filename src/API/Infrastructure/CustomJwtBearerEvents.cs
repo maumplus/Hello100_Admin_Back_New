@@ -74,7 +74,7 @@ namespace Hello100Admin.API.Infrastructure
 
             var authStore = context.HttpContext.RequestServices.GetRequiredService<IAuthStore>();
 
-            var adminInfo = await authStore.GetAdminInfoByAIdAsync(adminId);
+            var adminInfo = await authStore.GetAdminByAidAsync(adminId);
 
             if (adminInfo == null || adminInfo.HospNo != hospNo)
             {

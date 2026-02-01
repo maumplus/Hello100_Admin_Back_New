@@ -23,11 +23,11 @@ namespace Hello100Admin.Modules.Admin.Application.Features.AdminUser.Commands.Up
 
         public async Task<Result> Handle(UpdatePasswordCommand command, CancellationToken token)
         {
-            _logger.LogInformation("Processing update password. [{id}]", command.AId);
+            _logger.LogInformation("Processing update password. [{id}]", command.Aid);
 
-            var encryptedPwd = _hash.HashWithSalt(command.NewPassword, command.AId);
+            var encryptedPwd = _hash.HashWithSalt(command.NewPassword, command.Aid);
 
-            var updateCount = await _adminUserRepository.UpdatePassword(command.AId, encryptedPwd);
+            var updateCount = await _adminUserRepository.UpdatePassword(command.Aid, encryptedPwd);
 
             if (updateCount <= 0)
                 return Result.Success().WithError(AdminErrorCode.PasswordChangeFailed.ToError());

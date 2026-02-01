@@ -31,7 +31,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse<GetUntactMedicalRequestsForApprovalResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetUntactMedicalRequestsForApproval(int pageNo, int pageSize, string apprYn, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("GET /api/approvalrequest/untact-medical-requests [{AId}]", AId);
+            _logger.LogInformation("GET /api/approvalrequest/untact-medical-requests [{Aid}]", Aid);
 
             var query = new GetUntactMedicalRequestsForApprovalQuery
             {
@@ -53,7 +53,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse<GetUntactMedicalRequestDetailForApprovalResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetUntactMedicalRequestDetailForApproval(int seq, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("GET /api/approvalrequest/untact-medical-requests/{seq} [{AId}]", seq, AId);
+            _logger.LogInformation("GET /api/approvalrequest/untact-medical-requests/{seq} [{Aid}]", seq, Aid);
 
             var result = await _mediator.Send(new GetUntactMedicalRequestDetailForApprovalQuery(seq), cancellationToken);
 

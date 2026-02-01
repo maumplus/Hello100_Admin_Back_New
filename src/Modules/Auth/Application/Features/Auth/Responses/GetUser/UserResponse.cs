@@ -5,15 +5,13 @@
     /// </summary>
     public class UserResponse
     {
-        public string Id { get; set; } = string.Empty;
-        public string AccountId { get; set; } = string.Empty;  // acc_id
-        public string Name { get; set; } = string.Empty;  // name
-        public string? HospNo { get; set; }  // hosp_no
-        public string Grade { get; set; } = "C";  // grade
-        public bool Enabled { get; set; }  // enabled
-        public bool Approved { get; set; }  // approved
-        public bool AccountLocked { get; set; }  // account_locked
-        public DateTime? LastLoginAt { get; set; }
-        public List<string> Roles { get; set; } = new();
+        public string Aid { get; set; } = string.Empty;
+        public string AccId { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string? HospNo { get; set; }
+        public string? HospKey { get; set; }
+        public string Grade { get; set; } = string.Empty;
+        public string AccountLocked { get; set; } = string.Empty;
+        public string? LastLoginDt { get; set; }
     }
 }

@@ -35,7 +35,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(Result<GetBankListResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetBankList(CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("GET /api/bank/list [{AId}]", AId);
+            _logger.LogInformation("GET /api/bank/list [{Aid}]", Aid);
 
             var result = await _mediator.Send(new GetBankListQuery(), cancellationToken);
 

@@ -53,11 +53,11 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> CreateSeller(CreateSellerRequest req, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("POST /api/seller/add [{AId}], [{HospNo}]", base.AId, req.HospNo);
+            _logger.LogInformation("POST /api/seller/add [{AId}], [{HospNo}]", base.Aid, req.HospNo);
 
             var command = req.Adapt<CreateSellerCommand>() with
             { 
-                AId = base.AId
+                Aid = base.Aid
             };
 
             var result = await _mediator.Send(command, cancellationToken);
@@ -74,7 +74,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse<PagedResult<GetSellerListResponse>>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetSellerList(GetSellerListRequest req, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("POST /api/seller/list [{AId}]", AId);
+            _logger.LogInformation("POST /api/seller/list [{Aid}]", Aid);
 
             var query = req.Adapt<GetSellerListQuery>();
 
@@ -92,7 +92,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse<GetSellerDetailResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetSellerDetail(int id, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("GET /api/seller/{id} [{AId}]", id, AId);
+            _logger.LogInformation("GET /api/seller/{id} [{Aid}]", id, Aid);
 
             var query = new GetSellerDetailQuery(id);
 
@@ -110,11 +110,11 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> CreateSellerRemit(CreateSellerRemitRequest req, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("POST /api/seller/remit-add [{SellerId}] [{AId}]", req.HospSellerId, AId);
+            _logger.LogInformation("POST /api/seller/remit-add [{SellerId}] [{Aid}]", req.HospSellerId, Aid);
 
             var command = req.Adapt<CreateSellerRemitCommand>() with
             {
-                AId = base.AId
+                Aid = base.Aid
             };
 
             var result = await _mediator.Send(command, cancellationToken);
@@ -131,7 +131,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse<UpdateSellerRemitResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> UpdateSellerRemit(UpdateSellerRemitRequest req, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("PATCH /api/seller/remit-request [{Id}] [{AId}]", req.Id, AId);
+            _logger.LogInformation("PATCH /api/seller/remit-request [{Id}] [{Aid}]", req.Id, Aid);
 
             var command = req.Adapt<UpdateSellerRemitCommand>();
 
@@ -148,7 +148,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse<GetRemitBalanceResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetRemitBalance(CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("POST /api/seller/remit-balance [{AId}]", AId);
+            _logger.LogInformation("POST /api/seller/remit-balance [{Aid}]", Aid);
 
             var result = await _mediator.Send(new GetRemitBalanceQuery(), cancellationToken);
 
@@ -163,7 +163,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse<PagedResult<GetSellerRemitListResponse>>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetSellerRemitList(GetSellerRemitListRequest req, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("POST /api/seller/remit-list [{AId}]", AId);
+            _logger.LogInformation("POST /api/seller/remit-list [{Aid}]", Aid);
 
             var query = req.Adapt<GetSellerRemitListQuery>();
 
@@ -180,7 +180,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse<GetSellerRemitWaitListResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetSellerRemitWaitList(GetSellerRemitWaitListRequest req, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("POST /api/seller/remit-wait-list [{AId}]", AId);
+            _logger.LogInformation("POST /api/seller/remit-wait-list [{Aid}]", Aid);
 
             var query = req.Adapt<GetSellerRemitWaitListQuery>();
 
@@ -197,7 +197,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> DeleteSellerRemit(DeleteSellerRemitRequest req, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("PATCH /api/seller/remit-delete [{AId}]", AId);
+            _logger.LogInformation("PATCH /api/seller/remit-delete [{Aid}]", Aid);
 
             var command = req.Adapt<DeleteSellerRemitCommand>();
 
@@ -214,7 +214,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> UpdateSellerRemitEnabled(UpdateSellerRemitEnabledRequest req, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("PATCH /api/seller/seller-enable [{AId}]", AId);
+            _logger.LogInformation("PATCH /api/seller/seller-enable [{Aid}]", Aid);
 
             var command = req.Adapt<UpdateSellerRemitEnabledCommand>();
 

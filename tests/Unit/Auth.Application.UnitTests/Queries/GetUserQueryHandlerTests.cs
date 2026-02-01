@@ -13,7 +13,7 @@ public class GetUserQueryHandlerTests
         // Arrange
         var user = new UserEntity
         {
-            AId = "A0000001",
+            Aid = "A0000001",
             AccId = "testuser",
             AccPwd = "password",
             Grade = "S",
@@ -21,32 +21,26 @@ public class GetUserQueryHandlerTests
             DelYn = "N",
             AccountLocked = "N",
             LoginFailCount = 0,
-            Approved = "1",
-            Enabled = "1",
             LastLoginDt = DateTime.UtcNow,
             HospNo = "H1234"
         };
         var mockRepo = new Mock<IAuthStore>();
-        mockRepo.Setup(r => r.GetAdminInfoByAIdAsync(user.AId, It.IsAny<CancellationToken>())).ReturnsAsync(user);
+        mockRepo.Setup(r => r.GetAdminByAidAsync(user.Aid, It.IsAny<CancellationToken>())).ReturnsAsync(user);
         var handler = new GetUserQueryHandler(mockRepo.Object);
-        var query = new GetUserQuery { AId = user.AId };
+        var query = new GetUserQuery { Aid = user.Aid };
 
         // Act
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
         result.Data.Should().NotBeNull();
-        result.Data.Id.Should().Be(user.AId);
-        result.Data.AccountId.Should().Be(user.AccId);
+        result.Data.Aid.Should().Be(user.Aid);
+        result.Data.AccId.Should().Be(user.AccId);
         result.Data.Name.Should().Be(user.Name);
         result.Data.HospNo.Should().Be(user.HospNo);
         result.Data.Grade.Should().Be(user.Grade);
-        result.Data.Enabled.Should().BeTrue();
-        result.Data.Approved.Should().BeTrue();
-        result.Data.AccountLocked.Should().BeTrue();
-        result.Data.LastLoginAt.Should().Be(user.LastLoginDt);
-        result.Data.Roles.Should().ContainSingle();
-        result.Data.Roles[0].Should().Be("SuperAdmin");
+        result.Data.AccountLocked.Should().Be(user.AccountLocked);
+        result.Data.LastLoginDt.Should().Be(user.LastLoginDt);
     }
 
     [Fact]
@@ -54,9 +48,9 @@ public class GetUserQueryHandlerTests
     {
         // Arrange
         var mockRepo = new Mock<IAuthStore>();
-        mockRepo.Setup(r => r.GetAdminInfoByAIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync((UserEntity?)null);
+        mockRepo.Setup(r => r.GetAdminByAidAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync((UserEntity?)null);
         var handler = new GetUserQueryHandler(mockRepo.Object);
-        var query = new GetUserQuery { AId = "NOT_EXIST" };
+        var query = new GetUserQuery { Aid = "NOT_EXIST" };
 
         // Act
         var result = await handler.Handle(query, CancellationToken.None);

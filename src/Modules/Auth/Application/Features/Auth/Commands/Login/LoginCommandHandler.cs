@@ -37,88 +37,40 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginRes
 
     public async Task<Result<LoginResponse>> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogDebug("Processing login for AccountId: {AccountId} from IP: {IpAddress}", 
-            request.AccountId, request.IpAddress);
-
-        // 1. 사용자 조회 (AccountId)
-        var user = await _authStore.GetByUsernameAsync(request.AccountId, cancellationToken);
-
-        if (user == null)
+        var adminInfo = await _authStore.GetAdminByAccIdAsync(request.AccId, cancellationToken);
+        
+        if (adminInfo == null)
         {
-            _logger.LogWarning("Login failed: User not found for AccountId: {AccountId}", request.AccountId);
-            // return Result.Failure<LoginResponseDto>("계정 ID 또는 비밀번호가 올바르지 않습니다.");
             return Result.Success<LoginResponse>().WithError(GlobalErrorCode.AuthFailed.ToError());
         }
 
-        // 2. 계정 상태 확인 (CanLogin 헬퍼 메서드 사용)
-        // if (!user.CanLogin())
-        // {
-        //     string reason = user.DelYn == "Y" ? "삭제된 계정입니다." :
-        //                    user.Approved == "0" ? "승인되지 않은 계정입니다." :
-        //                    user.Enabled == "0" ? "비활성화된 계정입니다." :
-        //                    user.AccountLocked == "1" ? "계정이 잠겨 있습니다. 관리자에게 문의하세요." :
-        //                    "로그인할 수 없는 계정입니다.";
-            
-        //     _logger.LogWarning("Login failed: {Reason} for UserId: {UserId}, AccountId: {AccountId}", 
-        //         reason, user.Id, request.AccountId);
-        //     return Result.Failure<LoginResponseDto>(reason);
-        // }
-
-        // 3. 비밀번호 검증 (SHA256 + Salt(aid))
-        if (!_passwordHasher.VerifyPassword(user.AccPwd, request.Password, user.AId))
+        if (!_passwordHasher.VerifyPassword(adminInfo.AccPwd, request.Password, adminInfo.Aid))
         {
-            // 실패 관련 동작은 이게 아닌듯?
-            // _logger.LogWarning("Login failed: Invalid password for UserId={UserId}, AccountId={AccountId}, FailCount={FailCount}", 
-            //     user.Id, request.AccountId, user.LoginFailCount + 1);
-
-            // // 로그인 실패 기록
-            // user.RecordLoginFailure();
-            // await _userRepository.UpdateAsync(user, cancellationToken);
-
-            _logger.LogWarning("Login failed: Invalid password for UserId: {UserId}, AccountId: {AccountId}",
-                user.Id, request.AccountId);
-
-            user.RecordLoginFailure();
-            await _authRepository.UpdateLoginFailureAsync(user, cancellationToken);
+            adminInfo.RecordLoginFailure();
+            await _authRepository.UpdateLoginFailureAsync(adminInfo, cancellationToken);
 
             return Result.Success<LoginResponse>().WithError(GlobalErrorCode.AuthFailed.ToError());
         }
 
-        _logger.LogInformation("Password verified successfully for UserId: {UserId}, AccountId: {AccountId}", 
-            user.Id, request.AccountId);
-
-        // 4. 로그인 기록
-        user.RecordLogin();
-
-        // 8. Grade 기반 역할 설정
-        var roleNames = new[] { GetRoleNameByGrade(user.Grade) };
-
-        // 9. 토큰 생성
-        var accessToken = _tokenService.GenerateAccessToken(user, roleNames);
-        var refreshToken = _tokenService.GenerateRefreshToken(user.AId, request.IpAddress);  // string aid
+        var accessToken = _tokenService.GenerateAccessToken(adminInfo);
+        var refreshToken = _tokenService.GenerateRefreshToken(adminInfo.Aid, request.IpAddress);
 
         // 10. User 테이블에 토큰 저장
-        user.RefreshToken = refreshToken.Token;
+        adminInfo.RefreshToken = refreshToken.Token;
 
-        await _authRepository.UpdateLoginSuccessAsync(user, cancellationToken);
-
-        _logger.LogInformation("Login successful for Aid: {Aid}, AccountId: {AccountId}, Grade: {Grade}, Role: {Role}",
-            user.AId, request.AccountId, user.Grade, roleNames[0]);
+        await _authRepository.UpdateLoginSuccessAsync(adminInfo, cancellationToken);
 
         // 5. 응답 생성
         var response = new LoginResponse
         {
             User = new UserResponse
             {
-                Id = user.AId,
-                AccountId = user.AccId,
-                Name = user.Name,
-                Grade = user.Grade,
-                Enabled = user.Enabled == "1",
-                Approved = user.Approved == "1",
-                AccountLocked = user.AccountLocked == "Y",
-                LastLoginAt = user.LastLoginDt,
-                Roles = roleNames.ToList()
+                Aid = adminInfo.Aid,
+                AccId = adminInfo.AccId,
+                Name = adminInfo.Name,
+                Grade = adminInfo.Grade,
+                AccountLocked = adminInfo.AccountLocked,
+                LastLoginDt = adminInfo.LastLoginDtStr,
             },
             Token = new TokenInfo
             {

@@ -32,9 +32,9 @@ namespace Hello100Admin.Modules.Seller.Infrastructure.Repositories.Seller
         {
             try
             {
-                _logger.LogInformation("InsertTbHospSellerAsync: [{sellerId}], [{aId}]", sellerId, req.AId);
+                _logger.LogInformation("InsertTbHospSellerAsync: [{sellerId}], [{aid}]", sellerId, req.Aid);
 
-                if (string.IsNullOrEmpty(req.AId) ||
+                if (string.IsNullOrEmpty(req.Aid) ||
                     string.IsNullOrEmpty(req.HospNo) ||
                     string.IsNullOrEmpty(req.BankCd) ||
                     string.IsNullOrEmpty(req.DepositNo) ||
@@ -43,7 +43,7 @@ namespace Hello100Admin.Modules.Seller.Infrastructure.Repositories.Seller
                     return -1;
                 }
 
-                var adminCount = await GetTbAdminCountByAIdAsync(req.AId, cancellationToken);
+                var adminCount = await GetTbAdminCountByAIdAsync(req.Aid, cancellationToken);
                 if (adminCount <= 0)
                 {
                     _logger.LogError("InsertTbHospSellerAsync: 관리자 정보 없음");
@@ -72,7 +72,7 @@ namespace Hello100Admin.Modules.Seller.Infrastructure.Repositories.Seller
                     DepositNo = req.DepositNo,
                     Depositor = req.Depositor,
                     Etc = req.Etc,
-                    RegAId = req.AId,
+                    RegAId = req.Aid,
                     RegDt = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds()
                 };
 
@@ -126,7 +126,7 @@ namespace Hello100Admin.Modules.Seller.Infrastructure.Repositories.Seller
         {
             try
             {
-                _logger.LogInformation("InsertTbHospSellerRemitAsync by AId: [{Id}]", req.AId);
+                _logger.LogInformation("InsertTbHospSellerRemitAsync by AId: [{Id}]", req.Aid);
 
                 var depositor = await GetHospSellerDepositorAsync(req.HospSellerId);
 
@@ -143,7 +143,7 @@ namespace Hello100Admin.Modules.Seller.Infrastructure.Repositories.Seller
                     VaName = "(주)이지스헬스케어",
                     Depositor = depositor,
                     Etc = req.Etc,
-                    RegAId = req.AId,
+                    RegAId = req.Aid,
                     RegDt = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds()
                 };
 

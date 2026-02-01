@@ -12,16 +12,14 @@ public class UserTests
     {
         return new UserEntity
         {
-            AId = "A0000001",
+            Aid = "A0000001",
             AccId = "testuser",
             AccPwd = "password",
             Grade = "A",
             Name = "테스트유저",
             DelYn = "N",
             AccountLocked = "N",
-            LoginFailCount = 0,
-            Approved = "0",
-            Enabled = "1"
+            LoginFailCount = 0
         };
     }
 
@@ -48,8 +46,6 @@ public class UserTests
         // Arrange
         var user = CreateDefaultUser();
         user.DelYn = delYn;
-        user.Approved = approved;
-        user.Enabled = enabled;
         user.AccountLocked = accountLocked;
 
         // Act

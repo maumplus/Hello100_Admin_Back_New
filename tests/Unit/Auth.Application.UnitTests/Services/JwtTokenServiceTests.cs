@@ -22,8 +22,8 @@ namespace Hello100Admin.Modules.Auth.Application.UnitTests.Services
                     {"Jwt:SecretKey", "supersecretkey_that_is_long_enough"},
                     {"Jwt:Issuer", "issuer"},
                     {"Jwt:Audience", "audience"},
-                    {"Jwt:AccessTokenExpirationMinutes", "10"},
-                    {"Jwt:RefreshTokenExpirationDays", "7"}
+                    {"Jwt:AccessTokenExpirationMinutes", "30"},
+                    {"Jwt:RefreshTokenExpirationDays", "1"}
                 }).Build();
             var mockAuthRepository = authRepo ?? new Moq.Mock<IAuthRepository>().Object;
             var mockAuthStore = authStore ?? new Moq.Mock<IAuthStore>().Object;
@@ -38,21 +38,18 @@ namespace Hello100Admin.Modules.Auth.Application.UnitTests.Services
             var service = CreateService();
             var user = new UserEntity
             {
-                AId = "A0000001",
+                Aid = "A0000001",
                 AccId = "testuser",
                 AccPwd = "password",
                 Grade = "S",
                 Name = "테스트유저",
                 DelYn = "N",
                 AccountLocked = "N",
-                LoginFailCount = 0,
-                Approved = "1",
-                Enabled = "1"
+                LoginFailCount = 0
             };
-            var roles = new[] { "SuperAdmin" };
 
             // Act
-            var token = service.GenerateAccessToken(user, roles);
+            var token = service.GenerateAccessToken(user);
 
             // Assert
             token.Should().NotBeNullOrEmpty();

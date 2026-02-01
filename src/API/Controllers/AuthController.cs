@@ -32,8 +32,8 @@ public class AuthController : BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Login([FromBody] LoginCommand command)
     {
-        _logger.LogInformation("Login attempt for AccountId: {AccountId} from IP: {IpAddress}",
-            command.AccountId, GetClientIpAddress());
+        _logger.LogInformation("Login attempt for AccountId: {AccId} from IP: {IpAddress}",
+            command.AccId, GetClientIpAddress());
 
         // 클라이언트 IP 추출
         var ipAddress = GetClientIpAddress();
@@ -41,7 +41,7 @@ public class AuthController : BaseController
 
         var result = await _mediator.Send(commandWithIp);
 
-        _logger.LogInformation("User {AccountId} logged in process completed", command.AccountId);
+        _logger.LogInformation("User {AccountId} logged in process completed", command.AccId);
 
         // 중앙화된 매퍼 사용: 성공/실패 모두 ToActionResult에서 처리합니다.
         return result.ToActionResult(this, authEndpoint: true);
@@ -97,38 +97,15 @@ public class AuthController : BaseController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetMe()
     {
-        if (string.IsNullOrWhiteSpace(base.AId) == true)
+        if (string.IsNullOrWhiteSpace(base.Aid) == true)
         {
             return Unauthorized();
         }
 
-        var query = new GetUserQuery { AId = base.AId };
+        var query = new GetUserQuery { Aid = base.Aid };
         var result = await _mediator.Send(query);
 
         // 제네릭 Result<UserDto> 경로는 ToActionResult에서 성공/실패를 모두 처리합니다.
         return result.ToActionResult(this);
-    }
-
-    /// <summary>
-    /// 클라이언트 IP 주소 추출
-    /// </summary>
-    private string? GetClientIpAddress()
-    {
-        // X-Forwarded-For 헤더 확인 (프록시/로드밸런서 환경)
-        var forwardedFor = Request.Headers["X-Forwarded-For"].FirstOrDefault();
-        if (!string.IsNullOrEmpty(forwardedFor))
-        {
-            return forwardedFor.Split(',').FirstOrDefault()?.Trim();
-        }
-
-        // X-Real-IP 헤더 확인 (Nginx 등)
-        var realIp = Request.Headers["X-Real-IP"].FirstOrDefault();
-        if (!string.IsNullOrEmpty(realIp))
-        {
-            return realIp;
-        }
-
-        // HttpContext의 RemoteIpAddress 사용
-        return HttpContext.Connection.RemoteIpAddress?.ToString();
     }
 }

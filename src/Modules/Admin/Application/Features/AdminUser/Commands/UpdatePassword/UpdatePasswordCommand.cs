@@ -2,5 +2,5 @@
 
 namespace Hello100Admin.Modules.Admin.Application.Features.AdminUser.Commands.UpdatePassword
 {
-    public record UpdatePasswordCommand(string UserId, string NewPassword, string AId) : ICommand<Result>;
+    public record UpdatePasswordCommand(string UserId, string NewPassword, string Aid) : ICommand<Result>;
 }

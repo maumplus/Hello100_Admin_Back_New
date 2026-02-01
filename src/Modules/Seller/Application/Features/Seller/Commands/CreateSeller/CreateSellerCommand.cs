@@ -10,7 +10,7 @@ namespace Hello100Admin.Modules.Seller.Application.Features.Seller.Commands.Crea
         /// <summary>
         /// 관리자 AID
         /// </summary>
-        string AId,
+        string Aid,
         /// <summary>
         /// 요양기관번호
         /// </summary>

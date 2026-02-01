@@ -6,15 +6,6 @@ namespace Hello100Admin.BuildingBlocks.Common.Domain;
 public abstract class BaseEntity<TId> where TId : notnull
 {
     public TId Id { get; protected set; } = default!;
-    
-     /// <summary>
-    /// 등록날짜 (Unix timestamp, int) -> TypeHandler에서 DateTime으로 변환
-    /// </summary>
-    public DateTime RegDt { get; set; }
-    /// <summary>
-    /// 수정날짜 (Unix timestamp, int) -> TypeHandler에서 DateTime으로 변환
-    /// </summary>
-    public DateTime ModDt { get; set; }
     public string? CreatedBy { get; protected set; }
     public string? UpdatedBy { get; protected set; }
     public bool IsDeleted { get; protected set; }
@@ -24,7 +15,6 @@ public abstract class BaseEntity<TId> where TId : notnull
 
     protected BaseEntity()
     {
-        RegDt = DateTime.UtcNow;
         IsDeleted = false;
     }
 
@@ -43,15 +33,9 @@ public abstract class BaseEntity<TId> where TId : notnull
         _domainEvents.Clear();
     }
 
-    public void MarkAsDeleted()
+    public void Delete()
     {
         IsDeleted = true;
-        ModDt = DateTime.UtcNow;
-    }
-
-    public void UpdateModifiedInfo()
-    {
-        ModDt = DateTime.UtcNow;
     }
 }
 
