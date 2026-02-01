@@ -1,4 +1,5 @@
-﻿using Hello100Admin.BuildingBlocks.Common.Errors;
+﻿using System.Net.Http.Json;
+using Hello100Admin.BuildingBlocks.Common.Errors;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Serialization;
 using Hello100Admin.Integration.Shared;
 using Microsoft.AspNetCore.WebUtilities;
@@ -43,6 +44,63 @@ namespace AdminUser.API.IntegrationTests
             _client.AsSuperAdmin("B81AFBD0", "대민테스트");
 
             var response = await _client.GetAsync(url);
+            var body = await response.Content.ReadAsStringAsync();
+
+            var bodyKor = body.FromJson<ApiResponse>();
+
+            Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task GetHospitalUserProfile_ShouldReturnOk_WhenValidCredentials()
+        {
+            _client.AsSuperAdmin("B81AFBD0", "대민테스트");
+
+            var response = await _client.GetAsync("api/hospital-user/65DDFEB5/profile");
+            var body = await response.Content.ReadAsStringAsync();
+
+            var bodyKor = body.FromJson<ApiResponse>();
+
+            Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task UpdateHospitalUserRole_ShouldReturnOk_WhenValidCredentials()
+        {
+            var req = new
+            {
+                UserRole = 0
+            };
+
+            _client.AsSuperAdmin("B81AFBD0", "대민테스트");
+
+            var response = await _client.PatchAsJsonAsync("api/hospital-user/65DDFEB5/role", req);
+            var body = await response.Content.ReadAsStringAsync();
+
+            var bodyKor = body.FromJson<ApiResponse>();
+
+            Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task DeleteUserFamily_ShouldReturnOk_WhenValidCredentials()
+        {
+            _client.AsSuperAdmin("B81AFBD0", "대민테스트");
+
+            var response = await _client.DeleteAsync("api/hospital-user/TEST1234/family/1");
+            var body = await response.Content.ReadAsStringAsync();
+
+            var bodyKor = body.FromJson<ApiResponse>();
+
+            Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task DeleteFamily_ShouldReturnOk_WhenValidCredentials()
+        {
+            _client.AsSuperAdmin("B81AFBD0", "대민테스트");
+
+            var response = await _client.DeleteAsync("api/hospital-user/TEST1234");
             var body = await response.Content.ReadAsStringAsync();
 
             var bodyKor = body.FromJson<ApiResponse>();

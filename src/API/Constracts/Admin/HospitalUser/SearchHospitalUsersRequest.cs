@@ -1,6 +1,6 @@
 ﻿namespace Hello100Admin.API.Constracts.Admin.HospitalUser
 {
-    public class SearchHospitalUsersRequest
+    public sealed record SearchHospitalUsersRequest
     {
         /// <summary>
         /// 페이지 번호
