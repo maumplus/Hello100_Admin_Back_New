@@ -4,11 +4,13 @@ namespace Hello100Admin.Modules.Auth.Application.Common.Abstractions.Persistence
 {
     public interface IAuthRepository
     {
-        public Task UpdateLoginSuccessAsync(AdminEntity user, CancellationToken cancellationToken = default);
-        public Task UpdateLoginFailureAsync(AdminEntity user, CancellationToken cancellationToken = default);
-        public Task UpdateTokensAsync(AdminEntity user, CancellationToken cancellationToken = default);
-        public Task<RefreshTokenEntity> AddAsync(RefreshTokenEntity refreshToken, CancellationToken cancellationToken = default);
-        public Task UpdateAsync(RefreshTokenEntity refreshToken, CancellationToken cancellationToken = default);
-        public Task RevokeUserTokensAsync(string userId, CancellationToken cancellationToken = default);
+        Task<RefreshTokenEntity> AddAsync(RefreshTokenEntity refreshToken, CancellationToken cancellationToken = default);
+        Task UpdateAsync(RefreshTokenEntity refreshToken, CancellationToken cancellationToken = default);
+        Task RevokeUserTokensAsync(string userId, CancellationToken cancellationToken = default);
+        Task UpdateLoginFailureAsync(AdminEntity user, CancellationToken cancellationToken = default);
+        Task UpdateLoginSuccessAsync(AdminEntity user, CancellationToken cancellationToken = default);
+        Task UpdateTokensAsync(AdminEntity user, CancellationToken cancellationToken = default);
+        Task InsertAdminLogAsync(AdminLogEntity adminLog, CancellationToken cancellationToken = default);
+        Task UpdateAuthNumberConfirmAsync(AppAuthNumberInfoEntity appAuthNumberInfo, CancellationToken cancellationToken = default);
     }
 }

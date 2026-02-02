@@ -70,42 +70,11 @@ VALUES (@Id, @Aid, @Token, @ExpiresAt, @IsRevoked, @RevokedByIp, @RevokedAt, @Re
             }
         }
 
-        public async Task UpdateLoginSuccessAsync(AdminEntity user, CancellationToken cancellationToken = default)
+        public async Task UpdateLoginFailureAsync(AdminEntity admin, CancellationToken cancellationToken = default)
         {
             try
             {
-                _logger.LogInformation("Updating login success for User. Aid: {Aid}", user.Aid);
-                var sql = @"
-                        UPDATE tb_admin
-                           SET last_login_dt = @LastLoginDt,
-                               login_fail_count = 0,
-                               account_locked = @AccountLocked,
-                               access_token = @AccessToken,
-                               refresh_token = @RefreshToken
-                         WHERE aid = @Aid";
-
-                using var connection = _connectionFactory.CreateConnection();
-                await connection.ExecuteAsync(sql, new
-                {
-                    Aid = user.Aid,
-                    LastLoginDt = user.LastLoginDt,
-                    AccountLocked = user.AccountLocked,
-                    AccessToken = user.AccessToken,
-                    RefreshToken = user.RefreshToken,
-                });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating login success for User. Aid: {Aid}", user.Aid);
-                throw;
-            }
-        }
-
-        public async Task UpdateLoginFailureAsync(AdminEntity user, CancellationToken cancellationToken = default)
-        {
-            try
-            {
-                _logger.LogInformation("Updating login failure for User. Aid: {Aid}", user.Aid);
+                _logger.LogInformation("Updating login failure for User. Aid: {Aid}", admin.Aid);
 
                 var sql = @"
                         UPDATE tb_admin
@@ -116,39 +85,118 @@ VALUES (@Id, @Aid, @Token, @ExpiresAt, @IsRevoked, @RevokedByIp, @RevokedAt, @Re
                 using var connection = _connectionFactory.CreateConnection();
                 await connection.ExecuteAsync(sql, new
                 {
-                    user.LoginFailCount,
-                    user.AccountLocked,
-                    user.Aid
+                    admin.Aid,
+                    admin.LoginFailCount,
+                    admin.AccountLocked
                 });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating login failure for User. Aid: {Aid}", user.Aid);
+                _logger.LogError(ex, "Error updating login failure for User. Aid: {Aid}", admin.Aid);
                 throw;
             }
         }
 
-        public async Task UpdateTokensAsync(AdminEntity user, CancellationToken cancellationToken = default)
+        public async Task UpdateLoginSuccessAsync(AdminEntity admin, CancellationToken cancellationToken = default)
         {
             try
             {
-                _logger.LogInformation("Updating tokens for User. Aid: {Aid}", user.Aid);
-
+                _logger.LogInformation("Updating login success for User. Aid: {Aid}", admin.Aid);
                 var sql = @"
                         UPDATE tb_admin
-                           SET refresh_token = @RefreshToken
+                           SET last_login_dt = UNIX_TIMESTAMP(NOW()),
+                               login_fail_count = 0,
+                               account_locked = 'N'
                          WHERE aid = @Aid";
 
                 using var connection = _connectionFactory.CreateConnection();
                 await connection.ExecuteAsync(sql, new
                 {
-                    user.RefreshToken,
-                    user.Aid
+                    Aid = admin.Aid,
+                    AccessToken = admin.AccessToken,
+                    RefreshToken = admin.RefreshToken,
                 });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating tokens for User. Aid: {Aid}", user.Aid);
+                _logger.LogError(ex, "Error updating login success for User. Aid: {Aid}", admin.Aid);
+                throw;
+            }
+        }
+
+        public async Task UpdateTokensAsync(AdminEntity admin, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                _logger.LogInformation("Updating tokens for User. Aid: {Aid}", admin.Aid);
+
+                var sql = @"
+                        UPDATE tb_admin
+                           SET access_token = @AccessToken,
+                               refresh_token = @RefreshToken
+                         WHERE aid = @Aid";
+
+                using var connection = _connectionFactory.CreateConnection();
+                await connection.ExecuteAsync(sql, new
+                {
+                    admin.Aid,
+                    admin.AccessToken,
+                    admin.RefreshToken
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating tokens for User. Aid: {Aid}", admin.Aid);
+                throw;
+            }
+        }
+
+        public async Task InsertAdminLogAsync(AdminLogEntity adminLog, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                _logger.LogInformation("Inserting Admin Log. Aid: {Aid}", adminLog.Aid);
+
+                var sql = @"
+                        INSERT INTO tb_admin_log (aid, user_agent, ip, reg_dt)
+                        VALUES (@Aid, @UserAgent, @Ip, UNIX_TIMESTAMP(NOW()));";
+
+                using var connection = _connectionFactory.CreateConnection();
+                await connection.ExecuteAsync(sql, new
+                {
+                    adminLog.Aid,
+                    adminLog.UserAgent,
+                    adminLog.IP
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error Inserting Admin Log. Aid: {Aid}", adminLog.Aid);
+                throw;
+            }
+        }
+
+        public async Task UpdateAuthNumberConfirmAsync(AppAuthNumberInfoEntity appAuthNumberInfo, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                _logger.LogInformation("Updating App Auth Number Info for AuthId. AuthId: {AuthId}", appAuthNumberInfo.AuthId);
+
+                var sql = @"
+                        UPDATE tb_app_auth_number_info
+                           SET confirmYn = 'Y',
+                               mod_dt    = UNIX_TIMESTAMP(NOW())
+                         WHERE auth_id = @AuthId;";
+
+                using var connection = _connectionFactory.CreateConnection();
+                await connection.ExecuteAsync(sql, new
+                {
+                    appAuthNumberInfo.AuthId
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error Updating App Auth Number Info for AuthId. AuthId: {AuthId}", appAuthNumberInfo.AuthId);
                 throw;
             }
         }

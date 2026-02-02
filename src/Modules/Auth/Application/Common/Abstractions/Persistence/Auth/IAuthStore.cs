@@ -8,5 +8,6 @@ namespace Hello100Admin.Modules.Auth.Application.Common.Abstractions.Persistence
         Task<AdminModel?> GetAdminByAidAsync(string aid, CancellationToken cancellationToken = default);
         Task<AdminModel?> GetAdminByAccIdAsync(string accId, CancellationToken cancellationToken = default);
         Task<RefreshTokenEntity?> GetByTokenAsync(string token, CancellationToken cancellationToken = default);
+        Task<AppAuthNumberInfoEntity?> GetAppAuthNumberInfoAsync(int authId, CancellationToken cancellationToken = default);
     }
 }

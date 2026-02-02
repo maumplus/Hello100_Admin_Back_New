@@ -107,6 +107,39 @@ namespace Hello100Admin.Modules.Auth.Infrastructure.Repositories
             }
         }
 
+        public async Task<AppAuthNumberInfoEntity?> GetAppAuthNumberInfoAsync(int authId, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                _logger.LogInformation("Getting App Auth Number Info by AuthId: {AuthId}", authId);
+
+                var parameters = new DynamicParameters();
+                parameters.Add("AuthId", authId, DbType.Int32);
+
+                var sql = @"
+                    SELECT auth_id                                                 AS AuthId,
+                           app_cd                                                  AS AppCd,
+                           `key`                                                   AS `Key`,
+                           auth_number                                             AS AuthNumber,
+                           confirmYn                                               AS ConfirmYn,
+                           mod_dt                                                  AS ModUnixDt,
+                           DATE_FORMAT(FROM_UNIXTIME(mod_dt), '%Y-%m-%d %H:%i:%s') AS ModDt,
+                           reg_dt                                                  AS RegUnixDt,
+                           DATE_FORMAT(FROM_UNIXTIME(reg_dt), '%Y-%m-%d %H:%i:%s') AS RegDt
+                      FROM tb_app_auth_number_info
+                     WHERE auth_id = @AuthId;";
+
+                using var connection = _connectionFactory.CreateConnection();
+
+                return await connection.QueryFirstOrDefaultAsync<AppAuthNumberInfoEntity>(sql, parameters);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting App Auth Number Info by AuthId: {AuthId}", authId);
+                throw;
+            }
+        }
+
         public async Task<RefreshTokenEntity?> GetByTokenAsync(string token, CancellationToken cancellationToken = default)
         {
             try

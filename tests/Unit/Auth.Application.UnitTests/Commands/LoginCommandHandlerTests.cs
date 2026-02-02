@@ -23,7 +23,8 @@ namespace Hello100Admin.Modules.Auth.Application.UnitTests.Commands
 				Grade = "S",
 				Name = "테스트유저",
 				AccountLocked = "N",
-				LastLoginDt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+                LoginFailCount = 0,
+                LastLoginDt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
 			};
 			var authStore = new Mock<IAuthStore>();
 			authStore.Setup(r => r.GetAdminByAccIdAsync(user.AccId, It.IsAny<CancellationToken>())).ReturnsAsync(user);
@@ -52,7 +53,7 @@ namespace Hello100Admin.Modules.Auth.Application.UnitTests.Commands
 		{
 			// Arrange
 			var authStore = new Mock<IAuthStore>();
-			authStore.Setup(r => r.GetAdminByAccIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync((AdminEntity?)null);
+			authStore.Setup(r => r.GetAdminByAccIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync((AdminModel?)null);
 			var mockPasswordHasher = new Mock<IPasswordHasher>();
 			var mockTokenService = new Mock<ITokenService>();
 			var authRepo = new Mock<IAuthRepository>();
@@ -71,14 +72,13 @@ namespace Hello100Admin.Modules.Auth.Application.UnitTests.Commands
 		public async Task Handle_ShouldReturnFailure_WhenPasswordIsInvalid()
 		{
 			// Arrange
-			var user = new AdminEntity
+			var user = new AdminModel
 			{
 				Aid = "A0000001",
 				AccId = "testuser",
 				AccPwd = "hashedpwd",
 				Grade = "S",
 				Name = "테스트유저",
-				DelYn = "N",
 				AccountLocked = "N",
 				LoginFailCount = 0,
 				LastLoginDt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")

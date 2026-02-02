@@ -17,6 +17,18 @@ namespace Hello100Admin.API.Controllers
         protected string HospNo => User.FindFirst("hospNo")?.Value ?? "";
         protected string HospKey => User.FindFirst("hospKey")?.Value ?? "";
 
+        protected string? GetClientUserAgent()
+        {
+            string? userAgent = null;
+
+            if (!string.IsNullOrEmpty(Request.Headers["User-Agent"]))
+            {
+                userAgent = Request.Headers["User-Agent"].FirstOrDefault();
+            }
+
+            return userAgent;
+        }
+
         protected string? GetClientIpAddress()
         {
             string? clientIp = null;

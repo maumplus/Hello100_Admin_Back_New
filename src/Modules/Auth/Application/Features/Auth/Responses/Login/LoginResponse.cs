@@ -3,7 +3,7 @@ using Hello100Admin.Modules.Auth.Application.Features.Auth.Responses.GetUser;
 namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Responses.Login;
 
 /// <summary>
-/// 로그인 응답 DTO
+/// 로그인 응답 Response
 /// </summary>
 public class LoginResponse
 {

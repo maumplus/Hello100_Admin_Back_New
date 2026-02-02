@@ -8,6 +8,7 @@ using Hello100Admin.Modules.Auth.Application.Features.Auth.Responses.Login;
 using Hello100Admin.Modules.Auth.Domain.Entities;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using System.Net;
 
 namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.Login;
 
@@ -59,16 +60,31 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginRes
 
         if (!_passwordHasher.VerifyPassword(adminInfo.AccPwd, request.Password, adminInfo.Aid))
         {
-            adminInfo.LoginFailCount++;
+            return Result.Success<LoginResponse>().WithError(GlobalErrorCode.AuthFailed.ToError());
+        }
 
-            if (adminInfo.LoginFailCount >= 5)  // 5회 실패 시 계정 잠금
+        if (adminInfo.Use2fa == "Y")
+        {
+            var appAuthNumberInfo = await _authStore.GetAppAuthNumberInfoAsync(request.AuthId);
+
+            if (appAuthNumberInfo == null)
             {
-                adminInfo.AccountLocked = "Y";
+                return Result.Success<LoginResponse>().WithError(GlobalErrorCode.InvalidVerificationCode.ToError());
             }
 
-            await _authRepository.UpdateLoginFailureAsync(adminEntity, cancellationToken);
+            if (!_passwordHasher.VerifyAuthNumber(appAuthNumberInfo.AuthNumber, request.AuthNumber, request.AppCd))
+            {
+                return Result.Success<LoginResponse>().WithError(GlobalErrorCode.InvalidVerificationCode.ToError());
+            }
 
-            return Result.Success<LoginResponse>().WithError(GlobalErrorCode.AuthFailed.ToError());
+            try
+            {
+                await _authRepository.UpdateAuthNumberConfirmAsync(appAuthNumberInfo);
+            }
+            catch
+            {
+                return Result.Success<LoginResponse>().WithError(GlobalErrorCode.InvalidVerificationCode.ToError());
+            }
         }
 
         var roles = new[] { GetRoleNameByGrade(adminInfo.Grade) };
@@ -76,9 +92,18 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginRes
         var accessToken = _tokenService.GenerateAccessToken(adminInfo, roles);
         var refreshToken = _tokenService.GenerateRefreshToken(adminInfo.Aid, request.IpAddress);
 
+        adminEntity.AccessToken = accessToken;
         adminEntity.RefreshToken = refreshToken.Token;
 
-        await _authRepository.UpdateLoginSuccessAsync(adminEntity, cancellationToken);
+        await _authRepository.UpdateTokensAsync(adminEntity, cancellationToken);
+
+        var adminLog = new AdminLogEntity()
+        {
+            Aid = adminInfo.Aid,
+            UserAgent = request.UserAgent,
+            IP = request.IpAddress
+        };
+        await _authRepository.InsertAdminLogAsync(adminLog, cancellationToken);
 
         var response = new LoginResponse
         {

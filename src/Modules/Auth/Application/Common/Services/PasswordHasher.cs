@@ -52,9 +52,9 @@ public class PasswordHasher : IPasswordHasher
             throw new ArgumentException("Salt cannot be empty", nameof(salt));
         }
 
-        _logger.LogDebug("Hashing password with salt for AccountId={AccountId}", salt);
+        _logger.LogDebug("Hashing password with salt for Aid={Aid}", salt);
         var hashedPassword = SHA256SaltHash(password, salt);
-        _logger.LogDebug("Password hashed successfully for AccountId={AccountId}", salt);
+        _logger.LogDebug("Password hashed successfully for Aid={Aid}", salt);
         return hashedPassword;
     }
 
@@ -71,13 +71,13 @@ public class PasswordHasher : IPasswordHasher
             string.IsNullOrWhiteSpace(hashedPassword) || 
             string.IsNullOrWhiteSpace(salt))
         {
-            _logger.LogWarning("Password verification failed: empty input for AccountId={AccountId}", salt);
+            _logger.LogWarning("Password verification failed: empty input for Aid={Aid}", salt);
             return false;
         }
 
         try
         {
-            _logger.LogDebug("Verifying password for AccountId={AccountId}", salt);
+            _logger.LogDebug("Verifying password for Aid={Aid}", salt);
             
             // 입력된 비밀번호 + salt로 해시 생성
             var computedHash = SHA256SaltHash(plainPassword, salt);
@@ -90,11 +90,59 @@ public class PasswordHasher : IPasswordHasher
 
             if (isValid)
             {
-                _logger.LogDebug("Password verification successful for AccountId={AccountId}", salt);
+                _logger.LogDebug("Password verification successful for Aid={Aid}", salt);
             }
             else
             {
-                _logger.LogWarning("Password verification failed: mismatch for AccountId={AccountId}", salt);
+                _logger.LogWarning("Password verification failed: mismatch for Aid={Aid}", salt);
+            }
+
+            return isValid;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Password verification error for Aid={Aid}", salt);
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// 인증번호 검증 (레거시 방식: SHA256SaltHash(authNumber, appCd))
+    /// </summary>
+    /// <param name="hashedAuthNumber">저장된 해시 인증번호</param>
+    /// <param name="plainAuthNumber">입력된 평문 인증번호</param>
+    /// <param name="salt">Salt (appCd 값)</param>
+    /// <returns>일치 여부</returns>
+    public bool VerifyAuthNumber(string hashedAuthNumber, string plainAuthNumber, string salt)
+    {
+        if (string.IsNullOrWhiteSpace(plainAuthNumber) ||
+            string.IsNullOrWhiteSpace(hashedAuthNumber) ||
+            string.IsNullOrWhiteSpace(salt))
+        {
+            _logger.LogWarning("Auth Number verification failed: empty input for AppCd={AppCd}", salt);
+            return false;
+        }
+
+        try
+        {
+            _logger.LogDebug("Verifying Auth Number for AppCd={AppCd}", salt);
+
+            // 입력된 비밀번호 + salt로 해시 생성
+            var computedHash = SHA256SaltHash(plainAuthNumber, salt);
+
+            // 타이밍 공격 방지를 위한 고정 시간 비교
+            var isValid = CryptographicOperations.FixedTimeEquals(
+                Encoding.ASCII.GetBytes(hashedAuthNumber),
+                Encoding.ASCII.GetBytes(computedHash)
+            );
+
+            if (isValid)
+            {
+                _logger.LogDebug("Auth Number verification successful for AppCd={AppCd}", salt);
+            }
+            else
+            {
+                _logger.LogWarning("Auth Number verification failed: mismatch for AppCd={AppCd}", salt);
             }
 
             return isValid;

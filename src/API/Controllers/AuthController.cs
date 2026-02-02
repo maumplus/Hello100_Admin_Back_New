@@ -35,9 +35,13 @@ public class AuthController : BaseController
         _logger.LogInformation("Login attempt for AccountId: {AccId} from IP: {IpAddress}",
             command.AccountId, GetClientIpAddress());
 
+        // 클라이언트 UserAgent 추출
+        var userAgent = GetClientUserAgent();
+
         // 클라이언트 IP 추출
         var ipAddress = GetClientIpAddress();
-        var commandWithIp = command with { IpAddress = ipAddress };
+
+        var commandWithIp = command with { UserAgent = userAgent, IpAddress = ipAddress };
 
         var result = await _mediator.Send(commandWithIp);
 
