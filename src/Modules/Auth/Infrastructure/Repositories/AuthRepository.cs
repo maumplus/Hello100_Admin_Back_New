@@ -70,7 +70,7 @@ VALUES (@Id, @Aid, @Token, @ExpiresAt, @IsRevoked, @RevokedByIp, @RevokedAt, @Re
             }
         }
 
-        public async Task UpdateLoginSuccessAsync(UserEntity user, CancellationToken cancellationToken = default)
+        public async Task UpdateLoginSuccessAsync(AdminEntity user, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -101,11 +101,12 @@ VALUES (@Id, @Aid, @Token, @ExpiresAt, @IsRevoked, @RevokedByIp, @RevokedAt, @Re
             }
         }
 
-        public async Task UpdateLoginFailureAsync(UserEntity user, CancellationToken cancellationToken = default)
+        public async Task UpdateLoginFailureAsync(AdminEntity user, CancellationToken cancellationToken = default)
         {
             try
             {
                 _logger.LogInformation("Updating login failure for User. Aid: {Aid}", user.Aid);
+
                 var sql = @"
                         UPDATE tb_admin
                            SET login_fail_count = @LoginFailCount,
@@ -127,12 +128,17 @@ VALUES (@Id, @Aid, @Token, @ExpiresAt, @IsRevoked, @RevokedByIp, @RevokedAt, @Re
             }
         }
 
-        public async Task UpdateTokensAsync(UserEntity user, CancellationToken cancellationToken = default)
+        public async Task UpdateTokensAsync(AdminEntity user, CancellationToken cancellationToken = default)
         {
             try
             {
                 _logger.LogInformation("Updating tokens for User. Aid: {Aid}", user.Aid);
-                var sql = @"UPDATE tb_admin SET refresh_token = @RefreshToken WHERE aid = @Aid";
+
+                var sql = @"
+                        UPDATE tb_admin
+                           SET refresh_token = @RefreshToken
+                         WHERE aid = @Aid";
+
                 using var connection = _connectionFactory.CreateConnection();
                 await connection.ExecuteAsync(sql, new
                 {

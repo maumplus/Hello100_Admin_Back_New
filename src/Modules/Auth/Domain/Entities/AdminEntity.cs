@@ -1,11 +1,12 @@
 using Hello100Admin.BuildingBlocks.Common.Domain;
+using System.Text.Json.Serialization;
 
 namespace Hello100Admin.Modules.Auth.Domain.Entities;
 
 /// <summary>
 /// 관리자 정보 엔티티 (tb_admin)
 /// </summary>
-public class UserEntity : AggregateRoot<string>
+public class AdminEntity : AggregateRoot<string>
 {
     /// <summary>
     /// 관리자아이디
@@ -24,10 +25,6 @@ public class UserEntity : AggregateRoot<string>
     /// </summary>
     public string HospNo { get; set; } = string.Empty;
     /// <summary>
-    /// 요양기관키
-    /// </summary>
-    public string HospKey { get; set; } = string.Empty;
-    /// <summary>
     /// 등급(tb_common:07)
     /// </summary>
     public required string Grade { get; set; }
@@ -40,13 +37,23 @@ public class UserEntity : AggregateRoot<string>
     /// </summary>
     public required string DelYn { get; set; }
     /// <summary>
-    /// 마지막 로그인 일시
+    ///
     /// </summary>
-    public int? LastLoginDt { get; set; }
+    [JsonIgnore]
+    public int RegUnixDt { get; set; }
+    /// <summary>
+    /// 등록일자
+    /// </summary>
+    public string RegDt { get; set; }
+    /// <summary>
+    ///
+    /// </summary>
+    [JsonIgnore]
+    public int? LastLoginUnixDt { get; set; }
     /// <summary>
     /// 마지막 로그인 일시
     /// </summary>
-    public string? LastLoginDtStr { get; set; }
+    public string? LastLoginDt { get; set; }
     /// <summary>
     /// hosp 매핑 최종 동의 시간
     /// </summary>
@@ -68,13 +75,14 @@ public class UserEntity : AggregateRoot<string>
     /// </summary>
     public int? LoginFailCount { get; set; }
     /// <summary>
-    /// 마지막 비밀번호 변경 일시
+    ///
     /// </summary>
-    public int? LastPwdChangeDt { get; set; }
+    [JsonIgnore]
+    public int? LastPwdChangeUnixDt { get; set; }
     /// <summary>
     /// 마지막 비밀번호 변경 일시
     /// </summary>
-    public string? LastPwdChangeDtStr { get; set; }
+    public string? LastPwdChangeDt { get; set; }
     /// <summary>
     /// 엑세스 토큰
     /// </summary>

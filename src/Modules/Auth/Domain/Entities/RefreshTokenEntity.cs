@@ -8,7 +8,7 @@ namespace Hello100Admin.Modules.Auth.Domain.Entities;
 public class RefreshTokenEntity : BaseEntity
 {
     public string Aid { get; private set; } = string.Empty;  // tb_admin.aid와 매핑
-    public UserEntity User { get; private set; } = null!;
+    public AdminEntity User { get; private set; } = null!;
 
     public string Token { get; private set; }
     public DateTime ExpiresAt { get; private set; }

@@ -29,13 +29,12 @@ public class GetUserQueryHandler : IRequestHandler<GetUserQuery, Result<UserResp
 
         var userDto = new UserResponse
         {
-            Aid = user.Aid,
-            AccId = user.AccId,
+            Id = user.Aid,
+            AccountId = user.AccId,
             Name = user.Name,
-            HospNo = user.HospNo,
             Grade = user.Grade,
             AccountLocked = user.AccountLocked,
-            LastLoginDt = user.LastLoginDtStr
+            LastLoginDt = user.LastLoginDt
         };
 
         return Result.Success(userDto);

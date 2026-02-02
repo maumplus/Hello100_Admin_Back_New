@@ -8,9 +8,9 @@ namespace Hello100Admin.Modules.Auth.Domain.UnitTests.Entities;
 /// </summary>
 public class UserTests
 {
-    private UserEntity CreateDefaultUser()
+    private AdminEntity CreateDefaultUser()
     {
-        return new UserEntity
+        return new AdminEntity
         {
             Aid = "A0000001",
             AccId = "testuser",

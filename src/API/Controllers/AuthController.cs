@@ -33,7 +33,7 @@ public class AuthController : BaseController
     public async Task<IActionResult> Login([FromBody] LoginCommand command)
     {
         _logger.LogInformation("Login attempt for AccountId: {AccId} from IP: {IpAddress}",
-            command.AccId, GetClientIpAddress());
+            command.AccountId, GetClientIpAddress());
 
         // 클라이언트 IP 추출
         var ipAddress = GetClientIpAddress();
@@ -41,7 +41,7 @@ public class AuthController : BaseController
 
         var result = await _mediator.Send(commandWithIp);
 
-        _logger.LogInformation("User {AccountId} logged in process completed", command.AccId);
+        _logger.LogInformation("User {AccountId} logged in process completed", command.AccountId);
 
         // 중앙화된 매퍼 사용: 성공/실패 모두 ToActionResult에서 처리합니다.
         return result.ToActionResult(this, authEndpoint: true);

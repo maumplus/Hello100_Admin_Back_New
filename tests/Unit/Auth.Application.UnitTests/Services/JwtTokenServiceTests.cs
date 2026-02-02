@@ -36,7 +36,7 @@ namespace Hello100Admin.Modules.Auth.Application.UnitTests.Services
         {
             // Arrange
             var service = CreateService();
-            var user = new UserEntity
+            var user = new AdminEntity
             {
                 Aid = "A0000001",
                 AccId = "testuser",

@@ -1,3 +1,4 @@
+using Hello100Admin.Modules.Auth.Application.Features.Auth.ReadModels;
 using Hello100Admin.Modules.Auth.Domain.Entities;
 
 namespace Hello100Admin.Modules.Auth.Application.Common.Abstractions.Services;
@@ -10,7 +11,7 @@ public interface ITokenService
     /// <summary>
     /// Access Token 생성
     /// </summary>
-    string GenerateAccessToken(UserEntity adminInfo);
+    string GenerateAccessToken(AdminModel adminInfo, IEnumerable<string> roles);
 
     /// <summary>
     /// Refresh Token 생성
@@ -25,5 +26,5 @@ public interface ITokenService
     /// <summary>
     /// Refresh Token으로 사용자 조회
     /// </summary>
-    Task<UserEntity?> GetUserByRefreshTokenAsync(string token, CancellationToken cancellationToken = default);
+    Task<AdminModel?> GetUserByRefreshTokenAsync(string token, CancellationToken cancellationToken = default);
 }

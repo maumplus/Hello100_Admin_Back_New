@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 using Hello100Admin.Modules.Auth.Application.Common.Abstractions.Persistence.Auth;
+using Hello100Admin.Modules.Auth.Application.Features.Auth.ReadModels;
 using Hello100Admin.Modules.Auth.Domain.Entities;
 using Hello100Admin.Modules.Auth.Infrastructure.Persistence.DbModels.Auth;
 using Mapster;
@@ -20,7 +21,7 @@ namespace Hello100Admin.Modules.Auth.Infrastructure.Repositories
             _logger = logger;
         }
 
-        public async Task<UserEntity?> GetAdminByAidAsync(string aid, CancellationToken cancellationToken = default)
+        public async Task<AdminModel?> GetAdminByAidAsync(string aid, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -30,27 +31,21 @@ namespace Hello100Admin.Modules.Auth.Infrastructure.Repositories
                 parameters.Add("Aid", aid, DbType.String);
 
                 var sql = @"
-                    SELECT a.aid                               AS AId,
-                           a.acc_id                            AS AccId,
-                           a.acc_pwd                           AS AccPwd,
-                           a.hosp_no                           AS HospNo,
-                           b.hosp_key                          AS HospKey,
-                           a.grade                             AS Grade,
-                           a.name                              AS Name,
-                           a.tel                               AS Tel,
-                           a.email                             AS Email,
-                           a.del_yn                            AS DelYn,
-                           FROM_UNIXTIME(a.reg_dt)             AS RegDt,
-                           FROM_UNIXTIME(a.last_login_dt)      AS LastLoginDt,
-                           a.agree_dt                          AS AgreeDt,
-                           a.role_id                           AS RoleId,
-                           a.use_2fa                           AS Use2Fa,
-                           a.account_locked                    AS AccountLocked,
-                           a.login_fail_count                  AS LoginFailCount,
-                           FROM_UNIXTIME(a.last_pwd_change_dt) AS LastPwdChangeDt,
-                           a.access_token                      AS AccessToken,
-                           a.refresh_token                     AS RefresgToken,
-                           a.2fa_key                           AS 2faKey
+                    SELECT a.aid                                                                AS AId,
+                           a.acc_id                                                             AS AccId,
+                           a.acc_pwd                                                            AS AccPwd,
+                           a.hosp_no                                                            AS HospNo,
+                           b.hosp_key                                                           AS HospKey,
+                           a.grade                                                              AS Grade,
+                           a.name                                                               AS Name,
+                           a.tel                                                                AS Tel,
+                           a.email                                                              AS Email,
+                           DATE_FORMAT(FROM_UNIXTIME(a.last_login_dt), '%Y-%m-%d %H:%i:%s')     AS LastLoginDt,
+                           a.use_2fa                                                            AS Use2fa,
+                           a.account_locked                                                     AS AccountLocked,
+                           a.login_fail_count                                                   AS LoginFailCount,
+                           a.access_token                                                       AS AccessToken,
+                           a.refresh_token                                                      AS RefresgToken
                       FROM tb_admin a
                       LEFT JOIN tb_eghis_hosp_info b
                              ON a.hosp_no = b.hosp_no
@@ -60,7 +55,7 @@ namespace Hello100Admin.Modules.Auth.Infrastructure.Repositories
 
                 using var connection = _connectionFactory.CreateConnection();
 
-                return await connection.QueryFirstOrDefaultAsync<UserEntity>(sql, parameters);
+                return await connection.QueryFirstOrDefaultAsync<AdminModel>(sql, parameters);
             }
             catch (Exception ex)
             {
@@ -69,7 +64,7 @@ namespace Hello100Admin.Modules.Auth.Infrastructure.Repositories
             }
         }
 
-        public async Task<UserEntity?> GetAdminByAccIdAsync(string accId, CancellationToken cancellationToken = default)
+        public async Task<AdminModel?> GetAdminByAccIdAsync(string accId, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -79,30 +74,21 @@ namespace Hello100Admin.Modules.Auth.Infrastructure.Repositories
                 parameters.Add("AccId", accId, DbType.String);
 
                 var sql = @"
-                    SELECT a.aid                               AS Aid,
-                           a.acc_id                            AS AccId,
-                           a.acc_pwd                           AS AccPwd,
-                           a.hosp_no                           AS HospNo,
-                           b.hosp_key                          AS HospKey,
-                           a.grade                             AS Grade,
-                           a.name                              AS Name,
-                           a.tel                               AS Tel,
-                           a.email                             AS Email,
-                           a.del_yn                            AS DelYn,
-                           a.reg_dt                            AS RegDt,
-                           FROM_UNIXTIME(a.reg_dt)             AS RegDtStr,
-                           a.last_login_dt                     AS LastLoginDt,
-                           FROM_UNIXTIME(a.last_login_dt)      AS LastLoginDtStr,
-                           a.agree_dt                          AS AgreeDt,
-                           a.role_id                           AS RoleId,
-                           a.use_2fa                           AS Use2a,
-                           a.account_locked                    AS AccountLocked,
-                           a.login_fail_count                  AS LoginFailCount,
-                           a.last_pwd_change_dt                AS LastPwdChangeDt,
-                           FROM_UNIXTIME(a.last_pwd_change_dt) AS LastPwdChangeDtStr,
-                           a.access_token                      AS AccessToken,
-                           a.refresh_token                     AS RefresgToken,
-                           a.2fa_key                           AS 2faKey
+                    SELECT a.aid                                                                AS AId,
+                           a.acc_id                                                             AS AccId,
+                           a.acc_pwd                                                            AS AccPwd,
+                           a.hosp_no                                                            AS HospNo,
+                           b.hosp_key                                                           AS HospKey,
+                           a.grade                                                              AS Grade,
+                           a.name                                                               AS Name,
+                           a.tel                                                                AS Tel,
+                           a.email                                                              AS Email,
+                           DATE_FORMAT(FROM_UNIXTIME(a.last_login_dt), '%Y-%m-%d %H:%i:%s')     AS LastLoginDt,
+                           a.use_2fa                                                            AS Use2fa,
+                           a.account_locked                                                     AS AccountLocked,
+                           a.login_fail_count                                                   AS LoginFailCount,
+                           a.access_token                                                       AS AccessToken,
+                           a.refresh_token                                                      AS RefresgToken
                       FROM tb_admin a
                       LEFT JOIN tb_eghis_hosp_info b
                              ON a.hosp_no = b.hosp_no
@@ -112,7 +98,7 @@ namespace Hello100Admin.Modules.Auth.Infrastructure.Repositories
 
                 using var connection = _connectionFactory.CreateConnection();
 
-                return await connection.QueryFirstOrDefaultAsync<UserEntity>(sql, parameters);
+                return await connection.QueryFirstOrDefaultAsync<AdminModel>(sql, parameters);
             }
             catch (Exception ex)
             {

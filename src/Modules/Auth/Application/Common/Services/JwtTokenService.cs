@@ -1,5 +1,6 @@
 using Hello100Admin.Modules.Auth.Application.Common.Abstractions.Persistence.Auth;
 using Hello100Admin.Modules.Auth.Application.Common.Abstractions.Services;
+using Hello100Admin.Modules.Auth.Application.Features.Auth.ReadModels;
 using Hello100Admin.Modules.Auth.Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -43,7 +44,7 @@ public class JwtTokenService : ITokenService
         _refreshTokenExpirationDays = int.Parse(_configuration["Jwt:RefreshTokenExpirationDays"] ?? "1");
     }
 
-    public string GenerateAccessToken(UserEntity adminInfo)
+    public string GenerateAccessToken(AdminModel adminInfo, IEnumerable<string> roles)
     {
         if (_secretKey == null)
         {
@@ -58,10 +59,15 @@ public class JwtTokenService : ITokenService
             new Claim("accId", adminInfo.AccId),
             new Claim("name", adminInfo.Name),
             new Claim("grade", adminInfo.Grade),
-            new Claim("hospNo", adminInfo.HospNo),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
         };
 
+        // 역할 추가
+        foreach (var role in roles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, role));
+        }
+            
         if (!string.IsNullOrEmpty(adminInfo.HospNo) && !string.IsNullOrEmpty(adminInfo.HospKey))
         {
             claims.Add(new Claim("hospNo", adminInfo.HospNo));
@@ -126,7 +132,7 @@ public class JwtTokenService : ITokenService
         return true;
     }
 
-    public async Task<UserEntity?> GetUserByRefreshTokenAsync(string token, CancellationToken cancellationToken = default)
+    public async Task<AdminModel?> GetUserByRefreshTokenAsync(string token, CancellationToken cancellationToken = default)
     {
         var refreshToken = await _authStore.GetByTokenAsync(token, cancellationToken);
         

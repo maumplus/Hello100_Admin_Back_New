@@ -5,6 +5,7 @@ using Hello100Admin.Modules.Auth.Application.Common.Abstractions.Persistence.Aut
 using Hello100Admin.Modules.Auth.Application.Common.Abstractions.Services;
 using Hello100Admin.Modules.Auth.Application.Features.Auth.Responses.GetUser;
 using Hello100Admin.Modules.Auth.Application.Features.Auth.Responses.Login;
+using Hello100Admin.Modules.Auth.Domain.Entities;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -37,40 +38,58 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginRes
 
     public async Task<Result<LoginResponse>> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
-        var adminInfo = await _authStore.GetAdminByAccIdAsync(request.AccId, cancellationToken);
+        var adminInfo = await _authStore.GetAdminByAccIdAsync(request.AccountId, cancellationToken);
         
         if (adminInfo == null)
         {
             return Result.Success<LoginResponse>().WithError(GlobalErrorCode.AuthFailed.ToError());
         }
 
+        var adminEntity = new AdminEntity()
+        {
+            Aid = adminInfo.Aid,
+            AccId = adminInfo.AccId,
+            AccPwd = adminInfo.AccPwd,
+            Grade = adminInfo.Grade,
+            Name = adminInfo.Name,
+            DelYn = "N",
+            AccountLocked = adminInfo.AccountLocked,
+            LoginFailCount = adminInfo.LoginFailCount
+        };
+
         if (!_passwordHasher.VerifyPassword(adminInfo.AccPwd, request.Password, adminInfo.Aid))
         {
-            adminInfo.RecordLoginFailure();
-            await _authRepository.UpdateLoginFailureAsync(adminInfo, cancellationToken);
+            adminInfo.LoginFailCount++;
+
+            if (adminInfo.LoginFailCount >= 5)  // 5회 실패 시 계정 잠금
+            {
+                adminInfo.AccountLocked = "Y";
+            }
+
+            await _authRepository.UpdateLoginFailureAsync(adminEntity, cancellationToken);
 
             return Result.Success<LoginResponse>().WithError(GlobalErrorCode.AuthFailed.ToError());
         }
 
-        var accessToken = _tokenService.GenerateAccessToken(adminInfo);
+        var roles = new[] { GetRoleNameByGrade(adminInfo.Grade) };
+
+        var accessToken = _tokenService.GenerateAccessToken(adminInfo, roles);
         var refreshToken = _tokenService.GenerateRefreshToken(adminInfo.Aid, request.IpAddress);
 
-        // 10. User 테이블에 토큰 저장
-        adminInfo.RefreshToken = refreshToken.Token;
+        adminEntity.RefreshToken = refreshToken.Token;
 
-        await _authRepository.UpdateLoginSuccessAsync(adminInfo, cancellationToken);
+        await _authRepository.UpdateLoginSuccessAsync(adminEntity, cancellationToken);
 
-        // 5. 응답 생성
         var response = new LoginResponse
         {
             User = new UserResponse
             {
-                Aid = adminInfo.Aid,
-                AccId = adminInfo.AccId,
+                Id = adminInfo.Aid,
+                AccountId = adminInfo.AccId,
                 Name = adminInfo.Name,
                 Grade = adminInfo.Grade,
                 AccountLocked = adminInfo.AccountLocked,
-                LastLoginDt = adminInfo.LastLoginDtStr,
+                LastLoginDt = adminInfo.LastLoginDt,
             },
             Token = new TokenInfo
             {

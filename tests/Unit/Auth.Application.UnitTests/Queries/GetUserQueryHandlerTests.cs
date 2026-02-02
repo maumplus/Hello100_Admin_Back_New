@@ -11,7 +11,7 @@ public class GetUserQueryHandlerTests
     public async Task Handle_ShouldReturnUserDto_WhenUserExists()
     {
         // Arrange
-        var user = new UserEntity
+        var user = new AdminEntity
         {
             Aid = "A0000001",
             AccId = "testuser",
@@ -21,7 +21,6 @@ public class GetUserQueryHandlerTests
             DelYn = "N",
             AccountLocked = "N",
             LoginFailCount = 0,
-            LastLoginDt = DateTime.UtcNow,
             HospNo = "H1234"
         };
         var mockRepo = new Mock<IAuthStore>();
@@ -34,13 +33,14 @@ public class GetUserQueryHandlerTests
 
         // Assert
         result.Data.Should().NotBeNull();
-        result.Data.Aid.Should().Be(user.Aid);
-        result.Data.AccId.Should().Be(user.AccId);
+        result.Data.Id.Should().Be(user.Aid);
+        result.Data.AccountId.Should().Be(user.AccId);
         result.Data.Name.Should().Be(user.Name);
-        result.Data.HospNo.Should().Be(user.HospNo);
         result.Data.Grade.Should().Be(user.Grade);
         result.Data.AccountLocked.Should().Be(user.AccountLocked);
         result.Data.LastLoginDt.Should().Be(user.LastLoginDt);
+        //result.Data.Roles.Should().ContainSingle();
+        //result.Data.Roles[0].Should().Be("SuperAdmin");
     }
 
     [Fact]
@@ -48,7 +48,7 @@ public class GetUserQueryHandlerTests
     {
         // Arrange
         var mockRepo = new Mock<IAuthStore>();
-        mockRepo.Setup(r => r.GetAdminByAidAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync((UserEntity?)null);
+        mockRepo.Setup(r => r.GetAdminByAidAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync((AdminEntity?)null);
         var handler = new GetUserQueryHandler(mockRepo.Object);
         var query = new GetUserQuery { Aid = "NOT_EXIST" };
 
