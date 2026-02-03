@@ -43,6 +43,13 @@ builder.Services.AddScoped<CustomJwtBearerEvents>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
+    var basePath = AppContext.BaseDirectory;
+
+    foreach (var xml in Directory.GetFiles(basePath, "*.xml", SearchOption.TopDirectoryOnly))
+    {
+        options.IncludeXmlComments(xml);
+    }
+
     options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
     {
         Title = "Hello100Admin API",

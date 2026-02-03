@@ -30,6 +30,7 @@ namespace Hello100Admin.API.Controllers
     /// 송금 API Controller
     /// </summary>
     [Auth]
+    [Route("api/seller")]
     public class SellerController : BaseController
     {
         private readonly IMediator _mediator;
@@ -50,6 +51,7 @@ namespace Hello100Admin.API.Controllers
         /// <returns>응답 결과 <see cref="Result"/></returns>
         /// <returns></returns>
         [HttpPost("add")]
+        [Auth(Roles = "SuperAdmin")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> CreateSeller(CreateSellerRequest req, CancellationToken cancellationToken = default)
         {
@@ -71,6 +73,7 @@ namespace Hello100Admin.API.Controllers
         /// <param name="req">셀러 등록 시 요청 정보 <see cref="GetSellerListRequest"/></param>
         /// <returns>응답 리스트가 포함된 결과 <see cref="PagedResult{GetSellerListResponse}"/></returns>
         [HttpPost("list")]
+        [Auth(Roles = "SuperAdmin")]
         [ProducesResponseType(typeof(ApiResponse<PagedResult<GetSellerListResponse>>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetSellerList(GetSellerListRequest req, CancellationToken cancellationToken = default)
         {
@@ -89,6 +92,7 @@ namespace Hello100Admin.API.Controllers
         /// <param name="id">셀러 일련번호</param>
         /// <returns></returns>
         [HttpGet("{id}")]
+        [Auth(Roles = "SuperAdmin")]
         [ProducesResponseType(typeof(ApiResponse<GetSellerDetailResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetSellerDetail(int id, CancellationToken cancellationToken = default)
         {
@@ -107,6 +111,7 @@ namespace Hello100Admin.API.Controllers
         /// <param name="req">송금 시 요청 정보</param>
         /// <returns></returns>
         [HttpPost("remit-add")]
+        [Auth(Roles = "SuperAdmin")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> CreateSellerRemit(CreateSellerRemitRequest req, CancellationToken cancellationToken = default)
         {
@@ -128,6 +133,7 @@ namespace Hello100Admin.API.Controllers
         /// <param name="req">송금 시 요청 정보</param>
         /// <returns></returns>
         [HttpPatch("remit-request")]
+        [Auth(Roles = "SuperAdmin")]
         [ProducesResponseType(typeof(ApiResponse<UpdateSellerRemitResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> UpdateSellerRemit(UpdateSellerRemitRequest req, CancellationToken cancellationToken = default)
         {
@@ -145,6 +151,7 @@ namespace Hello100Admin.API.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost("remit-balance")]
+        [Auth(Roles = "SuperAdmin")]
         [ProducesResponseType(typeof(ApiResponse<GetRemitBalanceResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetRemitBalance(CancellationToken cancellationToken = default)
         {
@@ -160,6 +167,7 @@ namespace Hello100Admin.API.Controllers
         /// </summary>  
         /// <returns></returns>
         [HttpPost("remit-list")]
+        [Auth(Roles = "SuperAdmin")]
         [ProducesResponseType(typeof(ApiResponse<PagedResult<GetSellerRemitListResponse>>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetSellerRemitList(GetSellerRemitListRequest req, CancellationToken cancellationToken = default)
         {
@@ -177,6 +185,7 @@ namespace Hello100Admin.API.Controllers
         /// </summary>  
         /// <returns></returns>
         [HttpPost("remit-wait-list")]
+        [Auth(Roles = "SuperAdmin")]
         [ProducesResponseType(typeof(ApiResponse<GetSellerRemitWaitListResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetSellerRemitWaitList(GetSellerRemitWaitListRequest req, CancellationToken cancellationToken = default)
         {
@@ -194,6 +203,7 @@ namespace Hello100Admin.API.Controllers
         /// </summary>  
         /// <returns></returns>
         [HttpPatch("remit-delete")]
+        [Auth(Roles = "SuperAdmin")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> DeleteSellerRemit(DeleteSellerRemitRequest req, CancellationToken cancellationToken = default)
         {
@@ -211,6 +221,7 @@ namespace Hello100Admin.API.Controllers
         /// </summary>  
         /// <returns></returns>
         [HttpPatch("seller-enable")]
+        [Auth(Roles = "SuperAdmin")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> UpdateSellerRemitEnabled(UpdateSellerRemitEnabledRequest req, CancellationToken cancellationToken = default)
         {

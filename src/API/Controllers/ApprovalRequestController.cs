@@ -13,6 +13,7 @@ namespace Hello100Admin.API.Controllers
     /// 승인 요청 관리 API Controller
     /// </summary>
     [Auth]
+    [Route("api/approval-request")]
     public class ApprovalRequestController : BaseController
     {
         private readonly ILogger<ApprovalRequestController> _logger;

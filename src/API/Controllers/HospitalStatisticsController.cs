@@ -12,6 +12,7 @@ namespace Hello100Admin.API.Controllers
     /// 통계 관리 API
     /// </summary>
     [Auth]
+    [Route("api/hospital-statistics")]
     public class HospitalStatisticsController : BaseController
     {
         private readonly ILogger<HospitalStatisticsController> _logger;

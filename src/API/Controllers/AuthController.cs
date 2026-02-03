@@ -15,6 +15,7 @@ namespace Hello100Admin.API.Controllers;
 /// <summary>
 /// 인증 관련 API 컨트롤러
 /// </summary>
+[Route("api/auth")]
 public class AuthController : BaseController
 {
     private readonly IMediator _mediator;

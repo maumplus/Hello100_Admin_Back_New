@@ -30,5 +30,13 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Errors
         VisitPurposeDeleteFailed = 4010,
         [Description("제증명문서 순번 및 노출 여부 수정에 실패하였습니다.")]
         CertificateBulkUpdateFailed = 4011,
+        [Description("해당 회원 정보를 찾지 못하였습니다. 확인 후 다시 시도해주세요.")]
+        NotFoundUserInfo = 4012,
+        [Description("회원 권한 수정에 실패하였습니다. 확인 후 다시 시도해주세요.")]
+        UpdateUserRoleFailed = 4013,
+        [Description("회원 프로필 삭제에 실패하였습니다. 확인 후 다시 시도해주세요.")]
+        DeleteUserFamilyFailed = 4014,
+        [Description("회원 삭제에 실패하였습니다. 확인 후 다시 시도해주세요.")]
+        DeleteUserFailed = 4015,
     }
 }

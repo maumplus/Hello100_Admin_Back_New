@@ -26,6 +26,7 @@ namespace Hello100Admin.API.Controllers
     /// 서비스 이용 관리 API Controller
     /// </summary>
     [Auth]
+    [Route("api/service-usage")]
     public class ServiceUsageController : BaseController
     {
         private readonly ILogger<ServiceUsageController> _logger;

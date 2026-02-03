@@ -1,6 +1,7 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Net.Mime;
+using System.Security.Claims;
 using Hello100Admin.BuildingBlocks.Common.Application;
 using Hello100Admin.BuildingBlocks.Common.Errors;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Extensions;
@@ -63,27 +64,28 @@ namespace Hello100Admin.API.Infrastructure
             // AId, HospNo 검증
             var adminId = context.Principal?.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
             var hospNo = context.Principal?.FindFirst("hospital_number")?.Value;
+            var role = context.Principal?.FindFirst(ClaimTypes.Role)?.Value;
 
-            if (string.IsNullOrWhiteSpace(adminId) == true
-             || string.IsNullOrWhiteSpace(hospNo) == true)
+            if (string.IsNullOrWhiteSpace(adminId) == true)
             {
                 context.Fail("Admin Id or Hospital No is null or empty");
                 this.SetCutomAuthErrorContext(context.HttpContext, GlobalErrorCode.InvalidAccessToken.ToError());
                 return;
             }
 
+            // Role이 전체관리자가 아닌 경우 Hospital Number 필수 & 신규 병원 매핑의 경우 관련 EndPoint Anonymouse로 진행
+
+
             var authStore = context.HttpContext.RequestServices.GetRequiredService<IAuthStore>();
 
             var adminInfo = await authStore.GetAdminByAidAsync(adminId);
 
-            if (adminInfo == null || adminInfo.HospNo != hospNo)
+            if (adminInfo == null)
             {
                 context.Fail("Not found admin info");
                 this.SetCutomAuthErrorContext(context.HttpContext, GlobalErrorCode.InvalidAccessToken.ToError());
                 return;
             }
-
-            await Task.CompletedTask;
         }
 
         /// <summary>

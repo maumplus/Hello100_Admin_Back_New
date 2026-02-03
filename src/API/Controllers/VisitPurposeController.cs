@@ -26,6 +26,7 @@ namespace Hello100Admin.API.Controllers
     /// 내원목적관리 API
     /// </summary>
     [Auth]
+    [Route("api/visit-purpose")]
     public class VisitPurposeController : BaseController
     {
         private readonly ILogger<VisitPurposeController> _logger;
@@ -169,8 +170,7 @@ namespace Hello100Admin.API.Controllers
         }
 
         /// <summary>
-        /// 내원목적관리 > 내원목적편집 > 저장 (공단 검진 외 나머지)
-        /// National Health Insurance Service (국민건강보험공단), Health Screening (건강 검진) 
+        /// 내원목적관리 > 내원목적편집 > 삭제 (공단 검진 외 나머지)
         /// </summary>
         /// <param name="req"></param>
         /// <param name="cancellationToken"></param>
@@ -193,7 +193,7 @@ namespace Hello100Admin.API.Controllers
         }
 
         /// <summary>
-        /// 내원목적관리 조회
+        /// 제증명문서관리 조회
         /// </summary>
         [HttpGet("certificates")]
         [ProducesResponseType(typeof(ApiResponse<GetCertificatesResponse>), StatusCodes.Status200OK)]
@@ -207,7 +207,7 @@ namespace Hello100Admin.API.Controllers
         }
 
         /// <summary>
-        /// 내원목적관리 > 목록편집 > 저장
+        /// 제증명문서관리 > 목록편집 > 저장
         /// </summary>
         [HttpPut("certificates/bulk")]
         [ProducesResponseType(typeof(ApiResponse<GetVisitPurposesResponse>), StatusCodes.Status200OK)]

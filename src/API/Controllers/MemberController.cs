@@ -11,14 +11,15 @@ namespace Hello100Admin.API.Controllers;
 /// 멤버 관리 API Controller
 /// </summary>
 [Auth]
-public class MembersController : BaseController
+[Route("api/member")]
+public class MemberController : BaseController
 {
     private readonly IMediator _mediator;
-    private readonly ILogger<MembersController> _logger;
+    private readonly ILogger<MemberController> _logger;
 
-    public MembersController(
+    public MemberController(
         IMediator mediator,
-        ILogger<MembersController> logger)
+        ILogger<MemberController> logger)
     {
         _mediator = mediator;
         _logger = logger;
@@ -34,7 +35,7 @@ public class MembersController : BaseController
         string uid,
         CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("GET /api/members/{Uid}", uid);
+        _logger.LogInformation("GET /api/member/{Uid}", uid);
 
         var query = new GetMemberQuery(uid);
         var result = await _mediator.Send(query, cancellationToken);
