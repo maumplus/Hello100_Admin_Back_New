@@ -56,7 +56,7 @@ namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.Refresh
 
             adminEntity.AccessToken = accessToken;
 
-            await _authRepository.UpdateTokensAsync(adminEntity, cancellationToken);
+            await _authRepository.UpdateAccessTokenAsync(adminEntity, cancellationToken);
 
             var response = new RefreshResponse
             {

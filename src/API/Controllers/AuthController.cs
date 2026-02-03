@@ -156,7 +156,7 @@ public class AuthController : BaseController
         // 클라이언트 IP 추출
         var ipAddress = GetClientIpAddress();
 
-        var commandWithIp = command with { UserAgent = userAgent, IpAddress = ipAddress };
+        var commandWithIp = command with { Aid = base.Aid, UserAgent = userAgent, IpAddress = ipAddress };
 
         var result = await _mediator.Send(commandWithIp);
 

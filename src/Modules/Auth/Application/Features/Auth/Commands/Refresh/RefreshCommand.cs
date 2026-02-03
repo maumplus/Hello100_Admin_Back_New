@@ -8,7 +8,6 @@ namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.Refresh
     {
         [JsonIgnore]
         public string Aid { get; set; } = string.Empty;
-        public string AccessToken { get; init; } = string.Empty;
         [JsonIgnore]
         public string? UserAgent { get; init; } = string.Empty;
         [JsonIgnore]

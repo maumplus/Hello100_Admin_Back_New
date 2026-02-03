@@ -10,6 +10,7 @@ namespace Hello100Admin.Modules.Auth.Application.Common.Abstractions.Persistence
         Task UpdateLoginFailureAsync(AdminEntity user, CancellationToken cancellationToken = default);
         Task UpdateLoginSuccessAsync(AdminEntity user, CancellationToken cancellationToken = default);
         Task UpdateTokensAsync(AdminEntity user, CancellationToken cancellationToken = default);
+        Task UpdateAccessTokenAsync(AdminEntity admin, CancellationToken cancellationToken = default);
         Task InsertAdminLogAsync(AdminLogEntity adminLog, CancellationToken cancellationToken = default);
         Task<int> InsertAsync(AppAuthNumberInfoEntity appAuthNumberInfo, CancellationToken cancellationToken = default);
         Task UpdateConfirmAsync(AppAuthNumberInfoEntity appAuthNumberInfo, CancellationToken cancellationToken = default);
