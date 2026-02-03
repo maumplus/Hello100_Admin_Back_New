@@ -9,6 +9,7 @@ using Hello100Admin.Modules.Auth.Application.Features.Auth.Queries.GetUser;
 using Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.LoginCheck;
 using Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.SendAuthNumberToEmail;
 using Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.SendAuthNumber;
+using Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.VerifyAuthNumber;
 
 namespace Hello100Admin.API.Controllers;
 
@@ -87,6 +88,24 @@ public class AuthController : BaseController
         var result = await _mediator.Send(command);
 
         _logger.LogInformation("Send Auth Number To Sms logged in process completed");
+
+        return result.ToActionResult(this);
+    }
+
+    /// <summary>
+    /// 인증번호 검증
+    /// </summary>
+    [HttpPost("verify-auth-number")]
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> VerifyAuthNumber(VerifyAuthNumberCommand command)
+    {
+        _logger.LogInformation("Verify Auth Number.");
+
+        var result = await _mediator.Send(command);
+
+        _logger.LogInformation("Verify Auth Number logged in process completed");
 
         return result.ToActionResult(this);
     }
