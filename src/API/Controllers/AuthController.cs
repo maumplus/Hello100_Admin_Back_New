@@ -10,6 +10,7 @@ using Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.LoginCheck;
 using Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.SendAuthNumberToEmail;
 using Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.SendAuthNumber;
 using Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.VerifyAuthNumber;
+using Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.Refresh;
 
 namespace Hello100Admin.API.Controllers;
 
@@ -141,24 +142,26 @@ public class AuthController : BaseController
     /// <summary>
     /// 토큰 갱신
     /// </summary>
-    // [HttpPost("refresh")]
-    // [ProducesResponseType(StatusCodes.Status200OK)]
-    // [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    // public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenCommand command)
-    // {
-    //     _logger.LogInformation("Token refresh attempt");
+    [HttpPost("refresh")]
+    [Auth]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> Refresh([FromBody] RefreshCommand command)
+    {
+        _logger.LogInformation("Refresh attempt");
 
-    //     var result = await _mediator.Send(command);
+        // 클라이언트 UserAgent 추출
+        var userAgent = GetClientUserAgent();
 
-    //     if (!result.IsSuccess)
-    //     {
-    //         _logger.LogWarning("Token refresh failed: {Error}", result.Error);
-    //         return BadRequest(new { message = result.Error });
-    //     }
+        // 클라이언트 IP 추출
+        var ipAddress = GetClientIpAddress();
 
-    //     _logger.LogInformation("Token refreshed successfully");
-    //     return Ok(result.Value);
-    // }
+        var commandWithIp = command with { UserAgent = userAgent, IpAddress = ipAddress };
+
+        var result = await _mediator.Send(commandWithIp);
+
+        return result.ToActionResult(this);
+    }
 
     /// <summary>
     /// 로그아웃
