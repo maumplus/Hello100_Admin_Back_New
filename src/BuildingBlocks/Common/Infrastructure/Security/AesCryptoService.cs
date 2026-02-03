@@ -192,6 +192,22 @@ public class AesCryptoService : ICryptoService
     }
 
     /// <summary>
+    /// 기본 키로 암호화 (기존 코드 호환)
+    /// </summary>
+    public string EncryptWithNoVector(string plainText)
+    {
+        return EncryptWithNoVector(plainText, CryptoKeyType.Default);
+    }
+
+    /// <summary>
+    /// 기본 키로 복호화 (기존 코드 호환)
+    /// </summary>
+    public string DecryptWithNoVector(string encryptedText)
+    {
+        return DecryptWithNoVector(encryptedText, CryptoKeyType.Default);
+    }
+
+    /// <summary>
     /// 지정된 키 타입으로 AES-256 암호화
     /// </summary>
     public string EncryptWithNoVector(string plainText, CryptoKeyType keyType)
@@ -208,7 +224,7 @@ public class AesCryptoService : ICryptoService
             aes.Padding = PaddingMode.PKCS7;
 
             using var decryptor = aes.CreateEncryptor();
-            var plainBytes = Convert.FromBase64String(plainText);
+            var plainBytes = Encoding.UTF8.GetBytes(plainText);
             var encryptedBytes = decryptor.TransformFinalBlock(plainBytes, 0, plainBytes.Length);
 
             return Convert.ToBase64String(encryptedBytes);

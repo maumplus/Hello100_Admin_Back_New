@@ -49,7 +49,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Queries.
                     HospNo = req.HospNo,
                     FromDate = Convert.ToDateTime(req.FromDate).ToString("yyyyMMdd"),
                     ToDate = Convert.ToDateTime(req.ToDate).ToString("yyyyMMdd"),
-                    EncKey = _cryptoService.Encrypt("clinic2013!" + DateTime.Now.ToString("yyyyMMdd"))
+                    EncKey = _cryptoService.EncryptWithNoVector("clinic2013!" + DateTime.Now.ToString("yyyyMMdd"))
                 };
 
                 var bizResult = await _bizApiClientService.SendHistoryAsync(kakaoBizRequest, token);

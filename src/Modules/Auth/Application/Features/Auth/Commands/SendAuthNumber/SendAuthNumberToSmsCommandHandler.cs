@@ -81,7 +81,7 @@ namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.SendAuth
             {
                 PhoneNo = request.Tel,
                 Otp = authNumber,
-                EncKey = _cryptoService.Encrypt("clinic2013!" + DateTime.Now.ToString("yyyyMMdd")),
+                EncKey = _cryptoService.EncryptWithNoVector("clinic2013!" + DateTime.Now.ToString("yyyyMMdd")),
             };
 
             try
