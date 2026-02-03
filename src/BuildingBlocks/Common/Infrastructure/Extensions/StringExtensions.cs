@@ -45,4 +45,20 @@ public static class StringExtensions
 
         return value.Length <= maxLength ? value : value.Substring(0, maxLength);
     }
+
+    public static DateTime? ToDateTime(this string value, string format)
+    {
+        DateTime? dateTime = null;
+
+        try
+        {
+            dateTime = DateTime.ParseExact(value, format, null);
+        }
+        catch
+        {
+            dateTime = null;
+        }
+
+        return dateTime;
+    }
 }

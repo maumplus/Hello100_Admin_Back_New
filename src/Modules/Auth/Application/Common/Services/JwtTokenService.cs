@@ -84,7 +84,7 @@ public class JwtTokenService : ITokenService
             signingCredentials: new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256)
         );
 
-        return new JwtSecurityTokenHandler().WriteToken(token); ;
+        return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
     public RefreshTokenEntity GenerateRefreshToken(string userId, string? ipAddress = null)

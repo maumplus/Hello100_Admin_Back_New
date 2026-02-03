@@ -151,6 +151,31 @@ VALUES (@Id, @Aid, @Token, @ExpiresAt, @IsRevoked, @RevokedByIp, @RevokedAt, @Re
             }
         }
 
+        public async Task UpdateAccessTokenAsync(AdminEntity admin, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                _logger.LogInformation("Updating Access Token for User. Aid: {Aid}", admin.Aid);
+
+                var sql = @"
+                        UPDATE tb_admin
+                           SET access_token = @AccessToken
+                         WHERE aid = @Aid";
+
+                using var connection = _connectionFactory.CreateConnection();
+                await connection.ExecuteAsync(sql, new
+                {
+                    admin.Aid,
+                    admin.AccessToken
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating Access Token for User. Aid: {Aid}", admin.Aid);
+                throw;
+            }
+        }
+
         public async Task InsertAdminLogAsync(AdminLogEntity adminLog, CancellationToken cancellationToken = default)
         {
             try
