@@ -18,6 +18,8 @@ namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.LoginChe
         public string AccountId { get; init; } = string.Empty;
         public string Password { get; init; } = string.Empty;
         [JsonIgnore]
+        public string? UserAgent { get; init; } = string.Empty;
+        [JsonIgnore]
         public string? IpAddress { get; init; } = string.Empty;
     }
 }

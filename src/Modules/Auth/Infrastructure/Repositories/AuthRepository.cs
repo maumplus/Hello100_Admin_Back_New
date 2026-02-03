@@ -176,7 +176,36 @@ VALUES (@Id, @Aid, @Token, @ExpiresAt, @IsRevoked, @RevokedByIp, @RevokedAt, @Re
             }
         }
 
-        public async Task UpdateAuthNumberConfirmAsync(AppAuthNumberInfoEntity appAuthNumberInfo, CancellationToken cancellationToken = default)
+        public async Task<int> InsertAsync(AppAuthNumberInfoEntity appAuthNumberInfo, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                _logger.LogInformation("Inserting App Auth Number Info.");
+
+                var sql = @"
+                        INSERT INTO tb_app_auth_number_info
+                          (app_cd, `key`, auth_number, confirmYn, reg_dt)
+                        VALUES
+                          (@AppCd, @Key, @AuthNumber, 'N', UNIX_TIMESTAMP(NOW()));
+
+                        SELECT LAST_INSERT_ID();";
+
+                using var connection = _connectionFactory.CreateConnection();
+                return await connection.ExecuteScalarAsync<int>(sql, new
+                {
+                    appAuthNumberInfo.AppCd,
+                    appAuthNumberInfo.Key,
+                    appAuthNumberInfo.AuthNumber
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error Inserting App Auth Number Info");
+                throw;
+            }
+        }
+
+        public async Task UpdateConfirmAsync(AppAuthNumberInfoEntity appAuthNumberInfo, CancellationToken cancellationToken = default)
         {
             try
             {

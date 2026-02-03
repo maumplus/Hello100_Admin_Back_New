@@ -9,6 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="../../../BuildingBlocks/Common/Hello100Admin.BuildingBlocks.Common.csproj" />
     <ProjectReference Include="../Domain/Hello100Admin.Modules.Auth.Domain.csproj" />
+    <ProjectReference Include="..\..\Admin\Application\Hello100Admin.Modules.Admin.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>

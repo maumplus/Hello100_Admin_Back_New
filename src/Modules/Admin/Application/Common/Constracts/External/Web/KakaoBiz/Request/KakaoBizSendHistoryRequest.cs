@@ -1,6 +1,6 @@
 ﻿namespace Hello100Admin.Modules.Admin.Application.Common.Constracts.External.Web.KakaoBiz.Request
 {
-    public class KakaoBizRequest
+    public class KakaoBizSendHistoryRequest
     {
         public string HospNo { get; set; } = default!;
         public string FromDate { get; set; } = default!;

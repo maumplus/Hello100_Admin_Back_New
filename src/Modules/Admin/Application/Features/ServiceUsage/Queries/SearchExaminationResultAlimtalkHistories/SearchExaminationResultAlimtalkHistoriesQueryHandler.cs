@@ -35,7 +35,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Queries.
 
             var resultList = result.List;
 
-            var kakaoBizRequest = new KakaoBizRequest
+            var kakaoBizRequest = new KakaoBizSendHistoryRequest
             {
                 HospNo = req.HospNo,
                 FromDate = Convert.ToDateTime(req.FromDate).ToString("yyyyMMdd"),
@@ -43,7 +43,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Queries.
                 EncKey = _cryptoService.Encrypt("clinic2013!" + DateTime.Now.ToString("yyyyMMdd"))
             };
 
-            var bizResult = await _bizApiClientService.SendAsync(kakaoBizRequest, token);
+            var bizResult = await _bizApiClientService.SendHistoryAsync(kakaoBizRequest, token);
 
             if (bizResult != null && bizResult.ResultCd == 0 && bizResult.ResultData.ListCount > 0)
             {

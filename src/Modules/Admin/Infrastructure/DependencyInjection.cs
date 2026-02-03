@@ -25,6 +25,8 @@ using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Ap
 using Hello100Admin.Modules.Admin.Infrastructure.Repositories.ApprovalRequest;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence;
 using Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalStatistics;
+using System.Net.Http.Headers;
+using System.Net.Http;
 
 namespace Hello100Admin.Modules.Admin.Infrastructure;
 
@@ -59,7 +61,7 @@ public static class DependencyInjection
 
         services.AddHttpClient<IBizApiClientService, KakaoBizApiClientService>(client =>
         {
-            client.BaseAddress = new Uri($"{kakaoBizUrl}ws/api/kakao/hello100/send/history");
+            client.BaseAddress = new Uri($"{kakaoBizUrl}");
             client.Timeout = TimeSpan.FromSeconds(10);
         });
         services.AddHttpClient<IEghisHomeApiClientService, EghisHomeApiClientService>(client =>

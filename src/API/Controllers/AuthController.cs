@@ -6,6 +6,9 @@ using Hello100Admin.API.Infrastructure.Attributes;
 using Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.Login;
 using Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.Logout;
 using Hello100Admin.Modules.Auth.Application.Features.Auth.Queries.GetUser;
+using Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.LoginCheck;
+using Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.SendAuthNumberToEmail;
+using Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.SendAuthNumber;
 
 namespace Hello100Admin.API.Controllers;
 
@@ -24,7 +27,71 @@ public class AuthController : BaseController
     }
 
     /// <summary>
-    /// 로그인
+    /// 1차 로그인
+    /// </summary>
+    [HttpPost("login-check")]
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> Login([FromBody] LoginCheckCommand command)
+    {
+        _logger.LogInformation("Login Check attempt for AccountId: {AccId} from IP: {IpAddress}",
+            command.AccountId, GetClientIpAddress());
+
+        // 클라이언트 UserAgent 추출
+        var userAgent = GetClientUserAgent();
+
+        // 클라이언트 IP 추출
+        var ipAddress = GetClientIpAddress();
+
+        var commandWithIp = command with { UserAgent = userAgent, IpAddress = ipAddress };
+
+        var result = await _mediator.Send(commandWithIp);
+
+        _logger.LogInformation("User {AccountId} logged in process completed", command.AccountId);
+
+        // 중앙화된 매퍼 사용: 성공/실패 모두 ToActionResult에서 처리합니다.
+        return result.ToActionResult(this, authEndpoint: true);
+    }
+
+    /// <summary>
+    /// 인증번호 이메일로 전송
+    /// </summary>
+    [HttpPost("send-auth-number-to-email")]
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> SendAuthNumberToEmail(SendAuthNumberToEmailCommand command)
+    {
+        _logger.LogInformation("Send Auth Number To Email.");
+
+        var result = await _mediator.Send(command);
+
+        _logger.LogInformation("Send Auth Number To Email logged in process completed");
+
+        return result.ToActionResult(this);
+    }
+
+    /// <summary>
+    /// 인증번호 SMS로 전송
+    /// </summary>
+    [HttpPost("send-auth-number-to-sms")]
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> SendAuthNumberToSms(SendAuthNumberToSmsCommand command)
+    {
+        _logger.LogInformation("Send Auth Number To Sms.");
+
+        var result = await _mediator.Send(command);
+
+        _logger.LogInformation("Send Auth Number To Sms logged in process completed");
+
+        return result.ToActionResult(this);
+    }
+
+    /// <summary>
+    /// 2차 로그인
     /// </summary>
     [HttpPost("login")]
     [AllowAnonymous]

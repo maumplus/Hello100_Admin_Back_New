@@ -192,6 +192,34 @@ public class AesCryptoService : ICryptoService
     }
 
     /// <summary>
+    /// 지정된 키 타입으로 AES-256 암호화
+    /// </summary>
+    public string EncryptWithNoVector(string plainText, CryptoKeyType keyType)
+    {
+        if (string.IsNullOrEmpty(plainText))
+            return plainText;
+
+        try
+        {
+            using var aes = Aes.Create();
+            aes.Key = _aesKeys[keyType];
+            aes.IV = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+            aes.Mode = CipherMode.CBC;
+            aes.Padding = PaddingMode.PKCS7;
+
+            using var decryptor = aes.CreateEncryptor();
+            var plainBytes = Convert.FromBase64String(plainText);
+            var encryptedBytes = decryptor.TransformFinalBlock(plainBytes, 0, plainBytes.Length);
+
+            return Convert.ToBase64String(encryptedBytes);
+        }
+        catch (Exception ex)
+        {
+            throw new CryptographicException($"Failed to encrypt data with {keyType} key: {ex.Message}", ex);
+        }
+    }
+
+    /// <summary>
     /// 지정된 키 타입으로 AES-256 복호화
     /// </summary>
     public string DecryptWithNoVector(string encryptedText, CryptoKeyType keyType)

@@ -5,6 +5,7 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.External
 {
     public interface IBizApiClientService
     {
-        public Task<KakaoBizResult<KakaoMsgSendHistoryDataSet>?> SendAsync(KakaoBizRequest req, CancellationToken ct);
+        Task<KakaoBizResult<KakaoMsgSendHistoryDataSet>?> SendHistoryAsync(KakaoBizSendHistoryRequest req, CancellationToken ct);
+        Task LoginOtpAsync(KakaoBizLoginOtpRequest req, CancellationToken ct);
     }
 }

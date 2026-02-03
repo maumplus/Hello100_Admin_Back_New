@@ -79,7 +79,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginRes
 
             try
             {
-                await _authRepository.UpdateAuthNumberConfirmAsync(appAuthNumberInfo);
+                await _authRepository.UpdateConfirmAsync(appAuthNumberInfo);
             }
             catch
             {
