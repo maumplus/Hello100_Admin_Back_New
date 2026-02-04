@@ -71,14 +71,16 @@ namespace Hello100Admin.Modules.Admin.Application.Features.VisitPurpose.Commands
                 });
             }
 
-            await _db.RunInTransactionAsync(DataSource.Hello100, async session =>
-            {
-                // 승인요청정보 테이블에 저장
-                var createdApprId = await _visitPurposeRepository.CreateVisitPurposeApprovalAsync(session, req.HospKey, "HR", data.ToJsonForStorage(), req.AId, ct);
+            await _db.RunInTransactionAsync(DataSource.Hello100, 
+                async (session, token) =>
+                {
+                    // 승인요청정보 테이블에 저장
+                    var createdApprId = await _visitPurposeRepository.CreateVisitPurposeApprovalAsync(session, req.HospKey, "HR", data.ToJsonForStorage(), req.AId, token);
 
-                // 이지스병원내원목적정보 테이블에 저장
-                await _visitPurposeRepository.UpdateVisitPurposeForNonNhisHealthScreeningAsync(session, req, createdApprId, ct);
-            }, ct);
+                    // 이지스병원내원목적정보 테이블에 저장
+                    await _visitPurposeRepository.UpdateVisitPurposeForNonNhisHealthScreeningAsync(session, req, createdApprId, token);
+            
+                }, ct);
 
 
             // 현재 운영에서 정상 동작하지 않는 것으로 확인되어 해당 내용 삭제

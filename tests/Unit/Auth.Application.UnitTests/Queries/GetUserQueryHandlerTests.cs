@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Hello100Admin.Modules.Auth.Application.Common.Abstractions.Persistence.Auth;
 using Hello100Admin.Modules.Auth.Application.Features.Auth.Queries.GetUser;
+using Hello100Admin.Modules.Auth.Application.Features.Auth.ReadModels;
 using Hello100Admin.Modules.Auth.Domain.Entities;
 using Moq;
 
@@ -11,14 +12,13 @@ public class GetUserQueryHandlerTests
     public async Task Handle_ShouldReturnUserDto_WhenUserExists()
     {
         // Arrange
-        var user = new AdminEntity
+        var user = new AdminModel
         {
             Aid = "A0000001",
             AccId = "testuser",
             AccPwd = "password",
             Grade = "S",
             Name = "테스트유저",
-            DelYn = "N",
             AccountLocked = "N",
             LoginFailCount = 0,
             HospNo = "H1234"
@@ -48,7 +48,7 @@ public class GetUserQueryHandlerTests
     {
         // Arrange
         var mockRepo = new Mock<IAuthStore>();
-        mockRepo.Setup(r => r.GetAdminByAidAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync((AdminEntity?)null);
+        mockRepo.Setup(r => r.GetAdminByAidAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync((AdminModel?)null);
         var handler = new GetUserQueryHandler(mockRepo.Object);
         var query = new GetUserQuery { Aid = "NOT_EXIST" };
 

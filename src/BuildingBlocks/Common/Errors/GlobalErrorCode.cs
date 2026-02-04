@@ -50,12 +50,14 @@ public enum GlobalErrorCode
     EmptyEncryptPlainText = 1018,
     [Description("요청에 유효하지 않거나 지원되지 않는 파라미터 값이 포함되어 있습니다. 확인 후 다시 시도해주세요.")]
     InvalidInputParameter = 1019,
+    [Description("데이터 쓰기 중 에러가 발생하였습니다. 확인 후 다시 시도해주세요.")]
+    DataWriteFailed = 1020,
     [Description("인증코드가 유효하지 않습니다. 확인 후 다시 시도해주세요.")]
-    InvalidVerificationCode = 1020,
+    InvalidVerificationCode = 1021,
     [Description("인증코드를 요청해주세요.")]
-    RequestVerificationCode = 1021,
+    RequestVerificationCode = 1022,
     [Description("인증코드 요청에 실패하였습니다. 다시 시도해주세요.")]
-    FailedRequestVerificationCode = 1022,
+    FailedRequestVerificationCode = 1023,
     [Description("인증코드가 만료되었습니다.")]
-    ExpiredVerificationCode = 1023,
+    ExpiredVerificationCode = 1024,
 }

@@ -2,6 +2,8 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Dapper;
+using Hello100Admin.BuildingBlocks.Common.Errors;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Extensions;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 using Microsoft.Extensions.Logging;
 using MySqlConnector;
@@ -18,8 +20,8 @@ namespace Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Dapper
         #endregion
 
         #region INTERNAL STATIC METHOD AREA ********************************************
-        private static CommandDefinition DefineCommand(string sql, object? param, IDbTransaction? tran, int? timeout)
-            => new CommandDefinition(sql, param, tran, timeout ?? _defaultTimeout);
+        private static CommandDefinition DefineCommand(string sql, object? param, IDbTransaction? tran, int? timeout, CancellationToken ct)
+            => new CommandDefinition(sql, param, tran, timeout ?? _defaultTimeout, cancellationToken: ct);
         #endregion
 
         #region GENERAL STATIC METHOD AREA **********************************************
@@ -35,7 +37,7 @@ namespace Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Dapper
         /// <param name="callerName"></param>
         /// <param name="lineNum"></param>
         /// <returns>단일 객체 <typeparamref name="T?"></typeparamref></returns>
-        public static async Task<T?> QueryFirstOrDefaultAsync<T>(this DbSession db, string sql, object? param = null, ILogger? logger = null, int? timeout = null, [CallerMemberName] string callerName = "", [CallerLineNumber] int lineNum = 0)
+        public static async Task<T?> QueryFirstOrDefaultAsync<T>(this DbSession db, string sql, object? param = null, CancellationToken ct = default, ILogger? logger = null, int? timeout = null, [CallerMemberName] string callerName = "", [CallerLineNumber] int lineNum = 0)
         {
             Stopwatch? sw = null;
 
@@ -49,7 +51,7 @@ namespace Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Dapper
 
                 sw = Stopwatch.StartNew();
 
-                var result = await db.Connection.QueryFirstOrDefaultAsync<T>(DefineCommand(sql, param, db.Transaction, timeout));
+                var result = await db.Connection.QueryFirstOrDefaultAsync<T>(DefineCommand(sql, param, db.Transaction, timeout, ct));
 
                 sw.Stop();
 
@@ -63,7 +65,7 @@ namespace Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Dapper
 
                 DapperLogHelper.LogQueryError(logger, e, sw?.ElapsedMilliseconds, sqlPreview, paramDic, callerName, lineNum);
 
-                throw;
+                throw new BizException(GlobalErrorCode.DataQueryError.ToError());
             }
             catch (Exception e)
             {
@@ -71,7 +73,7 @@ namespace Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Dapper
 
                 DapperLogHelper.LogQueryError(logger, e, sw?.ElapsedMilliseconds, sqlPreview, paramDic, callerName, lineNum);
 
-                throw;
+                throw new BizException(GlobalErrorCode.DataQueryError.ToError());
             }
         }
 
@@ -87,7 +89,7 @@ namespace Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Dapper
         /// <param name="callerName"></param>
         /// <param name="lineNum"></param>
         /// <returns>결과 목록 <see cref="IEnumerable{T}"></see></returns>
-        public static async Task<IEnumerable<T>> QueryAsync<T>(this DbSession db, string sql, object? param = null, ILogger? logger = null, int? timeout = null, [CallerMemberName] string callerName = "", [CallerLineNumber] int lineNum = 0)
+        public static async Task<IEnumerable<T>> QueryAsync<T>(this DbSession db, string sql, object? param = null, CancellationToken ct = default, ILogger? logger = null, int? timeout = null, [CallerMemberName] string callerName = "", [CallerLineNumber] int lineNum = 0)
         {
             Stopwatch? sw = null;
 
@@ -101,7 +103,7 @@ namespace Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Dapper
 
                 sw = Stopwatch.StartNew();
 
-                var result = await db.Connection.QueryAsync<T>(DefineCommand(sql, param, db.Transaction, timeout));
+                var result = await db.Connection.QueryAsync<T>(DefineCommand(sql, param, db.Transaction, timeout, ct));
 
                 sw.Stop();
 
@@ -115,7 +117,7 @@ namespace Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Dapper
 
                 DapperLogHelper.LogQueryError(logger, e, sw?.ElapsedMilliseconds, sqlPreview, paramDic, callerName, lineNum);
 
-                throw;
+                throw new BizException(GlobalErrorCode.DataQueryError.ToError());
             }
             catch (Exception e)
             {
@@ -123,7 +125,58 @@ namespace Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Dapper
 
                 DapperLogHelper.LogQueryError(logger, e, sw?.ElapsedMilliseconds, sqlPreview, paramDic, callerName, lineNum);
 
-                throw;
+                throw new BizException(GlobalErrorCode.DataQueryError.ToError());
+            }
+        }
+
+        /// <summary>
+        /// 여러 쿼리 조회
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="sql"></param>
+        /// <param name="param"></param>
+        /// <param name="logger"></param>
+        /// <param name="timeout"></param>
+        /// <param name="callerName"></param>
+        /// <param name="lineNum"></param>
+        /// <returns>결과 목록 <see cref="GridReader"></see></returns>
+        public static async Task<SqlMapper.GridReader> QueryMultipleAsync(this DbSession db, string sql, object? param = null, CancellationToken ct = default, ILogger? logger = null, int? timeout = null, [CallerMemberName] string callerName = "", [CallerLineNumber] int lineNum = 0)
+        {
+            Stopwatch? sw = null;
+
+            var paramDic = DapperParameterExtractor.ToDictionary(param as DynamicParameters);
+
+            string sqlPreview = SqlParameterReplacer.ReplaceSqlParameters(sql, paramDic, logger);
+
+            try
+            {
+                DapperLogHelper.LogQueryStart(logger, sqlPreview, paramDic, callerName, lineNum);
+
+                sw = Stopwatch.StartNew();
+
+                var result = await db.Connection.QueryMultipleAsync(DefineCommand(sql, param, db.Transaction, timeout, ct));
+
+                sw.Stop();
+
+                DapperLogHelper.LogQuerySuccess(logger, sw.ElapsedMilliseconds, callerName, lineNum);
+
+                return result;
+            }
+            catch (MySqlException e)
+            {
+                if (sw is { IsRunning: true }) sw.Stop();
+
+                DapperLogHelper.LogQueryError(logger, e, sw?.ElapsedMilliseconds, sqlPreview, paramDic, callerName, lineNum);
+
+                throw new BizException(GlobalErrorCode.DataQueryError.ToError());
+            }
+            catch (Exception e)
+            {
+                if (sw is { IsRunning: true }) sw.Stop();
+
+                DapperLogHelper.LogQueryError(logger, e, sw?.ElapsedMilliseconds, sqlPreview, paramDic, callerName, lineNum);
+
+                throw new BizException(GlobalErrorCode.DataQueryError.ToError());
             }
         }
 
@@ -138,7 +191,7 @@ namespace Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Dapper
         /// <param name="callerName"></param>
         /// <param name="lineNum"></param>
         /// <returns>단일 값(object 또는 지정 타입) <see cref="object"></see></returns>
-        public static async Task<T?> ExecuteScalarAsync<T>(this DbSession db, string sql, object? param = null, ILogger? logger = null, int? timeout = null, [CallerMemberName] string callerName = "", [CallerLineNumber] int lineNum = 0)
+        public static async Task<T?> ExecuteScalarAsync<T>(this DbSession db, string sql, object? param = null, CancellationToken ct = default, ILogger? logger = null, int? timeout = null, [CallerMemberName] string callerName = "", [CallerLineNumber] int lineNum = 0)
         {
             Stopwatch? sw = null;
 
@@ -152,7 +205,7 @@ namespace Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Dapper
 
                 sw = Stopwatch.StartNew();
 
-                var result = await db.Connection.ExecuteScalarAsync<T>(DefineCommand(sql, param, db.Transaction, timeout));
+                var result = await db.Connection.ExecuteScalarAsync<T>(DefineCommand(sql, param, db.Transaction, timeout, ct));
 
                 sw.Stop();
 
@@ -166,7 +219,7 @@ namespace Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Dapper
 
                 DapperLogHelper.LogQueryError(logger, e, sw?.ElapsedMilliseconds, sqlPreview, paramDic, callerName, lineNum);
 
-                throw;
+                throw new BizException(GlobalErrorCode.DataQueryError.ToError());
             }
             catch (Exception e)
             {
@@ -174,7 +227,7 @@ namespace Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Dapper
 
                 DapperLogHelper.LogQueryError(logger, e, sw?.ElapsedMilliseconds, sqlPreview, paramDic, callerName, lineNum);
 
-                throw;
+                throw new BizException(GlobalErrorCode.DataQueryError.ToError());
             }
         }
 
@@ -189,7 +242,7 @@ namespace Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Dapper
         /// <param name="callerName"></param>
         /// <param name="lineNum"></param>
         /// <returns>영향받은 행 수 <see cref="int"></see></returns>
-        public static async Task<int> ExecuteAsync(this DbSession db, string sql, object? param = null, ILogger? logger = null, int? timeout = null, [CallerMemberName] string callerName = "", [CallerLineNumber] int lineNum = 0)
+        public static async Task<int> ExecuteAsync(this DbSession db, string sql, object? param = null, CancellationToken ct = default, ILogger? logger = null, int? timeout = null, [CallerMemberName] string callerName = "", [CallerLineNumber] int lineNum = 0)
         {
             Stopwatch? sw = null;
 
@@ -203,7 +256,7 @@ namespace Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Dapper
 
                 sw = Stopwatch.StartNew();
 
-                var result = await db.Connection.ExecuteAsync(DefineCommand(sql, param, db.Transaction, timeout));
+                var result = await db.Connection.ExecuteAsync(DefineCommand(sql, param, db.Transaction, timeout, ct));
 
                 sw.Stop();
 
@@ -217,7 +270,7 @@ namespace Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Dapper
 
                 DapperLogHelper.LogQueryError(logger, e, sw?.ElapsedMilliseconds, sqlPreview, paramDic, callerName, lineNum);
 
-                throw;
+                throw new BizException(GlobalErrorCode.DataWriteFailed.ToError());
             }
             catch (Exception e)
             {
@@ -225,7 +278,7 @@ namespace Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Dapper
 
                 DapperLogHelper.LogQueryError(logger, e, sw?.ElapsedMilliseconds, sqlPreview, paramDic, callerName, lineNum);
 
-                throw;
+                throw new BizException(GlobalErrorCode.DataWriteFailed.ToError());
             }
         }
         #endregion

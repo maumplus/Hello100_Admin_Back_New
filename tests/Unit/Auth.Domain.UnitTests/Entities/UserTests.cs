@@ -62,7 +62,7 @@ public class UserTests
         var user = CreateDefaultUser();
         user.LoginFailCount = 3;
         user.AccountLocked = "N";
-        var before = user.LastLoginDt;
+        var before = user.LastLoginUnixDt;
 
         // Act
         user.RecordLogin();
@@ -70,7 +70,7 @@ public class UserTests
         // Assert
         user.LoginFailCount.Should().Be(0);
         user.AccountLocked.Should().Be("N");
-        (user.LastLoginDt > before || user.LastLoginDt != null).Should().BeTrue();
+        (user.LastLoginUnixDt > before || user.LastLoginUnixDt != null).Should().BeTrue();
     }
 
     [Fact]

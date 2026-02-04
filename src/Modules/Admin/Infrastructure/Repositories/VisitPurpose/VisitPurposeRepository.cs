@@ -89,7 +89,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.VisitPurpose
             }
         }
 
-        public async Task<int> CreateVisitPurposeApprovalAsync(DbSession db, string hospKey, string apprType, string data, string reqAId, CancellationToken cancellationToken)
+        public async Task<int> CreateVisitPurposeApprovalAsync(DbSession db, string hospKey, string apprType, string data, string reqAId, CancellationToken ct)
         {
             try
             {
@@ -109,7 +109,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.VisitPurpose
                     SELECT IFNULL(LAST_INSERT_ID(), 0);
                 ";
 
-                var result = await db.ExecuteScalarAsync<int>(query, parameters, _logger);
+                var result = await db.ExecuteScalarAsync<int>(query, parameters, ct, _logger);
 
                 return result;
             }
@@ -120,7 +120,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.VisitPurpose
             }
         }
 
-        public async Task<int> CreateVisitPurposeAsync(DbSession db, CreateVisitPurposeCommand req, int apprId, CancellationToken cancellationToken)
+        public async Task<int> CreateVisitPurposeAsync(DbSession db, CreateVisitPurposeCommand req, int apprId, CancellationToken ct)
         {
             try
             {
@@ -226,7 +226,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.VisitPurpose
                 #endregion
 
 
-                var result = await db.ExecuteAsync(sb.ToString(), parameters, _logger);
+                var result = await db.ExecuteAsync(sb.ToString(), parameters, ct, _logger);
 
                 if (result <= 0)
                     throw new BizException(AdminErrorCode.VisitPurposeCreateFailed.ToError());
@@ -301,7 +301,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.VisitPurpose
             }
         }
 
-        public async Task<int> UpdateVisitPurposeForNonNhisHealthScreeningAsync(DbSession db, UpdateVisitPurposeForNonNhisHealthScreeningCommand req, int apprId, CancellationToken cancellationToken)
+        public async Task<int> UpdateVisitPurposeForNonNhisHealthScreeningAsync(DbSession db, UpdateVisitPurposeForNonNhisHealthScreeningCommand req, int apprId, CancellationToken ct)
         {
             try
             {
@@ -385,7 +385,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.VisitPurpose
                 sb.AppendLine("  WHERE appr_id = @ApprId	;                ");
                 #endregion
 
-                var result = await db.ExecuteAsync(sb.ToString(), parameters, _logger);
+                var result = await db.ExecuteAsync(sb.ToString(), parameters, ct, _logger);
 
                 if (result <= 0)
                     throw new BizException(AdminErrorCode.VisitPurposeUpdateFailed.ToError());

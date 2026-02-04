@@ -13,7 +13,7 @@ namespace Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core
         /// <param name="dbType"></param>
         /// <param name="action"></param>
         /// <returns></returns>
-        public Task RunAsync(DataSource dbType, Func<DbSession, Task> action, CancellationToken ct);
+        public Task RunAsync(DataSource dbType, Func<DbSession, CancellationToken, Task> action, CancellationToken ct);
 
         /// <summary>
         /// 
@@ -21,6 +21,14 @@ namespace Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core
         /// <param name="dbType"></param>
         /// <param name="action"></param>
         /// <returns></returns>
-        public Task RunInTransactionAsync(DataSource dbType, Func<DbSession, Task> action, CancellationToken ct);
+        public Task<T> RunAsync<T>(DataSource dbType, Func<DbSession, CancellationToken, Task<T>> action, CancellationToken ct);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="dbType"></param>
+        /// <param name="action"></param>
+        /// <returns></returns>
+        public Task RunInTransactionAsync(DataSource dbType, Func<DbSession, CancellationToken, Task> action, CancellationToken ct);
     }
 }

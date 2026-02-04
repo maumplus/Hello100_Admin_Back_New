@@ -54,10 +54,9 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalUser.Commands
                 UserRole = req.UserRole
             };
 
-            await _db.RunAsync(DataSource.Hello100, async dbSession =>
-            {
-                await _hospitalUserRepository.UpdateHospitalUserRoleAsync(dbSession, tbUserEntity, ct);
-            }, ct);
+            await _db.RunAsync(DataSource.Hello100, 
+                (dbSession, token) => _hospitalUserRepository.UpdateHospitalUserRoleAsync(dbSession, tbUserEntity, token),
+                ct);
 
             return Result.Success();
         }

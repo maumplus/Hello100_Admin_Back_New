@@ -5,12 +5,12 @@
         /// <summary>
         /// 페이지 번호
         /// </summary>
-        public int PageNo { get; set; }
+        public required int PageNo { get; set; }
 
         /// <summary>
         /// 페이지 사이즈
         /// </summary>
-        public int PageSize { get; set; }
+        public required int PageSize { get; set; }
 
         /// <summary>
         /// 조회 시작일
