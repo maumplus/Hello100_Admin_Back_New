@@ -169,7 +169,7 @@ namespace Hello100Admin.API.Controllers
         }
 
         /// <summary>
-        /// 알림톡 발송 서비스 신청(검사결과) 조회
+        /// 알림톡 발송 서비스 신청 [진료접수, 검사결과] > 신청
         /// </summary>
         [HttpPost("alimtalk-service/submit")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]

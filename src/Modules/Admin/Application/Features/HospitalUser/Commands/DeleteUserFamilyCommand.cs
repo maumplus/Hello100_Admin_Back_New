@@ -46,10 +46,9 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalUser.Commands
         {
             _logger.LogInformation("Handling DeleteUserFamilyCommand for UserId: {UserId}, MId: {MId}", req.UserId, req.MId);
             
-            await _db.RunAsync(DataSource.Hello100, async dbSession =>
-            {
-                await _hospitalUserRepository.DeleteUserFamilyAsync(dbSession, req.UserId, req.MId, ct);
-            }, ct);
+            await _db.RunAsync(DataSource.Hello100, 
+                (dbSession, token) => _hospitalUserRepository.DeleteUserFamilyAsync(dbSession, req.UserId, req.MId, token),
+                ct);
             
             return Result.Success();
         }

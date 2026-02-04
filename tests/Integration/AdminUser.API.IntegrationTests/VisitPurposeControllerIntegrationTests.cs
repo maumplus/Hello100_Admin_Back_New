@@ -53,8 +53,8 @@ namespace AdminUser.API.IntegrationTests
 
             var req = new[]
             {
-                new { SortNo = 0, VpCd = "01", ShowYn = "Y" },
-                new { SortNo = 1, VpCd = "02", ShowYn = "Y" }
+                new { SortNo = 2, VpCd = "01", ShowYn = "N" },
+                new { SortNo = 1, VpCd = "02", ShowYn = "N" }
             };
 
             // Arrange

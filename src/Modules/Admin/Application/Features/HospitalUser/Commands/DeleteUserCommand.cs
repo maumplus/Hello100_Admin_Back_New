@@ -44,10 +44,9 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalUser.Commands
         {
             _logger.LogInformation("Handling DeleteUserCommand for UserId: {UserId}", req.UserId);
             
-            await _db.RunAsync(DataSource.Hello100, async dbSession =>
-            {
-                await _hospitalUserRepository.DeleteUserAsync(dbSession, req.UserId, ct);
-            }, ct);
+            await _db.RunAsync(DataSource.Hello100, 
+                (dbSession, token) => _hospitalUserRepository.DeleteUserAsync(dbSession, req.UserId, token),
+                ct);
             
             return Result.Success();
         }

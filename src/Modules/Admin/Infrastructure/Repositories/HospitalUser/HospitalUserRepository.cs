@@ -37,7 +37,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalUser
                  WHERE uid = @UId
             ";
 
-            var result = await db.ExecuteAsync(query, parameters, _logger);
+            var result = await db.ExecuteAsync(query, parameters, ct, _logger);
 
             if (result <= 0)
                 throw new BizException(AdminErrorCode.UpdateUserRoleFailed.ToError());
@@ -58,7 +58,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalUser
                    AND mid = @MId
             ";
 
-            var result = await db.ExecuteAsync(query, parameters, _logger);
+            var result = await db.ExecuteAsync(query, parameters, ct, _logger);
 
             if (result <= 0)
                 throw new BizException(AdminErrorCode.DeleteUserFamilyFailed.ToError());
@@ -77,7 +77,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalUser
                  WHERE uid = @UId
             ";
 
-            var result = await db.ExecuteAsync(query, parameters, _logger);
+            var result = await db.ExecuteAsync(query, parameters, ct, _logger);
 
             if (result <= 0)
                 throw new BizException(AdminErrorCode.DeleteUserFailed.ToError());

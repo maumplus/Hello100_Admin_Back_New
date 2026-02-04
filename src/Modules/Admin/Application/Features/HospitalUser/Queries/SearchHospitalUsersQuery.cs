@@ -99,8 +99,6 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalUser.Queries
                 item.LoginTypeName = GetLoginTYpeName(item.LoginType);
             }
 
-            var test = response.ToJsonForStorage();
-
             return Result.Success(response);
         }
 

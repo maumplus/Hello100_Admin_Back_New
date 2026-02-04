@@ -77,9 +77,6 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalUser.Queries
             userProfile.ServiceUsages.TotalCount = serviceUsageList.Count;
             userProfile.ServiceUsages.Items = serviceUsageList;
 
-            var test = userProfile.ToJsonForStorage();
-            var test3 = userProfile.ServiceUsages.ToJsonForStorage();
-
             return Result.Success(userProfile);
         }
     }

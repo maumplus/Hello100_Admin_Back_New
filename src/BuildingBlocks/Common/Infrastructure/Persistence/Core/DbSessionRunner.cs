@@ -25,7 +25,7 @@ namespace Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core
         /// <param name="dbType"></param>
         /// <param name="action"></param>
         /// <returns></returns>
-        public Task RunAsync(DataSource dbType, Func<DbSession, Task> action, CancellationToken ct)
+        public Task RunAsync(DataSource dbType, Func<DbSession, CancellationToken, Task> action, CancellationToken ct)
             => RunInternalAsync(dbType, action, useTransaction: false, ct);
 
         /// <summary>
@@ -34,7 +34,16 @@ namespace Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core
         /// <param name="dbType"></param>
         /// <param name="action"></param>
         /// <returns></returns>
-        public Task RunInTransactionAsync(DataSource dbType, Func<DbSession, Task> action, CancellationToken ct)
+        public Task<T> RunAsync<T>(DataSource dbType, Func<DbSession, CancellationToken, Task<T>> action, CancellationToken ct)
+            => RunInternalAsync(dbType, action, useTransaction: false, ct);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="dbType"></param>
+        /// <param name="action"></param>
+        /// <returns></returns>
+        public Task RunInTransactionAsync(DataSource dbType, Func<DbSession, CancellationToken, Task> action, CancellationToken ct)
             => RunInternalAsync(dbType, action, useTransaction: true, ct);
 
         /// <summary>
@@ -43,25 +52,65 @@ namespace Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core
         /// <param name="dbType"></param>
         /// <param name="action"></param>
         /// <param name="useTransaction"></param>
+        /// <param name="ct"></param>
         /// <returns></returns>
-        private async Task RunInternalAsync(DataSource dbType, Func<DbSession, Task> action, bool useTransaction, CancellationToken ct)
+        private async Task RunInternalAsync(
+            DataSource dbType,
+            Func<DbSession, CancellationToken, Task> action,
+            bool useTransaction,
+            CancellationToken ct)
         {
             await using var conn = (DbConnection)_connFactory.CreateDbConnection(dbType);
-            await conn.OpenAsync();
+            await conn.OpenAsync(ct);
 
-            DbTransaction? tran = null;
-
-            if (useTransaction == true)
-                tran = await conn.BeginTransactionAsync();
+            await using var tran = useTransaction ? await conn.BeginTransactionAsync(ct) : null;
 
             var session = new DbSession(conn, tran);
 
             try
             {
-                await action(session);
+                await action(session, ct);
 
                 if (tran != null)
-                    await tran.CommitAsync();
+                    await tran.CommitAsync(ct);
+            }
+            catch
+            {
+                if (tran != null)
+                    await tran.RollbackAsync(ct);
+
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="dbType"></param>
+        /// <param name="action"></param>
+        /// <param name="useTransaction"></param>
+        /// <returns></returns>
+        private async Task<T> RunInternalAsync<T>(
+            DataSource dbType, 
+            Func<DbSession, CancellationToken, Task<T>> action, 
+            bool useTransaction, 
+            CancellationToken ct)
+        {
+            await using var conn = (DbConnection)_connFactory.CreateDbConnection(dbType);
+            await conn.OpenAsync(ct);
+
+            await using var tran = useTransaction ? await conn.BeginTransactionAsync(ct) : null;
+
+            var session = new DbSession(conn, tran);
+
+            try
+            {
+                var result = await action(session, ct);
+
+                if (tran != null)
+                    await tran.CommitAsync(ct);
+
+                return result;
             }
             catch
             {
@@ -69,10 +118,6 @@ namespace Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core
                     await tran.RollbackAsync();
 
                 throw;
-            }
-            finally
-            {
-                tran?.Dispose();
             }
         }
     }

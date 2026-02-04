@@ -19,7 +19,7 @@ public class LogoutCommandHandlerTests
         authStore.Setup(r => r.GetByTokenAsync("token123", It.IsAny<CancellationToken>())).ReturnsAsync(refreshToken);
         authRepo.Setup(r => r.UpdateAsync(refreshToken, It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
         var handler = new LogoutCommandHandler(mockLogger.Object, authRepo.Object, authStore.Object);
-        var command = new LogoutCommand { UserId = "A0000001", RefreshToken = "token123" };
+        var command = new LogoutCommand { Aid = "A0000001" };
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -38,7 +38,7 @@ public class LogoutCommandHandlerTests
         var mockLogger = new Mock<ILogger<LogoutCommandHandler>>();
         mockRepo.Setup(r => r.RevokeUserTokensAsync("A0000001", It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
         var handler = new LogoutCommandHandler(mockLogger.Object, mockRepo.Object, mockStore.Object);
-        var command = new LogoutCommand { UserId = "A0000001", RefreshToken = null };
+        var command = new LogoutCommand { Aid = "A0000001" };
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -56,7 +56,7 @@ public class LogoutCommandHandlerTests
         var mockLogger = new Mock<ILogger<LogoutCommandHandler>>();
         mockStore.Setup(r => r.GetByTokenAsync("notfound", It.IsAny<CancellationToken>())).ReturnsAsync((RefreshTokenEntity?)null);
         var handler = new LogoutCommandHandler(mockLogger.Object, mockRepo.Object, mockStore.Object);
-        var command = new LogoutCommand { UserId = "A0000001", RefreshToken = "notfound" };
+        var command = new LogoutCommand { Aid = "A0000001" };
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);

@@ -5,6 +5,7 @@ using Moq;
 using Hello100Admin.Modules.Auth.Domain.Entities;
 using Hello100Admin.Modules.Auth.Application.Common.Services;
 using Hello100Admin.Modules.Auth.Application.Common.Abstractions.Persistence.Auth;
+using Hello100Admin.Modules.Auth.Application.Features.Auth.ReadModels;
 
 namespace Hello100Admin.Modules.Auth.Application.UnitTests.Services
 {
@@ -36,20 +37,21 @@ namespace Hello100Admin.Modules.Auth.Application.UnitTests.Services
         {
             // Arrange
             var service = CreateService();
-            var user = new AdminEntity
+            var user = new AdminModel
             {
                 Aid = "A0000001",
                 AccId = "testuser",
                 AccPwd = "password",
                 Grade = "S",
                 Name = "테스트유저",
-                DelYn = "N",
                 AccountLocked = "N",
                 LoginFailCount = 0
             };
 
+            var roles = new[] { "SuperAdmin" };
+
             // Act
-            var token = service.GenerateAccessToken(user);
+            var token = service.GenerateAccessToken(user, roles);
 
             // Assert
             token.Should().NotBeNullOrEmpty();
