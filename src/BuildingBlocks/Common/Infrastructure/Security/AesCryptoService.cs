@@ -339,13 +339,13 @@ public class AesCryptoService : ICryptoService
     public string EncryptToBase64WithDesEcbPkcs7(string plaintext)
     {
         if (string.IsNullOrEmpty(plaintext)) 
-            throw new BizException(GlobalErrorCode.EmptyEncryptPlainText.ToError());
+            throw new BizException(GlobalErrorCode.EmptyCryptoPlainText.ToError());
 
         using var des = DES.Create();
         des.Mode = CipherMode.ECB;
         des.Padding = PaddingMode.PKCS7;
         des.Key = _desKey;
-        des.IV = _desKey;
+        //des.IV = _desKey; // CipherMode.ECB에선 사용X
 
         byte[] inputBytes = Encoding.UTF8.GetBytes(plaintext);
 
@@ -365,4 +365,33 @@ public class AesCryptoService : ICryptoService
 
         return strReturn;
     }
+
+    public string DecryptFromBase64WithDesEcbPkcs7(string cipherText)
+    {
+        if (string.IsNullOrEmpty(cipherText))
+            throw new BizException(GlobalErrorCode.EmptyCryptoPlainText.ToError());
+
+        cipherText = cipherText.Replace("Aa1Z_1A", "/");
+        cipherText = cipherText.Replace("Ae1ZA1_", "+");
+        cipherText = cipherText.Replace("AK_2x1A", "|");
+        cipherText = cipherText.Replace("AK_1XCA", "#");
+
+        byte[] cipherBytes = Convert.FromBase64String(cipherText);
+
+        using var des = DES.Create();
+        des.Mode = CipherMode.ECB;
+        des.Padding = PaddingMode.PKCS7;
+        des.Key = _desKey;
+        //des.IV = _desKey; // CipherMode.ECB에선 사용X
+
+        using var ms = new MemoryStream();
+        using (var cs = new CryptoStream(ms, des.CreateDecryptor(), CryptoStreamMode.Write))
+        {
+            cs.Write(cipherBytes, 0, cipherBytes.Length);
+            cs.FlushFinalBlock();
+        }
+
+        return Encoding.UTF8.GetString(ms.ToArray());
+    }
+
 }

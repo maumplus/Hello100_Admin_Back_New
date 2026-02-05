@@ -34,7 +34,8 @@ public class GetUserQueryHandler : IRequestHandler<GetUserQuery, Result<UserResp
             Name = user.Name,
             Grade = user.Grade,
             AccountLocked = user.AccountLocked,
-            LastLoginDt = user.LastLoginDt
+            LastLoginDt = user.LastLoginDt,
+            Use2fa = user.Use2fa
         };
 
         return Result.Success(userDto);

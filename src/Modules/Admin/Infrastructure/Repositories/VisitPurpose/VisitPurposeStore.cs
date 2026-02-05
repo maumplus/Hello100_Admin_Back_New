@@ -11,6 +11,9 @@ using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 using Hello100Admin.Modules.Admin.Application.Features.VisitPurpose.Queries.GetVisitPurposeDetail;
 using Hello100Admin.Modules.Admin.Application.Features.VisitPurpose.ReadModels.GetVisitPurposeDetail;
 using Hello100Admin.Modules.Admin.Application.Features.VisitPurpose.ReadModels.GetCertificates;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Dapper;
+using Hello100Admin.Modules.Admin.Application.Common.Models;
+using Hello100Admin.Modules.Admin.Application.Features.VisitPurpose.Results;
 
 namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.VisitPurpose
 {
@@ -163,7 +166,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.VisitPurpose
                 var child = (await multi.ReadAsync<GetVisitPurposeDetailChildRow>()).ToList();
 
                 result.Purpose = parent.Adapt<GetVisitPurposeDetailParentItemReadModel>();
-                result.Details = parent.Adapt<List<GetVisitPurposeDetailChildItemReadModel>>();
+                result.Details = child.Adapt<List<GetVisitPurposeDetailChildItemReadModel>>();
 
                 return result;
             }
@@ -219,6 +222,37 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.VisitPurpose
                 _logger.LogError(e, "GetVisitPurposesAsync() Error");
                 throw new BizException(GlobalErrorCode.DataQueryError.ToError());
             }
+        }
+
+        public async Task<ListResult<GetQuestionnairesResult>> GetQuestionnairesAsync(DbSession db, string hospNo, CancellationToken ct)
+        {
+
+            var parameters = new DynamicParameters();
+            parameters.Add("HospNo", hospNo, DbType.String);
+
+            var query = @"
+                SELECT intCd       AS IntCd,
+                        intNm       AS IntNm,
+                        category    AS Category
+                    FROM hello100_api.eghis_paper_info
+                WHERE hospNo = @HospNo
+                    AND useYn = 1
+                GROUP BY intCd, intNm, category;
+
+                SELECT COUNT(DISTINCT intCd)
+                    FROM hello100_api.eghis_paper_info
+                    WHERE hospNo = @HospNo
+                    AND useYn = 1
+            ";
+
+            var multi = await db.QueryMultipleAsync(query, parameters);
+
+            var result = new ListResult<GetQuestionnairesResult>();
+
+            result.Items = (await multi.ReadAsync<GetQuestionnairesResult>()).ToList();
+            result.TotalCount = await multi.ReadSingleAsync<int>();
+
+            return result;
         }
         #endregion
     }

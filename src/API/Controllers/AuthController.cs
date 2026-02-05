@@ -11,6 +11,12 @@ using Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.SendAuthNumb
 using Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.SendAuthNumber;
 using Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.VerifyAuthNumber;
 using Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.Refresh;
+using Hello100Admin.BuildingBlocks.Common.Errors;
+using Hello100Admin.Modules.Auth.Application.Features.Auth.Responses.LoginCheck;
+using Hello100Admin.Modules.Auth.Application.Features.Auth.Responses.SendAuthNumber;
+using Hello100Admin.Modules.Auth.Application.Features.Auth.Responses.Login;
+using Hello100Admin.Modules.Auth.Application.Features.Auth.Responses.Refresh;
+using Hello100Admin.Modules.Auth.Application.Features.Auth.Responses.GetUser;
 
 namespace Hello100Admin.API.Controllers;
 
@@ -34,7 +40,7 @@ public class AuthController : BaseController
     /// </summary>
     [HttpPost("login-check")]
     [AllowAnonymous]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<LoginCheckResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Login([FromBody] LoginCheckCommand command)
     {
@@ -62,7 +68,7 @@ public class AuthController : BaseController
     /// </summary>
     [HttpPost("send-auth-number-to-email")]
     [AllowAnonymous]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<SendAuthNumberResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> SendAuthNumberToEmail(SendAuthNumberToEmailCommand command)
     {
@@ -80,7 +86,7 @@ public class AuthController : BaseController
     /// </summary>
     [HttpPost("send-auth-number-to-sms")]
     [AllowAnonymous]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<SendAuthNumberResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> SendAuthNumberToSms(SendAuthNumberToSmsCommand command)
     {
@@ -98,7 +104,7 @@ public class AuthController : BaseController
     /// </summary>
     [HttpPost("verify-auth-number")]
     [AllowAnonymous]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> VerifyAuthNumber(VerifyAuthNumberCommand command)
     {
@@ -116,7 +122,7 @@ public class AuthController : BaseController
     /// </summary>
     [HttpPost("login")]
     [AllowAnonymous]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<LoginResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Login([FromBody] LoginCommand command)
     {
@@ -144,8 +150,8 @@ public class AuthController : BaseController
     /// </summary>
     [HttpPost("refresh")]
     [Auth]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse<RefreshResponse>), StatusCodes.Status200OK)]
+    //[ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Refresh([FromBody] RefreshCommand command)
     {
         _logger.LogInformation("Refresh attempt");
@@ -168,7 +174,7 @@ public class AuthController : BaseController
     /// </summary>
     [HttpPost("logout")]
     [Auth]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Logout([FromBody] LogoutCommand command)
     {
@@ -187,7 +193,7 @@ public class AuthController : BaseController
     /// </summary>
     [HttpGet("me")]
     [Auth]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<UserResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetMe()
     {

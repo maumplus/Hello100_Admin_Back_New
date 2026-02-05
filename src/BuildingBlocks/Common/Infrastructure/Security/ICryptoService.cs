@@ -119,4 +119,13 @@ public interface ICryptoService
     /// NOTE: DES/ECB is insecure; keep only for compatibility.
     /// </summary>
     public string EncryptToBase64WithDesEcbPkcs7(string plaintext);
+
+    /// <summary>
+    /// Legacy-compatible encryption:
+    /// DES + ECB + PKCS7, output as string.
+    /// NOTE: DES/ECB is insecure; keep only for compatibility.
+    /// </summary>
+    /// <param name="cipherText"></param>
+    /// <returns></returns>
+    public string DecryptFromBase64WithDesEcbPkcs7(string cipherText);
 }

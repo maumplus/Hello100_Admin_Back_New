@@ -68,8 +68,9 @@ namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.Refresh
                     Grade = adminInfo.Grade,
                     AccountLocked = adminInfo.AccountLocked,
                     LastLoginDt = adminInfo.LastLoginDt,
+                    Use2fa = adminInfo.Use2fa
                 },
-                Token = new TokenInfo
+                Token = new TokenInfoForRefresh
                 {
                     AccessToken = accessToken
                 }

@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Hello100Admin.Modules.Admin.Application.Features.Hospital.Responses
+﻿namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.ReadModels
 {
-    public class GetDoctorListResponse
+    public class GetDoctorListModel
     {
         public string HospNo { get; set; } = string.Empty;
         public string HospKey { get; set; } = string.Empty;

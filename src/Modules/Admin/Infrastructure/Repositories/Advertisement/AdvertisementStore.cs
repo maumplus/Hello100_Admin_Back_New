@@ -55,6 +55,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Advertisement
             sb.AppendLine("	     ,	link_type	AS LinkType      ");
             sb.AppendLine("	     ,	sort_no 	AS SortNo   ");
             sb.AppendLine("	     ,	del_yn  	AS DelYn    ");
+            sb.AppendLine("	     ,	DATE_FORMAT(start_dt, '%Y-%m-%d')	AS StartDt");
             sb.AppendLine("	     ,	DATE_FORMAT(end_dt, '%Y-%m-%d')	AS EndDt");
             sb.AppendLine("	     ,	TIMESTAMPDIFF(day, NOW(), IFNULL(end_dt,'')) AS CntDt");
             sb.AppendLine("	     ,	from_unixtime(reg_dt, '%Y-%m-%d %H:%i')  AS RegDt");

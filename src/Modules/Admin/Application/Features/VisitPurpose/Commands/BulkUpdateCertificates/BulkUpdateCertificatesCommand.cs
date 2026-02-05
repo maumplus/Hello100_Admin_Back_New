@@ -18,7 +18,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.VisitPurpose.Commands
     public record BulkUpdateCertificatesCommandItem
     {
         public string ReDocCd { get; set; } = default!;
-        public char ShowYn { get; set; }
+        public string ShowYn { get; set; } = default!;
         public int SortNo { get; set; }
     }
 }

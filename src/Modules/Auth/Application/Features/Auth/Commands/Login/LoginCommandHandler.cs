@@ -1,14 +1,16 @@
 using Hello100Admin.BuildingBlocks.Common.Application;
 using Hello100Admin.BuildingBlocks.Common.Errors;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Extensions;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Security;
 using Hello100Admin.Modules.Auth.Application.Common.Abstractions.Persistence.Auth;
 using Hello100Admin.Modules.Auth.Application.Common.Abstractions.Services;
+using Hello100Admin.Modules.Auth.Application.Common.Errors;
+using Hello100Admin.Modules.Auth.Application.Common.Extensions;
 using Hello100Admin.Modules.Auth.Application.Features.Auth.Responses.GetUser;
 using Hello100Admin.Modules.Auth.Application.Features.Auth.Responses.Login;
 using Hello100Admin.Modules.Auth.Domain.Entities;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using System.Net;
 
 namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.Login;
 
@@ -22,19 +24,22 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginRes
     private readonly ITokenService _tokenService;
     private readonly IAuthStore _authStore;
     private readonly ILogger<LoginCommandHandler> _logger;
+    private readonly ICryptoService _cryptoService;
 
     public LoginCommandHandler(
         IPasswordHasher passwordHasher,
         ITokenService tokenService,
         IAuthRepository authRepository,
         IAuthStore authStore,
-        ILogger<LoginCommandHandler> logger)
+        ILogger<LoginCommandHandler> logger,
+        ICryptoService cryptoService)
     {
         _authRepository = authRepository;
         _authStore = authStore;
         _passwordHasher = passwordHasher;
         _tokenService = tokenService;
         _logger = logger;
+        _cryptoService = cryptoService;
     }
 
     public async Task<Result<LoginResponse>> Handle(LoginCommand request, CancellationToken cancellationToken)
@@ -44,6 +49,13 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginRes
         if (adminInfo == null)
         {
             return Result.Success<LoginResponse>().WithError(GlobalErrorCode.AuthFailed.ToError());
+        }
+
+        if (adminInfo.Use2fa == "Y"
+         && string.IsNullOrWhiteSpace(adminInfo.Email) == true
+         && string.IsNullOrWhiteSpace(adminInfo.Tel) == true)
+        {
+            return Result.Success<LoginResponse>().WithError(AuthErrorCode.NotFoundPhoneAndEmail.ToError());
         }
 
         var adminEntity = new AdminEntity()
@@ -115,6 +127,9 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginRes
                 Grade = adminInfo.Grade,
                 AccountLocked = adminInfo.AccountLocked,
                 LastLoginDt = adminInfo.LastLoginDt,
+                Use2fa = adminInfo.Use2fa,
+                Email = string.IsNullOrWhiteSpace(adminInfo.Email) == false ? _cryptoService.DecryptWithNoVector(adminInfo.Email, CryptoKeyType.Email) : "",
+                Tel = string.IsNullOrWhiteSpace(adminInfo.Tel) == false ? _cryptoService.DecryptWithNoVector(adminInfo.Tel, CryptoKeyType.Mobile) : ""
             },
             Token = new TokenInfo
             {

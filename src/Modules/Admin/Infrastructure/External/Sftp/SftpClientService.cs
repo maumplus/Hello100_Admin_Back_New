@@ -44,18 +44,25 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.External.Sftp
                 _opt.Username,
                 new PasswordAuthenticationMethod(_opt.Username, _opt.Password))
             {
-                Timeout = TimeSpan.FromSeconds(10)
+                // SSH 핸드셰이크/키교환 시간
+                Timeout = TimeSpan.FromSeconds(_opt.ConnectTimeoutSeconds)
             };
 
-            return new SftpClient(connectionInfo)
+            var client = new SftpClient(connectionInfo)
             {
-                OperationTimeout = TimeSpan.FromSeconds(15)
+                // 파일 1개 업로드에 허용할 최대 시간
+                OperationTimeout = TimeSpan.FromSeconds(_opt.OperationTimeoutSeconds)
             };
+
+            client.KeepAliveInterval = TimeSpan.FromSeconds(_opt.KeepAliveInterval);
+
+            return client;
         }
+
         #endregion
 
         #region ISFTPCLIENTSERVICE IMPLEMENTS AREA **********************************************
-        public async Task<string> UploadImageWithPathAsync(FileUploadPayload file, ImageUploadType uploadType, string? customRootDirectory = null, CancellationToken ct = default)
+        public async Task<string> UploadImageWithPathAsync(FileUploadPayload? file, ImageUploadType uploadType, string? customRootDirectory = null, CancellationToken ct = default)
         {
             ct.ThrowIfCancellationRequested();
 
@@ -119,16 +126,115 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.External.Sftp
 
                 return RemoteCombine(basePath, newFileName);
             }
-            catch (Exception ex)
+            catch (BizException ex)
             {
                 _logger.LogError(ex, "SFTP 업로드 실패: OriginalFileName={FileName}, RemotePath={RemoteFilePath}", file.FileName, remoteFilePath);
                 throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "SFTP 업로드 실패: OriginalFileName={FileName}, RemotePath={RemoteFilePath}", file.FileName, remoteFilePath);
+                throw new BizException(AdminErrorCode.SftpUploadFailed.ToError());
             }
             finally
             {
                 if (sftp.IsConnected) sftp.Disconnect();
             }
         }
+
+        public async Task<IReadOnlyList<string>> UploadImagesWithPathAsync(IReadOnlyList<FileUploadPayload>? files, ImageUploadType uploadType, string? customRootDirectory = null, CancellationToken ct = default)
+        {
+            ct.ThrowIfCancellationRequested();
+
+            if (files is null || files.Count == 0)
+                return Array.Empty<string>();
+
+            var datePath = DateTime.UtcNow.ToString("yyyyMMdd", CultureInfo.InvariantCulture);
+            var basePath = RemoteCombine(uploadType.ToString(), datePath);
+
+            if (!string.IsNullOrWhiteSpace(customRootDirectory))
+                basePath = RemoteCombine(customRootDirectory, basePath);
+
+            var remoteDir = RemoteCombine(_opt.RemotePath, basePath);
+
+            using var sftp = this.CreateSftpClient();
+
+            try
+            {
+                await sftp.ConnectAsync(ct).ConfigureAwait(false);
+
+                if (!sftp.IsConnected)
+                    throw new BizException(AdminErrorCode.SftpConnectionFailed.ToError());
+
+                await EnsureDirectoryAsync(sftp, remoteDir, ct).ConfigureAwait(false);
+
+                var results = new List<string>(files.Count);
+
+                foreach (var file in files)
+                {
+                    ct.ThrowIfCancellationRequested();
+
+                    if (file is null || string.IsNullOrWhiteSpace(file.FileName))
+                        throw new BizException(AdminErrorCode.NotFoundFileName.ToError());
+
+                    if (file.Length <= 0)
+                        throw new BizException(AdminErrorCode.NotFoundFileStream.ToError());
+
+                    var ext = Path.GetExtension(file.FileName)?.ToLowerInvariant();
+                    if (string.IsNullOrEmpty(ext) || !_imageAllowExtensions.Contains(ext))
+                        throw new BizException(AdminErrorCode.NotAllowedExtensions.ToError());
+
+                    var safeBaseName = SanitizeFileName(Path.GetFileNameWithoutExtension(file.FileName));
+                    var suffix = Guid.NewGuid().ToString("N")[..8];
+                    var newFileName = $"{safeBaseName}_{suffix}{ext}";
+
+                    var remoteFilePath = RemoteCombine(remoteDir, newFileName);
+
+                    using var input = file.OpenReadStream();
+
+                    if (uploadType == ImageUploadType.HO)
+                    {
+                        // 애니메이션(GIF/WebP)이면 변환 금지 → 원본 업로드
+                        if (ext is ".gif" or ".webp")
+                        {
+                            await sftp.UploadFileAsync(input, remoteFilePath, ct).ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            await using var hoStream = await TransformHoImageAsync(input, ext, ct).ConfigureAwait(false);
+                            await sftp.UploadFileAsync(hoStream, remoteFilePath, ct).ConfigureAwait(false);
+                        }
+                    }
+                    else
+                    {
+                        // ImageUploadType.HO 외에는 원본 업로드
+                        await sftp.UploadFileAsync(input, remoteFilePath, ct).ConfigureAwait(false);
+                    }
+
+                    var returnBasePath = RemoteCombine("Upload", basePath);
+                    results.Add(RemoteCombine(returnBasePath, newFileName));
+                }
+
+                return results;
+            }
+            catch (BizException ex)
+            {
+                _logger.LogError(ex, "SFTP 멀티 업로드 실패: Count={Count}, UploadType={UploadType}, RemoteDir={RemoteDir}",
+                    files.Count, uploadType, remoteDir);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "SFTP 멀티 업로드 실패: Count={Count}, UploadType={UploadType}, RemoteDir={RemoteDir}",
+                    files.Count, uploadType, remoteDir);
+                throw new BizException(AdminErrorCode.SftpUploadFailed.ToError());
+            }
+            finally
+            {
+                if (sftp.IsConnected) sftp.Disconnect();
+            }
+        }
+
 
         public async Task DeleteFileAsync(string? fullPath, CancellationToken ct)
         {

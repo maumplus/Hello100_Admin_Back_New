@@ -29,6 +29,7 @@ using Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalUser;
 using Hello100Admin.Modules.Admin.Domain.Repositories;
 using Hello100Admin.Modules.Admin.Infrastructure.Repositories.Advertisement;
 using Hello100Admin.Modules.Admin.Infrastructure.External.Sftp;
+using Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManagement;
 
 namespace Hello100Admin.Modules.Admin.Infrastructure;
 
@@ -57,11 +58,12 @@ public static class DependencyInjection
         services.AddScoped<IHospitalStatisticsStore, HospitalStatisticsStore>();
         services.AddScoped<IHospitalUserStore, HospitalUserStore>();
         services.AddScoped<IHospitalUserRepository, HospitalUserRepository>();
+        services.AddScoped<IHospitalStore, HospitalStore>();
+        services.AddScoped<IHospitalManagementRepository, HospitalManagementRepository>();
         services.AddScoped<IAdvertisementStore, AdvertisementStore>();
         services.AddScoped<IAdvertisementRepository, AdvertisementRepository>();
         services.AddScoped<ISftpClientService, SftpClientService>();
         services.AddScoped<IExcelExporter, ClosedXmlExcelExporter>();
-        services.AddScoped<IHospitalStore, HospitalStore>();
         services.AddSingleton<IHasher, Sha256Hasher>();
 
         var kakaoBizUrl = configuration.GetSection("KakaoBizUrl").Value;

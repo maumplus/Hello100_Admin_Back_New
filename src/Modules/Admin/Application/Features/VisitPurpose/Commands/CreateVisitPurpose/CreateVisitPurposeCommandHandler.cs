@@ -55,7 +55,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.VisitPurpose.Commands
             await _db.RunInTransactionAsync(DataSource.Hello100, 
                 async (session, token) =>
                 {
-                    // 승인요청정보 테이블에 저장
+                    // 승인요청정보 테이블에 저장 [ApprovalType HR: 병원 내원정보]
                     var createdApprId = await _visitPurposeRepository.CreateVisitPurposeApprovalAsync(session, req.HospKey, "HR", data.ToJsonForStorage(), req.AId, token);
 
                     // 이지스병원내원목적정보 테이블에 저장

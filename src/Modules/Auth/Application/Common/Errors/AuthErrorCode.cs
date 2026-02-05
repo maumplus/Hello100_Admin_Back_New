@@ -8,7 +8,7 @@ namespace Hello100Admin.Modules.Auth.Application.Common.Errors
     /// </summary>
     public enum AuthErrorCode
     {
-        [Description("임시 description 입니다.")]
-        TempEnum = 8001,
+        [Description("로그인을 위해서는 전화번호 혹은 이메일 둘 중 하나는 필수입니다. 확인 후 다시 시도해주세요.")]
+        NotFoundPhoneAndEmail = 8001,
     }
 }

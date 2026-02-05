@@ -11,7 +11,8 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalStatistics.Qu
     /// 접수구분통계 쿼리
     /// </summary>
     /// <param name="HospNo">요양기관번호</param>
-    public record GetRegistrationStatsByMethodQuery(string HospNo, string year) : IQuery<Result<List<GetRegistrationStatsByMethodResult>>>;
+    /// <param name="Year">연도</param>
+    public record GetRegistrationStatsByMethodQuery(string HospNo, string Year) : IQuery<Result<List<GetRegistrationStatsByMethodResult>>>;
 
     public class GetRegistrationStatsByMethodQueryValidator : AbstractValidator<GetRegistrationStatsByMethodQuery>
     {
@@ -19,7 +20,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalStatistics.Qu
         {
             RuleFor(x => x.HospNo)
                 .Must(x => !string.IsNullOrWhiteSpace(x)).WithMessage("요양기관번호는 필수입니다.");
-            RuleFor(x => x.year)
+            RuleFor(x => x.Year)
                 .Must(x => !string.IsNullOrWhiteSpace(x)).WithMessage("연도는 필수입니다.");
         }
     }
@@ -39,9 +40,9 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalStatistics.Qu
                   
         public async Task<Result<List<GetRegistrationStatsByMethodResult>>> Handle(GetRegistrationStatsByMethodQuery request, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Handling GetRegistrationStatsByMethodQuery for HospNo: {HospNo}, Year: {Year}", request.HospNo, request.year);
+            _logger.LogInformation("Handling GetRegistrationStatsByMethodQuery for HospNo: {HospNo}, Year: {Year}", request.HospNo, request.Year);
 
-            var response = await _hospitalStatisticsStore.GetRegistrationStatsByMethodAsync(request.HospNo, request.year, cancellationToken);
+            var response = await _hospitalStatisticsStore.GetRegistrationStatsByMethodAsync(request.HospNo, request.Year, cancellationToken);
 
             return Result.Success(response);
         }

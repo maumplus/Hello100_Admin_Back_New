@@ -76,6 +76,7 @@ namespace Hello100Admin.API.Controllers
         /// </summary>
         [HttpGet("popups/{popupId}")]
         [ProducesResponseType(typeof(ApiResponse<GetPopupResult>), StatusCodes.Status200OK)]
+        [Obsolete("팝업 리스트 전체 조회에서 필요한 데이터 다 응답하므로 미사용")]
         public async Task<IActionResult> GetPopup(int popupId, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("GET /api/advertisement/popups/{popupId} [{AId}]", popupId, Aid);

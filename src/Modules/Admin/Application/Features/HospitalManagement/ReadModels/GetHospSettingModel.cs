@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Hello100Admin.Modules.Admin.Application.Features.Hospital.Responses
+namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.ReadModels
 {
-    public class GetHospitalSettingResponse
+    public class GetHospSettingModel
     {
         public string HospNo { get; set; }
         public string Name { get; set; }

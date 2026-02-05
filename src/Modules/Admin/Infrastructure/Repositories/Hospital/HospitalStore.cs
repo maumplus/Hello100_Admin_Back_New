@@ -2,10 +2,11 @@
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 using Hello100Admin.BuildingBlocks.Common.Definition.Enums;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Hospital;
-using Hello100Admin.Modules.Admin.Application.Features.Hospital.ReadModels;
 using Mapster;
 using Microsoft.Extensions.Logging;
 using System.Data;
+using Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.ReadModels;
+using Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Results;
 
 namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Hospital
 {
@@ -31,7 +32,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Hospital
             return conn;
         }
 
-        public async Task<(List<GetHospitalModel>, int)> GetHospitalList(string chartType, HospitalListSearchType searchType, string keyword, int pageNo, int pageSize, CancellationToken cancellationToken = default)
+        public async Task<(List<GetHospitalResult>, int)> GetHospitalList(string chartType, HospitalListSearchType searchType, string keyword, int pageNo, int pageSize, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -120,7 +121,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Hospital
 
                 var hospitalList = await connection.QueryAsync(sql, parameters);
 
-                var result = hospitalList.Adapt<List<GetHospitalModel>>();
+                var result = hospitalList.Adapt<List<GetHospitalResult>>();
                 int totalCount = hospitalList.Count() > 0 ? (int)hospitalList.First().TotalCount : 0;
 
                 return (result, totalCount);
@@ -132,7 +133,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Hospital
             }
         }
 
-        public async Task<GetHospitalModel?> GetHospital(string hospNo, CancellationToken cancellationToken = default)
+        public async Task<GetHospitalResult?> GetHospital(string hospNo, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -145,6 +146,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Hospital
                     SELECT a.hosp_key              AS HospKey,
                            a.hosp_no               AS HospNo,
                            a.business_no           AS BusinessNo,
+                           a.business_level        AS BusinessLevel,
                            a.name                  AS Name,
                            a.hosp_cls_cd           AS HospClsCd,
                            a.addr                  AS Addr,
@@ -155,7 +157,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Hospital
                            a.lng                   AS Lng,
                            a.closing_yn            AS ClosingYn,
                            a.del_yn                AS DelYn,
-                           a.`desc`                AS Descrption,
+                           a.descrption            AS Descrption,
                            a.reg_dt                AS RegDt,
                            a.chart_type            AS ChartType,
                            a.is_test               AS IsTest,
@@ -167,6 +169,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Hospital
                       FROM ( SELECT b.hosp_key              AS hosp_key,
                                     a.hosp_no               AS hosp_no,
                                     a.business_no           AS business_no,
+                                    a.business_level        AS business_level,
                                     b.name                  AS name,
                                     b.hosp_cls_cd           AS hosp_cls_cd,
                                     b.addr                  AS addr,
@@ -206,12 +209,13 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Hospital
                                FROM tb_eghis_hosp_info a
                               INNER JOIN tb_hospital_info b
                                  ON a.hosp_key = b.hosp_key
-                              WHERE a.del_yn = 'N' ) a
+                              WHERE a.hosp_no = @HospNo
+                                AND a.del_yn = 'N' ) a
                 ";
 
                 using var connection = CreateConnection();
 
-                return await connection.QueryFirstOrDefaultAsync<GetHospitalModel>(sql, parameters);
+                return await connection.QueryFirstOrDefaultAsync<GetHospitalResult>(sql, parameters);
             }
             catch (Exception ex)
             {
@@ -220,7 +224,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Hospital
             }
         }
 
-        public async Task<List<GetHospMedicalTimeModel>> GetHospMedicalTimeList(string hospKey, CancellationToken cancellationToken = default)
+        public async Task<List<MedicalTimeResultItem>> GetHospMedicalTimeList(string hospKey, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -244,7 +248,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Hospital
 
                 using var connection = CreateConnection();
 
-                return (await connection.QueryAsync<GetHospMedicalTimeModel>(sql, parameters)).ToList();
+                return (await connection.QueryAsync<MedicalTimeResultItem>(sql, parameters)).ToList();
             }
             catch (Exception ex)
             {
@@ -253,7 +257,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Hospital
             }
         }
 
-        public async Task<List<GetHospKeywordModel>> GetHospKeywordList(string hospKey, CancellationToken cancellationToken = default)
+        public async Task<List<HashTagInfoResultItem>> GetHospKeywordList(string hospKey, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -286,7 +290,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Hospital
 
                 using var connection = CreateConnection();
 
-                return (await connection.QueryAsync<GetHospKeywordModel>(sql, parameters)).ToList();
+                return (await connection.QueryAsync<HashTagInfoResultItem>(sql, parameters)).ToList();
             }
             catch (Exception ex)
             {
@@ -295,7 +299,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Hospital
             }
         }
 
-        public async Task<List<GetHospitalMedicalModel>> GetHospitalMedicalList(string hospKey, CancellationToken cancellationToken = default)
+        public async Task<List<MedicalInfoResultItem>> GetHospitalMedicalList(string hospKey, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -318,7 +322,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Hospital
 
                 using var connection = CreateConnection();
 
-                return (await connection.QueryAsync<GetHospitalMedicalModel>(sql, parameters)).ToList();
+                return (await connection.QueryAsync<MedicalInfoResultItem>(sql, parameters)).ToList();
             }
             catch (Exception ex)
             {
@@ -327,13 +331,14 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Hospital
             }
         }
 
-        public async Task<List<GetImageModel>> GetImageList(string hospKey, CancellationToken cancellationToken = default)
+        public async Task<List<ImageInfoResultItem>> GetImageList(string hospKey, CancellationToken cancellationToken = default)
         {
             try
             {
                 _logger.LogInformation("Getting Image by HospKey: {HospKey}", hospKey);
 
                 var parameters = new DynamicParameters();
+                parameters.Add("@EncKey", "d3fa7fa7873c38097b31feb7bcd1c017ff222aee", DbType.String);
                 parameters.Add("@HospKey", hospKey, DbType.String);
 
                 var sql = @"
@@ -350,7 +355,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Hospital
 
                 using var connection = CreateConnection();
 
-                return (await connection.QueryAsync<GetImageModel>(sql, parameters)).ToList();
+                return (await connection.QueryAsync<ImageInfoResultItem>(sql, parameters)).ToList();
             }
             catch (Exception ex)
             {
@@ -359,7 +364,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Hospital
             }
         }
 
-        public async Task<List<GetHospMedicalTimeNewModel>> GetHospMedicalTimeNewList(string hospKey, CancellationToken cancellationToken = default)
+        public async Task<List<MedicalTimeNewResultItem>> GetHospMedicalTimeNewList(string hospKey, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -398,7 +403,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Hospital
 
                 using var connection = CreateConnection();
 
-                return (await connection.QueryAsync<GetHospMedicalTimeNewModel>(sql, parameters)).ToList();
+                return (await connection.QueryAsync<MedicalTimeNewResultItem>(sql, parameters)).ToList();
             }
             catch (Exception ex)
             {
@@ -407,30 +412,26 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Hospital
             }
         }
 
-        public async Task<List<GetKeywordMasterModel>> GetKeywordMasterList(string hospKey, CancellationToken cancellationToken = default)
+        public async Task<List<KeywordMasterResultItem>> GetKeywordMasterList(string hospKey, CancellationToken cancellationToken = default)
         {
             try
             {
                 _logger.LogInformation("Getting Keyword Master by HospKey: {HospKey}", hospKey);
 
                 var parameters = new DynamicParameters();
+                parameters.Add("@EncKey", "d3fa7fa7873c38097b31feb7bcd1c017ff222aee", DbType.String);
                 parameters.Add("@HospKey", hospKey, DbType.String);
 
                 var sql = @"
-                    SELECT img_id                                        AS ImgId,
-                           img_key                                       AS ImgKey,
-                           url                                           AS Url,
-                           del_yn                                        AS DelYn,
-                           DATE_FORMAT(FROM_UNIXTIME(reg_dt), '%Y%m%d')  AS RegDt
-                      FROM tb_image_info
-                     WHERE img_key = func_HMACSHA256(@EncKey, CONCAT('hospital', @HospKey))
-                       AND del_yn = 'N'
-                    ORDER BY img_id ASC;
+                    SELECT master_name as MasterName,
+                           master_seq as MasterSeq
+                      FROM tb_keyword_master tkm
+                     WHERE show_yn = 'Y'
                 ";
 
                 using var connection = CreateConnection();
 
-                return (await connection.QueryAsync<GetKeywordMasterModel>(sql, parameters)).ToList();
+                return (await connection.QueryAsync<KeywordMasterResultItem>(sql, parameters)).ToList();
             }
             catch (Exception ex)
             {

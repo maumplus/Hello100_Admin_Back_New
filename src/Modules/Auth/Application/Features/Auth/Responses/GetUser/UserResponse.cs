@@ -8,8 +8,11 @@
         public string Id { get; set; } = string.Empty;
         public string AccountId { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Tel { get; set; } = string.Empty;
         public string Grade { get; set; } = string.Empty;
         public string AccountLocked { get; set; } = string.Empty;
         public string? LastLoginDt { get; set; }
+        public string Use2fa { get; set; } = default!;
     }
 }

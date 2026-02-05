@@ -47,8 +47,8 @@ namespace Hello100Admin.Integration.Shared
                         claims.Add(new Claim("sub", value));
                         break;
 
-                    case "account_id":
-                        claims.Add(new Claim("account_id", value));
+                    case "accId":
+                        claims.Add(new Claim("accId", value));
                         break;
 
                     case "name":
@@ -59,12 +59,16 @@ namespace Hello100Admin.Integration.Shared
                         claims.Add(new Claim(ClaimTypes.Role, value));
                         break;
 
-                    case "hospital_number":
-                        claims.Add(new Claim("hospital_number", value));
+                    case "grade":
+                        claims.Add(new Claim("grade", value));
                         break;
 
-                    case "hospital_key":
-                        claims.Add(new Claim("hospital_key", value));
+                    case "hospNo":
+                        claims.Add(new Claim("hospNo", value));
+                        break;
+
+                    case "hospKey":
+                        claims.Add(new Claim("hospKey", value));
                         break;
 
                     default:

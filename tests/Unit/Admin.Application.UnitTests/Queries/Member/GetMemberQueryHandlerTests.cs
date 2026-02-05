@@ -29,6 +29,7 @@ public class GetMemberQueryHandlerTests
         public string EncryptParameter(string plainText) => plainText;
         public string DecryptParameter(string encryptedText) => encryptedText;
         public string EncryptToBase64WithDesEcbPkcs7(string plaintext) => plaintext;
+        public string DecryptFromBase64WithDesEcbPkcs7(string plaintext) => plaintext;
     }
 
     [Fact]
