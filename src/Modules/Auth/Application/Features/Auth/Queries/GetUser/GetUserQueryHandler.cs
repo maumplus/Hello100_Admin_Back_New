@@ -33,6 +33,7 @@ public class GetUserQueryHandler : IRequestHandler<GetUserQuery, Result<UserResp
             AccountId = user.AccId,
             Name = user.Name,
             Grade = user.Grade,
+            HospNo = user.HospNo,
             AccountLocked = user.AccountLocked,
             LastLoginDt = user.LastLoginDt,
             Use2fa = user.Use2fa

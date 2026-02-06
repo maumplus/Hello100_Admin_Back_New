@@ -125,6 +125,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginRes
                 AccountId = adminInfo.AccId,
                 Name = adminInfo.Name,
                 Grade = adminInfo.Grade,
+                HospNo = adminInfo.HospNo,
                 AccountLocked = adminInfo.AccountLocked,
                 LastLoginDt = adminInfo.LastLoginDt,
                 Use2fa = adminInfo.Use2fa,

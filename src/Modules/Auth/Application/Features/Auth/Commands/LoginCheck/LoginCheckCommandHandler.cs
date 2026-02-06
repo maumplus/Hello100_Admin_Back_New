@@ -97,6 +97,7 @@ namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.LoginChe
                     AccountId = adminInfo.AccId,
                     Name = adminInfo.Name,
                     Grade = adminInfo.Grade,
+                    HospNo = adminInfo.HospNo,
                     AccountLocked = adminInfo.AccountLocked,
                     LastLoginDt = adminInfo.LastLoginDt,
                     Use2fa = adminInfo.Use2fa,

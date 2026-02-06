@@ -11,6 +11,7 @@
         public string Email { get; set; } = string.Empty;
         public string Tel { get; set; } = string.Empty;
         public string Grade { get; set; } = string.Empty;
+        public string HospNo { get; set; } = string.Empty;
         public string AccountLocked { get; set; } = string.Empty;
         public string? LastLoginDt { get; set; }
         public string Use2fa { get; set; } = default!;
