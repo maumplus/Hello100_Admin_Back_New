@@ -62,5 +62,9 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Errors
         SftpConnectionFailed = 4026,
         [Description("병원정보 저장 또는 수정에 실패하였습니다. 다시 시도해주세요.")]
         UpsertHospitalFailed = 4027,
+        [Description("비즈 사이트 데이터 요청 간 에러가 발생하였습니다. 다시 시도해주세요.")]
+        BizSiteDataRequestFailed = 4028,
+        [Description("헬로100 설정 저장 또는 수정에 실패하였습니다. 다시 시도해주세요.")]
+        UpsertHello100SettingFailed = 4029,
     }
 }

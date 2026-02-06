@@ -100,36 +100,42 @@ namespace Hello100Admin.API.Controllers
             return result.ToActionResult(this);
         }
 
-        private List<FileUploadPayload>? GetImagePayload(List<IFormFile>? images)
+        /// <summary>
+        /// [병원관리자] 병원정보관리 > Hello100 설정 > 조회
+        /// </summary>
+        [HttpGet("hello100-setting")]
+        [ProducesResponseType(typeof(ApiResponse<GetHello100SettingResult>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetHello100Setting(CancellationToken cancellationToken = default)
         {
-            if (images == null || images.Count <= 0)
-                return null;
+            _logger.LogInformation("GET /api/hospital-management/hello100-setting");
 
-            var payloads = new List<FileUploadPayload>();
+            var result = await _mediator.Send(new GetHello100SettingQuery(base.HospNo, base.HospKey), cancellationToken);
 
-            foreach (var image in images)
-            {
-                var payload = new FileUploadPayload(image.FileName, image.ContentType, image.Length, () => image.OpenReadStream());
-                payloads.Add(payload);
-            }
-
-            return payloads;
+            return result.ToActionResult(this);
         }
 
-        ///// <summary>
-        ///// [병원정보관리 > Hello100 설정]Hello100 설정정보 API
-        ///// </summary>
-        //[HttpGet("hospital/setting")]
-        //[ProducesResponseType(typeof(GetHospitalResult), StatusCodes.Status200OK)]
-        //[ProducesResponseType(StatusCodes.Status404NotFound)]
-        //public async Task<IActionResult> GetHospitalSetting(CancellationToken cancellationToken = default)
-        //{
-        //    _logger.LogInformation("GET /api/hospital-management/hospital/setting");
+        /// <summary>
+        /// [병원관리자] 병원정보관리 > Hello100 설정 > 저장
+        /// </summary>
+        [HttpPost("hello100-setting")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> UpsertHello100Setting(UpsertHello100SettingRequest req, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("POST /api/hospital-management/hello100-setting");
 
-        //    var result = await _mediator.Send(new GetHospitalSettingQuery(base.HospKey), cancellationToken);
+            var command = req.Adapt<UpsertHello100SettingCommand>() with
+            {
+                HospNo = base.HospNo,
+                HospKey = base.HospKey,
+                Role = this.SetRole(req.Roles)
+            };
 
-        //    return result.ToActionResult(this);
-        //}
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
 
         ///// <summary>
         ///// [병원정보관리 > 의료진관리]의료진 목록 API
@@ -156,5 +162,38 @@ namespace Hello100Admin.API.Controllers
         //    // 중앙화된 매퍼로 Result -> IActionResult 변환
         //    return result.ToActionResult(this);
         //}
+
+        #region INTERNAL METHOD AREA ********************************************
+        private List<FileUploadPayload>? GetImagePayload(List<IFormFile>? images)
+        {
+            if (images == null || images.Count <= 0)
+                return null;
+
+            var payloads = new List<FileUploadPayload>();
+
+            foreach (var image in images)
+            {
+                var payload = new FileUploadPayload(image.FileName, image.ContentType, image.Length, () => image.OpenReadStream());
+                payloads.Add(payload);
+            }
+
+            return payloads;
+        }
+
+        private int SetRole(List<int>? roleList)
+        {
+            if (roleList == null || roleList.Count <= 0)
+                return 0;
+
+            int role = 0;
+
+            foreach (var item in roleList)
+            {
+                role |= item;
+            }
+
+            return role;
+        }
+        #endregion
     }
 }

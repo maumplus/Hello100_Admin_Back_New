@@ -9,6 +9,7 @@ using Hello100Admin.Modules.Admin.Application.Common.Extensions;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Dapper;
 using System.Text;
 using Hello100Admin.Modules.Admin.Domain.Entities;
+using Hello100Admin.Modules.Admin.Application.Common.Definitions.Enums;
 
 namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManagement
 {
@@ -31,9 +32,9 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             DynamicParameters parameters = new DynamicParameters();
             parameters.Add("HospKey", hospKey, DbType.String);
             parameters.Add("ApprType", apprType, DbType.String);
-            parameters.Add("ApprData", reqJson, DbType.String);   
-            parameters.Add("ReqAid", aId, DbType.String);   
-            parameters.Add("EncKey", "d3fa7fa7873c38097b31feb7bcd1c017ff222aee", DbType.Int32);
+            parameters.Add("ApprData", reqJson, DbType.String);
+            parameters.Add("ReqAid", aId, DbType.String);
+            parameters.Add("EncKey", "d3fa7fa7873c38097b31feb7bcd1c017ff222aee", DbType.String);
 
             StringBuilder sbImages = new StringBuilder();
             imageUrls.ForEach(x =>
@@ -92,7 +93,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             parameters.Add("HospKey", hospKey, DbType.String);
             parameters.Add("Descrption", description, DbType.String);
             parameters.Add("AId", aId, DbType.String);
-            parameters.Add("EncKey", "d3fa7fa7873c38097b31feb7bcd1c017ff222aee", DbType.Int32);
+            parameters.Add("EncKey", "d3fa7fa7873c38097b31feb7bcd1c017ff222aee", DbType.String);
             parameters.Add("ApprId", apprId, DbType.Int32);
             parameters.Add("BusinessNo", businessNo, DbType.String);
             parameters.Add("BusinessLevel", businessLevel, DbType.String);
@@ -234,6 +235,107 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
 
             if (result <= 0)
                 throw new BizException(AdminErrorCode.UpsertHospitalFailed.ToError());
+
+            return result;
+        }
+
+        public async Task<int> UpsertHello100SettingAsync(DbSession db, string hospNo, TbEghisHospSettingsInfoEntity settingEntity, TbNoticeEntity noticeEntity, CancellationToken ct)
+        {
+            DynamicParameters parameters = new DynamicParameters();
+            parameters.Add("HospNo", hospNo, DbType.String);
+            parameters.Add("HospKey", settingEntity.HospKey, DbType.String);
+            parameters.Add("Role", settingEntity.Role, DbType.Int32);
+            parameters.Add("ReceptEndTime", settingEntity.ReceptEndTime, DbType.String);
+            parameters.Add("AwaitRole", settingEntity.AwaitRole, DbType.Int32);
+            parameters.Add("Notice", noticeEntity.Content ?? string.Empty, DbType.String);
+            parameters.Add("NoticeId", noticeEntity.NotiId, DbType.Int32);
+            parameters.Add("StId", settingEntity.StId, DbType.Int32);
+            parameters.Add("ExamPushSet", settingEntity.ExamPushSet, DbType.Int32);
+
+            #region == Query ==
+            StringBuilder sb = new StringBuilder();
+
+            if (settingEntity.StId == 0)
+            {
+                // 모바일 접수 셋팅
+                sb.AppendLine("  INSERT INTO tb_eghis_hosp_settings_info ");
+                sb.AppendLine("     (   hosp_key                ");
+                sb.AppendLine("     ,   wait_tm                 ");
+                sb.AppendLine("     ,   role                    ");
+                sb.AppendLine("     ,   recept_end_time         ");
+                sb.AppendLine("     ,   await_role              ");
+                sb.AppendLine("     ,   exampush_set              ");
+                sb.AppendLine("     ,   reg_dt                  ");
+                sb.AppendLine("     )                           ");
+                sb.AppendLine(" VALUES                          ");
+                sb.AppendLine("     (   @HospKey                ");
+                sb.AppendLine("     ,   ''                      ");
+                sb.AppendLine("     ,   @Role                   ");
+                sb.AppendLine("     ,   @ReceptEndTime          ");
+                sb.AppendLine("     ,   @AwaitRole              ");
+                sb.AppendLine("     ,   @ExamPushSet              ");
+                sb.AppendLine("     ,   UNIX_TIMESTAMP(now())   ");
+                sb.AppendLine("     );                          ");
+            }
+            else
+            {
+                sb.AppendLine("  UPDATE tb_eghis_hosp_settings_info ");
+                sb.AppendLine("     SET wait_tm = wait_tm");
+                sb.AppendLine("     ,   role = @Role");
+                if (settingEntity.Role == 2 || (settingEntity.Role & (int)Hello100RoleType.NoRecept) == 0)
+                {
+                    sb.AppendLine("     ,   recept_end_time = ''");
+                }
+                else
+                {
+                    sb.AppendLine("     ,   recept_end_time = @ReceptEndTime");
+                }
+                sb.AppendLine("     ,   await_role = @AwaitRole");
+                sb.AppendLine("     ,   exampush_set = @ExamPushSet");
+                sb.AppendLine("     ,   reg_dt = UNIX_TIMESTAMP(now())");
+                sb.AppendLine("   WHERE st_id = @StId;");
+            }
+
+            // 공지사항 저장
+            if (noticeEntity.NotiId == 0)
+            {
+                sb.AppendLine("  INSERT INTO tb_notice          ");
+                sb.AppendLine("     (   title                   ");
+                sb.AppendLine("     ,   content                 ");
+                sb.AppendLine("     ,   grade                   ");
+                sb.AppendLine("     ,   hosp_key                ");
+                sb.AppendLine("     ,   reg_dt                  ");
+                sb.AppendLine("     )                           ");
+                sb.AppendLine(" VALUES                          ");
+                sb.AppendLine("     (   ''                      ");
+
+                if (noticeEntity.Content == null)
+                {
+                    sb.AppendLine("     ,    ''                 ");
+                }
+
+                else
+                {
+                    sb.AppendLine("     ,    @Notice            ");
+                }
+                sb.AppendLine("     ,   '01'                    ");
+                sb.AppendLine("     ,   @HospKey                ");
+                sb.AppendLine("     ,   UNIX_TIMESTAMP(now())   ");
+                sb.AppendLine("     );                          ");
+            }
+            else
+            {
+                sb.AppendLine(" UPDATE tb_notice            ");
+                sb.AppendLine("     SET content = @Notice   ");
+                sb.AppendLine("   WHERE noti_id = @NoticeId;");
+            }
+
+            #endregion
+
+            var result = await db.ExecuteAsync(sb.ToString(), parameters, ct, _logger);
+
+            if (result <= 0)
+                throw new BizException(AdminErrorCode.UpsertHello100SettingFailed.ToError());
 
             return result;
         }
