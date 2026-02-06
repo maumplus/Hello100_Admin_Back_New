@@ -27,16 +27,16 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
 
         public async Task<Result<GetHospitalResult?>> Handle(GetHospitalQuery query, CancellationToken cancellationToken)
         {
-            var result = await _hospitalStore.GetHospital(query.HospNo, cancellationToken);
+            var result = await _hospitalStore.GetHospitalAsync(query.HospNo, cancellationToken);
 
             if (result != null)
             {
-                result.ClinicTimes = await _hospitalStore.GetHospMedicalTimeList(result.HospKey, cancellationToken);
-                result.DeptCodes = await _hospitalStore.GetHospitalMedicalList(result.HospKey, cancellationToken);
-                result.Keywords = await _hospitalStore.GetHospKeywordList(result.HospKey, cancellationToken);
-                result.Images = await _hospitalStore.GetImageList(result.HospKey, cancellationToken);
-                result.ClinicTimesNew = await _hospitalStore.GetHospMedicalTimeNewList(result.HospKey, cancellationToken);
-                result.KeywordMasters = await _hospitalStore.GetKeywordMasterList(result.HospKey, cancellationToken);
+                result.ClinicTimes = await _hospitalStore.GetHospMedicalTimeListAsync(result.HospKey, cancellationToken);
+                result.DeptCodes = await _hospitalStore.GetHospitalMedicalListAsync(result.HospKey, cancellationToken);
+                result.Keywords = await _hospitalStore.GetHospKeywordListAsync(result.HospKey, cancellationToken);
+                result.Images = await _hospitalStore.GetImageListAsync(result.HospKey, cancellationToken);
+                result.ClinicTimesNew = await _hospitalStore.GetHospMedicalTimeNewListAsync(result.HospKey, cancellationToken);
+                result.KeywordMasters = await _hospitalStore.GetKeywordMasterListAsync(result.HospKey, cancellationToken);
             }
 
             return Result.Success(result);

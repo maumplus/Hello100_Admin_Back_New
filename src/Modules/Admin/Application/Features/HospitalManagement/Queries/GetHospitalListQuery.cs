@@ -33,16 +33,16 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
 
         public async Task<Result<PagedResult<GetHospitalResult>>> Handle(GetHospitalListQuery query, CancellationToken cancellationToken)
         {
-            (var hospitalList, var totalCount) = await _hospitalStore.GetHospitalList(query.ChartType, query.SearchType, query.Keyword, query.PageNo, query.PageSize, cancellationToken);
+            (var hospitalList, var totalCount) = await _hospitalStore.GetHospitalListAsync(query.ChartType, query.SearchType, query.Keyword, query.PageNo, query.PageSize, cancellationToken);
 
             foreach (var hospital in hospitalList)
             {
-                hospital.ClinicTimes = await _hospitalStore.GetHospMedicalTimeList(hospital.HospKey, cancellationToken);
-                hospital.DeptCodes = await _hospitalStore.GetHospitalMedicalList(hospital.HospKey, cancellationToken);
-                hospital.Keywords = await _hospitalStore.GetHospKeywordList(hospital.HospKey, cancellationToken);
-                hospital.Images = await _hospitalStore.GetImageList(hospital.HospKey, cancellationToken);
-                hospital.ClinicTimesNew = await _hospitalStore.GetHospMedicalTimeNewList(hospital.HospKey, cancellationToken);
-                hospital.KeywordMasters = await _hospitalStore.GetKeywordMasterList(hospital.HospKey, cancellationToken);
+                hospital.ClinicTimes = await _hospitalStore.GetHospMedicalTimeListAsync(hospital.HospKey, cancellationToken);
+                hospital.DeptCodes = await _hospitalStore.GetHospitalMedicalListAsync(hospital.HospKey, cancellationToken);
+                hospital.Keywords = await _hospitalStore.GetHospKeywordListAsync(hospital.HospKey, cancellationToken);
+                hospital.Images = await _hospitalStore.GetImageListAsync(hospital.HospKey, cancellationToken);
+                hospital.ClinicTimesNew = await _hospitalStore.GetHospMedicalTimeNewListAsync(hospital.HospKey, cancellationToken);
+                hospital.KeywordMasters = await _hospitalStore.GetKeywordMasterListAsync(hospital.HospKey, cancellationToken);
             }
 
             var dtos = hospitalList.Adapt<List<GetHospitalResult>>();
