@@ -42,6 +42,15 @@ namespace Hello100Admin.BuildingBlocks.Common.Infrastructure.Serialization
                 ?? throw new JsonException("Deserialization returned null.");
         }
 
+        public static T? FromJsonNoOptions<T>(this string json)
+        {
+            if (json is null)
+                throw new ArgumentNullException(nameof(json));
+
+            return JsonSerializer.Deserialize<T>(json, JsonOptions.NoOptions)
+                ?? throw new JsonException("Deserialization returned null.");
+        }
+
         public static string? ToJsonOrNull(this object? obj)
         {
             return obj is null ? null : JsonSerializer.Serialize(obj, JsonOptions.Default);

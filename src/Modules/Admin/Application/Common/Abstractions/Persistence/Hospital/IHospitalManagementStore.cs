@@ -84,5 +84,30 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistenc
         /// <param name="ct"></param>
         /// <returns></returns>
         public Task<List<GetClinicalKeywordsResult>> GetClinicalKeywordsAsync(DbSession db, string? keyword, string? masterSeq, CancellationToken ct = default);
+
+        /// <summary>
+        /// 헬로데스크 설정 조회
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="hospNo"></param>
+        /// <param name="hospKey"></param>
+        /// <param name="emplNo"></param>
+        /// <param name="deviceType"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        public Task<GetHelloDeskSettingResult> GetHelloDeskSettingAsync(
+            DbSession db, string hospNo, string hospKey, string? emplNo, int deviceType, CancellationToken ct = default);
+
+        /// <summary>
+        /// 의사 목록 조회
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="hospNo"></param>
+        /// <param name="pageNo"></param>
+        /// <param name="pageSize"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        public Task<ListResult<DoctorBaseRo>> GetDoctorsAsync(
+            DbSession db, string hospNo, int pageNo, int pageSize, CancellationToken ct = default);
     }
 }

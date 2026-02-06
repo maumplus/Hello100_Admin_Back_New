@@ -633,5 +633,129 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
 
             return result;
         }
+
+        public async Task<GetHelloDeskSettingResult> GetHelloDeskSettingAsync(
+            DbSession db, string hospNo, string hospKey, string? emplNo, int deviceType, CancellationToken ct = default)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@HospNo", hospNo, DbType.String);
+            parameters.Add("@HospKey", hospKey, DbType.String);
+            parameters.Add("@EmplNo", emplNo ?? string.Empty, DbType.String);
+            parameters.Add("@DeviceType", deviceType, DbType.Int32); // SetDeviceType.Tablet: 2
+
+            #region == Query ==
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine(" SELECT a.device_nm              AS DeviceNm          ");
+            sb.AppendLine("	   ,   a.empl_no                AS EmplNo            ");
+            sb.AppendLine("  FROM hello100.tb_eghis_hosp_device_settings_info a  ");
+            sb.AppendLine(" WHERE a.hosp_no = @HospNo                            ");
+            sb.AppendLine("   AND a.hosp_key = @HospKey                          ");
+            sb.AppendLine("   AND a.device_type = @DeviceType                    ");
+            sb.AppendLine("   AND a.use_yn = 'Y'                                 ");
+            sb.AppendLine("  ORDER BY a.empl_no ASC   ;                          ");
+
+            sb.AppendLine(" SELECT a.hosp_no              AS HospNo              ");
+            sb.AppendLine("	   ,   a.empl_no              AS EmplNo              ");
+            sb.AppendLine("	   ,   a.device_nm            AS DeviceNm            ");
+            sb.AppendLine("	   ,   a.hosp_nm              AS HospNm              ");
+            sb.AppendLine("	   ,   a.device_type          AS DeviceType          ");
+            sb.AppendLine("	   ,   a.hosp_key             AS HospKey             ");
+            sb.AppendLine("	   ,   a.info_txt             AS InfoTxt             ");
+            sb.AppendLine("	   ,   a.set_json             AS SetJsonStr          ");
+            sb.AppendLine("	   ,   a.use_yn               AS UseYn               ");
+            sb.AppendLine("  FROM hello100.tb_eghis_hosp_device_settings_info a  ");
+            sb.AppendLine(" WHERE a.hosp_no = @HospNo                            ");
+            sb.AppendLine("   AND a.hosp_key = @HospKey                          ");
+            sb.AppendLine("   AND a.device_type = @DeviceType                    ");
+            sb.AppendLine("   AND a.use_yn = 'Y'                                 ");
+
+            if (emplNo != "")
+            {
+                sb.AppendLine("   AND a.empl_no = @EmplNo                        ");
+            }
+            sb.AppendLine("  ORDER BY a.empl_no ASC                              ");
+            sb.AppendLine(" LIMIT 1;                                             ");
+            #endregion
+
+            var multi = await db.QueryMultipleAsync(sb.ToString(), parameters, ct, _logger);
+
+            var result = new GetHelloDeskSettingResult();
+
+            result.EmplList = (await multi.ReadAsync<DeviceInfo>()).ToList();
+            result.DeviceData = await multi.ReadSingleAsync<DeviceRo<TabletRo>>();
+
+            return result;
+        }
+
+        public async Task<ListResult<DoctorBaseRo>> GetDoctorsAsync(
+            DbSession db, string hospNo, int pageNo, int pageSize, CancellationToken ct = default)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@Limit", pageSize, DbType.Int32);
+            parameters.Add("@OffSet", (pageNo - 1) * pageSize, DbType.Int32);
+            parameters.Add("@HospNo", hospNo, DbType.String);
+
+            #region == Query ==
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine(" SET @total_count:= (SELECT COUNT(DISTINCT empl_no)            ");
+            sb.AppendLine("                       FROM hello100_api.eghis_doct_info       ");
+            sb.AppendLine("                      WHERE hosp_no = @HospNo  and doct_no!=''                  ");
+            sb.AppendLine("                        AND doct_nm LIKE CONCAT('%', '', '%'));");
+            sb.AppendLine(" SET @rownum:= @total_count + 1 - @OffSet;                     ");
+
+            sb.AppendLine(" SELECT @rownum:= @rownum - 1         AS rownum                ");
+            sb.AppendLine("      , t.*                                                    ");
+            sb.AppendLine("    FROM(                                                      ");
+            sb.AppendLine(" SELECT  a.hosp_no                     AS HospNo               ");
+            sb.AppendLine("   ,     a.hosp_key                    AS HospKey              ");
+            sb.AppendLine("   ,     a.empl_no                     AS EmplNo               ");
+            sb.AppendLine("   ,     a.doct_no                     AS DoctNo               ");
+            sb.AppendLine("   ,     a.doct_nm                     AS DoctNm               ");
+            sb.AppendLine("   ,     a.dept_cd                     AS DeptCd               ");
+            sb.AppendLine("   ,     a.dept_nm                     AS DeptNm               ");
+            sb.AppendLine("   ,     b.weeks_num                                           ");
+            sb.AppendLine("   ,     case when b.otherCnt = 0 then b.weeks_nm              ");
+            sb.AppendLine("         ELSE CONCAT(b.weeks_nm, ',지정', b.otherCnt, '건') END AS WeeksNm ");
+            sb.AppendLine("   ,     a.front_view_role             AS FrontViewRole        ");
+            sb.AppendLine("  FROM hello100_api.eghis_doct_info a                                       ");
+            sb.AppendLine("  LEFT JOIN(SELECT empl_no, GROUP_CONCAT(z.week_num) AS weeks_num,  ");
+            sb.AppendLine("        GROUP_CONCAT(CASE WHEN z.week_num = 1 THEN '월'        ");
+            sb.AppendLine("                          WHEN z.week_num = 2 THEN '화'        ");
+            sb.AppendLine("                          WHEN z.week_num = 3 THEN '수'        ");
+            sb.AppendLine("                          WHEN z.week_num = 4 THEN '목'        ");
+            sb.AppendLine("                          WHEN z.week_num = 5 THEN '금'        ");
+            sb.AppendLine("                          WHEN z.week_num = 6 THEN '토'        ");
+            sb.AppendLine("                          WHEN z.week_num = 7 THEN '일'        ");
+            sb.AppendLine("                          WHEN z.week_num = 8 THEN '공휴일' END) AS weeks_nm ");
+            sb.AppendLine("                          , SUM(case when z.week_num = 11 then 1 ELSE 0 END) AS otherCnt ");
+            sb.AppendLine("               FROM hello100_api.eghis_doct_info z                         ");
+            sb.AppendLine("               WHERE z.hosp_no = @HospNo   and doct_no!=''                     ");
+            sb.AppendLine("                 AND z.use_yn= 'Y'                            ");
+            sb.AppendLine("                 AND (ifnull(z.clinic_ymd,'') = '' OR z.clinic_ymd > Date_Format(NOW(), '%Y%m%d')) ");
+            sb.AppendLine("               GROUP BY z.empl_no) b                          ");
+            sb.AppendLine("      ON(b.empl_no = a.empl_no)                               ");
+            sb.AppendLine("     WHERE a.hosp_no = @HospNo  and doct_no!=''                          ");
+            sb.AppendLine(" GROUP BY  a.hosp_no                                          ");
+            sb.AppendLine("   ,       a.hosp_key                                         ");
+            sb.AppendLine("   ,       a.empl_no                                          ");
+            sb.AppendLine("   ,       a.doct_no                                          ");
+            sb.AppendLine("   ,       a.doct_nm                                          ");
+            sb.AppendLine("   ,       a.dept_cd                                          ");
+            sb.AppendLine("   ,       a.dept_nm                                          ");
+            sb.AppendLine("   ,       a.front_view_role                                  ");
+            sb.AppendLine(" ORDER BY CAST(a.empl_no AS SIGNED)) t;                       ");
+
+            sb.AppendLine(" SELECT @total_count;                                         ");
+            #endregion
+
+            var multi = await db.QueryMultipleAsync(sb.ToString(), parameters, ct, _logger);
+
+            var result = new ListResult<DoctorBaseRo>();
+
+            result.Items = (await multi.ReadAsync<DoctorBaseRo>()).ToList();
+            result.TotalCount = Convert.ToInt32(await multi.ReadSingleAsync<long>());
+
+            return result;
+        }
     }
 }

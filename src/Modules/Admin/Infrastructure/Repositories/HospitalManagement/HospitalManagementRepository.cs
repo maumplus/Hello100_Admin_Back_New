@@ -339,5 +339,40 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
 
             return result;
         }
+
+        public async Task<int> UpsertDeviceSettingAsync(
+            DbSession db, string hospNo, string hospNm, string emplNo, string deviceNm, int deviceType, string hospKey, string infoTxt, string useYn, string? setJson, CancellationToken ct)
+        {
+            DynamicParameters parameters = new DynamicParameters();
+            parameters.Add("HospNo", hospNo, DbType.String);
+            parameters.Add("EmplNo", emplNo, DbType.String);
+            parameters.Add("DeviceNm", deviceNm, DbType.String);
+            parameters.Add("HospNm", hospNm, DbType.String);
+            parameters.Add("DeviceType", deviceType, DbType.Int32);
+            parameters.Add("HospKey", hospKey, DbType.String);
+            parameters.Add("InfoTxt", infoTxt, DbType.String);
+            parameters.Add("SetJson", setJson, DbType.String);
+            parameters.Add("UseYn", useYn, DbType.String);
+
+            var query = @"
+                INSERT INTO hello100.tb_eghis_hosp_device_settings_info
+                            ( hosp_no, empl_no, device_nm, hosp_nm, device_type, hosp_key, info_txt, set_json, use_yn, reg_dt )
+                     VALUES
+                            ( @HospNo, @EmplNo, @DeviceNm, @HospNm, @DeviceType, @HospKey, @InfoTxt, @SetJson, @UseYn, NOW() )
+                         ON DUPLICATE KEY
+                     UPDATE hosp_nm = @HospNm,
+                            hosp_key = @HospKey,
+                            info_txt = @InfoTxt,
+                            set_json = @SetJson,
+                            use_yn = @UseYn
+            ";
+
+            var result = await db.ExecuteAsync(query, parameters, ct, _logger);
+
+            if (result <= 0)
+                throw new BizException(AdminErrorCode.UpsertDeviceSettingFailed.ToError());
+
+            return result;
+        }
     }
 }

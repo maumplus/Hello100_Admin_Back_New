@@ -54,5 +54,23 @@ namespace Hello100Admin.Modules.Admin.Domain.Repositories
         /// <param name="ct"></param>
         /// <returns></returns>
         public Task<int> UpsertHello100SettingAsync(DbSession db, string hospNo, TbEghisHospSettingsInfoEntity settingEntity, TbNoticeEntity noticeEntity, CancellationToken ct);
+
+        /// <summary>
+        /// 디바이스 설정 등록/수정
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="hospNo"></param>
+        /// <param name="hospNm"></param>
+        /// <param name="emplNo"></param>
+        /// <param name="deviceNm"></param>
+        /// <param name="deviceType"></param>
+        /// <param name="hospKey"></param>
+        /// <param name="infoTxt"></param>
+        /// <param name="useYn"></param>
+        /// <param name="setJson"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        public Task<int> UpsertDeviceSettingAsync(
+            DbSession db, string hospNo, string hospNm, string emplNo, string deviceNm, int deviceType, string hospKey, string infoTxt, string useYn, string? setJson, CancellationToken ct);
     }
 }

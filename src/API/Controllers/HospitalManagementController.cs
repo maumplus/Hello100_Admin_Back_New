@@ -9,6 +9,11 @@ using Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Comman
 using Hello100Admin.Modules.Admin.Application.Common.Models;
 using Mapster;
 using Hello100Admin.API.Infrastructure.Attributes;
+using System.Text.Json.Serialization;
+using System.Text.Json;
+using Org.BouncyCastle.Bcpg.OpenPgp;
+using Org.BouncyCastle.Ocsp;
+using System.Text.Encodings.Web;
 
 namespace Hello100Admin.API.Controllers
 {
@@ -167,6 +172,45 @@ namespace Hello100Admin.API.Controllers
             return result.ToActionResult(this);
         }
 
+        /// <summary>
+        /// [병원관리자] 병원정보관리 > 헬로데스크 설정 > 조회
+        /// </summary>
+        [HttpGet("hello-desk-setting")]
+        [ProducesResponseType(typeof(ApiResponse<GetHelloDeskSettingResult>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetHelloDeskSetting(string? emplNo, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("GET /api/hospital-management/hello-desk-setting");
+
+            var result = await _mediator.Send(new GetHelloDeskSettingQuery(base.HospNo, base.HospKey, emplNo), cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [병원관리자] 병원정보관리 > 헬로데스크, 키오스크 설정 > 저장
+        /// </summary>
+        [HttpPost("device-setting")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> UpsertDeviceSetting(UpsertDeviceSettingRequest req, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("POST /api/hospital-management/device-setting");
+
+            string? setJson = this.CustomJsonToString(req.SetJson);
+
+            var command = req.Adapt<UpsertDeviceSettingCommand>() with
+            {
+                HospNo = base.HospNo,
+                HospKey = base.HospKey,
+                SetJson = setJson
+            };
+
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
         ///// <summary>
         ///// [병원정보관리 > 의료진관리]의료진 목록 API
         ///// </summary>
@@ -223,6 +267,20 @@ namespace Hello100Admin.API.Controllers
             }
 
             return role;
+        }
+
+        private string? CustomJsonToString(DeviceSettingInfo settingInfo)
+        {
+            if (settingInfo == null)
+                return null;
+
+            return JsonSerializer.Serialize(settingInfo,
+                new JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+                    Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                });
         }
         #endregion
     }
