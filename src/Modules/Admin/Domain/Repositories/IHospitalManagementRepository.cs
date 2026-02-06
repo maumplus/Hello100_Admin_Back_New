@@ -56,7 +56,7 @@ namespace Hello100Admin.Modules.Admin.Domain.Repositories
         public Task<int> UpsertHello100SettingAsync(DbSession db, string hospNo, TbEghisHospSettingsInfoEntity settingEntity, TbNoticeEntity noticeEntity, CancellationToken ct);
 
         /// <summary>
-        /// 디바이스 설정 등록/수정
+        /// 디바이스(헬로데스크, 키오스크) 설정 등록/수정
         /// </summary>
         /// <param name="db"></param>
         /// <param name="hospNo"></param>

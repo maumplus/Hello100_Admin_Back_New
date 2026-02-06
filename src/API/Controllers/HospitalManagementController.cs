@@ -176,13 +176,28 @@ namespace Hello100Admin.API.Controllers
         /// [병원관리자] 병원정보관리 > 헬로데스크 설정 > 조회
         /// </summary>
         [HttpGet("hello-desk-setting")]
-        [ProducesResponseType(typeof(ApiResponse<GetHelloDeskSettingResult>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<GetDeviceSettingResult<TabletRo>>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetHelloDeskSetting(string? emplNo, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("GET /api/hospital-management/hello-desk-setting");
 
             var result = await _mediator.Send(new GetHelloDeskSettingQuery(base.HospNo, base.HospKey, emplNo), cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [병원관리자] 병원정보관리 > 키오스크 설정 > 조회
+        /// </summary>
+        [HttpGet("kiosk-setting")]
+        [ProducesResponseType(typeof(ApiResponse<GetDeviceSettingResult<KioskRo>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetKioskSetting(string? emplNo, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("GET /api/hospital-management/kiosk-setting");
+
+            var result = await _mediator.Send(new GetKioskSettingQuery(base.HospNo, base.HospKey, emplNo), cancellationToken);
 
             return result.ToActionResult(this);
         }

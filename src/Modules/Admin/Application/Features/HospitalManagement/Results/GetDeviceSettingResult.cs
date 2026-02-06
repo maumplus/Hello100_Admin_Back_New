@@ -3,11 +3,11 @@ using System.Text.Json.Serialization;
 
 namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Results
 {
-    public sealed class GetHelloDeskSettingResult
+    public sealed class GetDeviceSettingResult<T>
     {
         public string Name { get; set; }
         public List<DeviceInfo> EmplList { get; set; }
-        public DeviceRo<TabletRo> DeviceData { get; set; }
+        public DeviceRo<T> DeviceData { get; set; }
         public ListResult<DoctorBaseRo> DocList { get; set; }
     }
 
@@ -97,6 +97,32 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Re
         public string ViewMinTime { get; set; } = "";
         public string NewReceiveYn { get; set; } = "N";
         [JsonIgnore]
+        public string PrtBarcodeYn { get; set; } = "N";
+        /// <summary>
+        /// 환자 입력 유형 [0: 없음, 1: 휴대폰번호, 2: 주민등록번호, 3: 접수증바코드]
+        /// </summary>
+        public int PtntInputType { get; set; } = 1; // PtntType.TelNo;
+        public string ReceiveMainSelect { get; set; } = "D";
+        public string PopupYn { get; set; } = "Y";
+        public string DefaultDeptCD { get; set; } = "";
+        public string DefaultEmplNo { get; set; } = "";
+        public string receiptState { get; set; } = "W";
+        public string QrReceiptYn { get; set; } = "N";
+        public string PurposeYn { get; set; } = "Y";
+    }
+
+    public class KioskRo
+    {
+        public string PayYn { get; set; } = "N";
+        public string AddrYn { get; set; } = "N";
+        public string DeptYn { get; set; } = "N";
+        public string DeptBreakYn { get; set; } = "N";
+        public string DetailYn { get; set; } = "N";
+        public string ReceptYn { get; set; } = "N";
+        public string SimplePayYn { get; set; } = "N";
+        public string WaitTimeYn { get; set; } = "N";
+        public string ViewMinTime { get; set; } = "";
+        public string NewReceiveYn { get; set; } = "N";
         public string PrtBarcodeYn { get; set; } = "N";
         /// <summary>
         /// 환자 입력 유형 [0: 없음, 1: 휴대폰번호, 2: 주민등록번호, 3: 접수증바코드]

@@ -95,7 +95,20 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistenc
         /// <param name="deviceType"></param>
         /// <param name="ct"></param>
         /// <returns></returns>
-        public Task<GetHelloDeskSettingResult> GetHelloDeskSettingAsync(
+        public Task<GetDeviceSettingResult<TabletRo>> GetHelloDeskSettingAsync(
+            DbSession db, string hospNo, string hospKey, string? emplNo, int deviceType, CancellationToken ct = default);
+
+        /// <summary>
+        /// 키오스크 설정 조회
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="hospNo"></param>
+        /// <param name="hospKey"></param>
+        /// <param name="emplNo"></param>
+        /// <param name="deviceType"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        public Task<GetDeviceSettingResult<KioskRo>> GetKioskSettingAsync(
             DbSession db, string hospNo, string hospKey, string? emplNo, int deviceType, CancellationToken ct = default);
 
         /// <summary>

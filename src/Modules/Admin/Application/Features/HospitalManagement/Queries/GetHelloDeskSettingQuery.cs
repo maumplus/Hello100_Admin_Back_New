@@ -22,7 +22,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
     /// <param name="HospNo"></param>
     /// <param name="HospKey"></param>
     /// <param name="EmplNo"></param>
-    public record GetHelloDeskSettingQuery(string HospNo, string HospKey, string? EmplNo) : IQuery<Result<GetHelloDeskSettingResult>>;
+    public record GetHelloDeskSettingQuery(string HospNo, string HospKey, string? EmplNo) : IQuery<Result<GetDeviceSettingResult<TabletRo>>>;
 
     public class GetHelloDeskSettingQueryValidator : AbstractValidator<GetHelloDeskSettingQuery>
     {
@@ -33,7 +33,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
         }
     }
 
-    public class GetHelloDeskSettingQueryHandler : IRequestHandler<GetHelloDeskSettingQuery, Result<GetHelloDeskSettingResult>>
+    public class GetHelloDeskSettingQueryHandler : IRequestHandler<GetHelloDeskSettingQuery, Result<GetDeviceSettingResult<TabletRo>>>
     {
         private readonly ILogger<GetHelloDeskSettingQueryHandler> _logger;
         private readonly IHospitalManagementStore _hospitalStore;
@@ -55,7 +55,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
             _db = db;
         }
 
-        public async Task<Result<GetHelloDeskSettingResult>> Handle(GetHelloDeskSettingQuery req, CancellationToken ct)
+        public async Task<Result<GetDeviceSettingResult<TabletRo>>> Handle(GetHelloDeskSettingQuery req, CancellationToken ct)
         {
             _logger.LogInformation("Handling GetHelloDeskSettingQuery HospNo:{HospNo}", req.HospNo);
 
