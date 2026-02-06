@@ -19,7 +19,6 @@ using Hello100Admin.Modules.Admin.Infrastructure.Repositories.VisitPurpose;
 using Hello100Admin.Modules.Admin.Infrastructure.Persistence.MySql;
 using Hello100Admin.Modules.Admin.Infrastructure.Configuration.Options;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
-using Hello100Admin.Modules.Admin.Infrastructure.Repositories.Hospital;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Hospital;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.ApprovalRequest;
 using Hello100Admin.Modules.Admin.Infrastructure.Repositories.ApprovalRequest;
@@ -63,8 +62,7 @@ public static class DependencyInjection
         services.AddScoped<IHospitalStatisticsStore, HospitalStatisticsStore>();
         services.AddScoped<IHospitalUserStore, HospitalUserStore>();
         services.AddScoped<IHospitalUserRepository, HospitalUserRepository>();
-        services.AddScoped<IHospitalManagementStore, HospitalStore>();
-        //services.AddScoped<IHospitalManagementStore, HospitalManagementStore>(); // 추후 Merge 시 HospitalStore 삭제 및 이거 사용 예정
+        services.AddScoped<IHospitalManagementStore, HospitalManagementStore>();
         services.AddScoped<IHospitalManagementRepository, HospitalManagementRepository>();
         services.AddScoped<IAdvertisementStore, AdvertisementStore>();
         services.AddScoped<IAdvertisementRepository, AdvertisementRepository>();

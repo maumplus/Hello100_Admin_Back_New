@@ -4,7 +4,6 @@ using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Dapper;
 using System.Data;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Hospital;
-using Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.ReadModels;
 using Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Results;
 using Microsoft.Extensions.Logging;
 using Mapster;
@@ -471,75 +470,6 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             return result;
         }
 
-        public async Task<List<GetDoctorListModel>> GetDoctorList(string hospNo, CancellationToken cancellationToken = default)
-        {
-            try
-            {
-                _logger.LogInformation("Getting Doctor by HospNo: {HospNo}", hospNo);
-
-                var parameters = new DynamicParameters();
-                parameters.Add("@HospNo", hospNo, DbType.String);
-
-                var sql = @"
-                    SELECT a.hosp_no                     AS HospNo,
-                           a.hosp_key                    AS HospKey,
-                           a.empl_no                     AS EmplNo,
-                           a.doct_no                     AS DoctNo,
-                           a.doct_nm                     AS DoctNm,
-                           a.dept_cd                     AS DeptCd,
-                           a.dept_nm                     AS DeptNm,
-                           CASE b.other_cnt
-                             WHEN 0 THEN b.weeks_nm
-                             ELSE CONCAT(b.weeks_nm, ',지정', b.other_cnt, '건')
-                           END                           AS WeeksNm,
-                           a.front_view_role             AS FrontViewRole
-                      FROM hello100_api.eghis_doct_info a
-                      LEFT JOIN ( SELECT t.empl_no                      AS empl_no,
-                                         GROUP_CONCAT(t.week_num)       AS weeks_num,
-                                         GROUP_CONCAT(
-                                           CASE t.week_num
-                                             WHEN 1 THEN '월'
-                                             WHEN 2 THEN '화'
-                                             WHEN 3 THEN '수'
-                                             WHEN 4 THEN '목'
-                                             WHEN 5 THEN '금'
-                                             WHEN 6 THEN '토'
-                                             WHEN 7 THEN '일'
-                                             WHEN 8 THEN '공휴일'
-                                           END
-                                         )                              AS weeks_nm,
-                                         SUM(IF(t.week_num = 11, 1, 0)) AS other_cnt
-                                    FROM hello100_api.eghis_doct_info t
-                                   WHERE t.hosp_no = @HospNo
-                                     AND t.doct_no != ''
-                                     AND t.use_yn = 'Y'
-                                     AND (IFNULL(t.clinic_ymd, '') = '' OR t.clinic_ymd > DATE_FORMAT(NOW(), '%Y%m%d'))
-                                  GROUP BY t.empl_no ) b
-                        ON b.empl_no = a.empl_no
-                     WHERE a.hosp_no = @HospNo
-                       AND doct_no != ''
-                    GROUP BY a.hosp_no,
-                             a.hosp_key,
-                             a.empl_no,
-                             a.doct_no,
-                             a.doct_nm,
-                             a.dept_cd,
-                             a.dept_nm,
-                             a.front_view_role
-                    ORDER BY CAST(a.empl_no AS SIGNED);
-                ";
-
-                using var connection = CreateConnection();
-
-                return (await connection.QueryAsync<GetDoctorListModel>(sql, parameters)).ToList();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting Doctor by HospNo: {HospNo}", hospNo);
-                throw;
-            }
-        }
-
         public async Task<ListResult<GetMedicalDepartmentsResult>> GetMedicalDepartmentsAsync(DbSession db, string clsCd, CancellationToken ct = default)
         {
             var parameters = new DynamicParameters();
@@ -632,6 +562,163 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             var result = (await db.QueryAsync<GetClinicalKeywordsResult>(sb.ToString(), ct: ct, logger: _logger)).ToList();
 
             return result;
+        }
+
+        public async Task<List<GetDoctorListResult>> GetDoctorList(string hospNo, CancellationToken cancellationToken = default)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@HospNo", hospNo, DbType.String);
+
+            var sql = @"
+                    SELECT a.hosp_no                     AS HospNo,
+                           a.hosp_key                    AS HospKey,
+                           a.empl_no                     AS EmplNo,
+                           a.doct_no                     AS DoctNo,
+                           a.doct_nm                     AS DoctNm,
+                           a.dept_cd                     AS DeptCd,
+                           a.dept_nm                     AS DeptNm,
+                           CASE b.other_cnt
+                             WHEN 0 THEN b.weeks_nm
+                             ELSE CONCAT(b.weeks_nm, ',지정', b.other_cnt, '건')
+                           END                           AS WeeksNm,
+                           a.front_view_role             AS FrontViewRole
+                      FROM hello100_api.eghis_doct_info a
+                      LEFT JOIN ( SELECT t.empl_no                      AS empl_no,
+                                         GROUP_CONCAT(t.week_num)       AS weeks_num,
+                                         GROUP_CONCAT(
+                                           CASE t.week_num
+                                             WHEN 1 THEN '월'
+                                             WHEN 2 THEN '화'
+                                             WHEN 3 THEN '수'
+                                             WHEN 4 THEN '목'
+                                             WHEN 5 THEN '금'
+                                             WHEN 6 THEN '토'
+                                             WHEN 7 THEN '일'
+                                             WHEN 8 THEN '공휴일'
+                                           END
+                                         )                              AS weeks_nm,
+                                         SUM(IF(t.week_num = 11, 1, 0)) AS other_cnt
+                                    FROM hello100_api.eghis_doct_info t
+                                   WHERE t.hosp_no = @HospNo
+                                     AND t.doct_no != ''
+                                     AND t.use_yn = 'Y'
+                                     AND (IFNULL(t.clinic_ymd, '') = '' OR t.clinic_ymd > DATE_FORMAT(NOW(), '%Y%m%d'))
+                                  GROUP BY t.empl_no ) b
+                        ON b.empl_no = a.empl_no
+                     WHERE a.hosp_no = @HospNo
+                       AND doct_no != ''
+                    GROUP BY a.hosp_no,
+                             a.hosp_key,
+                             a.empl_no,
+                             a.doct_no,
+                             a.doct_nm,
+                             a.dept_cd,
+                             a.dept_nm,
+                             a.front_view_role
+                    ORDER BY CAST(a.empl_no AS SIGNED);
+                ";
+
+            using var connection = CreateConnection();
+
+            return (await connection.QueryAsync<GetDoctorListResult>(sql, parameters)).ToList();
+        }
+
+        public async Task<List<GetDoctorScheduleResult>> GetDoctorList(string hospNo, string emplNo, CancellationToken cancellationToken = default)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@HospNo", hospNo, DbType.String);
+            parameters.Add("@EmplNo", emplNo, DbType.String);
+
+            var sql = $@"
+                SELECT a.hosp_no                    AS HospNo,
+                       a.hosp_key                   AS HospKey,
+                       a.empl_no                    AS EmplNo,
+                       IFNULL(a.clinic_ymd, '')     AS ClinicYmd,
+                       ( SELECT CASE WHEN COUNT(1) > 0 THEN 'Y' ELSE 'N' END 
+                           FROM hello100.tb_eghis_doct_untact_join
+                          WHERE hosp_no = a.hosp_no
+                            AND empl_no = a.empl_no
+                            AND join_state != '03') AS UntactJoinYn,
+                       ( SELECT CASE WHEN COUNT(1) > 0 THEN 'Y' ELSE 'N' END
+                           FROM hello100.tb_eghis_doct_untact_join
+                          WHERE hosp_no = a.hosp_no
+                            AND empl_no = a.empl_no
+                            AND join_state = '02')  AS DoctModifyYn,
+                       a.doct_no                    AS DoctNo,
+                       a.doct_nm                    AS DoctNm,
+                       a.dept_cd                    AS DeptCd,
+                       a.dept_nm                    AS DeptNm,
+                       a.week_num                   AS WeekNum,
+                       ( CASE WHEN a.week_num = 1 THEN '월요일'
+                              WHEN a.week_num = 2 THEN '화요일'
+                              WHEN a.week_num = 3 THEN '수요일'
+                              WHEN a.week_num = 4 THEN '목요일'
+                              WHEN a.week_num = 5 THEN '금요일'
+                              WHEN a.week_num = 6 THEN '토요일'
+                              WHEN a.week_num = 7 THEN '일요일'
+                              WHEN a.week_num = 8 THEN '공휴일'
+                         ELSE '예외' END )          AS WeeksNm,
+                       ( SELECT COUNT(1)
+                           FROM hello100_api.eghis_rsrv_info z
+                           LEFT JOIN hello100_api.eghis_doct_info y
+                             ON y.hosp_no = z.hospNo AND y.empl_no = z.doctEmplNo AND y.clinic_ymd = z.rsrvYmd
+                          WHERE z.hospNo = a.hosp_no
+                            AND z.doctEmplNo = a.empl_no
+                          	AND z.rsrvYmd > date_format(NOW(), '%Y%m%d')
+                            AND CASE WHEN IFNULL(y.clinic_ymd, '') = '' THEN WEEKDAY(z.rsrvYmd) + 1 = a.week_num ELSE z.rsrvYmd = a.clinic_ymd END
+                            AND z.ptntState = 4 ) AS RsrvCnt,
+                       ( SELECT COUNT(1)
+                           FROM hello100.tb_eghis_hosp_receipt_info x
+                          WHERE	hosp_no = a.hosp_no
+                            AND recept_type = 'NR'
+                            AND empl_no = a.empl_no
+                            AND ptnt_state = '1'
+                            AND empl_no = a.empl_no
+                            AND WEEKDAY(req_date) + 1 = a.week_num ) AS UntactRsrvCnt,
+                       a.start_hour                 AS StartHour,
+                       a.start_minute               AS StartMinute,
+                       a.end_hour                   AS EndHour,
+                       a.end_minute                 AS EndMinute,
+                       a.break_start_hour           AS BreakStartHour,
+                       a.break_start_minute         AS BreakStartMinute,
+                       a.break_end_hour             AS BreakEndHour,
+                       a.break_end_minute           AS BreakEndMinute,
+                       a.hello100_role              AS Hello100Role,
+                       a.view_role                  AS ViewRole,
+                       a.view_min_time              AS ViewMinTime,
+                       a.view_min_cnt               AS ViewMinCnt,
+                       a.interval_time              AS IntervalTime,
+                       a.message                    AS Message,
+                       a.use_yn                     AS UseYn,
+                       IFNULL( ( SELECT z.ridx
+                                   FROM hello100_api.eghis_doct_rsrv_info z                         
+                                  WHERE z.hosp_no = a.hosp_no                                      
+                                    AND z.empl_no = a.empl_no                                      
+                                    AND z.week_num = a.week_num                                    
+                                    AND IFNULL(z.clinic_ymd, '') = CASE WHEN a.week_num < 11 THEN '' ELSE a.clinic_ymd END LIMIT 1), 0) AS Ridx,
+                       a.untact_start_hour         AS UntactStartHour,
+                       a.untact_start_minute       AS UntactStartMinute,
+                       a.untact_end_hour           AS UntactEndHour,
+                       a.untact_end_minute         AS UntactEndMinute,
+                       a.untact_interval_time      AS UntactIntervalTime,
+                       a.untact_use_yn             AS UntactUseYn,
+                       a.untact_break_start_hour   AS UntactBreakStartHour,
+                       a.untact_break_start_minute AS UntactBreakStartMinute,
+                       a.untact_break_end_hour     AS UntactBreakEndHour,
+                       a.untact_break_end_minute   AS UntactBreakEndMinute,
+                       CONCAT('/', ( SELECT file_path FROM tb_file_info tfi WHERE tfi.seq = b.doct_file_seq )) AS DoctFilePath
+                 FROM hello100_api.eghis_doct_info a                                                              
+                 LEFT JOIN hello100.tb_eghis_doct_info_file b
+                   ON a.hosp_no = b.hosp_no AND a.hosp_key = b.hosp_key AND a.empl_no = b.empl_no 
+                WHERE a.hosp_no = @HospNo                                                            
+                  AND a.empl_no = @EmplNo                                                            
+                  AND (IFNULL(a.clinic_ymd, '') = '' OR a.clinic_ymd >= DATE_FORMAT(NOW(), '%Y%m%d')) 
+               ORDER BY a.clinic_ymd, a.week_num;
+            ";
+
+            using var connection = CreateConnection();
+
+            return (await connection.QueryAsync<GetDoctorScheduleResult>(sql, parameters)).ToList();
         }
     }
 }
