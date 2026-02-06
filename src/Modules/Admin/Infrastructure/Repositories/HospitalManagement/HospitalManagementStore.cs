@@ -8,6 +8,8 @@ using Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.ReadMo
 using Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Results;
 using Microsoft.Extensions.Logging;
 using Mapster;
+using Hello100Admin.Modules.Admin.Application.Common.Models;
+using System.Text;
 
 namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManagement
 {
@@ -30,7 +32,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             return conn;
         }
 
-        public async Task<(List<GetHospitalResult>, int)> GetHospitalList(string chartType, HospitalListSearchType searchType, string keyword, int pageNo, int pageSize, CancellationToken cancellationToken = default)
+        public async Task<(List<GetHospitalResult>, int)> GetHospitalListAsync(string chartType, HospitalListSearchType searchType, string keyword, int pageNo, int pageSize, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -131,7 +133,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             }
         }
 
-        public async Task<GetHospitalResult?> GetHospital(string hospNo, CancellationToken cancellationToken = default)
+        public async Task<GetHospitalResult?> GetHospitalAsync(string hospNo, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -222,7 +224,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             }
         }
 
-        public async Task<List<MedicalTimeResultItem>> GetHospMedicalTimeList(string hospKey, CancellationToken cancellationToken = default)
+        public async Task<List<MedicalTimeResultItem>> GetHospMedicalTimeListAsync(string hospKey, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -255,7 +257,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             }
         }
 
-        public async Task<List<HashTagInfoResultItem>> GetHospKeywordList(string hospKey, CancellationToken cancellationToken = default)
+        public async Task<List<HashTagInfoResultItem>> GetHospKeywordListAsync(string hospKey, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -297,7 +299,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             }
         }
 
-        public async Task<List<MedicalInfoResultItem>> GetHospitalMedicalList(string hospKey, CancellationToken cancellationToken = default)
+        public async Task<List<MedicalInfoResultItem>> GetHospitalMedicalListAsync(string hospKey, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -329,7 +331,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             }
         }
 
-        public async Task<List<ImageInfoResultItem>> GetImageList(string hospKey, CancellationToken cancellationToken = default)
+        public async Task<List<ImageInfoResultItem>> GetImageListAsync(string hospKey, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -362,7 +364,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             }
         }
 
-        public async Task<List<MedicalTimeNewResultItem>> GetHospMedicalTimeNewList(string hospKey, CancellationToken cancellationToken = default)
+        public async Task<List<MedicalTimeNewResultItem>> GetHospMedicalTimeNewListAsync(string hospKey, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -410,7 +412,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             }
         }
 
-        public async Task<List<KeywordMasterResultItem>> GetKeywordMasterList(string hospKey, CancellationToken cancellationToken = default)
+        public async Task<List<KeywordMasterResultItem>> GetKeywordMasterListAsync(string hospKey, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -438,7 +440,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             }
         }
 
-        public async Task<GetHello100SettingResult?> GetHello100Setting(DbSession db, string hospKey, CancellationToken cancellationToken = default)
+        public async Task<GetHello100SettingResult?> GetHello100SettingAsync(DbSession db, string hospKey, CancellationToken ct = default)
         {
             var parameters = new DynamicParameters();
             parameters.Add("@HospKey", hospKey, DbType.String);
@@ -464,7 +466,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
                  LIMIT 1;
             ";
 
-            var result = await db.QueryFirstOrDefaultAsync<GetHello100SettingResult>(sql, parameters);
+            var result = await db.QueryFirstOrDefaultAsync<GetHello100SettingResult>(sql, parameters, ct, _logger);
 
             return result;
         }
@@ -536,6 +538,100 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
                 _logger.LogError(ex, "Error getting Doctor by HospNo: {HospNo}", hospNo);
                 throw;
             }
+        }
+
+        public async Task<ListResult<GetMedicalDepartmentsResult>> GetMedicalDepartmentsAsync(DbSession db, string clsCd, CancellationToken ct = default)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@ClsCode", clsCd, DbType.String);
+
+            var sql = @"
+                SELECT cm_seq                             AS CmSeq,
+                       cls_cd                             AS ClsCode,
+                       cm_cd                              AS CmCode,
+                       cls_name                           AS ClsName,
+                       cm_name                            AS CmName,
+                       locale                             AS Locale,
+                       del_yn                             AS DelYn,
+                       sort                               AS Sort,
+                       DATE_FORMAT(reg_dt, '%Y-%m-%d %T') AS RegDate
+                  FROM tb_common 
+                 WHERE cls_cd = @ClsCode
+                   AND del_yn = 'N'
+                 ORDER BY sort asc; 
+
+                SELECT COUNT(*) AS TotalCount 
+                  FROM tb_common 
+                 WHERE cls_cd = @ClsCode 
+                   AND del_yn = 'N'
+            ";
+
+            var multi = await db.QueryMultipleAsync(sql, parameters, ct, _logger);
+
+            var result = new ListResult<GetMedicalDepartmentsResult>();
+
+            result.Items = (await multi.ReadAsync<GetMedicalDepartmentsResult>()).ToList();
+            result.TotalCount = Convert.ToInt32(await multi.ReadSingleAsync<long>());
+
+            return result;
+        }
+
+        public async Task<List<GetClinicalKeywordsResult>> GetClinicalKeywordsAsync(DbSession db, string? keyword, string? masterSeq, CancellationToken ct = default)
+        {
+            // 파라미터 사용 안함
+            //var parameters = new DynamicParameters();
+            //parameters.Add("@Keyword", keyword, DbType.String);
+
+            #region == Query ==
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("   select	");
+            sb.AppendLine("      CONCAT(master_seq,'_',detail_seq) as Kid,   	");
+            sb.AppendLine("      master_seq as MasterSeq,   	");
+            sb.AppendLine("      detail_seq as DetailSeq,	");
+            sb.AppendLine("      detail_name as Keyword,	");
+            sb.AppendLine("      sort_no as SortNo,	");
+            sb.AppendLine("      search_cnt as SearchCnt,	");
+            sb.AppendLine("      'N' as DelYn	");
+            sb.AppendLine("   from	");
+            sb.AppendLine("      hello100.tb_keyword_detail tkd 	");
+            sb.AppendLine("   where	 ");
+            sb.AppendLine("   (select detail_use_yn from hello100.tb_keyword_master tkm where tkm.master_seq=tkd.master_seq)!='N' ");
+            if (!string.IsNullOrEmpty(masterSeq))
+            {
+                sb.AppendLine("     and master_seq=" + masterSeq + " 	");
+            }
+            if (keyword != "")
+            {
+                sb.AppendLine("     and detail_name like '%" + keyword + "%'");
+            }
+
+            sb.AppendLine("     union	");
+            sb.AppendLine("     select	");
+            sb.AppendLine("        CONCAT(master_seq,'_',0) as Kid,     	");
+            sb.AppendLine("        master_seq as MasterSeq,      	");
+            sb.AppendLine("        0 as DetailSeq,  	");
+            sb.AppendLine("        concat('[대표] ',master_name) as Keyword,      	");
+            sb.AppendLine("        sort_no as SortNo,    	");
+            sb.AppendLine("        search_cnt as SearchCnt,   	");
+            sb.AppendLine("        'N' as DelYn	");
+            sb.AppendLine("     from	");
+            sb.AppendLine("        hello100.tb_keyword_master tkm 	");
+            sb.AppendLine("   where	 show_yn='Y' ");
+            if (!string.IsNullOrEmpty(masterSeq))
+            {
+                sb.AppendLine("     and master_seq=" + masterSeq + " 	");
+            }
+            if (keyword != "")
+            {
+                sb.AppendLine("     and master_name like '%" + keyword + "%'");
+            }
+
+            sb.AppendLine("        order by MasterSeq asc ,DetailSeq asc  	");
+            #endregion
+
+            var result = (await db.QueryAsync<GetClinicalKeywordsResult>(sb.ToString(), ct: ct, logger: _logger)).ToList();
+
+            return result;
         }
     }
 }

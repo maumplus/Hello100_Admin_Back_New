@@ -232,20 +232,20 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.VisitPurpose
 
             var query = @"
                 SELECT intCd       AS IntCd,
-                        intNm       AS IntNm,
-                        category    AS Category
-                    FROM hello100_api.eghis_paper_info
-                WHERE hospNo = @HospNo
-                    AND useYn = 1
-                GROUP BY intCd, intNm, category;
+                       intNm       AS IntNm,
+                       category    AS Category
+                  FROM hello100_api.eghis_paper_info
+                 WHERE hospNo = @HospNo
+                   AND useYn = 1
+                 GROUP BY intCd, intNm, category;
 
                 SELECT COUNT(DISTINCT intCd)
-                    FROM hello100_api.eghis_paper_info
-                    WHERE hospNo = @HospNo
-                    AND useYn = 1
+                  FROM hello100_api.eghis_paper_info
+                 WHERE hospNo = @HospNo
+                   AND useYn = 1
             ";
 
-            var multi = await db.QueryMultipleAsync(query, parameters);
+            var multi = await db.QueryMultipleAsync(query, parameters, ct, _logger);
 
             var result = new ListResult<GetQuestionnairesResult>();
 

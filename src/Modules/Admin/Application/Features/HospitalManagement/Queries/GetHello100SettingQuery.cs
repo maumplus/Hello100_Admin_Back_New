@@ -48,7 +48,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
             , ct);
 
             var result = await _db.RunAsync(DataSource.Hello100, 
-                (dbSession, token) => _hospitalStore.GetHello100Setting(dbSession, req.HospKey, token)
+                (dbSession, token) => _hospitalStore.GetHello100SettingAsync(dbSession, req.HospKey, token)
             , ct);
 
             if (result != null)
