@@ -634,7 +634,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             return result;
         }
 
-        public async Task<GetHelloDeskSettingResult> GetHelloDeskSettingAsync(
+        public async Task<GetDeviceSettingResult<TabletRo>> GetHelloDeskSettingAsync(
             DbSession db, string hospNo, string hospKey, string? emplNo, int deviceType, CancellationToken ct = default)
         {
             var parameters = new DynamicParameters();
@@ -669,7 +669,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             sb.AppendLine("   AND a.device_type = @DeviceType                    ");
             sb.AppendLine("   AND a.use_yn = 'Y'                                 ");
 
-            if (emplNo != "")
+            if (string.IsNullOrWhiteSpace(emplNo) == false)
             {
                 sb.AppendLine("   AND a.empl_no = @EmplNo                        ");
             }
@@ -679,10 +679,63 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
 
             var multi = await db.QueryMultipleAsync(sb.ToString(), parameters, ct, _logger);
 
-            var result = new GetHelloDeskSettingResult();
+            var result = new GetDeviceSettingResult<TabletRo>();
 
             result.EmplList = (await multi.ReadAsync<DeviceInfo>()).ToList();
             result.DeviceData = await multi.ReadSingleAsync<DeviceRo<TabletRo>>();
+
+            return result;
+        }
+
+        public async Task<GetDeviceSettingResult<KioskRo>> GetKioskSettingAsync(
+            DbSession db, string hospNo, string hospKey, string? emplNo, int deviceType, CancellationToken ct = default)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@HospNo", hospNo, DbType.String);
+            parameters.Add("@HospKey", hospKey, DbType.String);
+            parameters.Add("@EmplNo", emplNo ?? string.Empty, DbType.String);
+            parameters.Add("@DeviceType", deviceType, DbType.Int32); // SetDeviceType.Tablet: 2
+
+            #region == Query ==
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine(" SELECT a.device_nm              AS DeviceNm          ");
+            sb.AppendLine("	   ,   a.empl_no                AS EmplNo            ");
+            sb.AppendLine("  FROM hello100.tb_eghis_hosp_device_settings_info a  ");
+            sb.AppendLine(" WHERE a.hosp_no = @HospNo                            ");
+            sb.AppendLine("   AND a.hosp_key = @HospKey                          ");
+            sb.AppendLine("   AND a.device_type = @DeviceType                    ");
+            sb.AppendLine("   AND a.use_yn = 'Y'                                 ");
+            sb.AppendLine("  ORDER BY a.empl_no ASC   ;                          ");
+
+            sb.AppendLine(" SELECT a.hosp_no              AS HospNo              ");
+            sb.AppendLine("	   ,   a.empl_no              AS EmplNo              ");
+            sb.AppendLine("	   ,   a.device_nm            AS DeviceNm            ");
+            sb.AppendLine("	   ,   a.hosp_nm              AS HospNm              ");
+            sb.AppendLine("	   ,   a.device_type          AS DeviceType          ");
+            sb.AppendLine("	   ,   a.hosp_key             AS HospKey             ");
+            sb.AppendLine("	   ,   a.info_txt             AS InfoTxt             ");
+            sb.AppendLine("	   ,   a.set_json             AS SetJsonStr          ");
+            sb.AppendLine("	   ,   a.use_yn               AS UseYn               ");
+            sb.AppendLine("  FROM hello100.tb_eghis_hosp_device_settings_info a  ");
+            sb.AppendLine(" WHERE a.hosp_no = @HospNo                            ");
+            sb.AppendLine("   AND a.hosp_key = @HospKey                          ");
+            sb.AppendLine("   AND a.device_type = @DeviceType                    ");
+            sb.AppendLine("   AND a.use_yn = 'Y'                                 ");
+
+            if (string.IsNullOrWhiteSpace(emplNo) == false)
+            {
+                sb.AppendLine("   AND a.empl_no = @EmplNo                        ");
+            }
+            sb.AppendLine("  ORDER BY a.empl_no ASC                              ");
+            sb.AppendLine(" LIMIT 1;                                             ");
+            #endregion
+
+            var multi = await db.QueryMultipleAsync(sb.ToString(), parameters, ct, _logger);
+
+            var result = new GetDeviceSettingResult<KioskRo>();
+
+            result.EmplList = (await multi.ReadAsync<DeviceInfo>()).ToList();
+            result.DeviceData = await multi.ReadSingleAsync<DeviceRo<KioskRo>>();
 
             return result;
         }
