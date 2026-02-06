@@ -60,5 +60,9 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Errors
         DeleteAdvertisementFailed = 4025,
         [Description("SFTP 서버 연결에 실패하였습니다. 다시 시도해주세요.")]
         SftpConnectionFailed = 4026,
+        [Description("입력하신 요양기관은 이미 모바일 사용과 연결되어 있습니다. 관리자에게 문의하세요.")]
+        ExistsHospMappingInfo = 4027,
+        [Description("요양기관번호 설정에 실패하였습니다. 관리자에게 문의하세요.")]
+        HospitalInfoSaveFaild = 4027,
     }
 }

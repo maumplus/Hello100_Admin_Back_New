@@ -20,4 +20,8 @@
     <PackageReference Include="Mapster.DependencyInjection" Version="1.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Features\Account\Queries\" />
+  </ItemGroup>
+
 </Project>

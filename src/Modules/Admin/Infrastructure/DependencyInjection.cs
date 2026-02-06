@@ -29,6 +29,8 @@ using Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalUser;
 using Hello100Admin.Modules.Admin.Domain.Repositories;
 using Hello100Admin.Modules.Admin.Infrastructure.Repositories.Advertisement;
 using Hello100Admin.Modules.Admin.Infrastructure.External.Sftp;
+using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Account;
+using Hello100Admin.Modules.Admin.Infrastructure.Repositories.Account;
 
 namespace Hello100Admin.Modules.Admin.Infrastructure;
 
@@ -45,6 +47,7 @@ public static class DependencyInjection
         services.AddScoped<IDbSessionRunner, DbSessionRunner>();
         services.AddScoped<IDbConnectionFactory, MySqlConnectionFactory>();
         services.AddScoped<ICurrentHospitalProfileProvider, CurrentHospitalProfileProvider>();
+        services.AddScoped<IAccountRepository, AccountRepository>();
         services.AddScoped<IAdminUserRepository, AdminUserRepository>();
         services.AddScoped<IAdminUserStore, AdminUserStore>();
         services.AddScoped<IMemberRepository, MemberRepository>();
