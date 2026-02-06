@@ -11,8 +11,6 @@ using Mapster;
 using Hello100Admin.API.Infrastructure.Attributes;
 using System.Text.Json.Serialization;
 using System.Text.Json;
-using Org.BouncyCastle.Bcpg.OpenPgp;
-using Org.BouncyCastle.Ocsp;
 using System.Text.Encodings.Web;
 
 namespace Hello100Admin.API.Controllers
@@ -226,31 +224,43 @@ namespace Hello100Admin.API.Controllers
             return result.ToActionResult(this);
         }
 
-        ///// <summary>
-        ///// [병원정보관리 > 의료진관리]의료진 목록 API
-        ///// </summary>
-        //[HttpGet("doctors")]
-        //[ProducesResponseType(typeof(List<GetDoctorListResult>), StatusCodes.Status200OK)]
-        //[ProducesResponseType(StatusCodes.Status404NotFound)]
-        //public async Task<IActionResult> GetDoctorList(CancellationToken cancellationToken = default)
-        //{
-        //    /*var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-        //    if (userId == null)
-        //    {
-        //        return Unauthorized();
-        //    }*/
+        /// [병원정보관리 > 의료진관리]의료진 목록 API
+        /// </summary>
+        [HttpGet("doctors")]
+        [ProducesResponseType(typeof(List<GetDoctorListResult>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetDoctorList(CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("GET /api/hospital-management/doctors");
 
-        //    _logger.LogInformation("GET /api/hospital-management/doctors");
+            var query = new GetDoctorListQuery()
+            {
+                HospNo = HospNo
+            };
+            var result = await _mediator.Send(query, cancellationToken);
 
-        //    var query = new GetDoctorListQuery()
-        //    {
-        //        HospNo = "10350072"
-        //    };
-        //    var result = await _mediator.Send(query, cancellationToken);
+            return result.ToActionResult(this);
+        }
 
-        //    // 중앙화된 매퍼로 Result -> IActionResult 변환
-        //    return result.ToActionResult(this);
-        //}
+        /// <summary>
+        /// [병원정보관리 > 의료진관리]의료진 상세 API
+        /// </summary>
+        [HttpGet("doctor/{EmplNo}")]
+        [ProducesResponseType(typeof(List<GetDoctorListResult>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetDoctor(string EmplNo, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("GET /api/hospital-management/doctors");
+
+            var query = new GetDoctorQuery()
+            {
+                HospNo = HospNo,
+                EmplNo = EmplNo
+            };
+            var result = await _mediator.Send(query, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
 
         #region INTERNAL METHOD AREA ********************************************
         private List<FileUploadPayload>? GetImagePayload(List<IFormFile>? images)

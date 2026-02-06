@@ -1,6 +1,6 @@
 ﻿namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Results
 {
-    public sealed class GetDoctorListResult
+    public class GetDoctorListResult
     {
         public string HospNo { get; set; } = string.Empty;
         public string HospKey { get; set; } = string.Empty;

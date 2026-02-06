@@ -1,7 +1,6 @@
 ﻿using Hello100Admin.BuildingBlocks.Common.Definition.Enums;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 using Hello100Admin.Modules.Admin.Application.Common.Models;
-using Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.ReadModels;
 using Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Results;
 
 namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Hospital
@@ -66,7 +65,6 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistenc
         /// <param name="ct"></param>
         /// <returns></returns>
         Task<GetHello100SettingResult?> GetHello100SettingAsync(DbSession db, string hospKey, CancellationToken ct = default);
-        Task<List<GetDoctorListModel>> GetDoctorList(string hospNo, CancellationToken cancellationToken = default);
         /// <summary>
         /// 전체 진료과목 조회
         /// </summary>
@@ -122,5 +120,8 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistenc
         /// <returns></returns>
         public Task<ListResult<DoctorBaseRo>> GetDoctorsAsync(
             DbSession db, string hospNo, int pageNo, int pageSize, CancellationToken ct = default);
+
+        Task<List<GetDoctorListResult>> GetDoctorList(string hospNo, CancellationToken cancellationToken = default);
+        Task<List<GetDoctorScheduleResult>> GetDoctorList(string hospNo, string emplNo, CancellationToken cancellationToken = default);
     }
 }
