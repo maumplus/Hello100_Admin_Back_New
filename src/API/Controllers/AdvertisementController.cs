@@ -55,6 +55,7 @@ namespace Hello100Admin.API.Controllers
         /// <returns></returns>
         [HttpPost("popups")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [Consumes("multipart/form-data")]
         public async Task<IActionResult> CreatePopup([FromForm] CreatePopupRequest req, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("POST /api/advertisement/popups [{AId}]", Aid);
@@ -91,6 +92,7 @@ namespace Hello100Admin.API.Controllers
         /// </summary>
         [HttpPatch("popups/{popupId}")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [Consumes("multipart/form-data")]
         public async Task<IActionResult> UpdatePopup(int popupId, [FromForm] UpdatePopupRequest req, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("PATCH /api/advertisement/popups/{popupId} [{AId}]", popupId, Aid);

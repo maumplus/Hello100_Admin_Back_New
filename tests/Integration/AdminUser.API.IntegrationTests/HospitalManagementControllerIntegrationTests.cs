@@ -120,5 +120,24 @@ namespace AdminUser.API.IntegrationTests
             // Assert
             Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
         }
+
+        [Fact]
+        public async Task GetHelloDeskSetting_ShouldReturnOk_WhenValidCredentials()
+        {
+            var query = new Dictionary<string, string?>
+            {
+                ["emplNo"] = default!
+            };
+
+            var url = QueryHelpers.AddQueryString("/api/hospital-management/hello-desk-setting", query);
+
+            _client.AsSuperAdmin("B81AFBD0", "대민테스트", "10350033", "MmM4ZjA4NzJjYmI1YjkxOTAxNzczZmFlOTk0OGYxZmIxZTgyNDEwODhiOWE5MDllNmVkNjk5YTcxOGY0ZjUyNQ==");
+
+            var response = await _client.GetAsync(url);
+            var body = await response.Content.ReadAsStringAsync();
+
+            // Assert
+            Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+        }
     }
 }
