@@ -48,6 +48,7 @@ public static class DependencyInjection
         services.AddScoped<IDbConnectionFactory, MySqlConnectionFactory>();
         services.AddScoped<ICurrentHospitalProfileProvider, CurrentHospitalProfileProvider>();
         services.AddScoped<IAccountRepository, AccountRepository>();
+        services.AddScoped<IAccountStore, AccountStore>();
         services.AddScoped<IAdminUserRepository, AdminUserRepository>();
         services.AddScoped<IAdminUserStore, AdminUserStore>();
         services.AddScoped<IMemberRepository, MemberRepository>();

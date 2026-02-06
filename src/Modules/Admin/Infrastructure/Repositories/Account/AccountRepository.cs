@@ -66,7 +66,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Account
             return await db.ExecuteAsync(query, parameters, cancellationToken);
         }
 
-        public async Task<int> UpdateEghisHospInfoAsync(DbSession db, TbEghisHospQrInfoEntity entity, CancellationToken cancellationToken)
+        public async Task<int> UpdateEghisHospQrInfoAsync(DbSession db, TbEghisHospQrInfoEntity entity, CancellationToken cancellationToken)
         {
             DynamicParameters parameters = new DynamicParameters();
             parameters.Add("Aid", entity.Aid, DbType.String);
@@ -88,7 +88,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Account
             return await db.ExecuteAsync(query, parameters, cancellationToken);
         }
 
-        public async Task<int> UpdateEghisHospInfoAsync(DbSession db, TbEghisRecertDocInfoEntity entity, CancellationToken cancellationToken)
+        public async Task<int> UpdateEghisRecertDocInfoAsync(DbSession db, TbEghisRecertDocInfoEntity entity, CancellationToken cancellationToken)
         {
             DynamicParameters parameters = new DynamicParameters();
             parameters.Add("HospKey", entity.HospKey, DbType.String);
@@ -97,7 +97,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Account
                 INSERT INTO tb_eghis_recert_doc_info (hosp_key, re_doc_cd, show_yn, sort_no, reg_dt)
                 SELECT @HospKey,
                        a.cm_cd,
-                       'Y'
+                       'Y',
                        a.sort,
                        UNIX_TIMESTAMP(NOW())
                   FROM tb_common a
@@ -197,7 +197,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Account
                     values += ", ";
                 }
 
-                values += $"(@HospKey{i}, @HospNo{i}, @WeekNum{i}, @StartHour{i}, @StartMinute{i}, @EndHour{i}, @EndMinute{i}, @BreakStartHour{i}, @BreakStartMinute{i}, @BreakEndHour{i}, @BreakEndMinute{i}, @UseYn, UNIX_TIMESTAMP(NOW()))";
+                values += $"(@HospKey{i}, @HospNo{i}, @WeekNum{i}, @StartHour{i}, @StartMinute{i}, @EndHour{i}, @EndMinute{i}, @BreakStartHour{i}, @BreakStartMinute{i}, @BreakEndHour{i}, @BreakEndMinute{i}, @UseYn{i}, UNIX_TIMESTAMP(NOW()))";
             }
 
             string query = $@"

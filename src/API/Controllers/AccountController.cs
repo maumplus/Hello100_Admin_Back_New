@@ -2,10 +2,13 @@
 using Hello100Admin.API.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Hello100Admin.Modules.Admin.Application.Features.Account.Commands;
+using Hello100Admin.Modules.Admin.Application.Features.Account.Queries;
+using Hello100Admin.API.Infrastructure.Attributes;
 
 namespace Hello100Admin.API.Controllers
 {
     [Route("api/account")]
+    [Auth]
     public class AccountController : BaseController
     {
         private readonly IMediator _mediator;
@@ -18,7 +21,22 @@ namespace Hello100Admin.API.Controllers
         }
 
         /// <summary>
-        /// 신규계정 병원 매핑(요양기관번호, 요양기관키)
+        /// 병원 목록 API
+        /// </summary>
+        [HttpPost("hospitals")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetHospitalList(GetHospitalListQuery query)
+        {
+            _logger.LogInformation("GET /api/account/hospitals/ [{Aid}]", Aid);
+
+            var result = await _mediator.Send(query);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// 신규계정 병원 매핑(요양기관번호, 요양기관키) API
         /// </summary>
         [HttpPost("set-hosp-no")]
         [ProducesResponseType(StatusCodes.Status200OK)]

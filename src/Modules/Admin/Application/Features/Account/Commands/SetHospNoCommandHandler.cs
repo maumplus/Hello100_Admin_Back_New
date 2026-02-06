@@ -79,7 +79,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.Account.Commands
                 };
 
                 await _db.RunAsync(DataSource.Hello100,
-                    (dbSession, ct) => _accountRepository.UpdateEghisHospInfoAsync(dbSession, eghisHospQrInfo, ct),
+                    (dbSession, ct) => _accountRepository.UpdateEghisHospQrInfoAsync(dbSession, eghisHospQrInfo, ct),
                 cancellationToken);
 
                 var eghisRecertDocInfo = new TbEghisRecertDocInfoEntity()
@@ -88,7 +88,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.Account.Commands
                 };
 
                 await _db.RunAsync(DataSource.Hello100,
-                    (dbSession, ct) => _accountRepository.UpdateEghisHospInfoAsync(dbSession, eghisRecertDocInfo, ct),
+                    (dbSession, ct) => _accountRepository.UpdateEghisRecertDocInfoAsync(dbSession, eghisRecertDocInfo, ct),
                 cancellationToken);
 
                 var eghisHospVisitPurposeInfoList = new List<TbEghisHospVisitPurposeInfoEntity>();

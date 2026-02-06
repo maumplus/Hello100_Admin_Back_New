@@ -13,8 +13,8 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistenc
         Task<TbEghisHospInfoEntity?> GetEghisHospInfoAsync(DbSession db, string HospNo, CancellationToken cancellationToken);
         Task<int> UpdateAdminAsync(DbSession db, TbAdminEntity entity, CancellationToken cancellationToken);
         Task<int> UpdateEghisHospInfoAsync(DbSession db, TbEghisHospInfoEntity entity, CancellationToken cancellationToken);
-        Task<int> UpdateEghisHospInfoAsync(DbSession db, TbEghisHospQrInfoEntity entity, CancellationToken cancellationToken);
-        Task<int> UpdateEghisHospInfoAsync(DbSession db, TbEghisRecertDocInfoEntity entity, CancellationToken cancellationToken);
+        Task<int> UpdateEghisHospQrInfoAsync(DbSession db, TbEghisHospQrInfoEntity entity, CancellationToken cancellationToken);
+        Task<int> UpdateEghisRecertDocInfoAsync(DbSession db, TbEghisRecertDocInfoEntity entity, CancellationToken cancellationToken);
         Task<int> InsertEghisHospVisitPurposeInfoAsync(DbSession db, List<TbEghisHospVisitPurposeInfoEntity> entities, CancellationToken cancellationToken);
         Task<int> InsertEghisHospSettingsInfoAsync(DbSession db, TbEghisHospSettingsInfoEntity entity, CancellationToken cancellationToken);
         Task<int> InsertTbEghisHospMedicalTimeNewAsync(DbSession db, List<TbEghisHospMedicalTimeNewEntity> entities, CancellationToken cancellationToken);
