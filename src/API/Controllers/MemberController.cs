@@ -31,6 +31,7 @@ public class MemberController : BaseController
     [HttpGet("{uid}")]
     [ProducesResponseType(typeof(GetMemberResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [Obsolete("템플릿. 미사용. 추후 삭제 예정.")]
     public async Task<IActionResult> GetMember(
         string uid,
         CancellationToken cancellationToken = default)

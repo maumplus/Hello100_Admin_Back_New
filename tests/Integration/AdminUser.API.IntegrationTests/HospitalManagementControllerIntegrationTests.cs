@@ -43,5 +43,47 @@ namespace AdminUser.API.IntegrationTests
 
             Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
         }
+
+        [Fact]
+        public async Task GetHello100Setting_ShouldReturnOk_WhenValidCredentials()
+        {
+            _client.AsSuperAdmin("B81AFBD0", "대민테스트");
+
+            // Act
+            var response = await _client.GetAsync($"/api/hospital-management/hello100-setting");
+
+            // Body
+            var body = await response.Content.ReadAsStringAsync();
+
+            // Assert
+            Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task UpsertHello100Setting_ShouldReturnOk_WhenValidCredentials()
+        {
+            // Arrange
+            var req = new
+            {
+                NoticeId = 943,
+                StId = 1046,
+                Roles = new List<int> { 1, 2, 16, 32 },
+                AwaitRole = 1,
+                ReceptEndTime = "",
+                Notice = "테스트용 공지사항입니다.",
+                ExamPushSet = 2
+            };
+
+            _client.AsSuperAdmin("B81AFBD0", "대민테스트");
+
+            // Act
+            var response = await _client.PostAsJsonAsync($"/api/hospital-management/hello100-setting", req);
+
+            // Body
+            var body = await response.Content.ReadAsStringAsync();
+
+            // Assert
+            Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+        }
     }
 }

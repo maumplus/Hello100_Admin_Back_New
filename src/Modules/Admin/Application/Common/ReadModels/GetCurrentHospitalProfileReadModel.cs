@@ -68,7 +68,7 @@
         public int TabletCnt { get; set; }
 
         /// <summary>
-        /// 차트유형
+        /// 차트타입 [E: 이지스전자차트, N: 닉스펜차트]
         /// </summary>
         public string ChartType { get; set; } = default!;
     }

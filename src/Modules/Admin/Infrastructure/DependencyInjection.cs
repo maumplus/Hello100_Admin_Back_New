@@ -30,6 +30,7 @@ using Hello100Admin.Modules.Admin.Domain.Repositories;
 using Hello100Admin.Modules.Admin.Infrastructure.Repositories.Advertisement;
 using Hello100Admin.Modules.Admin.Infrastructure.External.Sftp;
 using Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManagement;
+using Hello100Admin.Modules.Admin.Infrastructure.External.Web.BizSite;
 
 namespace Hello100Admin.Modules.Admin.Infrastructure;
 
@@ -58,7 +59,8 @@ public static class DependencyInjection
         services.AddScoped<IHospitalStatisticsStore, HospitalStatisticsStore>();
         services.AddScoped<IHospitalUserStore, HospitalUserStore>();
         services.AddScoped<IHospitalUserRepository, HospitalUserRepository>();
-        services.AddScoped<IHospitalStore, HospitalStore>();
+        services.AddScoped<IHospitalManagementStore, HospitalStore>();
+        //services.AddScoped<IHospitalManagementStore, HospitalManagementStore>(); // 추후 Merge 시 HospitalStore 삭제 및 이거 사용 예정
         services.AddScoped<IHospitalManagementRepository, HospitalManagementRepository>();
         services.AddScoped<IAdvertisementStore, AdvertisementStore>();
         services.AddScoped<IAdvertisementRepository, AdvertisementRepository>();
@@ -68,6 +70,7 @@ public static class DependencyInjection
 
         var kakaoBizUrl = configuration.GetSection("KakaoBizUrl").Value;
         var eghisHomeUrl = configuration.GetSection("EghisHomeUrl").Value;
+        var bizApiDefaultUrl = configuration.GetSection("BizApiDefaultUrl").Value;
 
         services.AddHttpClient<IBizApiClientService, KakaoBizApiClientService>(client =>
         {
@@ -77,6 +80,11 @@ public static class DependencyInjection
         services.AddHttpClient<IEghisHomeApiClientService, EghisHomeApiClientService>(client =>
         {
             client.BaseAddress = new Uri($"{eghisHomeUrl}");
+            client.Timeout = TimeSpan.FromSeconds(10);
+        });
+        services.AddHttpClient<IBizSiteApiClientService, BizSiteApiClientService>(client =>
+        {
+            client.BaseAddress = new Uri($"{bizApiDefaultUrl}");
             client.Timeout = TimeSpan.FromSeconds(10);
         });
 

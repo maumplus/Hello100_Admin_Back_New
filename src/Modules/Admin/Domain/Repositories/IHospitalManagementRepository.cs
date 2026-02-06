@@ -43,5 +43,16 @@ namespace Hello100Admin.Modules.Admin.Domain.Repositories
             (DbSession db, string aId, int apprId, string hospNo, string hospKey, string? description, string? businessNo, string? businessLevel, string? mainMdCd,
             List<TbEghisHospMedicalTimeEntity> clinicTimesEntity, List<TbEghisHospMedicalTimeNewEntity> clinicTimesNewEntity,
             List<TbHospitalMedicalInfoEntity> deptCodesEntity, List<TbEghisHospKeywordInfoEntity> keywordsEntity, List<TbImageInfoEntity> imagesEntity, CancellationToken ct);
+
+        /// <summary>
+        /// Hello100 설정 등록/수정
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="hospNo"></param>
+        /// <param name="settingEntity"></param>
+        /// <param name="noticeEntity"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        public Task<int> UpsertHello100SettingAsync(DbSession db, string hospNo, TbEghisHospSettingsInfoEntity settingEntity, TbNoticeEntity noticeEntity, CancellationToken ct);
     }
 }

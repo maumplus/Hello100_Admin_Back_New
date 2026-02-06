@@ -14,11 +14,11 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
 
     public class GetHospitalQueryHandler : IRequestHandler<GetHospitalQuery, Result<GetHospitalResult?>>
     {
-        private readonly IHospitalStore _hospitalStore;
+        private readonly IHospitalManagementStore _hospitalStore;
         private readonly ILogger<GetHospitalQueryHandler> _logger;
 
         public GetHospitalQueryHandler(
-        IHospitalStore hospitalStore,
+        IHospitalManagementStore hospitalStore,
         ILogger<GetHospitalQueryHandler> logger)
         {
             _hospitalStore = hospitalStore;

@@ -1,25 +1,22 @@
 ﻿using Dapper;
-using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 using Hello100Admin.BuildingBlocks.Common.Definition.Enums;
-using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Hospital;
-using Mapster;
-using Microsoft.Extensions.Logging;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Dapper;
 using System.Data;
+using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Hospital;
 using Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.ReadModels;
 using Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Results;
-using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Dapper;
+using Microsoft.Extensions.Logging;
+using Mapster;
 
-namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Hospital
+namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManagement
 {
-    /// <summary>
-    /// Dapper 기반 HospitalRepository 구현체
-    /// </summary>
-    public class HospitalStore : IHospitalManagementStore
+    public class HospitalManagementStore : IHospitalManagementStore
     {
         private readonly IDbConnectionFactory _connectionFactory;
-        private readonly ILogger<HospitalStore> _logger;
+        private readonly ILogger<HospitalManagementStore> _logger;
 
-        public HospitalStore(IDbConnectionFactory connectionFactory, ILogger<HospitalStore> logger)
+        public HospitalManagementStore(IDbConnectionFactory connectionFactory, ILogger<HospitalManagementStore> logger)
         {
             _connectionFactory = connectionFactory;
             _logger = logger;

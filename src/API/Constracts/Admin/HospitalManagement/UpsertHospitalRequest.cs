@@ -13,7 +13,7 @@
         /// <summary>
         /// 상세정보
         /// 기존에 Descrption 이라고 돼있었음. 오타아님.
-        /// tb_eghis_hosp_approval_info.data colun에 json으로 저장되는 데이터라 임의로 변경 하지 않음.
+        /// tb_eghis_hosp_approval_info.data column에 json으로 저장되는 데이터라 임의로 변경 하지 않음.
         /// </summary>
         public string? Descrption { get; init; }
         /// <summary>
