@@ -44,9 +44,9 @@ namespace Hello100Admin.Modules.Admin.Application.Features.RequestsManagement.Qu
         {
             _logger.LogInformation("Handling GetRequestBugQuery");
 
-            var requestBugsList = await _requestsManagementStore.GetRequestBugAsync(req.HpId, ct);
+            var requestBug = await _requestsManagementStore.GetRequestBugAsync(req.HpId, ct);
 
-            return Result.Success(requestBugsList);
+            return Result.Success(requestBug);
         }
     }
 }

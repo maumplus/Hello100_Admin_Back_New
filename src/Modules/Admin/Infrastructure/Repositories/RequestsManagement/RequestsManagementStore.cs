@@ -12,6 +12,7 @@ using Hello100Admin.Modules.Admin.Application.Common.Extensions;
 using Hello100Admin.Modules.Admin.Application.Features.RequestsManagement.Results;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Hello100Admin.Modules.Admin.Application.Features.HospitalUser.Results;
+using System.Text.Encodings.Web;
 
 namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.RequestsManagement
 {
@@ -215,7 +216,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.RequestsManage
                         ON (c.hosp_key = a.hosp_key)
                      LEFT OUTER JOIN tb_eghis_hosp_info d
                         ON (d.hosp_key = c.hosp_key)
-                     /**where**//
+                     WHERE a.hp_id = @HpId
                 ";
                 #endregion
 
