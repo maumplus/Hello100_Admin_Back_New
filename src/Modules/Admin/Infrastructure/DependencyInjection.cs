@@ -68,12 +68,7 @@ public static class DependencyInjection
         services.AddScoped<IAdvertisementRepository, AdvertisementRepository>();
         services.AddScoped<ISftpClientService, SftpClientService>();
         services.AddScoped<IExcelExporter, ClosedXmlExcelExporter>();
-<<<<<<< HEAD
-        services.AddScoped<IHospitalStore, HospitalStore>();
         services.AddScoped<IRequestsManagementStore, IRequestsManagementStore>();
-
-=======
->>>>>>> main
         services.AddSingleton<IHasher, Sha256Hasher>();
 
         var kakaoBizUrl = configuration.GetSection("KakaoBizUrl").Value;
