@@ -10,6 +10,7 @@ using Hello100Admin.Modules.Admin.Application.Features.VisitPurpose.Commands.Cre
 using Hello100Admin.Modules.Admin.Application.Features.VisitPurpose.Commands.DeleteVisitPurpose;
 using Hello100Admin.Modules.Admin.Application.Features.VisitPurpose.Commands.UpdateVisitPurposeForNhisHealthScreening;
 using Hello100Admin.Modules.Admin.Application.Features.VisitPurpose.Commands.UpdateVisitPurposeForNonNhisHealthScreening;
+using Hello100Admin.Modules.Admin.Application.Features.VisitPurpose.Queries;
 using Hello100Admin.Modules.Admin.Application.Features.VisitPurpose.Queries.GetCertificates;
 using Hello100Admin.Modules.Admin.Application.Features.VisitPurpose.Queries.GetVisitPurposeDetail;
 using Hello100Admin.Modules.Admin.Application.Features.VisitPurpose.Queries.GetVisitPurposes;
@@ -188,6 +189,20 @@ namespace Hello100Admin.API.Controllers
             };
 
             var result = await _mediator.Send(command, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// 내원목적관리 > 내원목적편집(공단검진 제외), 신규등록 시 문진표 조회
+        /// </summary>
+        [HttpPatch("visit-purposes/questionnaires")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetQuestionnaires(CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("PATCH /api/visitpurpose/visit-purposes/questionnaires [{Aid}]", Aid);
+
+            var result = await _mediator.Send(new GetQuestionnairesQuery(base.HospNo), cancellationToken);
 
             return result.ToActionResult(this);
         }

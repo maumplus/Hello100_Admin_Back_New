@@ -60,5 +60,19 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Errors
         DeleteAdvertisementFailed = 4025,
         [Description("SFTP 서버 연결에 실패하였습니다. 다시 시도해주세요.")]
         SftpConnectionFailed = 4026,
+        [Description("병원정보 저장 또는 수정에 실패하였습니다. 다시 시도해주세요.")]
+        UpsertHospitalFailed = 4027,
+        [Description("비즈 사이트 데이터 요청 간 에러가 발생하였습니다. 다시 시도해주세요.")]
+        BizSiteDataRequestFailed = 4028,
+        [Description("헬로100 설정 저장 또는 수정에 실패하였습니다. 다시 시도해주세요.")]
+        UpsertHello100SettingFailed = 4029,
+        [Description("입력하신 요양기관은 이미 모바일 사용과 연결되어 있습니다. 관리자에게 문의하세요.")]
+        ExistsHospMappingInfo = 4030,
+        [Description("요양기관번호 설정에 실패하였습니다. 관리자에게 문의하세요.")]
+        HospitalInfoSaveFaild = 4031,
+        [Description("기기 설정 저장 또는 수정에 실패하였습니다. 다시 시도해주세요.")]
+        UpsertDeviceSettingFailed = 4032,
+        [Description("저장 또는 수정에 필요한 데이터가 없습니다. 다시 시도해주세요.")]
+        NoDataToUpsert = 4033,
     }
 }

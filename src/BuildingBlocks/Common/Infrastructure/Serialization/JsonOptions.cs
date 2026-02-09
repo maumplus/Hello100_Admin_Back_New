@@ -22,6 +22,14 @@ namespace Hello100Admin.BuildingBlocks.Common.Infrastructure.Serialization
             };
 
         /// <summary>
+        /// 애플리케이션 No Option JSON 정책
+        /// </summary>
+        public static readonly JsonSerializerOptions NoOptions =
+            new JsonSerializerOptions
+            {
+            };
+
+        /// <summary>
         /// DB 저장/로그 보관용 JSON 정책
         /// 한글 이스케이프 방지 + 가독성 유지
         /// </summary>

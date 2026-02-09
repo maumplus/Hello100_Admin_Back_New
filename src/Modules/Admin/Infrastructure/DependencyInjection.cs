@@ -19,7 +19,6 @@ using Hello100Admin.Modules.Admin.Infrastructure.Repositories.VisitPurpose;
 using Hello100Admin.Modules.Admin.Infrastructure.Persistence.MySql;
 using Hello100Admin.Modules.Admin.Infrastructure.Configuration.Options;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
-using Hello100Admin.Modules.Admin.Infrastructure.Repositories.Hospital;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Hospital;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.ApprovalRequest;
 using Hello100Admin.Modules.Admin.Infrastructure.Repositories.ApprovalRequest;
@@ -29,6 +28,10 @@ using Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalUser;
 using Hello100Admin.Modules.Admin.Domain.Repositories;
 using Hello100Admin.Modules.Admin.Infrastructure.Repositories.Advertisement;
 using Hello100Admin.Modules.Admin.Infrastructure.External.Sftp;
+using Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManagement;
+using Hello100Admin.Modules.Admin.Infrastructure.External.Web.BizSite;
+using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Account;
+using Hello100Admin.Modules.Admin.Infrastructure.Repositories.Account;
 
 namespace Hello100Admin.Modules.Admin.Infrastructure;
 
@@ -45,6 +48,8 @@ public static class DependencyInjection
         services.AddScoped<IDbSessionRunner, DbSessionRunner>();
         services.AddScoped<IDbConnectionFactory, MySqlConnectionFactory>();
         services.AddScoped<ICurrentHospitalProfileProvider, CurrentHospitalProfileProvider>();
+        services.AddScoped<IAccountRepository, AccountRepository>();
+        services.AddScoped<IAccountStore, AccountStore>();
         services.AddScoped<IAdminUserRepository, AdminUserRepository>();
         services.AddScoped<IAdminUserStore, AdminUserStore>();
         services.AddScoped<IMemberRepository, MemberRepository>();
@@ -57,17 +62,23 @@ public static class DependencyInjection
         services.AddScoped<IHospitalStatisticsStore, HospitalStatisticsStore>();
         services.AddScoped<IHospitalUserStore, HospitalUserStore>();
         services.AddScoped<IHospitalUserRepository, HospitalUserRepository>();
+        services.AddScoped<IHospitalManagementStore, HospitalManagementStore>();
+        services.AddScoped<IHospitalManagementRepository, HospitalManagementRepository>();
         services.AddScoped<IAdvertisementStore, AdvertisementStore>();
         services.AddScoped<IAdvertisementRepository, AdvertisementRepository>();
         services.AddScoped<ISftpClientService, SftpClientService>();
         services.AddScoped<IExcelExporter, ClosedXmlExcelExporter>();
+<<<<<<< HEAD
         services.AddScoped<IHospitalStore, HospitalStore>();
         services.AddScoped<IRequestsManagementStore, IRequestsManagementStore>();
 
+=======
+>>>>>>> main
         services.AddSingleton<IHasher, Sha256Hasher>();
 
         var kakaoBizUrl = configuration.GetSection("KakaoBizUrl").Value;
         var eghisHomeUrl = configuration.GetSection("EghisHomeUrl").Value;
+        var bizApiDefaultUrl = configuration.GetSection("BizApiDefaultUrl").Value;
 
         services.AddHttpClient<IBizApiClientService, KakaoBizApiClientService>(client =>
         {
@@ -77,6 +88,11 @@ public static class DependencyInjection
         services.AddHttpClient<IEghisHomeApiClientService, EghisHomeApiClientService>(client =>
         {
             client.BaseAddress = new Uri($"{eghisHomeUrl}");
+            client.Timeout = TimeSpan.FromSeconds(10);
+        });
+        services.AddHttpClient<IBizSiteApiClientService, BizSiteApiClientService>(client =>
+        {
+            client.BaseAddress = new Uri($"{bizApiDefaultUrl}");
             client.Timeout = TimeSpan.FromSeconds(10);
         });
 

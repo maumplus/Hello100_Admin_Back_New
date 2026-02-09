@@ -55,6 +55,7 @@ namespace Hello100Admin.API.Controllers
         /// <returns></returns>
         [HttpPost("popups")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [Consumes("multipart/form-data")]
         public async Task<IActionResult> CreatePopup([FromForm] CreatePopupRequest req, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("POST /api/advertisement/popups [{AId}]", Aid);
@@ -76,6 +77,7 @@ namespace Hello100Admin.API.Controllers
         /// </summary>
         [HttpGet("popups/{popupId}")]
         [ProducesResponseType(typeof(ApiResponse<GetPopupResult>), StatusCodes.Status200OK)]
+        [Obsolete("팝업 리스트 전체 조회에서 필요한 데이터 다 응답하므로 미사용")]
         public async Task<IActionResult> GetPopup(int popupId, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("GET /api/advertisement/popups/{popupId} [{AId}]", popupId, Aid);
@@ -90,6 +92,7 @@ namespace Hello100Admin.API.Controllers
         /// </summary>
         [HttpPatch("popups/{popupId}")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [Consumes("multipart/form-data")]
         public async Task<IActionResult> UpdatePopup(int popupId, [FromForm] UpdatePopupRequest req, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("PATCH /api/advertisement/popups/{popupId} [{AId}]", popupId, Aid);

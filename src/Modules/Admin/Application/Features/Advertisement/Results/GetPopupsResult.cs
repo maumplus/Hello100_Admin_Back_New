@@ -51,6 +51,10 @@
         /// </summary>
         public string? ImgUrl { get; set; }
         /// <summary>
+        /// 기간설정시작일자 (yyyy-mm-dd)
+        /// </summary>
+        public string? StartDt { get; set; }
+        /// <summary>
         /// 기간설정만료날짜 (yyyy-mm-dd)
         /// </summary>
         public string? EndDt { get; set; }

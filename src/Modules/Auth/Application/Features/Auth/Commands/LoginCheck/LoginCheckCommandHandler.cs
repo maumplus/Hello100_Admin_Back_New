@@ -1,14 +1,18 @@
 ﻿using Hello100Admin.BuildingBlocks.Common.Application;
 using Hello100Admin.BuildingBlocks.Common.Errors;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Extensions;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Security;
 using Hello100Admin.Modules.Auth.Application.Common.Abstractions.Persistence.Auth;
 using Hello100Admin.Modules.Auth.Application.Common.Abstractions.Services;
+using Hello100Admin.Modules.Auth.Application.Common.Errors;
+using Hello100Admin.Modules.Auth.Application.Common.Extensions;
 using Hello100Admin.Modules.Auth.Application.Features.Auth.Responses.GetUser;
 using Hello100Admin.Modules.Auth.Application.Features.Auth.Responses.Login;
 using Hello100Admin.Modules.Auth.Application.Features.Auth.Responses.LoginCheck;
 using Hello100Admin.Modules.Auth.Domain.Entities;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.LoginCheck
 {
@@ -22,19 +26,22 @@ namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.LoginChe
         private readonly ITokenService _tokenService;
         private readonly IAuthStore _authStore;
         private readonly ILogger<LoginCheckCommandHandler> _logger;
+        private readonly ICryptoService _cryptoService;
 
         public LoginCheckCommandHandler(
             IPasswordHasher passwordHasher,
             ITokenService tokenService,
             IAuthRepository authRepository,
             IAuthStore authStore,
-            ILogger<LoginCheckCommandHandler> logger)
+            ILogger<LoginCheckCommandHandler> logger,
+            ICryptoService cryptoService)
         {
             _authRepository = authRepository;
             _authStore = authStore;
             _passwordHasher = passwordHasher;
             _tokenService = tokenService;
             _logger = logger;
+            _cryptoService = cryptoService;
         }
 
         public async Task<Result<LoginCheckResponse>> Handle(LoginCheckCommand request, CancellationToken cancellationToken)
@@ -74,6 +81,13 @@ namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.LoginChe
 
             await _authRepository.UpdateLoginSuccessAsync(adminEntity, cancellationToken);
 
+            if (adminInfo.Use2fa == "Y"
+             && string.IsNullOrWhiteSpace(adminInfo.Email) == true
+             && string.IsNullOrWhiteSpace(adminInfo.Tel) == true)
+            {
+                return Result.Success<LoginCheckResponse>().WithError(AuthErrorCode.NotFoundPhoneAndEmail.ToError());
+            }
+
 
             var response = new LoginCheckResponse
             {
@@ -83,8 +97,12 @@ namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.LoginChe
                     AccountId = adminInfo.AccId,
                     Name = adminInfo.Name,
                     Grade = adminInfo.Grade,
+                    HospNo = adminInfo.HospNo,
                     AccountLocked = adminInfo.AccountLocked,
                     LastLoginDt = adminInfo.LastLoginDt,
+                    Use2fa = adminInfo.Use2fa,
+                    Email = string.IsNullOrWhiteSpace(adminInfo.Email) == false ? _cryptoService.DecryptWithNoVector(adminInfo.Email, CryptoKeyType.Email) : "",
+                    Tel = string.IsNullOrWhiteSpace(adminInfo.Tel) == false ? _cryptoService.DecryptWithNoVector(adminInfo.Tel, CryptoKeyType.Mobile) : ""
                 }
             };
 

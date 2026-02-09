@@ -35,6 +35,7 @@ public class AdminUserController : BaseController
     /// </summary>
     [HttpGet]
     [ProducesResponseType(typeof(PagedResult<AdminUserResponse>), StatusCodes.Status200OK)]
+    [Obsolete("템플릿. 미사용. 추후 삭제 예정.")]
     public async Task<IActionResult> GetAdminUsers(
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20,

@@ -17,14 +17,14 @@
         public static HttpClient AsSuperAdmin(this HttpClient client, string userId = "TEST5678", string name = "슈퍼테스트", string hospNo = "10350072", string hospKey = "MzNiMDI0OWI1MDA0MWU2YjcxNTE1YTQ2MDM0YWViYzVmYzY5ZGQ5YjY2M2I5ODBjODgwNDVhNDg3YTdkNzc4NA==")
         {
             client.DefaultRequestHeaders.Remove(TestAuthHandler.HeaderName);
-            client.DefaultRequestHeaders.Add(TestAuthHandler.HeaderName, $"sub={userId};name={name};role=SuperAdmin;hospital_number={hospNo};hospital_key={hospKey}");
+            client.DefaultRequestHeaders.Add(TestAuthHandler.HeaderName, $"sub={userId};name={name};role=SuperAdmin;hospNo={hospNo};hospKey={hospKey}");
             return client;
         }
 
         public static HttpClient AsMySuperAdmin(this HttpClient client, string userId = "TEST5678", string name = "슈퍼테스트", string hospNo = "13306651", string hospKey = "YzZjNzY4NjJjZTQzZTJlNjNkOTE0ZmJjMTEzMDdkMDI5ZjI5M2NiYWFiMjY0YjVhMDVmMTM4MTIxOGVlNGUyNQ==")
         {
             client.DefaultRequestHeaders.Remove(TestAuthHandler.HeaderName);
-            client.DefaultRequestHeaders.Add(TestAuthHandler.HeaderName, $"sub={userId};name={name};role=SuperAdmin;hospital_number={hospNo};hospital_key={hospKey}");
+            client.DefaultRequestHeaders.Add(TestAuthHandler.HeaderName, $"sub={userId};name={name};role=SuperAdmin;hospNo={hospNo};hospKey={hospKey}");
             return client;
         }
 

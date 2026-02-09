@@ -37,6 +37,17 @@
     /// <summary>
     /// 
     /// </summary>
+    public enum AccountHospitalListSearchType
+    {
+        /// <summary>
+        /// 1: 병원명 검색
+        /// </summary>
+        name = 0
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
     public enum HospitalListSearchType
     {
         /// <summary>
