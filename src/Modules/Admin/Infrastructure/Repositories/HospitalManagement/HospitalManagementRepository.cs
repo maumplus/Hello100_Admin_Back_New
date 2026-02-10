@@ -10,6 +10,8 @@ using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Dapper;
 using System.Text;
 using Hello100Admin.Modules.Admin.Domain.Entities;
 using Hello100Admin.Modules.Admin.Application.Common.Definitions.Enums;
+using DocumentFormat.OpenXml.Spreadsheet;
+using Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Results;
 
 namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManagement
 {
@@ -373,6 +375,91 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
                 throw new BizException(AdminErrorCode.UpsertDeviceSettingFailed.ToError());
 
             return result;
+        }
+
+        public async Task<int> UpdateDoctorInfoAsync(DbSession db, EghisDoctInfoEntity eghisDoctInfo, CancellationToken ct)
+        {
+            DynamicParameters parameters = new DynamicParameters();
+            parameters.Add("HospNo", eghisDoctInfo.HospNo, DbType.String);
+            parameters.Add("HospKey", eghisDoctInfo.HospKey, DbType.String);
+            parameters.Add("EmplNo", eghisDoctInfo.EmplNo, DbType.String);
+            parameters.Add("DoctNm", eghisDoctInfo.DoctNm, DbType.String);
+            parameters.Add("ViewMinTime", eghisDoctInfo.ViewMinTime, DbType.Int32);
+            parameters.Add("ViewMinCnt", eghisDoctInfo.ViewMinCnt, DbType.Int32);
+
+            var query = @"
+                UPDATE hello100_api.eghis_doct_info
+                   SET doct_nm       = @DoctNm,
+                       view_min_time = @ViewMinTime,
+                       view_min_cnt  = @ViewMinCnt
+                 WHERE hosp_no  = @HospNo
+                   AND hosp_key = @HospKey
+                   AND empl_no  = @EmplNo;
+            ";
+
+            return await db.ExecuteAsync(query, parameters, ct, _logger);
+        }
+
+        public async Task<int> UpdateDoctorInfoFileAsync(DbSession db, TbEghisDoctInfoFileEntity eghisDoctInfoFile, CancellationToken ct)
+        {
+            DynamicParameters parameters = new DynamicParameters();
+            parameters.Add("HospNo", eghisDoctInfoFile.HospNo, DbType.String);
+            parameters.Add("HospKey", eghisDoctInfoFile.HospKey, DbType.String);
+            parameters.Add("EmplNo", eghisDoctInfoFile.EmplNo, DbType.String);
+            parameters.Add("ClsCd", eghisDoctInfoFile.TbFileInfoEntity.ClsCd, DbType.String);
+            parameters.Add("CmCd", eghisDoctInfoFile.TbFileInfoEntity.CmCd, DbType.String);
+            parameters.Add("FilePath", eghisDoctInfoFile.TbFileInfoEntity.FilePath, DbType.String);
+            parameters.Add("OriginFileName", eghisDoctInfoFile.TbFileInfoEntity.OriginFileName, DbType.String);
+            parameters.Add("FileSize", eghisDoctInfoFile.TbFileInfoEntity.FileSize, DbType.Int32);
+            parameters.Add("DelYn", eghisDoctInfoFile.TbFileInfoEntity.DelYn, DbType.String);
+
+            var query = @"
+                SET @maxFileSeq4 := ( SELECT IFNULL(MAX(seq), 0) + 1
+                                        FROM tb_file_info );
+
+                INSERT INTO tb_file_info
+                  (seq, ord_seq, cls_cd, cm_cd, file_path, origin_file_name, file_size, del_yn, del_dt, reg_dt)
+                VALUES
+                  (@maxFileSeq4, ( SELECT IFNULL(MAX(tfi.ord_seq), 0) + 1 FROM tb_file_info tfi WHERE tfi.seq = @maxFileSeq4 ), @ClsCd, @CmCd, @FilePath, @OriginFileName, @FileSize, @DelYn, NULL, UNIX_TIMESTAMP(NOW()));
+
+                UPDATE tb_eghis_doct_untact
+                   SET doct_file_seq  = @maxFileSeq4
+                 WHERE hosp_no = @HospNo
+                   AND hosp_key = @HospKey
+                   AND empl_no = @EmplNo;
+
+                DELETE FROM hello100.tb_eghis_doct_info_file
+                      WHERE hosp_no = @HospNo
+                        AND empl_no = @EmplNo;
+
+                INSERT INTO tb_eghis_doct_info_file
+                  (hosp_no, hosp_key, empl_no, doct_file_seq, reg_dt)
+                VALUES
+                  (@HospNo, @HospKey, @EmplNo, @maxFileSeq4, UNIX_TIMESTAMP(NOW()));
+            ";
+
+            return await db.ExecuteAsync(query, parameters, ct, _logger);
+        }
+
+        public async Task<int> UpdateDoctorUntanctAsync(DbSession db, TbEghisDoctUntanctEntity eghisDoctUntanct, CancellationToken ct)
+        {
+            DynamicParameters parameters = new DynamicParameters();
+            parameters.Add("HospNo", eghisDoctUntanct.HospNo, DbType.String);
+            parameters.Add("EmplNo", eghisDoctUntanct.EmplNo, DbType.String);
+            parameters.Add("DoctIntro", eghisDoctUntanct.DoctIntro, DbType.String);
+            parameters.Add("ClinicGuide", eghisDoctUntanct.ClinicGuide, DbType.String);
+            parameters.Add("DoctHistory", eghisDoctUntanct.DoctHistory, DbType.String);
+
+            var query = @"
+                UPDATE hello100.tb_eghis_doct_untact
+                   SET doct_intro   = @DoctIntro,
+                       clinic_guide = @ClinicGuide,
+                       doct_history = @DoctHistory
+                 WHERE hosp_no = @HospNo
+                   AND empl_no = @EmplNo;
+            ";
+
+            return await db.ExecuteAsync(query, parameters, ct, _logger);
         }
     }
 }

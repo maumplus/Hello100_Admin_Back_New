@@ -12,6 +12,9 @@ using Hello100Admin.API.Infrastructure.Attributes;
 using System.Text.Json.Serialization;
 using System.Text.Json;
 using System.Text.Encodings.Web;
+using Org.BouncyCastle.Ocsp;
+using Microsoft.Extensions.FileProviders;
+using DocumentFormat.OpenXml.Drawing;
 
 namespace Hello100Admin.API.Controllers
 {
@@ -245,19 +248,71 @@ namespace Hello100Admin.API.Controllers
         /// <summary>
         /// [병원정보관리 > 의료진관리]의료진 상세 API
         /// </summary>
-        [HttpGet("doctor/{EmplNo}")]
+        [HttpGet("doctor/{emplNo}")]
         [ProducesResponseType(typeof(List<GetDoctorListResult>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetDoctor(string EmplNo, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetDoctor(string emplNo, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("GET /api/hospital-management/doctors");
 
             var query = new GetDoctorQuery()
             {
                 HospNo = HospNo,
-                EmplNo = EmplNo
+                EmplNo = emplNo
             };
             var result = await _mediator.Send(query, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [병원정보관리 > 의료진관리]의료진 수정 API
+        /// </summary>
+        [HttpPatch("doctor")]
+        [ProducesResponseType(typeof(List<GetDoctorListResult>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> PatchDoctor([FromForm] PatchDoctorRequest request, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("PATCH /api/hospital-management/doctor");
+
+            var payloads = this.GetImagePayload(new List<IFormFile>() { request.Image });
+
+            var command = request.Adapt<PatchDoctorCammand>() with
+            {
+                HospNo = base.HospNo,
+                HospKey = base.HospKey,
+                EmplNo = request.EmplNo,
+                DoctNm = request.DoctNm,
+                ViewMinCnt = request.ViewMinCnt,
+                ViewMinTime = request.ViewMinTime,
+                Image = payloads[0]
+            };
+
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [병원정보관리 > 의료진관리]비대면 의료진 수정 API
+        /// </summary>
+        [HttpPatch("doctor-untanct")]
+        [ProducesResponseType(typeof(List<GetDoctorListResult>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> PatchDoctorUntanct([FromForm] PatchDoctorUntactRequest request, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("PATCH /api/hospital-management/doctor-untact");
+
+            var command = request.Adapt<PatchDoctorUntactCammand>() with
+            {
+                HospNo = base.HospNo,
+                EmplNo = request.EmplNo,
+                DoctIntro = request.DoctIntro,
+                ClinicGuide = request.ClinicGuide,
+                DoctHistoryList = request.DoctHistoryList
+            };
+
+            var result = await _mediator.Send(command, cancellationToken);
 
             return result.ToActionResult(this);
         }

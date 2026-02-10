@@ -72,5 +72,8 @@ namespace Hello100Admin.Modules.Admin.Domain.Repositories
         /// <returns></returns>
         public Task<int> UpsertDeviceSettingAsync(
             DbSession db, string hospNo, string hospNm, string emplNo, string deviceNm, int deviceType, string hospKey, string infoTxt, string useYn, string? setJson, CancellationToken ct);
+        public Task<int> UpdateDoctorInfoAsync(DbSession db, EghisDoctInfoEntity eghisDoctInfo, CancellationToken ct);
+        public Task<int> UpdateDoctorInfoFileAsync(DbSession db, TbEghisDoctInfoFileEntity eghisDoctInfo, CancellationToken ct);
+        public Task<int> UpdateDoctorUntanctAsync(DbSession db, TbEghisDoctUntanctEntity eghisDoctUntanct, CancellationToken ct);
     }
 }
