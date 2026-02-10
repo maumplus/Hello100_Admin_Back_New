@@ -1,6 +1,6 @@
 ﻿namespace Hello100Admin.Modules.Admin.Application.Features.Advertisement.Results
 {
-    public sealed class GetPopupsResult
+    public class GetEghisBannersResult
     {
         /// <summary>
         /// 행번호
@@ -14,10 +14,6 @@
         /// 광고유형 tb_common(cls_cd:11)
         /// </summary>
         public string AdType { get; set; } = default!;
-        /// <summary>
-        /// 요양기관키(병원광고시만)
-        /// </summary>
-        public string? HospKey { get; set; }
         /// <summary>
         /// 진료과(병원광고시만)
         /// </summary>
@@ -39,13 +35,9 @@
         /// </summary>
         public string? Url { get; set; }
         /// <summary>
-        /// 정렬순서(필요시만사용)
+        /// 서브 URL 쇼핑몰 사용
         /// </summary>
-        public int SortNo { get; set; }
-        /// <summary>
-        /// 삭제여부
-        /// </summary>
-        public string DelYn { get; set; } = default!;
+        public string? Url2 { get; set; }
         /// <summary>
         /// 이미지 ID
         /// </summary>
@@ -62,6 +54,14 @@
         /// 기간설정만료날짜 (yyyy-mm-dd)
         /// </summary>
         public string? EndDt { get; set; }
+        /// <summary>
+        /// 정렬순서(필요시만사용)
+        /// </summary>
+        public int SortNo { get; set; }
+        /// <summary>
+        /// 삭제여부
+        /// </summary>
+        public string DelYn { get; set; } = default!;
         /// <summary>
         /// 등록일시 (yyyy-mm-dd hh24:mi)
         /// </summary>

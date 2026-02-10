@@ -5,6 +5,8 @@ using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Serialization;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Common;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Hospital;
+using Hello100Admin.Modules.Admin.Application.Common.Errors;
+using Hello100Admin.Modules.Admin.Application.Common.Extensions;
 using Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Results;
 using Mapster;
 using MediatR;
@@ -53,6 +55,9 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
             _logger.LogInformation("Handling GetKioskSettingQuery HospNo:{HospNo}", req.HospNo);
 
             var hospInfo = await _hospitalProfileProvider.GetCurrentHospitalProfileByHospNoAsync(req.HospNo, ct);
+
+            if (hospInfo.KioskCnt <= 0)
+                return Result.Success<GetDeviceSettingResult<KioskRo>>().WithError(AdminErrorCode.KioskNotRegistered.ToError());
 
             var result = await _db.RunAsync(DataSource.Hello100,
                 (session, token) => _hospitalStore.GetKioskSettingAsync(session, req.HospNo, req.HospKey, req.EmplNo, 1, token),  // SetDeviceType.Kiosk: 1

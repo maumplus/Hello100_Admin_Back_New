@@ -61,5 +61,18 @@ namespace AdminUser.API.IntegrationTests
 
             Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
         }
+
+        [Fact]
+        public async Task GetEghisBanners_ShouldReturnOk_WhenValidCredentials()
+        {
+            _client.AsSuperAdmin("B81AFBD0", "대민테스트");
+
+            var response = await _client.GetAsync("/api/advertisement/eghis-banners");
+            var body = await response.Content.ReadAsStringAsync();
+
+            var bodyKor = body.FromJson<ApiResponse>();
+
+            Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+        }
     }
 }

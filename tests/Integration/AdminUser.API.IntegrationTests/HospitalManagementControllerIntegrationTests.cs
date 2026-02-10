@@ -47,7 +47,7 @@ namespace AdminUser.API.IntegrationTests
         [Fact]
         public async Task GetHello100Setting_ShouldReturnOk_WhenValidCredentials()
         {
-            _client.AsSuperAdmin("B81AFBD0", "대민테스트");
+            _client.AsSuperAdmin("B81AFBD0", "대민테스트", "10350033", "MmM4ZjA4NzJjYmI1YjkxOTAxNzczZmFlOTk0OGYxZmIxZTgyNDEwODhiOWE5MDllNmVkNjk5YTcxOGY0ZjUyNQ==");
 
             // Act
             var response = await _client.GetAsync($"/api/hospital-management/hello100-setting");

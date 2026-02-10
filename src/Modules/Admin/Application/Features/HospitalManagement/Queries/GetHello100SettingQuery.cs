@@ -75,8 +75,6 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
                 result.ExamApproveYn = string.IsNullOrWhiteSpace(kakaoMsgExamInfo.ResultData) ? "N" : kakaoMsgExamInfo.ResultData;
             }
 
-            var test = result?.ToJsonForStorage();
-
             return Result.Success(result);
         }
     }

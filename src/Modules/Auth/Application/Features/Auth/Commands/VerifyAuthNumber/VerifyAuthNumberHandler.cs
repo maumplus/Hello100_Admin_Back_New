@@ -2,8 +2,6 @@
 using Hello100Admin.BuildingBlocks.Common.Errors;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Extensions;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Security.Hash;
-using Hello100Admin.BuildingBlocks.Common.Infrastructure.Security;
-using Hello100Admin.Modules.Admin.Application.Common.Abstractions.External;
 using Hello100Admin.Modules.Auth.Application.Common.Abstractions.Persistence.Auth;
 using MediatR;
 using Microsoft.Extensions.Logging;
