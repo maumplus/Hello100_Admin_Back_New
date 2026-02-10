@@ -33,7 +33,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Advertisement
             var parameters = new DynamicParameters();
             parameters.Add("Limit", pageSize * pageNo, DbType.Int32);
             parameters.Add("OffSet", (pageNo - 1) * pageSize, DbType.Int32);
-            parameters.Add("AdType", ImageUploadType.PO.ToString(), DbType.String); // AdvertType.PO
+            parameters.Add("AdType", AdvertType.PO.ToString(), DbType.String);
             parameters.Add("EncKey", "d3fa7fa7873c38097b31feb7bcd1c017ff222aee", DbType.String);
 
             StringBuilder sbCondi = new StringBuilder();
@@ -60,9 +60,9 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Advertisement
             sb.AppendLine("	     ,	DATE_FORMAT(a.end_dt, '%Y-%m-%d')	AS EndDt");
             sb.AppendLine("	     ,	TIMESTAMPDIFF(day, NOW(), IFNULL(a.end_dt,'')) AS CntDt");
             sb.AppendLine("	     ,	from_unixtime(a.reg_dt, '%Y-%m-%d %H:%i')  AS RegDt");
-            sb.AppendLine("      ,  a.img_url      AS ImgUrl");
+            sb.AppendLine("      ,  b.url      AS ImgUrl");
             sb.AppendLine("      ,  b.img_id      AS ImgId");
-            sb.AppendLine("	   FROM VM_ADVERTS a             ");
+            sb.AppendLine("	   FROM tb_ad_info a             ");
             sb.AppendLine("    LEFT JOIN tb_image_info b    ");
             sb.AppendLine("     ON (b.img_key = func_HMACSHA256(@EncKey, CONCAT('ad', a.ad_id, a.ad_type)) ");
             sb.AppendLine("     AND b.del_yn = 'N')         ");
@@ -121,6 +121,60 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Advertisement
 
             if (result == null)
                 throw new BizException(AdminErrorCode.PopupAdvertisementNotFound.ToError());
+
+            return result;
+        }
+
+        public async Task<ListResult<GetEghisBannersResult>> GetEghisBannersAsync(DbSession db, CancellationToken ct)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("AdType", AdvertType.BA.ToString(), DbType.String);
+            parameters.Add("EncKey", "d3fa7fa7873c38097b31feb7bcd1c017ff222aee", DbType.String);
+
+            StringBuilder sbCondi = new StringBuilder();
+
+            sbCondi.AppendLine("  WHERE a.ad_type = @AdType   ");
+            sbCondi.AppendLine("    AND a.del_yn = 'N'        ");
+
+            #region == Query ==
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"SET @total_cnt:= (SELECT COUNT(*) FROM tb_ad_info a {sbCondi.ToString()});");
+            sb.AppendLine($"SET @rownum:= (@total_cnt +1) - @OffSet;");
+            sb.AppendLine("  SELECT @rownum:= @rownum - 1 AS RowNum  ");
+            sb.AppendLine("	     ,	a.ad_id		AS AdId     ");
+            sb.AppendLine("	     ,	a.ad_type 	AS AdType   ");
+            sb.AppendLine("	     ,	a.hosp_key	AS HospKey  ");
+            sb.AppendLine("	     ,	a.md_cd   	AS MdCd     ");
+            sb.AppendLine("	     ,	a.send_type 	AS SendType ");
+            sb.AppendLine("	     ,	a.show_yn 	AS ShowYn   ");
+            sb.AppendLine("	     ,	a.url     	AS Url      ");
+            sb.AppendLine("	     ,	a.url2     	AS Url2      ");
+            sb.AppendLine("	     ,	a.link_type	AS LinkType      ");
+            sb.AppendLine("	     ,	a.sort_no 	AS SortNo   ");
+            sb.AppendLine("	     ,	a.del_yn  	AS DelYn    ");
+            sb.AppendLine("     ,	DATE_FORMAT(IFNULL(a.start_dt,''), '%Y-%m-%d')	AS StartDt  ");
+            sb.AppendLine("	     ,	DATE_FORMAT(IFNULL(a.end_dt,''), '%Y-%m-%d')	AS EndDt");
+            sb.AppendLine("	     ,	TIMESTAMPDIFF(day, NOW(), IFNULL(a.end_dt,'')) AS CntDt");
+            sb.AppendLine("	     ,	from_unixtime(a.reg_dt, '%Y-%m-%d %H:%i')  AS RegDt");
+            sb.AppendLine("     ,   b.img_id    AS ImgId    ");
+            sb.AppendLine("     ,   b.url       AS ImgUrl   ");
+            sb.AppendLine("	   FROM tb_ad_info a             ");
+            sb.AppendLine("    LEFT JOIN tb_image_info b    ");
+            sb.AppendLine("     ON (b.img_key = func_HMACSHA256(@EncKey, CONCAT('ad', a.ad_id, a.ad_type)) ");
+            sb.AppendLine("     AND b.del_yn = 'N')         ");
+            sb.AppendLine(sbCondi.ToString());
+            sb.AppendLine("   ORDER BY  sort_no, show_yn DESC, IFNULL(start_dt, '19000101') desc;  ");
+            //sb.AppendLine("   LIMIT @OffSet, @Limit;");
+
+            sb.AppendLine($"SELECT @total_cnt;");
+            #endregion
+
+            var multi = await db.QueryMultipleAsync(sb.ToString(), parameters, ct, _logger);
+
+            var result = new ListResult<GetEghisBannersResult>();
+
+            result.Items = (await multi.ReadAsync<GetEghisBannersResult>()).ToList();
+            result.TotalCount = await multi.ReadSingleAsync<int>();
 
             return result;
         }

@@ -123,6 +123,20 @@ namespace Hello100Admin.API.Controllers
 
             return result.ToActionResult(this);
         }
+
+        /// <summary>
+        /// [전체 관리자] 광고관리 > 이지스배너광고 > 조회
+        /// </summary>
+        [HttpGet("eghis-banners")]
+        [ProducesResponseType(typeof(ApiResponse<ListResult<GetEghisBannersResult>>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetEghisBanners(CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("GET /api/advertisement/eghis-banners [{AId}]", Aid);
+
+            var result = await _mediator.Send(new GetEghisBannersQuery(), cancellationToken);
+
+            return result.ToActionResult(this);
+        }
         #endregion
 
         #region INTERNAL METHOD AREA **********************************************

@@ -17,6 +17,8 @@ using Hello100Admin.Modules.Auth.Application.Features.Auth.Responses.SendAuthNum
 using Hello100Admin.Modules.Auth.Application.Features.Auth.Responses.Login;
 using Hello100Admin.Modules.Auth.Application.Features.Auth.Responses.Refresh;
 using Hello100Admin.Modules.Auth.Application.Features.Auth.Responses.GetUser;
+using Hello100Admin.API.Constracts.Auth;
+using Mapster;
 
 namespace Hello100Admin.API.Controllers;
 
@@ -42,7 +44,7 @@ public class AuthController : BaseController
     [AllowAnonymous]
     [ProducesResponseType(typeof(ApiResponse<LoginCheckResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Login([FromBody] LoginCheckCommand command)
+    public async Task<IActionResult> Login([FromBody] LoginCheckCommand command, CancellationToken ct)
     {
         _logger.LogInformation("Login Check attempt for AccountId: {AccId} from IP: {IpAddress}",
             command.AccountId, GetClientIpAddress());
@@ -55,7 +57,7 @@ public class AuthController : BaseController
 
         var commandWithIp = command with { UserAgent = userAgent, IpAddress = ipAddress };
 
-        var result = await _mediator.Send(commandWithIp);
+        var result = await _mediator.Send(commandWithIp, ct);
 
         _logger.LogInformation("User {AccountId} logged in process completed", command.AccountId);
 
@@ -70,11 +72,11 @@ public class AuthController : BaseController
     [AllowAnonymous]
     [ProducesResponseType(typeof(ApiResponse<SendAuthNumberResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> SendAuthNumberToEmail(SendAuthNumberToEmailCommand command)
+    public async Task<IActionResult> SendAuthNumberToEmail(SendAuthNumberToEmailCommand command, CancellationToken ct)
     {
         _logger.LogInformation("Send Auth Number To Email.");
 
-        var result = await _mediator.Send(command);
+        var result = await _mediator.Send(command, ct);
 
         _logger.LogInformation("Send Auth Number To Email logged in process completed");
 
@@ -88,11 +90,11 @@ public class AuthController : BaseController
     [AllowAnonymous]
     [ProducesResponseType(typeof(ApiResponse<SendAuthNumberResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> SendAuthNumberToSms(SendAuthNumberToSmsCommand command)
+    public async Task<IActionResult> SendAuthNumberToSms(SendAuthNumberToSmsCommand command, CancellationToken ct)
     {
         _logger.LogInformation("Send Auth Number To Sms.");
 
-        var result = await _mediator.Send(command);
+        var result = await _mediator.Send(command, ct);
 
         _logger.LogInformation("Send Auth Number To Sms logged in process completed");
 
@@ -106,11 +108,11 @@ public class AuthController : BaseController
     [AllowAnonymous]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> VerifyAuthNumber(VerifyAuthNumberCommand command)
+    public async Task<IActionResult> VerifyAuthNumber(VerifyAuthNumberCommand command, CancellationToken ct)
     {
         _logger.LogInformation("Verify Auth Number.");
 
-        var result = await _mediator.Send(command);
+        var result = await _mediator.Send(command, ct);
 
         _logger.LogInformation("Verify Auth Number logged in process completed");
 
@@ -124,24 +126,20 @@ public class AuthController : BaseController
     [AllowAnonymous]
     [ProducesResponseType(typeof(ApiResponse<LoginResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Login([FromBody] LoginCommand command)
+    public async Task<IActionResult> Login([FromBody] LoginRequest req, CancellationToken ct)
     {
-        _logger.LogInformation("Login attempt for AccountId: {AccId} from IP: {IpAddress}",
-            command.AccountId, GetClientIpAddress());
+        _logger.LogInformation("Login attempt for AccountId: {AccId} from IP: {IpAddress}", req.AccountId, base.ClientIpAddress);
 
-        // 클라이언트 UserAgent 추출
-        var userAgent = GetClientUserAgent();
+        var command = req.Adapt<LoginCommand>() with 
+        { 
+            UserAgent = base.UserAgent, 
+            IpAddress = base.ClientIpAddress
+        };
 
-        // 클라이언트 IP 추출
-        var ipAddress = GetClientIpAddress();
+        var result = await _mediator.Send(command, ct);
 
-        var commandWithIp = command with { UserAgent = userAgent, IpAddress = ipAddress };
+        _logger.LogInformation("User {AccountId} logged in process completed", req.AccountId);
 
-        var result = await _mediator.Send(commandWithIp);
-
-        _logger.LogInformation("User {AccountId} logged in process completed", command.AccountId);
-
-        // 중앙화된 매퍼 사용: 성공/실패 모두 ToActionResult에서 처리합니다.
         return result.ToActionResult(this, authEndpoint: true);
     }
 
@@ -152,19 +150,11 @@ public class AuthController : BaseController
     [Auth]
     [ProducesResponseType(typeof(ApiResponse<RefreshResponse>), StatusCodes.Status200OK)]
     //[ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Refresh([FromBody] RefreshCommand command)
+    public async Task<IActionResult> Refresh(CancellationToken ct)
     {
         _logger.LogInformation("Refresh attempt");
 
-        // 클라이언트 UserAgent 추출
-        var userAgent = GetClientUserAgent();
-
-        // 클라이언트 IP 추출
-        var ipAddress = GetClientIpAddress();
-
-        var commandWithIp = command with { Aid = base.Aid, UserAgent = userAgent, IpAddress = ipAddress };
-
-        var result = await _mediator.Send(commandWithIp);
+        var result = await _mediator.Send(new RefreshCommand(base.Aid, base.UserAgent, base.ClientIpAddress), ct);
 
         return result.ToActionResult(this);
     }
@@ -176,12 +166,12 @@ public class AuthController : BaseController
     [Auth]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Logout([FromBody] LogoutCommand command)
+    public async Task<IActionResult> Logout([FromBody] LogoutCommand command, CancellationToken ct)
     {
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         _logger.LogInformation("Logout attempt for UserId: {UserId}", userId);
 
-        var result = await _mediator.Send(command);
+        var result = await _mediator.Send(command, ct);
 
         // 이제 Logout 핸들러는 Result<string>을 반환하므로
         // 제네릭 ToActionResult 경로로 통일하여 성공/실패를 중앙에서 처리합니다.
@@ -195,7 +185,7 @@ public class AuthController : BaseController
     [Auth]
     [ProducesResponseType(typeof(ApiResponse<UserResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> GetMe()
+    public async Task<IActionResult> GetMe(CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(base.Aid) == true)
         {
@@ -203,7 +193,7 @@ public class AuthController : BaseController
         }
 
         var query = new GetUserQuery { Aid = base.Aid };
-        var result = await _mediator.Send(query);
+        var result = await _mediator.Send(query, ct);
 
         // 제네릭 Result<UserDto> 경로는 ToActionResult에서 성공/실패를 모두 처리합니다.
         return result.ToActionResult(this);

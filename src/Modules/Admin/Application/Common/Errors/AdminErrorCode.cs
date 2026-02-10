@@ -74,5 +74,9 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Errors
         UpsertDeviceSettingFailed = 4032,
         [Description("저장 또는 수정에 필요한 데이터가 없습니다. 다시 시도해주세요.")]
         NoDataToUpsert = 4033,
+        [Description("등록된 태블릿이 없습니다. 확인 후 다시 시도해주세요.")]
+        TabletNotRegistered = 4034,
+        [Description("등록된 키오스크가 없습니다. 확인 후 다시 시도해주세요.")]
+        KioskNotRegistered = 4035,
     }
 }
