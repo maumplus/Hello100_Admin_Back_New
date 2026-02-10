@@ -16,8 +16,6 @@ namespace Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Commands
             RuleFor(x => x.DoctTel)
                 .Must(x => !string.IsNullOrWhiteSpace(x)).WithMessage("휴대 전화번호를 입력해주세요.")
                 .MaximumLength(20).WithMessage("휴대 전화번호는 최대 20자까지 입력 가능합니다.");
-            RuleFor(x => x.TmpType)
-                .NotNull().WithMessage("신청 유형은 필수입니다.");
         }
     }
 }

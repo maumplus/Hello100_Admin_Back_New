@@ -15,6 +15,6 @@
         /// <summary>
         /// 신청 유형 ["": 알림톡 발송 서비스 신청(진료접수), "KakaoJoinTestResult": 알림톡 발송 서비스 신청(검사결과)]
         /// </summary>
-        public required string TmpType { get; init; }
+        public string? TmpType { get; init; } = "";
     }
 }

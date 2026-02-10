@@ -66,9 +66,9 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
 
                 var kakaoMsgInfo = await _bizSiteApiClientService.PostKakaoMessageInfoAsync(req.HospNo, ct);
 
-                result.SendYn = kakaoMsgInfo.ResultData.SendYn != "Y" ? "N" : "Y";
-                result.SendStartYmd = kakaoMsgInfo.ResultData.SendStartYmd;
-                result.SendEndYmd = kakaoMsgInfo.ResultData.SendEndYmd;
+                result.SendYn = kakaoMsgInfo.ResultData?.SendYn != "Y" ? "N" : "Y";
+                result.SendStartYmd = kakaoMsgInfo.ResultData?.SendStartYmd;
+                result.SendEndYmd = kakaoMsgInfo.ResultData?.SendEndYmd;
 
                 var kakaoMsgExamInfo = await _bizSiteApiClientService.PostKakaoMessageExamiantionInfoAsync(req.HospNo, ct);
 

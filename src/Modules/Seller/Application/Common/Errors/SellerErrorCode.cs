@@ -39,6 +39,8 @@ namespace Hello100Admin.Modules.Seller.Application.Common.Errors
         [Description("병원 판매자 계좌 활성화/비활성화 처리 간 에러가 발생하였습니다. 관리자에게 문의하거나 다시 시도해주세요.")]
         UpdateSellerRemitEnabledFailedError = 2015,
         [Description("은행 이미지 정보가 존재하지 않습니다.")]
-        NotFoundBankList = 2016
+        NotFoundBankList = 2016,
+        [Description("비밀번호 해시 생성 중 오류가 발생했습니다.")]
+        PasswordHashGenerationError = 2017
     }
 }

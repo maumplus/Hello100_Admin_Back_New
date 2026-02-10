@@ -1,5 +1,6 @@
 ﻿using System.Net.Http.Json;
 using Hello100Admin.Integration.Shared;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace Seller.API.IntegrationTests
 {
@@ -44,9 +45,8 @@ namespace Seller.API.IntegrationTests
             {
                 PageNo = 1,
                 PageSize = 20,
-                SearchText = "",
-                IsSync = "",
-                Enabled = true
+                SearchText = default(string),
+                IsSync = ""
             };
 
             _client.AsSuperAdmin("B81AFBD0", "대민테스트");
@@ -112,6 +112,7 @@ namespace Seller.API.IntegrationTests
             var req = new
             {
                 Id = 80,
+                Password = "qwer1234",
                 Etc = "TestData",
             };
 
@@ -247,6 +248,26 @@ namespace Seller.API.IntegrationTests
             var response = await _client.GetAsync($"/api/bank/list");
 
             // Body
+            var body = await response.Content.ReadAsStringAsync();
+
+            // Assert
+            Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+        }
+
+
+        [Fact]
+        public async Task GetHospitals_ShouldReturnOk_WhenValidCredentials()
+        {
+            var query = new Dictionary<string, string?>
+            {
+                ["searchText"] = "1",
+            };
+
+            var url = QueryHelpers.AddQueryString("/api/seller/hospital-list", query);
+
+            _client.AsSuperAdmin("B81AFBD0", "대민테스트");
+
+            var response = await _client.GetAsync(url);
             var body = await response.Content.ReadAsStringAsync();
 
             // Assert

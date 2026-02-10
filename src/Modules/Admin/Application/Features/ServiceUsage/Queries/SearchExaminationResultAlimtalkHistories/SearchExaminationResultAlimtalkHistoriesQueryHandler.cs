@@ -30,7 +30,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Queries.
 
         public async Task<Result<SearchExaminationResultAlimtalkHistoriesResponse>> Handle(SearchExaminationResultAlimtalkHistoriesQuery req, CancellationToken token)
         {
-            _logger.LogInformation("Process SearchDiagnosticTestResultAlimtalkSendHistoriesQuery() started.");
+            _logger.LogInformation("Process SearchExaminationResultAlimtalkHistoriesQuery() started.");
             var result = await _serviceUsageStore.SearchExaminationResultAlimtalkHistoriesAsync(req, token);
 
             var resultList = result.List;
@@ -45,7 +45,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Queries.
 
             var bizResult = await _bizApiClientService.SendHistoryAsync(kakaoBizRequest, token);
 
-            if (bizResult != null && bizResult.ResultCd == 0 && bizResult.ResultData.ListCount > 0)
+            if (bizResult != null && bizResult.ResultCd == 0 && bizResult.ResultData?.ListCount > 0)
             {
                 var joinedItems = resultList.Join(
                     bizResult.ResultData.List,

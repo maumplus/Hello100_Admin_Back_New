@@ -3,5 +3,5 @@ using Hello100Admin.Modules.Seller.Application.Features.Seller.Responses.UpdateS
 
 namespace Hello100Admin.Modules.Seller.Application.Features.Seller.Commands.UpdateSellerRemit
 {
-    public record UpdateSellerRemitCommand(int Id, string? Etc) : ICommand<Result<UpdateSellerRemitResponse>>;
+    public record UpdateSellerRemitCommand(int Id, string AId, string Password, string? Etc) : ICommand<Result<UpdateSellerRemitResponse>>;
 }

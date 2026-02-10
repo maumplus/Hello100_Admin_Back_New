@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Dapper;
 using Hello100Admin.Modules.Seller.Application.Common.Abstractions.Persistence.Seller;
 using Hello100Admin.Modules.Seller.Application.Features.Seller.Queries.GetSellerList;
 using Hello100Admin.Modules.Seller.Application.Features.Seller.Queries.GetSellerRemitList;
@@ -9,6 +10,8 @@ using Hello100Admin.Modules.Seller.Application.Features.Seller.ReadModels.GetSel
 using Hello100Admin.Modules.Seller.Application.Features.Seller.ReadModels.GetSellerRemitList;
 using Hello100Admin.Modules.Seller.Application.Features.Seller.ReadModels.GetSellerRemitWaitList;
 using Hello100Admin.Modules.Seller.Application.Features.Seller.ReadModels.UpdateSellerRemit;
+using Hello100Admin.Modules.Seller.Application.Features.Seller.Results;
+using Hello100Admin.Modules.Seller.Domain.Entities;
 using Hello100Admin.Modules.Seller.Infrastructure.Persistence.DbModels.Seller;
 using Mapster;
 using Microsoft.Extensions.Logging;
@@ -111,10 +114,10 @@ namespace Hello100Admin.Modules.Seller.Infrastructure.Repositories.Seller
                 int offset = (req.PageNo - 1) * req.PageSize;
 
                 var parameters = new DynamicParameters();
-                parameters.Add("SearchText", req.SearchText, DbType.String);
+                parameters.Add("SearchText", req.SearchText ?? "", DbType.String);
                 parameters.Add("PageSize", req.PageSize, DbType.Int32);
                 parameters.Add("Offset", offset, DbType.Int32);
-                parameters.Add("Enabled", req.Enabled ? "1" : "0", DbType.String);
+                parameters.Add("Enabled", "1", DbType.String);
 
                 string whereSql = string.Empty;
 
@@ -454,6 +457,71 @@ namespace Hello100Admin.Modules.Seller.Infrastructure.Repositories.Seller
                 _logger.LogError(ex, "Error GetSellerRemitWaitListAsync() 송금 요청(대기) 리스트 조회 시 오류");
                 return new List<GetSellerRemitWaitListReadModel>();
             }
+        }
+
+        public async Task<List<GetHospitalsResult>> GetHospitalsAsync(DbSession db, string searchText, CancellationToken ct = default)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@SearchText", searchText, DbType.String);
+
+            string query = @"
+                SELECT tehi.hosp_key as hospKey,
+                       tehi.hosp_no as hospNo,
+                       thi.name as hospName,
+                       tehi.business_no as businessNo,
+                       tehi.chart_type as chartType,
+                       tehi.business_level as businessLevel,
+                       thi.addr as hospAddr,
+                       thi.post_cd as hospPostCd,
+                       thi.tel as hospTel
+                  FROM tb_eghis_hosp_info tehi
+                 INNER JOIN tb_hospital_info thi 
+                         ON thi.hosp_key = tehi.hosp_key
+                 WHERE EXISTS ( SELECT NULL
+                                  FROM tb_eghis_doct_untact_join teduj
+                                 WHERE teduj.hosp_key = tehi.hosp_key
+                                   AND teduj.join_state = '02' )
+                          AND ( thi.name LIKE CONCAT('%', @searchText, '%')
+                             OR tehi.hosp_no LIKE CONCAT('%', @searchText, '%') )
+            ";
+
+            var result = (await db.QueryAsync<GetHospitalsResult>(query, parameters, ct, _logger)).ToList();
+
+            return result;
+        }
+
+        public async Task<TbAdminEntity?> GetAdminByAIdAsync(DbSession db, string aId, CancellationToken ct = default)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@AId", aId, DbType.String);
+
+            var query = @"
+                SELECT a.aid                                                                AS AId,
+                       a.acc_id                                                             AS AccId,
+                       a.acc_pwd                                                            AS AccPwd,
+                       a.hosp_no                                                            AS HospNo,
+                       b.hosp_key                                                           AS HospKey,
+                       a.grade                                                              AS Grade,
+                       a.name                                                               AS Name,
+                       a.tel                                                                AS Tel,
+                       a.email                                                              AS Email,
+                       a.last_login_dt                                                      AS LastLoginDt,
+                       a.use_2fa                                                            AS Use2fa,
+                       a.account_locked                                                     AS AccountLocked,
+                       a.login_fail_count                                                   AS LoginFailCount,
+                       a.access_token                                                       AS AccessToken,
+                       a.refresh_token                                                      AS RefresgToken
+                  FROM tb_admin a
+                  LEFT JOIN tb_eghis_hosp_info b
+                         ON a.hosp_no = b.hosp_no
+                 WHERE a.aid = @AId
+                   AND a.del_yn = 'N'
+                 LIMIT 1
+            ";
+
+            var result = await db.QueryFirstOrDefaultAsync<TbAdminEntity>(query, parameters, ct, _logger);
+
+            return result;
         }
         #endregion
     }

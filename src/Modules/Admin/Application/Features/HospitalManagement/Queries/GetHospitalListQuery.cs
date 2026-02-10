@@ -5,6 +5,7 @@ using Hello100Admin.Modules.Admin.Application.Features.AdminUser.Responses.Share
 using Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Results;
 using Mapster;
 using MediatR;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Queries
@@ -20,13 +21,16 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
 
     public class GetHospitalListQueryHandler : IRequestHandler<GetHospitalListQuery, Result<PagedResult<GetHospitalResult>>>
     {
+        private readonly string _adminImageUrl;
         private readonly IHospitalManagementStore _hospitalStore;
         private readonly ILogger<GetHospitalListQueryHandler> _logger;
 
         public GetHospitalListQueryHandler(
-        IHospitalManagementStore hospitalStore,
-        ILogger<GetHospitalListQueryHandler> logger)
+            IConfiguration config,
+            IHospitalManagementStore hospitalStore,
+            ILogger<GetHospitalListQueryHandler> logger)
         {
+            _adminImageUrl = config["AdminImageUrl"] ?? string.Empty;
             _hospitalStore = hospitalStore;
             _logger = logger;
         }
@@ -43,6 +47,14 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
                 hospital.Images = await _hospitalStore.GetImageListAsync(hospital.HospKey, cancellationToken);
                 hospital.ClinicTimesNew = await _hospitalStore.GetHospMedicalTimeNewListAsync(hospital.HospKey, cancellationToken);
                 hospital.KeywordMasters = await _hospitalStore.GetKeywordMasterListAsync(hospital.HospKey, cancellationToken);
+
+                if (hospital.Images != null && hospital.Images.Count > 0)
+                {
+                    foreach (var img in hospital.Images)
+                    {
+                        img.Url = $"{_adminImageUrl}{img.Url}";
+                    }
+                }
             }
 
             var dtos = hospitalList.Adapt<List<GetHospitalResult>>();

@@ -21,10 +21,5 @@
         /// 연동여부
         /// </summary>
         public string? IsSync { get; init; }
-
-        /// <summary>
-        /// 활성여부
-        /// </summary>
-        public bool Enabled { get; init; }
     }
 }

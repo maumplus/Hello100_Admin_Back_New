@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Text;
 using Hello100Admin.BuildingBlocks.Common.Errors;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.External;
 using Hello100Admin.Modules.Admin.Application.Common.Definitions.Enums;
@@ -392,12 +393,18 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.External.Sftp
 
         private static string SanitizeFileName(string name)
         {
-            if (string.IsNullOrWhiteSpace(name)) return "file";
+            if (string.IsNullOrWhiteSpace(name))
+                return "file";
+
+            name = name.Normalize(NormalizationForm.FormC);
 
             foreach (var c in Path.GetInvalidFileNameChars())
                 name = name.Replace(c, '_');
 
-            return name.Trim();
+            name = name.Replace(" ", "_");
+            name = name.Trim().TrimEnd('.');
+
+            return name;
         }
         #endregion
     }

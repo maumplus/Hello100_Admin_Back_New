@@ -49,6 +49,10 @@
         /// <summary>
         /// 이미지 URL
         /// </summary>
+        public int ImgId { get; set; }
+        /// <summary>
+        /// 이미지 URL
+        /// </summary>
         public string? ImgUrl { get; set; }
         /// <summary>
         /// 기간설정시작일자 (yyyy-mm-dd)

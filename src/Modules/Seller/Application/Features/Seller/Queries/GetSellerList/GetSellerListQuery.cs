@@ -9,7 +9,6 @@ namespace Hello100Admin.Modules.Seller.Application.Features.Seller.Queries.GetSe
         int PageNo, 
         int PageSize, 
         string? SearchText, 
-        string? IsSync, 
-        bool Enabled
+        string? IsSync
     ) : IQuery<Result<PagedResult<GetSellerListResponse>>>;
 }
