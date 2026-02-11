@@ -84,7 +84,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Advertisement
             return result;
         }
 
-        public async Task<GetPopupResult> GetPopupAsync(DbSession db, int popupId, CancellationToken ct)
+        public async Task<GetPopupResult> GetAdvertisementAsync(DbSession db, int popupId, CancellationToken ct)
         {
             var parameters = new DynamicParameters();
             parameters.Add("AdId", popupId, DbType.Int32);
@@ -120,7 +120,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Advertisement
             var result = await db.QueryFirstOrDefaultAsync<GetPopupResult>(sb.ToString(), parameters, ct, _logger);
 
             if (result == null)
-                throw new BizException(AdminErrorCode.PopupAdvertisementNotFound.ToError());
+                throw new BizException(AdminErrorCode.AdvertisementNotFound.ToError());
 
             return result;
         }

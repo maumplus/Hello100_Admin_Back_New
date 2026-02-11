@@ -1,4 +1,5 @@
-﻿using Hello100Admin.BuildingBlocks.Common.Errors;
+﻿using System.Net.Http.Json;
+using Hello100Admin.BuildingBlocks.Common.Errors;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Serialization;
 using Hello100Admin.Integration.Shared;
 using Microsoft.AspNetCore.WebUtilities;
@@ -72,6 +73,39 @@ namespace AdminUser.API.IntegrationTests
 
             var bodyKor = body.FromJson<ApiResponse>();
 
+            Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task BulkUpdateEghisBanners_ShouldReturnOk_WhenValidCredentials()
+        {
+            var req = new[]
+            {
+                new { AdId = 131, SortNo = 1, ShowYn = "N" },
+                new { AdId = 46, SortNo = 2, ShowYn = "N" },
+                new { AdId = 54, SortNo = 3, ShowYn = "N" },
+                new { AdId = 161, SortNo = 4, ShowYn = "N" },
+                new { AdId = 40, SortNo = 5, ShowYn = "N" },
+                new { AdId = 74, SortNo = 6, ShowYn = "N" },
+                new { AdId = 48, SortNo = 7, ShowYn = "N" },
+                new { AdId = 162, SortNo = 8, ShowYn = "N" },
+                new { AdId = 32, SortNo = 9, ShowYn = "N" },
+                new { AdId = 31, SortNo = 10, ShowYn = "N" },
+                new { AdId = 163, SortNo = 11, ShowYn = "N" },
+                new { AdId = 77, SortNo = 12, ShowYn = "N" },
+                new { AdId = 112, SortNo = 13, ShowYn = "N" }
+            };
+
+            // Arrange
+            _client.AsMySuperAdmin("B81AFBD0", "대민테스트", "10350033", "MmM4ZjA4NzJjYmI1YjkxOTAxNzczZmFlOTk0OGYxZmIxZTgyNDEwODhiOWE5MDllNmVkNjk5YTcxOGY0ZjUyNQ==");
+
+            // Act
+            var response = await _client.PutAsJsonAsync($"/api/advertisement/eghis-banners/bulk", req);
+
+            // Body
+            var body = await response.Content.ReadAsStringAsync();
+
+            // Assert
             Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
         }
     }

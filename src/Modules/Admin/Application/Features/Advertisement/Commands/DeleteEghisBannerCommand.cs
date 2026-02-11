@@ -8,36 +8,31 @@ using Hello100Admin.Modules.Admin.Application.Common.Definitions.Enums;
 using Hello100Admin.Modules.Admin.Domain.Entities;
 using Hello100Admin.Modules.Admin.Domain.Repositories;
 using MediatR;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace Hello100Admin.Modules.Admin.Application.Features.Advertisement.Commands
 {
-    /// <summary>
-    /// 팝업 광고 삭제 Command
-    /// </summary>
-    /// <param name="AdId">광고 ID</param>
-    public record DeletePopupCommand(int AdId) : IQuery<Result>;
+    public record DeleteEghisBannerCommand(int AdId) : IQuery<Result>;
 
-    public class DeletePopupCommandValidator : AbstractValidator<DeletePopupCommand>
+    public class DeleteEghisBannerCommandValidator : AbstractValidator<DeleteEghisBannerCommand>
     {
-        public DeletePopupCommandValidator()
+        public DeleteEghisBannerCommandValidator() 
         {
             RuleFor(x => x.AdId)
-                .NotNull().GreaterThan(0).WithMessage("유효한 광고 ID를 입력해주세요.");
+                .NotNull().GreaterThan(0).WithMessage("광고 ID는 필수이며 0보다 커야 합니다.");
         }
     }
-
-    public class DeletePopupCommandHandler : IRequestHandler<DeletePopupCommand, Result>
+    
+    public class DeleteEghisBannerCommandHandler : IRequestHandler<DeleteEghisBannerCommand, Result>
     {
-        private readonly ILogger<DeletePopupCommandHandler> _logger;
+        private readonly ILogger<DeleteEghisBannerCommandHandler> _logger;
         private readonly IAdvertisementStore _advertisementStore;
         private readonly IAdvertisementRepository _advertisementRepository;
         private readonly ISftpClientService _sftpClientService;
         private readonly IDbSessionRunner _db;
 
-        public DeletePopupCommandHandler(ILogger<DeletePopupCommandHandler> logger, 
-                                         IAdvertisementStore advertisementStore, 
+        public DeleteEghisBannerCommandHandler(ILogger<DeleteEghisBannerCommandHandler> logger,
+                                         IAdvertisementStore advertisementStore,
                                          IAdvertisementRepository advertisementRepository,
                                          ISftpClientService sftpClientService,
                                          IDbSessionRunner db)
@@ -49,25 +44,27 @@ namespace Hello100Admin.Modules.Admin.Application.Features.Advertisement.Command
             _db = db;
         }
 
-        public async Task<Result> Handle(DeletePopupCommand req, CancellationToken ct)
+        public async Task<Result> Handle(DeleteEghisBannerCommand req, CancellationToken ct)
         {
-            _logger.LogInformation("DeletePopupCommandHandler Handle Start [{AdId}]", req.AdId);
+            _logger.LogInformation("DeleteEghisBannerCommandHandler Handle Start [{AdId}]", req.AdId);
 
-            var popupInfo = await _db.RunAsync(DataSource.Hello100,
+            var bannerInfo = await _db.RunAsync(DataSource.Hello100,
                 (session, token) => _advertisementStore.GetAdvertisementAsync(session, req.AdId, token),
                 ct);
 
             var adEntity = new TbAdInfoEntity
             {
                 AdId = req.AdId,
-                AdType = ImageUploadType.PO.ToString()
+                AdType = ImageUploadType.BA.ToString()
             };
 
             await _db.RunAsync(DataSource.Hello100,
                 (session, token) => _advertisementRepository.DeleteAdvertisementAsync(session, adEntity, token),
                 ct);
 
-            await _sftpClientService.DeleteFileAsync(popupInfo.ImgUrl, ct);
+            await _sftpClientService.DeleteFileAsync(bannerInfo.ImgUrl, ct);
+
+            // 다른 애들 정렬 순서는??
 
             return Result.Success();
         }

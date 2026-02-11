@@ -50,12 +50,12 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Errors
         CreateDirectoryFailed = 4020,
         [Description("파일 스트림 읽기에 실패하였습니다. 확인 후 다시 시도해주세요.")]
         NotFoundFileStream = 4021,
-        [Description("팝업 광고 등록에 실패하였습니다. 다시 시도해주세요.")]
-        CreatePopupAdvertisementFailed = 4022,
+        [Description("광고 등록에 실패하였습니다. 다시 시도해주세요.")]
+        CreateAdvertisementFailed = 4022,
         [Description("팝업 광고 갱신에 실패하였습니다. 다시 시도해주세요.")]
         UpdatePopupAdvertisementFailed = 4023,
-        [Description("팝업 광고가 존재하지 않습니다. 확인 후 다시 시도해주세요.")]
-        PopupAdvertisementNotFound = 4024,
+        [Description("광고가 존재하지 않습니다. 확인 후 다시 시도해주세요.")]
+        AdvertisementNotFound = 4024,
         [Description("광고 삭제에 실패하였습니다. 다시 시도해주세요.")]
         DeleteAdvertisementFailed = 4025,
         [Description("SFTP 서버 연결에 실패하였습니다. 다시 시도해주세요.")]
@@ -78,5 +78,9 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Errors
         TabletNotRegistered = 4034,
         [Description("등록된 키오스크가 없습니다. 확인 후 다시 시도해주세요.")]
         KioskNotRegistered = 4035,
+        [Description("이지스 배너 광고 순번 및 노출 여부 수정에 실패하였습니다. 다시 시도해주세요.")]
+        EghisBannerBulkUpdateFailed = 4036,
+        [Description("이지스 배너 광고 갱신에 실패하였습니다. 다시 시도해주세요.")]
+        UpdateEghisBannerAdvertisementFailed = 4037,
     }
 }
