@@ -1,0 +1,30 @@
+﻿namespace Hello100Admin.Modules.Admin.Application.Features.Notice.Results
+{
+    public sealed class GetNoticesResult
+    {
+        /// <summary>
+        /// 행번호
+        /// </summary>
+        public int RowNum { get; set; }
+        /// <summary>
+        /// 제목
+        /// </summary>
+        public string Title { get; set; } = default!;
+        /// <summary>
+        /// 송신 타입 [A: 안드로이드, I: 아이폰, 0: 전체]
+        /// </summary>
+        public string SendType { get; set; } = default!;
+        /// <summary>
+        /// 노출여부
+        /// </summary>
+        public string ShowYn { get; set; } = default!;
+        /// <summary>
+        /// 수정일자
+        /// </summary>
+        public string? ModDt { get; set; }
+        /// <summary>
+        /// 등록일자
+        /// </summary>
+        public string RegDt { get; set; } = default!;
+    }
+}
