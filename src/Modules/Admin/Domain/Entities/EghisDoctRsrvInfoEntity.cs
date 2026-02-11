@@ -18,8 +18,8 @@ namespace Hello100Admin.Modules.Admin.Domain.Entities
         public string RegDt { get; set; }
         public int UntactRsrvIntervalTime { get; set; }
         public int UntactRsrvIntervalCnt { get; set; }
-        public string UntactRsrvIntervalStartTime { get; set; }
-        public string UntactRsrvIntervalEndTime { get; set; }
-        public string UntactRsrvIntervalUseYn { get; set; }
+        public string UntactAvaStartTime { get; set; }
+        public string UntactAvaEndTime { get; set; }
+        public string UntactAvaUseYn { get; set; }
     }
 }

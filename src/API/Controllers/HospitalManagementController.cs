@@ -545,6 +545,81 @@ namespace Hello100Admin.API.Controllers
             return result.ToActionResult(this);
         }
 
+        /// <summary>
+        /// [병원정보관리 > 의료진관리 > 주간 스케쥴 관리]예약 저장 API
+        /// </summary>
+        [HttpPatch("doctor/weeks-schedule/reservation")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> PatchDoctorWeeksReservation(PatchDoctorWeeksReservationRequest request, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("PATCH /api/hospital-management/doctor/weeks-schedule/reservation");
+
+            var command = new PatchDoctorWeeksReservationCommand()
+            {
+                HospNo = base.HospNo,
+                EmplNo = request.EmplNo,
+                WeekNum = request.WeekNum,
+                RsrvIntervalTime = request.RsrvIntervalTime,
+                RsrvIntervalCnt = request.RsrvIntervalCnt,
+                EghisDoctRsrvDetailInfoList = request.EghisDoctRsrvDetailInfoList
+            };
+
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [병원정보관리 > 의료진관리 > 지정 스케쥴 관리]예약 저장 API
+        /// </summary>
+        [HttpPatch("doctor/days-schedule/reservation")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> PatchDoctorDaysReservation(PatchDoctorDaysReservationRequest request, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("PATCH /api/hospital-management/doctor/days-schedule/reservation");
+
+            var command = new PatchDoctorDaysReservationCommand()
+            {
+                HospNo = base.HospNo,
+                EmplNo = request.EmplNo,
+                ClinicYmd = request.ClinicYmd,
+                RsrvIntervalTime = request.RsrvIntervalTime,
+                RsrvIntervalCnt = request.RsrvIntervalCnt,
+                EghisDoctRsrvDetailInfoList = request.EghisDoctRsrvDetailInfoList
+            };
+
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [병원정보관리 > 의료진관리 > 비대면 스케쥴 관리]예약 저장 API
+        /// </summary>
+        [HttpPatch("doctor/untact-weeks-schedule/reservation")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> PatchDoctorUntactWeeksScheduleReservation(PatchDoctorUntactWeeksReservationRequest request, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("PATCH /api/hospital-management/doctor/untact-weeks-schedule/reservation");
+
+            var command = new PatchDoctorUntactWeeksReservationCommand()
+            {
+                HospNo = base.HospNo,
+                EmplNo = request.EmplNo,
+                WeekNum = request.WeekNum,
+                UntactRsrvIntervalTime = request.UntactRsrvIntervalTime,
+                UntactRsrvIntervalCnt = request.UntactRsrvIntervalCnt,
+                EghisDoctRsrvDetailInfoList = request.EghisDoctRsrvDetailInfoList
+            };
+
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
         #region INTERNAL METHOD AREA ********************************************
         private List<FileUploadPayload>? GetImagePayload(List<IFormFile>? images)
         {

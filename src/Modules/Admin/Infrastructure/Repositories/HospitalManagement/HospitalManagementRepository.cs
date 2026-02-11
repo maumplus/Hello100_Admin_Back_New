@@ -465,52 +465,40 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             return await db.ExecuteAsync(query, parameters, ct, _logger);
         }
 
-        public async Task<int> RemoveEghisDoctRsrvAsync(DbSession db, EghisDoctRsrvInfoEntity eghisDoctRsrvInfoEntity, CancellationToken ct)
+        public async Task<int> RemoveEghisDoctRsrvAsync(DbSession db, int ridx, CancellationToken ct)
         {
             DynamicParameters parameters = new DynamicParameters();
-            parameters.Add("Ridx", eghisDoctRsrvInfoEntity.Ridx, DbType.Int32);
+            parameters.Add("Ridx", ridx, DbType.Int32);
 
-            var query =$@"
+            var query = $@"
                 DELETE FROM hello100_api.eghis_doct_rsrv_detail_info
                       WHERE ridx = @Ridx
-                        AND IFNULL(recept_type, '') != 'NR';
-            
-                DELETE FROM hello100_api.eghis_doct_rsrv_info
-                      WHERE ridx = @Ridx
-                        AND IFNULL(recept_type, '') != 'NR';
+                        AND recept_type != 'NR';
             ";
 
             return await db.ExecuteAsync(query, parameters, ct, _logger);
         }
-
-        public async Task<int> InsertEghisDoctRsrvAsync(DbSession db, EghisDoctRsrvInfoEntity eghisDoctRsrvInfoEntity, CancellationToken ct)
+        
+        public async Task<int> RemoveEghisDoctRsrvAsync(DbSession db, EghisDoctRsrvInfoEntity eghisDoctRsrvInfoEntity, CancellationToken ct)
         {
             DynamicParameters parameters = new DynamicParameters();
             parameters.Add("HospNo", eghisDoctRsrvInfoEntity.HospNo, DbType.String);
             parameters.Add("EmplNo", eghisDoctRsrvInfoEntity.EmplNo, DbType.String);
-            parameters.Add("ClinicYmd", eghisDoctRsrvInfoEntity.ClinicYmd, DbType.String);
             parameters.Add("WeekNum", eghisDoctRsrvInfoEntity.WeekNum, DbType.Int32);
-            parameters.Add("RsrvIntervalTime", eghisDoctRsrvInfoEntity.RsrvIntervalTime, DbType.Int32);
-            parameters.Add("RsrvIntervalCnt", eghisDoctRsrvInfoEntity.RsrvIntervalCnt, DbType.Int32);
+            parameters.Add("ClinicYmd", eghisDoctRsrvInfoEntity.ClinicYmd, DbType.String);
 
-            var query = @"
-                INSERT INTO hello100_api.eghis_doct_rsrv_info
-                  (hosp_no, empl_no, clinic_ymd, week_num, rsrv_interval_time, rsrv_interval_cnt, reg_dt)
-                VALUES
-                  (@HospNo, @EmplNo, @ClinicYmd, @WeekNum, @RsrvIntervalTime, @RsrvIntervalCnt, NOW());
-                ON DUPLICATE KEY UPDATE
-                  rsrv_interval_time = VALUES(rsrv_interval_time),
-                  rsrv_interval_cnt = VALUES(RsrvIntervalCnt),
-                  reg_dt = VALUES(reg_dt);
-                SELECT IFNULL(MAX(rIdx), 0)
-                  FROM hello100_api.eghis_doct_rsrv_info
-                 WHERE hosp_no = @HospNo
-                   AND empl_no = @EmplNo
-                   AND clinic_ymd = @ClinicYmd
-                   AND week_num = @WeekNum;
+            var query =$@"
+                DELETE FROM hello100_api.eghis_doct_rsrv_detail_info
+                      WHERE ridx IN ( SELECT rIdx
+                                        FROM hello100_api.eghis_doct_rsrv_info
+                                       WHERE hosp_no = @HospNo
+                                         AND empl_no = @EmplNo
+                                         AND week_num = @WeekNum
+                                         AND clinic_ymd = @ClinicYmd )
+                        AND recept_type != 'NR';
             ";
 
-            return await db.ExecuteScalarAsync<int>(query, parameters, ct, _logger);
+            return await db.ExecuteAsync(query, parameters, ct, _logger);
         }
 
         public async Task<int> UpdateDoctorInfoScheduleAsync(DbSession db, List<EghisDoctInfoEntity> eghisDoctInfoList, CancellationToken ct)
@@ -760,6 +748,113 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             query = string.Join("\n", queries.ToArray());
 
             return await db.ExecuteAsync(query, parameters, ct, _logger);
+        }
+
+        public async Task<int> InsertEghisDoctRsrvAsync(DbSession db, EghisDoctRsrvInfoEntity eghisDoctRsrvInfoEntity, CancellationToken ct)
+        {
+            DynamicParameters parameters = new DynamicParameters();
+            parameters.Add("HospNo", eghisDoctRsrvInfoEntity.HospNo, DbType.String);
+            parameters.Add("EmplNo", eghisDoctRsrvInfoEntity.EmplNo, DbType.String);
+            parameters.Add("ClinicYmd", eghisDoctRsrvInfoEntity.ClinicYmd, DbType.String);
+            parameters.Add("WeekNum", eghisDoctRsrvInfoEntity.WeekNum, DbType.Int32);
+            parameters.Add("RsrvIntervalTime", eghisDoctRsrvInfoEntity.RsrvIntervalTime, DbType.Int32);
+            parameters.Add("RsrvIntervalCnt", eghisDoctRsrvInfoEntity.RsrvIntervalCnt, DbType.Int32);
+
+            var query = @"
+                INSERT INTO hello100_api.eghis_doct_rsrv_info
+                  (hosp_no, empl_no, clinic_ymd, week_num, rsrv_interval_time, rsrv_interval_cnt, reg_dt)
+                VALUES
+                  (@HospNo, @EmplNo, @ClinicYmd, @WeekNum, @RsrvIntervalTime, @RsrvIntervalCnt, NOW())
+                ON DUPLICATE KEY UPDATE
+                  rsrv_interval_time = VALUES(rsrv_interval_time),
+                  rsrv_interval_cnt = VALUES(RsrvIntervalCnt),
+                  reg_dt = VALUES(reg_dt);
+                SELECT IFNULL(MAX(rIdx), 0)
+                  FROM hello100_api.eghis_doct_rsrv_info
+                 WHERE hosp_no = @HospNo
+                   AND empl_no = @EmplNo
+                   AND clinic_ymd = @ClinicYmd
+                   AND week_num = @WeekNum;
+            ";
+
+            return await db.ExecuteScalarAsync<int>(query, parameters, ct, _logger);
+        }
+
+        public async Task<int> InsertEghisDoctUntactRsrvAsync(DbSession db, EghisDoctRsrvInfoEntity eghisDoctRsrvInfoEntity, CancellationToken ct)
+        {
+            DynamicParameters parameters = new DynamicParameters();
+            parameters.Add("HospNo", eghisDoctRsrvInfoEntity.HospNo, DbType.String);
+            parameters.Add("EmplNo", eghisDoctRsrvInfoEntity.EmplNo, DbType.String);
+            parameters.Add("ClinicYmd", eghisDoctRsrvInfoEntity.ClinicYmd, DbType.String);
+            parameters.Add("WeekNum", eghisDoctRsrvInfoEntity.WeekNum, DbType.Int32);
+            parameters.Add("RsrvIntervalTime", eghisDoctRsrvInfoEntity.RsrvIntervalTime, DbType.Int32);
+            parameters.Add("RsrvIntervalCnt", eghisDoctRsrvInfoEntity.RsrvIntervalCnt, DbType.Int32);
+            parameters.Add("UntactRsrvIntervalTime", eghisDoctRsrvInfoEntity.UntactRsrvIntervalTime, DbType.Int32);
+            parameters.Add("UntactRsrvIntervalCnt", eghisDoctRsrvInfoEntity.UntactRsrvIntervalCnt, DbType.Int32);
+            parameters.Add("UntactAvaStartTime", eghisDoctRsrvInfoEntity.UntactAvaStartTime, DbType.String);
+            parameters.Add("UntactAvaEndTime", eghisDoctRsrvInfoEntity.UntactAvaEndTime, DbType.String);
+            parameters.Add("UntactAvaUseYn", eghisDoctRsrvInfoEntity.UntactAvaUseYn, DbType.String);
+
+            var query = @"
+                INSERT INTO hello100_api.eghis_doct_rsrv_info
+                  ( hosp_no, empl_no, clinic_ymd, week_num, rsrv_interval_time, rsrv_interval_cnt, reg_dt,
+                    untact_rsrv_interval_time, untact_rsrv_interval_cnt, untact_ava_start_time, untact_ava_end_time, untact_ava_use_yn )
+                VALUES
+                  ( @HospNo, @EmplNo, @ClinicYmd, @WeekNum, @RsrvIntervalTime, @RsrvIntervalCnt, NOW(),
+                    @UntactRsrvIntervalTime, @UntactRsrvIntervalCnt, @UntactAvaStartTime, @UntactAvaEndTime, @UntactAvaUseYn )
+                ON DUPLICATE KEY UPDATE
+                  rsrv_interval_time = VALUES(rsrv_interval_time),
+                  rsrv_interval_cnt = VALUES(RsrvIntervalCnt),
+                  reg_dt = VALUES(reg_dt),
+                  untact_rsrv_interval_time = VALUES(untact_rsrv_interval_time),
+                  untact_rsrv_interval_cnt = VALUES(untact_rsrv_interval_cnt),
+                  untact_ava_start_time = VALUES(untact_ava_start_time),
+                  untact_ava_end_time = VALUES(untact_ava_end_time),
+                  untact_ava_use_yn = VALUES(untact_ava_use_yn);
+                SELECT IFNULL(MAX(rIdx), 0)
+                  FROM hello100_api.eghis_doct_rsrv_info
+                 WHERE hosp_no = @HospNo
+                   AND empl_no = @EmplNo
+                   AND clinic_ymd = @ClinicYmd
+                   AND week_num = @WeekNum;
+            ";
+
+            return await db.ExecuteScalarAsync<int>(query, parameters, ct, _logger);
+        }
+
+        public async Task<int> InsertEghisDoctRsrvDetailAsync(DbSession db, List<EghisDoctRsrvDetailInfoEntity> eghisDoctRsrvDetailInfoList, CancellationToken ct)
+        {
+            DynamicParameters parameters = new DynamicParameters();
+
+            var values = string.Empty;
+
+            for (int i = 0; i < eghisDoctRsrvDetailInfoList.Count; i++)
+            {
+                var eghisDoctRsrvDetailInfoEntity = eghisDoctRsrvDetailInfoList[i];
+
+                parameters.Add($"Ridx{i}", eghisDoctRsrvDetailInfoEntity.Ridx, DbType.String);
+                parameters.Add($"StartTime{i}", eghisDoctRsrvDetailInfoEntity.StartTime, DbType.String);
+                parameters.Add($"EndTime{i}", eghisDoctRsrvDetailInfoEntity.EndTime, DbType.String);
+                parameters.Add($"RsrvCnt{i}", eghisDoctRsrvDetailInfoEntity.RsrvCnt, DbType.Int32);
+                parameters.Add($"ComCnt{i}", eghisDoctRsrvDetailInfoEntity.ComCnt, DbType.Int32);
+                parameters.Add($"ReceptType{i}", eghisDoctRsrvDetailInfoEntity.ReceptType, DbType.Int32);
+
+                if (!string.IsNullOrEmpty(values))
+                {
+                    values += ", ";
+                }
+                
+                values += "( @Ridx{i}, @StartTime{i}, @EndTime{i}, @RsrvCnt{i}, @ComCnt{i}, NOW(), @ReceptType{i} )";
+            }
+            
+
+            var query = $@"
+                INSERT INTO hello100_api.eghis_doct_rsrv_detail_info
+                  (ridx, start_time, end_time, rsrv_cnt, com_cnt, reg_dt, recept_type)
+                VALUES {values}
+            ";
+
+            return await db.ExecuteScalarAsync<int>(query, parameters, ct, _logger);
         }
     }
 }

@@ -61,7 +61,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
                     RsrvIntervalCnt = 0,
                     UntactRsrvIntervalTime = query.UntactRsrvIntervalTime == 0 ? 10 : query.UntactRsrvIntervalTime,
                     UntactRsrvIntervalCnt = query.UntactRsrvIntervalCnt == 0 ? 1 : query.UntactRsrvIntervalCnt,
-                    UntactRsrvIntervalUseYn = "N"
+                    UntactAvaUseYn = "N"
                 };
             }
             else if (query.ReCalculateYn == "Y")
@@ -98,7 +98,8 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
                             StartTime = i.Value.ToString("HH:mm"),
                             EndTime = (i.Value + time).ToString("HH:mm"),
                             RsrvCnt = eghisDoctRsrvInfoEntity.RsrvIntervalCnt,
-                            ComCnt = 0
+                            ComCnt = 0,
+                            ReceptType = "NR"
                         };
 
                         eghisDoctRsrvDetailEntityList.Add(eghisDoctRsrvDetailInfoEntity);
