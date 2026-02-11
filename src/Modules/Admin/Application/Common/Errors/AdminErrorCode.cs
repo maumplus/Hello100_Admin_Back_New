@@ -82,5 +82,13 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Errors
         EghisBannerBulkUpdateFailed = 4036,
         [Description("이지스 배너 광고 갱신에 실패하였습니다. 다시 시도해주세요.")]
         UpdateEghisBannerAdvertisementFailed = 4037,
+        [Description("공지사항 등록에 실패하였습니다. 다시 시도해주세요.")]
+        CreateNoticeFailed = 4038,
+        [Description("상세 조회할 공지사항 데이터가 없습니다. 확인 후 다시 시도해주세요.")]
+        NoticeNotFound = 4039,
+        [Description("공지사항 갱신에 실패하였습니다. 확인 후 다시 시도해주세요.")]
+        UpdateNoticeFailed = 4040,
+        [Description("공지사항 삭제에 실패하였습니다. 확인 후 다시 시도해주세요.")]
+        DeleteNoticeFailed = 4041,
     }
 }

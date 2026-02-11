@@ -32,6 +32,7 @@ using Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManagement
 using Hello100Admin.Modules.Admin.Infrastructure.External.Web.BizSite;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Account;
 using Hello100Admin.Modules.Admin.Infrastructure.Repositories.Account;
+using Hello100Admin.Modules.Admin.Infrastructure.Repositories.Notice;
 
 namespace Hello100Admin.Modules.Admin.Infrastructure;
 
@@ -66,6 +67,8 @@ public static class DependencyInjection
         services.AddScoped<IHospitalManagementRepository, HospitalManagementRepository>();
         services.AddScoped<IAdvertisementStore, AdvertisementStore>();
         services.AddScoped<IAdvertisementRepository, AdvertisementRepository>();
+        services.AddScoped<INoticeStore, NoticeStore>();
+        services.AddScoped<INoticeRepository, NoticeRepository>();
         services.AddScoped<ISftpClientService, SftpClientService>();
         services.AddScoped<IExcelExporter, ClosedXmlExcelExporter>();
         services.AddSingleton<IHasher, Sha256Hasher>();
