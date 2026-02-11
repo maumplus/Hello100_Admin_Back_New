@@ -4,6 +4,7 @@ using Hello100Admin.API.Infrastructure.Attributes;
 using Hello100Admin.BuildingBlocks.Common.Application;
 using Hello100Admin.BuildingBlocks.Common.Errors;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Extensions;
+using Hello100Admin.Modules.Admin.Application.Common.Models;
 using Hello100Admin.Modules.Admin.Application.Features.VisitPurpose.Commands.BulkUpdateCertificates;
 using Hello100Admin.Modules.Admin.Application.Features.VisitPurpose.Commands.BulkUpdateVisitPurposes;
 using Hello100Admin.Modules.Admin.Application.Features.VisitPurpose.Commands.CreateVisitPurpose;
@@ -17,6 +18,7 @@ using Hello100Admin.Modules.Admin.Application.Features.VisitPurpose.Queries.GetV
 using Hello100Admin.Modules.Admin.Application.Features.VisitPurpose.Responses.GetCertificates;
 using Hello100Admin.Modules.Admin.Application.Features.VisitPurpose.Responses.GetVisitPurposeDetail;
 using Hello100Admin.Modules.Admin.Application.Features.VisitPurpose.Responses.GetVisitPurposes;
+using Hello100Admin.Modules.Admin.Application.Features.VisitPurpose.Results;
 using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -71,7 +73,7 @@ namespace Hello100Admin.API.Controllers
         /// 내원목적관리 > 목록편집 > 저장
         /// </summary>
         [HttpPut("visit-purposes/bulk")]
-        [ProducesResponseType(typeof(ApiResponse<GetVisitPurposesResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> BulkUpdateVisitPurposes(List<BulkUpdateVisitPurposesRequest> req, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("PUT /api/visitpurpose/visit-purposes/bulk [{Aid}]", Aid);
@@ -197,7 +199,7 @@ namespace Hello100Admin.API.Controllers
         /// 내원목적관리 > 내원목적편집(공단검진 제외), 신규등록 시 문진표 조회
         /// </summary>
         [HttpPatch("visit-purposes/questionnaires")]
-        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<ListResult<GetQuestionnairesResult>>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetQuestionnaires(CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("PATCH /api/visitpurpose/visit-purposes/questionnaires [{Aid}]", Aid);
@@ -225,7 +227,7 @@ namespace Hello100Admin.API.Controllers
         /// 제증명문서관리 > 목록편집 > 저장
         /// </summary>
         [HttpPut("certificates/bulk")]
-        [ProducesResponseType(typeof(ApiResponse<GetVisitPurposesResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> BulkUpdateCertificates(List<BulkUpdateCertificatesRequest> req, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("PUT /api/visitpurpose/certificates/bulk [{Aid}]", Aid);

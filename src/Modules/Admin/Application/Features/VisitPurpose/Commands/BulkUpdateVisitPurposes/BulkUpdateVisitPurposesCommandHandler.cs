@@ -1,5 +1,4 @@
 ﻿using Hello100Admin.BuildingBlocks.Common.Application;
-using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Common;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.VisitPurpose;
 using MediatR;
 using Microsoft.Extensions.Logging;

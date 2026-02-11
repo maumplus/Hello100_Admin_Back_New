@@ -13,7 +13,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Hello100Admin.Modules.Admin.Application.Features.Advertisement.Commands
 {
-    public record CreatePopupCommand : IQuery<Result>
+    public record CreateEghisBannerCommand : IQuery<Result>
     {
         /// <summary>
         /// 노출여부
@@ -32,6 +32,10 @@ namespace Hello100Admin.Modules.Admin.Application.Features.Advertisement.Command
         /// </summary>
         public string? Url { get; init; }
         /// <summary>
+        /// 메뉴링크경로
+        /// </summary>
+        public string? Url2 { get; init; }
+        /// <summary>
         /// 기간설정시작일자 (yyyy-mm-dd)
         /// </summary>
         public string? StartDt { get; init; }
@@ -40,31 +44,36 @@ namespace Hello100Admin.Modules.Admin.Application.Features.Advertisement.Command
         /// </summary>
         public string? EndDt { get; init; }
         /// <summary>
-        /// 이미지 파일 (팝업 이미지)
+        /// 정렬 순서
+        /// </summary>
+        public int SortNo { get; init; }
+        /// <summary>
+        /// 이미지 파일 (이지스 배너 이미지)
         /// </summary>
         public FileUploadPayload? ImagePayload { get; init; }
     }
 
-    public class CreatePopupCommandValidator : AbstractValidator<CreatePopupCommand>
+    public class CreateEghisBannerCommandValidator : AbstractValidator<CreateEghisBannerCommand>
     {
-        public CreatePopupCommandValidator()
+        public CreateEghisBannerCommandValidator()
         {
             RuleFor(x => x.ImagePayload)
                 .NotNull().WithMessage("이미지 파일은 필수입니다.");
         }
     }
 
-    public class CreatePopupCommandHandler : IRequestHandler<CreatePopupCommand, Result>
+    public class CreateEghisBannerCommandHandler : IRequestHandler<CreateEghisBannerCommand, Result>
     {
-        private readonly ILogger<CreatePopupCommandHandler> _logger;
+        private readonly ILogger<CreateEghisBannerCommandHandler> _logger;
         private readonly IAdvertisementRepository _advertisementRepository;
         private readonly ISftpClientService _sftpClientService;
         private readonly IDbSessionRunner _db;
 
-        public CreatePopupCommandHandler(ILogger<CreatePopupCommandHandler> logger, 
-                                         IAdvertisementRepository advertisementRepository, 
-                                         ISftpClientService sftpClientService,
-                                         IDbSessionRunner db)
+        public CreateEghisBannerCommandHandler(
+            ILogger<CreateEghisBannerCommandHandler> logger,
+            IAdvertisementRepository advertisementRepository,
+            ISftpClientService sftpClientService,
+            IDbSessionRunner db)
         {
             _logger = logger;
             _advertisementRepository = advertisementRepository;
@@ -72,24 +81,24 @@ namespace Hello100Admin.Modules.Admin.Application.Features.Advertisement.Command
             _db = db;
         }
 
-        public async Task<Result> Handle(CreatePopupCommand req, CancellationToken ct)
+        public async Task<Result> Handle(CreateEghisBannerCommand req, CancellationToken ct)
         {
             _logger.LogInformation("Handling CreatePopupCommand");
 
-            string imagePath = await _sftpClientService.UploadImageWithPathAsync(req.ImagePayload!, ImageUploadType.PO, "SuperAdmin", ct);
+            string imagePath = await _sftpClientService.UploadImageWithPathAsync(req.ImagePayload!, ImageUploadType.BA, "SuperAdmin", ct);
 
             var adInfoEntity = req.Adapt<TbAdInfoEntity>();
-            adInfoEntity.AdType = AdvertType.PO.ToString();
+            adInfoEntity.AdType = AdvertType.BA.ToString();
 
             var imageEntity = new TbImageInfoEntity()
             {
                 Url = imagePath
             };
 
-            await _db.RunAsync(DataSource.Hello100, 
+            await _db.RunAsync(DataSource.Hello100,
                 (dbSession, ct) => _advertisementRepository.CreateAdvertisementAsync(dbSession, adInfoEntity, imageEntity, ct)
             , ct);
-            
+
             return Result.Success();
         }
     }

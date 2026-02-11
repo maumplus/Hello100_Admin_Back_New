@@ -6,13 +6,13 @@ using Hello100Admin.Modules.Auth.Application.Common.Abstractions.Persistence.Aut
 using Hello100Admin.Modules.Auth.Application.Common.Abstractions.Services;
 using Hello100Admin.Modules.Auth.Application.Common.Errors;
 using Hello100Admin.Modules.Auth.Application.Common.Extensions;
+using Hello100Admin.Modules.Auth.Application.Features.Auth.ReadModels;
 using Hello100Admin.Modules.Auth.Application.Features.Auth.Responses.GetUser;
-using Hello100Admin.Modules.Auth.Application.Features.Auth.Responses.Login;
 using Hello100Admin.Modules.Auth.Application.Features.Auth.Responses.LoginCheck;
 using Hello100Admin.Modules.Auth.Domain.Entities;
+using Mapster;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.LoginCheck
 {
@@ -88,25 +88,28 @@ namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.LoginChe
                 return Result.Success<LoginCheckResponse>().WithError(AuthErrorCode.NotFoundPhoneAndEmail.ToError());
             }
 
+            var config = this.GetMapsterConfig();
 
-            var response = new LoginCheckResponse
+            var response = new LoginCheckResponse()
             {
-                User = new UserResponse
-                {
-                    Id = adminInfo.Aid,
-                    AccountId = adminInfo.AccId,
-                    Name = adminInfo.Name,
-                    Grade = adminInfo.Grade,
-                    HospNo = adminInfo.HospNo,
-                    AccountLocked = adminInfo.AccountLocked,
-                    LastLoginDt = adminInfo.LastLoginDt,
-                    Use2fa = adminInfo.Use2fa,
-                    Email = string.IsNullOrWhiteSpace(adminInfo.Email) == false ? _cryptoService.DecryptWithNoVector(adminInfo.Email, CryptoKeyType.Email) : "",
-                    Tel = string.IsNullOrWhiteSpace(adminInfo.Tel) == false ? _cryptoService.DecryptWithNoVector(adminInfo.Tel, CryptoKeyType.Mobile) : ""
-                }
+                User = adminInfo.Adapt<UserResponse>(config)
             };
 
+            response.User.Email = string.IsNullOrWhiteSpace(adminInfo.Email) == false ? _cryptoService.DecryptWithNoVector(adminInfo.Email, CryptoKeyType.Email) : "";
+            response.User.Tel = string.IsNullOrWhiteSpace(adminInfo.Tel) == false ? _cryptoService.DecryptWithNoVector(adminInfo.Tel, CryptoKeyType.Mobile) : "";
+
             return Result.Success(response);
+        }
+
+        private TypeAdapterConfig GetMapsterConfig()
+        {
+            var config = new TypeAdapterConfig();
+
+            config.NewConfig<AdminModel, UserResponse>()
+                .Map(d => d.Id, s => s.Aid)
+                .Map(d => d.AccountId, s => s.AccId);
+
+            return config;
         }
     }
 }

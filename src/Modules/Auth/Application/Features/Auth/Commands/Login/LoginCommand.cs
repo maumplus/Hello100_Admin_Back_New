@@ -162,13 +162,10 @@ namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.Login
             {
                 hospInfo = await _db.RunAsync(DataSource.Hello100,
                     (session, token) => _authStore.GetHospitalInfoByHospNoAsync(session, adminInfo.HospNo, token),
-                ct); 
+                ct);
             }
 
-            var config = new TypeAdapterConfig();
-            config.NewConfig<AdminModel, UserResponse>()
-                .Map(d => d.Id, s => s.Aid)
-                .Map(d => d.AccountId, s => s.AccId);
+            var config = this.GetMapsterConfig();
 
             var response = new LoginResponse()
             {
@@ -195,5 +192,16 @@ namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.Login
             GlobalConstant.AdminRoles.GeneralAdmin => nameof(GlobalConstant.AdminRoles.GeneralAdmin),
             _ => nameof(GlobalConstant.AdminRoles.GeneralAdmin)
         };
+
+        private TypeAdapterConfig GetMapsterConfig()
+        {
+            var config = new TypeAdapterConfig();
+
+            config.NewConfig<AdminModel, UserResponse>()
+                .Map(d => d.Id, s => s.Aid)
+                .Map(d => d.AccountId, s => s.AccId);
+
+            return config;
+        }
     }
 }

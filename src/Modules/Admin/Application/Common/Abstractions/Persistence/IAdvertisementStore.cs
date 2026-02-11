@@ -23,7 +23,7 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistenc
         /// <param name="popupId"></param>
         /// <param name="ct"></param>
         /// <returns></returns>
-        public Task<GetPopupResult> GetPopupAsync(DbSession db, int popupId, CancellationToken ct);
+        public Task<GetPopupResult> GetAdvertisementAsync(DbSession db, int popupId, CancellationToken ct);
 
         /// <summary>
         /// 이지스 배너 조회

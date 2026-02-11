@@ -1,6 +1,7 @@
 ﻿using Hello100Admin.API.Constracts.Admin.Advertisement;
 using Hello100Admin.API.Extensions;
 using Hello100Admin.API.Infrastructure.Attributes;
+using Hello100Admin.BuildingBlocks.Common.Application;
 using Hello100Admin.BuildingBlocks.Common.Errors;
 using Hello100Admin.Modules.Admin.Application.Common.Models;
 using Hello100Admin.Modules.Admin.Application.Features.Advertisement.Commands;
@@ -9,6 +10,7 @@ using Hello100Admin.Modules.Admin.Application.Features.Advertisement.Results;
 using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Extensions;
 
 namespace Hello100Admin.API.Controllers
 {
@@ -134,6 +136,97 @@ namespace Hello100Admin.API.Controllers
             _logger.LogInformation("GET /api/advertisement/eghis-banners [{AId}]", Aid);
 
             var result = await _mediator.Send(new GetEghisBannersQuery(), cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [전체 관리자] 광고관리 > 이지스배너광고 > 목록편집 > 저장
+        /// </summary>
+        /// <param name="req"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        [HttpPut("eghis-banners/bulk")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        public async Task<IActionResult> BulkUpdateEghisBanners(List<BulkUpdateEghisBannersRequest> req, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("PUT /api/advertisement/eghis-banners/bulk [{Aid}]", Aid);
+
+            if (req != null && req.Count <= 0)
+                return Result.Success(GlobalErrorCode.EmptyRequestBody.ToError()).ToActionResult(this);
+
+            var tempList = req.Adapt<List<BulkUpdateEghisBannersCommandItem>>();
+
+            var result = await _mediator.Send(new BulkUpdateEghisBannersCommand(tempList), cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [전체 관리자] 광고관리 > 이지스배너광고 > 신규등록 > 등록
+        /// </summary>
+        /// <param name="req"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        [HttpPost("eghis-banners")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> CreateEghisBanner([FromForm] CreateEghisBannerRequest req, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("POST /api/advertisement/eghis-banners [{AId}]", Aid);
+
+            var payload = GetImagePayload(req.Image);
+
+            var command = req.Adapt<CreateEghisBannerCommand>() with
+            {
+                ImagePayload = payload
+            };
+
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [전체 관리자] 광고관리 > 이지스배너광고 > 배너광고편집 > 저장
+        /// </summary>
+        /// <param name="bannerId"></param>
+        /// <param name="req"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        [HttpPatch("eghis-banners/{bannerId}")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UpdateEghisBanner(int bannerId, [FromForm] UpdateEghisBannerRequest req, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("PATCH /api/advertisement/eghis-banners/{bannerId} [{AId}]", bannerId, Aid);
+
+            var payload = GetImagePayload(req.Image);
+
+            var command = req.Adapt<UpdateEghisBannerCommand>() with
+            {
+                AdId = bannerId,
+                ImagePayload = payload
+            };
+
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [전체 관리자] 광고관리 > 이지스배너광고 > 배너광고편집 > 삭제
+        /// </summary>
+        /// <param name="bannerId"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        [HttpDelete("eghis-banners/{bannerId}")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        public async Task<IActionResult> DeleteEghisBanner(int bannerId, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("DELETE /api/advertisement/eghis-banners/{bannerId} [{AId}]", bannerId, Aid);
+
+            var result = await _mediator.Send(new DeleteEghisBannerCommand(bannerId), cancellationToken);
 
             return result.ToActionResult(this);
         }
