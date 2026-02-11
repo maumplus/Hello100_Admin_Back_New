@@ -1,4 +1,6 @@
-﻿using Hello100Admin.BuildingBlocks.Common.Application;
+﻿using DocumentFormat.OpenXml.Drawing;
+using Hello100Admin.BuildingBlocks.Common.Application;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Extensions;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Hospital;
 using Hello100Admin.Modules.Admin.Application.Common.Definitions.Enums;
 using Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Results;
@@ -20,6 +22,13 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
         public string HospNo { get; set; }
         public string EmplNo { get; set; }
         public int WeekNum { get; set; }
+        public string ReCalculateYn { get; set; }
+        public string StartTime { get; set; }
+        public string EndTime { get; set; }
+        public string BreakStartTime { get; set; }
+        public string BreakEndTime { get; set; }
+        public int RsrvIntervalTime { get; set; }
+        public int RsrvIntervalCnt { get; set; }
     }
 
     public class GetDoctorWeeksReservationListQueryHandler : IRequestHandler<GetDoctorWeeksReservationListQuery, Result<GetDoctorWeeksReservationListResult>>
@@ -40,14 +49,63 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
             var eghisDoctRsrvInfoEntity = await _hospitalStore.GetEghisDoctRsrvInfo(query.HospNo, query.EmplNo, query.WeekNum, string.Empty, cancellationToken);
 
             var eghisDoctRsrvDetailEntityList = new List<EghisDoctRsrvDetailInfoEntity>();
-            var eghisRsrvInfoEntityList = new List<EghisRsrvInfoEntity>();
 
-            if (eghisDoctRsrvInfoEntity != null)
+            if (eghisDoctRsrvInfoEntity == null)
+            {
+                eghisDoctRsrvInfoEntity = new EghisDoctRsrvInfoEntity()
+                {
+                    HospNo = query.HospNo,
+                    EmplNo = query.EmplNo,
+                    WeekNum = query.WeekNum,
+                    ClinicYmd = string.Empty,
+                    RsrvIntervalTime = query.RsrvIntervalTime == 0 ? 10 : query.RsrvIntervalTime,
+                    RsrvIntervalCnt = query.RsrvIntervalCnt
+                };
+            }
+            else if (query.ReCalculateYn == "Y")
+            {
+                eghisDoctRsrvInfoEntity.RsrvIntervalTime = query.RsrvIntervalTime == 0 ? 10 : query.RsrvIntervalTime;
+                eghisDoctRsrvInfoEntity.RsrvIntervalCnt = query.RsrvIntervalCnt;
+            }
+            else
             {
                 eghisDoctRsrvDetailEntityList = await _hospitalStore.GetEghisDoctRsrvDetailList(eghisDoctRsrvInfoEntity.Ridx, "RS", cancellationToken);
-                eghisRsrvInfoEntityList = await _hospitalStore.GetEghisRsrvList(query.HospNo, query.EmplNo, query.WeekNum, cancellationToken);
             }
-            
+
+            if (eghisDoctRsrvDetailEntityList.Count == 0)
+            {
+                TimeSpan time = new TimeSpan(00, eghisDoctRsrvInfoEntity.RsrvIntervalTime, 00);
+
+                var startDateTime = query.StartTime.ToDateTime("HHmm");
+                var endDateTime = query.EndTime.ToDateTime("HHmm");
+                var breakStartDateTime = query.BreakStartTime.ToDateTime("HHmm");
+                var breakEndDateTime = query.BreakEndTime.ToDateTime("HHmm");
+
+                if (endDateTime > startDateTime)
+                {
+                    for (var i = startDateTime; i < endDateTime; i += time)
+                    {
+                        if (breakStartDateTime <= i && i < breakEndDateTime)
+                        {
+                            continue;
+                        }
+
+                        var eghisDoctRsrvDetailInfoEntity = new EghisDoctRsrvDetailInfoEntity()
+                        {
+                            Ridx = eghisDoctRsrvInfoEntity.Ridx,
+                            StartTime = i.Value.ToString("HH:mm"),
+                            EndTime = (i.Value + time).ToString("HH:mm"),
+                            RsrvCnt = eghisDoctRsrvInfoEntity.RsrvIntervalCnt,
+                            ComCnt = 0
+                        };
+
+                        eghisDoctRsrvDetailEntityList.Add(eghisDoctRsrvDetailInfoEntity);
+                    }
+                }
+            }
+
+            var eghisRsrvInfoEntityList = await _hospitalStore.GetEghisRsrvList(query.HospNo, query.EmplNo, query.WeekNum, cancellationToken);
+
             var result = new GetDoctorWeeksReservationListResult()
             {
                 EghisDoctRsrvInfo = eghisDoctRsrvInfoEntity,
