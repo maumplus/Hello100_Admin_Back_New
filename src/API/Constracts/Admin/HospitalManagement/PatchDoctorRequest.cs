@@ -7,8 +7,8 @@ namespace Hello100Admin.API.Constracts.Admin.HospitalManagement
     {
         public string EmplNo { get; set; }
         public string DoctNm { get; set; }
-        public int ViewMinCnt { get; set; }
-        public int ViewMinTime { get; set; }
+        public string ViewMinCnt { get; set; }
+        public string ViewMinTime { get; set; }
         public IFormFile Image { get; set; }
     }
 }

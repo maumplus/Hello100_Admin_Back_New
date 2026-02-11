@@ -12,6 +12,9 @@ using Hello100Admin.Modules.Admin.Domain.Entities;
 using Hello100Admin.Modules.Admin.Application.Common.Definitions.Enums;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Results;
+using DocumentFormat.OpenXml.Wordprocessing;
+using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
+using Org.BouncyCastle.Ocsp;
 
 namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManagement
 {
@@ -458,6 +461,303 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
                  WHERE hosp_no = @HospNo
                    AND empl_no = @EmplNo;
             ";
+
+            return await db.ExecuteAsync(query, parameters, ct, _logger);
+        }
+
+        public async Task<int> RemoveEghisDoctRsrvAsync(DbSession db, EghisDoctRsrvInfoEntity eghisDoctRsrvInfoEntity, CancellationToken ct)
+        {
+            DynamicParameters parameters = new DynamicParameters();
+            parameters.Add("Ridx", eghisDoctRsrvInfoEntity.Ridx, DbType.Int32);
+
+            var query =$@"
+                DELETE FROM hello100_api.eghis_doct_rsrv_detail_info
+                      WHERE ridx = @Ridx
+                        AND IFNULL(recept_type, '') != 'NR';
+            
+                DELETE FROM hello100_api.eghis_doct_rsrv_info
+                      WHERE ridx = @Ridx
+                        AND IFNULL(recept_type, '') != 'NR';
+            ";
+
+            return await db.ExecuteAsync(query, parameters, ct, _logger);
+        }
+
+        public async Task<int> InsertEghisDoctRsrvAsync(DbSession db, EghisDoctRsrvInfoEntity eghisDoctRsrvInfoEntity, CancellationToken ct)
+        {
+            DynamicParameters parameters = new DynamicParameters();
+            parameters.Add("HospNo", eghisDoctRsrvInfoEntity.HospNo, DbType.String);
+            parameters.Add("EmplNo", eghisDoctRsrvInfoEntity.EmplNo, DbType.String);
+            parameters.Add("ClinicYmd", eghisDoctRsrvInfoEntity.ClinicYmd, DbType.String);
+            parameters.Add("WeekNum", eghisDoctRsrvInfoEntity.WeekNum, DbType.Int32);
+            parameters.Add("RsrvIntervalTime", eghisDoctRsrvInfoEntity.RsrvIntervalTime, DbType.Int32);
+            parameters.Add("RsrvIntervalCnt", eghisDoctRsrvInfoEntity.RsrvIntervalCnt, DbType.Int32);
+
+            var query = @"
+                INSERT INTO hello100_api.eghis_doct_rsrv_info
+                  (hosp_no, empl_no, clinic_ymd, week_num, rsrv_interval_time, rsrv_interval_cnt, reg_dt)
+                VALUES
+                  (@HospNo, @EmplNo, @ClinicYmd, @WeekNum, @RsrvIntervalTime, @RsrvIntervalCnt, NOW());
+                ON DUPLICATE KEY UPDATE
+                  rsrv_interval_time = VALUES(rsrv_interval_time),
+                  rsrv_interval_cnt = VALUES(RsrvIntervalCnt),
+                  reg_dt = VALUES(reg_dt);
+                SELECT IFNULL(MAX(rIdx), 0)
+                  FROM hello100_api.eghis_doct_rsrv_info
+                 WHERE hosp_no = @HospNo
+                   AND empl_no = @EmplNo
+                   AND clinic_ymd = @ClinicYmd
+                   AND week_num = @WeekNum;
+            ";
+
+            return await db.ExecuteScalarAsync<int>(query, parameters, ct, _logger);
+        }
+
+        public async Task<int> UpdateDoctorInfoScheduleAsync(DbSession db, List<EghisDoctInfoEntity> eghisDoctInfoList, CancellationToken ct)
+        {
+            var hospNo = eghisDoctInfoList[0].HospNo;
+            var hospKey = eghisDoctInfoList[0].HospKey;
+            var emplNo = eghisDoctInfoList[0].EmplNo;
+            var doctNo = eghisDoctInfoList[0].DoctNo;
+            var doctNm = eghisDoctInfoList[0].DoctNm;
+            var deptCd = eghisDoctInfoList[0].DeptCd;
+            var deptNm = eghisDoctInfoList[0].DeptNm;
+
+            DynamicParameters parameters = new DynamicParameters();
+            parameters.Add("HospNo", hospNo, DbType.String);
+            parameters.Add("HospKey", hospKey, DbType.String);
+            parameters.Add("EmplNo", emplNo, DbType.String);
+            parameters.Add("DoctNo", doctNo, DbType.String);
+            parameters.Add("DoctNm", doctNm, DbType.String);
+            parameters.Add("DeptCd", deptCd, DbType.String);
+            parameters.Add("DeptNm", deptNm, DbType.String);
+
+            var queries = new List<string>();
+            var query = string.Empty;
+
+            query = @"
+                DROP TABLE IF EXISTS hello100_api.tmp_doct_sche;
+                CREATE TEMPORARY TABLE hello100_api.tmp_doct_sche (
+                  `hosp_no` VARCHAR(10) NOT NULL COMMENT '요양기관번호',
+                  `hosp_key` VARCHAR(128) NOT NULL COMMENT '요양기관키',
+                  `empl_no` VARCHAR(10) NOT NULL COMMENT '의사사번',
+                  `clinic_ymd` VARCHAR(8) NOT NULL DEFAULT '' COMMENT '진료일[\'\': 기본템플릿 사용 ]',
+                  `doct_no` VARCHAR(128) NOT NULL COMMENT '의사 면허번호',
+                  `doct_nm` VARCHAR(10) NOT NULL COMMENT '의사명',
+                  `dept_cd` VARCHAR(10) NULL DEFAULT NULL COMMENT '진료과코드',
+                  `dept_nm` VARCHAR(20) NULL DEFAULT NULL COMMENT '진료과명',
+                  `week_num` INT(11) NOT NULL DEFAULT '0' COMMENT '요일순번',
+                  `start_hour` INT(11) NOT NULL DEFAULT '0' COMMENT '진료시작시간',
+                  `start_minute` INT(11) NOT NULL DEFAULT '0' COMMENT '진료시작분',
+                  `end_hour` INT(11) NOT NULL DEFAULT '0' COMMENT '진료종료시간',
+                  `end_minute` INT(11) NOT NULL DEFAULT '0' COMMENT '진료종료분',
+                  `break_start_hour` INT(11) NOT NULL DEFAULT '0' COMMENT '점심시작시간',
+                  `break_start_minute` INT(11) NOT NULL DEFAULT '0' COMMENT '점심시작분',
+                  `break_end_hour` INT(11) NOT NULL DEFAULT '0' COMMENT '점심종료시간',
+                  `break_end_minute` INT(11) NOT NULL DEFAULT '0' COMMENT '점심종료분',
+                  `interval_time` INT(11) NOT NULL DEFAULT '0' COMMENT '환자 진료 시간',
+                  `message` VARCHAR(1000) NULL DEFAULT NULL COMMENT '요일별 의사 메세지',
+                  `hello100_role` INT(11) NOT NULL DEFAULT '0' COMMENT '부가서비스[1: qr접수 , 2:당일접수, 4:예약, 8:qr 접수마감, 16:당일접수마감]',
+                  `ridx` INT(11) NOT NULL COMMENT '예약번호',
+                  `view_role` INT(11) NOT NULL DEFAULT '0' COMMENT '화면 대기인원 표시[0:사용안함, 1:인원수, 2:시간, 3: 인원수, 시간 모두표시]',
+                  `view_min_time` VARCHAR(50) NOT NULL DEFAULT '' COMMENT '대기 시간표시에 따른 최소시간',
+                  `view_min_cnt` VARCHAR(50) NOT NULL DEFAULT '' COMMENT '대기 인원표시에 따른 최소인원',
+                  `use_yn` CHAR(1) NOT NULL DEFAULT 'Y' COMMENT '사용유무',
+                  `reg_dt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '등록날짜',
+                  PRIMARY KEY (`hosp_no`, `empl_no`, `clinic_ymd`, `week_num`),
+                  INDEX `hosp_key_empl_no` (`hosp_key`, `empl_no`)
+                ) COLLATE='utf8_general_ci' ENGINE=InnoDB;
+            ";
+
+            queries.Add(query);
+
+            var values = string.Empty;
+
+            foreach (var eghisDoctInfo in eghisDoctInfoList)
+            {
+                parameters.Add("Insert_ClinicYmd", eghisDoctInfo.ClinicYmd, DbType.String);
+                parameters.Add("Insert_WeekNum", eghisDoctInfo.WeekNum, DbType.Int32);
+                parameters.Add("Insert_StartHour", eghisDoctInfo.StartHour, DbType.Int32);
+                parameters.Add("Insert_StartMinute", eghisDoctInfo.StartMinute, DbType.Int32);
+                parameters.Add("Insert_EndHour", eghisDoctInfo.EndHour, DbType.Int32);
+                parameters.Add("Insert_EndMinute", eghisDoctInfo.EndMinute, DbType.Int32);
+                parameters.Add("Insert_BreakStartHour", eghisDoctInfo.BreakStartHour, DbType.Int32);
+                parameters.Add("Insert_BreakStartMinute", eghisDoctInfo.BreakStartMinute, DbType.Int32);
+                parameters.Add("Insert_BreakEndHour", eghisDoctInfo.BreakEndHour, DbType.Int32);
+                parameters.Add("Insert_BreakEndMinute", eghisDoctInfo.BreakEndMinute, DbType.Int32);
+                parameters.Add("Insert_IntervalTime", eghisDoctInfo.IntervalTime, DbType.Int32);
+                parameters.Add("Insert_Message", eghisDoctInfo.Message, DbType.String);
+                parameters.Add("Insert_Hello100Role", eghisDoctInfo.Hello100Role, DbType.Int32);
+                parameters.Add("Insert_Ridx", eghisDoctInfo.Ridx, DbType.Int32);
+                parameters.Add("Insert_ViewRole", eghisDoctInfo.ViewRole, DbType.Int32);
+                parameters.Add("Insert_ViewMinTime", eghisDoctInfo.ViewMinTime, DbType.String);
+                parameters.Add("Insert_ViewMinCnt", eghisDoctInfo.ViewMinCnt, DbType.String);
+                parameters.Add("Insert_UseYn", eghisDoctInfo.UseYn, DbType.String);
+
+                if (!string.IsNullOrEmpty(values))
+                {
+                    values += ", ";
+                }
+
+                values += $@"
+                    ( @HospNo, @HospKey, @EmplNo, @Insert_ClinicYmd, @DoctNo, @DoctNm, @DeptCd, @DeptNm,
+                      @Insert_WeekNum, @Insert_StartHour, @Insert_StartMinute, @Insert_EndHour, @Insert_EndMinute, @Insert_BreakStartHour, @Insert_BreakStartMinute, @Insert_BreakEndHour, @Insert_BreakEndMinute, @Insert_IntervalTime,
+                      @Insert_Message, @Insert_Hello100Role, @Insert_Ridx, @Insert_ViewRole, @Insert_ViewMinTime, @Insert_ViewMinCnt, @Insert_UseYn, NOW() )
+                ";
+            }
+
+            query = $@"
+                INSERT INTO hello100_api.tmp_doct_sche
+                  ( hosp_no, hosp_key, empl_no, clinic_ymd, doct_no, doct_nm, dept_cd, dept_nm,
+                    week_num, start_hour, start_minute, end_hour, end_minute, break_start_hour, break_start_minute, break_end_hour, break_end_minute, interval_time,
+                    message, hello100_role, ridx, view_role, view_min_time, view_min_cnt, use_yn, reg_dt )
+                VALUES {values}
+            ";
+
+            queries.Add(query);
+
+            query = @"
+                INSERT INTO hello100_api.eghis_doct_info
+                  ( hosp_no, hosp_key, empl_no, clinic_ymd, doct_no, doct_nm, dept_cd, dept_nm,
+                    week_num, start_hour, start_minute, end_hour, end_minute, break_start_hour, break_start_minute, break_end_hour, break_end_minute, interval_time,
+                    message, hello100_role, ridx, view_role, view_min_time, view_min_cnt, use_yn, reg_dt )
+                SELECT z.hosp_no, z.hosp_key, z.empl_no, z.clinic_ymd, z.doct_no, z.doct_nm, z.dept_cd, z.dept_nm,
+                       z.week_num, z.start_hour, z.start_minute, z.end_hour, z.end_minute, z.break_start_hour, z.break_start_minute, z.break_end_hour, z.break_end_minute, z.interval_time,
+                       z.message, z.hello100_role, z.ridx, z.view_role, z.view_min_time, z.view_min_cnt, z.use_yn, z.reg_dt
+                  FROM hello100_api.tmp_doct_sche z
+                ON DUPLICATE KEY UPDATE
+                  doct_no = VALUES(doct_no),
+                  doct_nm = VALUES(doct_nm),
+                  dept_cd = VALUES(dept_cd),
+                  dept_nm = VALUES(dept_nm),
+                  week_num = VALUES(week_num),
+                  start_hour = VALUES(start_hour),
+                  start_minute = VALUES(start_minute),
+                  end_hour = VALUES(end_hour),
+                  end_minute = VALUES(end_minute),
+                  break_start_hour = VALUES(break_start_hour),
+                  break_start_minute = VALUES(break_start_minute\),
+                  break_end_hour = VALUES(break_end_hour),
+                  break_end_minute = VALUES(break_end_minute),
+                  interval_time = VALUES(interval_time),
+                  message = VALUES(message),
+                  hello100_role = VALUES(hello100_role),
+                  ridx = VALUES(ridx),
+                  view_role = VALUES(view_role),
+                  view_min_time = VALUES(view_min_time),
+                  view_min_cnt = VALUES(view_min_cnt),
+                  use_yn = VALUES(use_yn),
+                  reg_dt = VALUES(reg_dt);
+            ";
+
+            queries.Add(query);
+
+            query = string.Join("\n", queries.ToArray());
+
+            return await db.ExecuteAsync(query, parameters, ct, _logger);
+        }
+
+        public async Task<int> UpdateDoctorInfoUntactScheduleAsync(DbSession db, List<EghisDoctInfoEntity> eghisDoctInfoList, CancellationToken ct)
+        {
+            var hospNo = eghisDoctInfoList[0].HospNo;
+            var hospKey = eghisDoctInfoList[0].HospKey;
+            var emplNo = eghisDoctInfoList[0].EmplNo;
+
+            DynamicParameters parameters = new DynamicParameters();
+            parameters.Add("HospNo", hospNo, DbType.String);
+            parameters.Add("HospKey", hospKey, DbType.String);
+            parameters.Add("EmplNo", emplNo, DbType.String);
+
+            var queries = new List<string>();
+            var query = string.Empty;
+
+            query = @"
+                DROP TABLE IF EXISTS hello100_api.tmp_doct_sche_untact;
+                CREATE TEMPORARY TABLE hello100_api.tmp_doct_sche_untact (
+                  `hosp_no` VARCHAR(10) NOT NULL COMMENT '요양기관번호',
+                  `hosp_key` VARCHAR(128) NOT NULL COMMENT '요양기관키',
+                  `empl_no` VARCHAR(10) NOT NULL COMMENT '의사사번',
+                  `week_num` INT(11) NOT NULL DEFAULT '0' COMMENT '요일순번',
+                  `untact_start_hour` INT(11) NOT NULL DEFAULT '0' COMMENT '비대면 진료시작시간',
+                  `untact_start_minute` INT(11) NOT NULL DEFAULT '0' COMMENT '비대면 진료시작분',
+                  `untact_end_hour` INT(11) NOT NULL DEFAULT '0' COMMENT '비대면 진료종료시간',
+                  `untact_end_minute` INT(11) NOT NULL DEFAULT '0' COMMENT '비대면 진료종료분',
+                  `untact_interval_time` INT(11) NOT NULL DEFAULT '0' COMMENT '비대면 소요시간',
+                  `untact_use_yn` VARCHAR(1) NOT NULL DEFAULT 'N' COMMENT '사용유무',
+                  `untact_break_start_hour` INT(11) NOT NULL DEFAULT '0' COMMENT '비대면 점심시작시간',
+                  `untact_break_start_minute` INT(11) NOT NULL DEFAULT '0' COMMENT '비대면 점심시작분',
+                  `untact_break_end_hour` INT(11) NOT NULL DEFAULT '0' COMMENT '비대면 점심종료시간',
+                  `untact_break_end_minute` INT(11) NOT NULL DEFAULT '0' COMMENT '비대면 점심종료분',
+                  PRIMARY KEY (`hosp_no`, `empl_no`, `week_num`),
+                  INDEX `hosp_key_empl_no` (`hosp_key`, `empl_no`)
+                ) COLLATE='utf8_general_ci' ENGINE=InnoDB;
+            ";
+
+            queries.Add(query);
+
+            var values = string.Empty;
+
+            foreach (var eghisDoctInfo in eghisDoctInfoList)
+            {
+                parameters.Add("Insert_WeekNum", eghisDoctInfo.WeekNum, DbType.Int32);
+                parameters.Add("Insert_UntactStartHour", eghisDoctInfo.UntactStartHour, DbType.Int32);
+                parameters.Add("Insert_UntactStartMinute", eghisDoctInfo.UntactStartMinute, DbType.Int32);
+                parameters.Add("Insert_UntactEndHour", eghisDoctInfo.UntactEndHour, DbType.Int32);
+                parameters.Add("Insert_UntactEndMinute", eghisDoctInfo.UntactEndMinute, DbType.Int32);
+                parameters.Add("Insert_UntactIntervalTime", eghisDoctInfo.UntactIntervalTime, DbType.Int32);
+                parameters.Add("Insert_UntactUseYn", eghisDoctInfo.UntactUseYn, DbType.String);
+                parameters.Add("Insert_UntactBreakStartHour", eghisDoctInfo.UntactBreakStartHour, DbType.Int32);
+                parameters.Add("Insert_UntactBreakStartMinute", eghisDoctInfo.UntactBreakStartMinute, DbType.Int32);
+                parameters.Add("Insert_UntactBreakEndHour", eghisDoctInfo.UntactBreakEndHour, DbType.Int32);
+                parameters.Add("Insert_UntactBreakEndMinute", eghisDoctInfo.UntactBreakEndMinute, DbType.Int32);
+
+                if (!string.IsNullOrEmpty(values))
+                {
+                    values += ", ";
+                }
+
+                values += $@"
+                    ( @HospNo, @HospKey, @EmplNo,
+                      @Insert_WeekNum, @Insert_UntactStartHour, @Insert_UntactStartMinute, @Insert_UntactEndHour, @Insert_UntactEndMinute , @Insert_UntactIntervalTime, @Insert_UntactUseYn,
+                      @Insert_UntactBreakStartHour, @Insert_UntactBreakStartMinute , @Insert_UntactBreakEndHour, @Insert_UntactBreakEndMinute )"; 
+            }
+
+            queries.Add(query);
+
+            query = $@"
+                INSERT INTO hello100_api.tmp_doct_sche_untact
+                  ( hosp_no, hosp_key, empl_no,
+                    week_num, untact_start_hour, untact_start_minute, untact_end_hour, untact_end_minute, untact_interval_time, untact_use_yn,
+                    untact_break_start_hour, untact_break_start_minute, untact_break_end_hour, untact_break_end_minute )
+                VALUES {values}
+            ";
+
+            queries.Add(query);
+
+            query = @"
+                UPDATE hello100_api.eghis_doct_info a
+                 INNER JOIN ( SELECT a.hosp_no, a.hosp_key, a.empl_no,
+                                     a.week_num, a.untact_start_hour, a.untact_start_minute, a.untact_end_hour, a.untact_end_minute, a.untact_interval_time, a.untact_use_yn,
+                                     a.untact_break_start_hour, a.untact_break_start_minute, a.untact_break_end_hour, a.untact_break_end_minute
+                                FROM hello100_api.tmp_doct_sche_untact a
+                               WHERE a.hosp_no = @HospNo
+                                 AND a.empl_no = @EmplNo ) AS b
+                    ON a.hosp_no = b.hosp_no AND a.empl_no = b.empl_no AND a.week_num = b.week_num
+                   SET a.untact_start_hour = b.untact_start_hour,
+                       a.untact_start_minute  = b.untact_start_minute,
+                       a.untact_end_hour = b.untact_end_hour,
+                       a.untact_end_minute = b.untact_end_minute,
+                       a.untact_break_start_hour = b.untact_break_start_hour,
+                       a.untact_break_start_minute  = b.untact_break_start_minute,
+                       a.untact_break_end_hour = b.untact_break_end_hour,
+                       a.untact_break_end_minute = b.untact_break_end_minute,
+                       a.untact_interval_time = b.untact_interval_time,
+                       a.untact_use_yn = b.untact_use_yn;
+            ";
+
+            queries.Add(query);
+
+            query = string.Join("\n", queries.ToArray());
 
             return await db.ExecuteAsync(query, parameters, ct, _logger);
         }

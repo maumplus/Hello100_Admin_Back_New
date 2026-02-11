@@ -249,7 +249,7 @@ namespace Hello100Admin.API.Controllers
         /// [병원정보관리 > 의료진관리]의료진 상세 API
         /// </summary>
         [HttpGet("doctor/{emplNo}")]
-        [ProducesResponseType(typeof(List<GetDoctorListResult>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(GetDoctorResult), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetDoctor(string emplNo, CancellationToken cancellationToken = default)
         {
@@ -311,6 +311,147 @@ namespace Hello100Admin.API.Controllers
                 ClinicGuide = request.ClinicGuide,
                 DoctHistoryList = request.DoctHistoryList
             };
+
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [병원정보관리 > 의료진관리]주간 스케쥴 수정 API
+        /// </summary>
+        [HttpPatch("doctor-weeks-schedule")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> PatchDoctorWeeksSchedule(PatchDoctorWeeksScheduleRequest request, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("PATCH /api/hospital-management/doctor-weeks-schedule");
+
+            var command = new PatchDoctorWeeksScheduleCommand()
+            {
+                HospNo = base.HospNo,
+                HospKey = base.HospKey,
+                DoctNo = request.DoctNo,
+                DoctNm = request.DoctNm,
+                DeptCd = request.DeptCd,
+                DeptNm = request.DeptNm,
+                ViewRole = request.ViewRole,
+                ViewMinTime = request.ViewMinTime,
+                ViewMinCnt = request.ViewMinCnt,
+                DoctorScheduleList = new List<Modules.Admin.Application.Features.HospitalManagement.Commands.PatchDoctorWeeksScheduleInfo>()
+            };
+
+            foreach (var info in request.DoctorScheduleList)
+            {
+                var doctorScheduleInfo = info.Adapt<Modules.Admin.Application.Features.HospitalManagement.Commands.PatchDoctorWeeksScheduleInfo>() with
+                {
+                    HospNo = base.HospNo,
+                    HospKey = base.HospKey,
+                    DoctNo = request.DoctNo,
+                    DoctNm = request.DoctNm,
+                    DeptCd = request.DeptCd,
+                    DeptNm = request.DeptNm,
+                    ViewRole = request.ViewRole,
+                    ViewMinTime = request.ViewMinTime,
+                    ViewMinCnt = request.ViewMinCnt
+                };
+
+                command.DoctorScheduleList.Add(doctorScheduleInfo);
+            }
+
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [병원정보관리 > 의료진관리]지정 스케쥴 수정 API
+        /// </summary>
+        [HttpPatch("doctor-days-schedule")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> PatchDoctorDaysSchedule(PatchDoctorDaysScheduleRequest request, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("PATCH /api/hospital-management/doctor-days-schedule");
+
+            var command = new PatchDoctorDaysScheduleCommand()
+            {
+                HospNo = base.HospNo,
+                HospKey = base.HospKey,
+                DoctNo = request.DoctNo,
+                DoctNm = request.DoctNm,
+                DeptCd = request.DeptCd,
+                DeptNm = request.DeptNm,
+                ViewRole = request.ViewRole,
+                ViewMinTime = request.ViewMinTime,
+                ViewMinCnt = request.ViewMinCnt,
+                DoctorScheduleList = new List<Modules.Admin.Application.Features.HospitalManagement.Commands.PatchDoctorDaysScheduleInfo>()
+            };
+
+            foreach (var info in request.DoctorScheduleList)
+            {
+                var doctorScheduleInfo = info.Adapt<Modules.Admin.Application.Features.HospitalManagement.Commands.PatchDoctorDaysScheduleInfo>() with
+                {
+                    HospNo = base.HospNo,
+                    HospKey = base.HospKey,
+                    DoctNo = request.DoctNo,
+                    DoctNm = request.DoctNm,
+                    DeptCd = request.DeptCd,
+                    DeptNm = request.DeptNm,
+                    ViewRole = request.ViewRole,
+                    ViewMinTime = request.ViewMinTime,
+                    ViewMinCnt = request.ViewMinCnt
+                };
+
+                command.DoctorScheduleList.Add(doctorScheduleInfo);
+            }
+
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [병원정보관리 > 의료진관리]비대면 스케쥴 수정 API
+        /// </summary>
+        [HttpPatch("doctor-untact-weeks-schedule")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> PatchDoctorUntactWeeksSchedule(PatchDoctorUntactWeeksScheduleRequest request, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("PATCH /api/hospital-management/doctor-untact-weeks-schedule");
+
+            var command = new PatchDoctorUntactWeeksScheduleCommand()
+            {
+                HospNo = base.HospNo,
+                HospKey = base.HospKey,
+                DoctNo = request.DoctNo,
+                DoctNm = request.DoctNm,
+                DeptCd = request.DeptCd,
+                DeptNm = request.DeptNm,
+                ViewRole = request.ViewRole,
+                ViewMinTime = request.ViewMinTime,
+                ViewMinCnt = request.ViewMinCnt,
+                DoctorScheduleList = new List<Modules.Admin.Application.Features.HospitalManagement.Commands.PatchDoctorUntactWeeksScheduleInfo>()
+            };
+
+            foreach (var info in request.DoctorScheduleList)
+            {
+                var doctorScheduleInfo = info.Adapt<Modules.Admin.Application.Features.HospitalManagement.Commands.PatchDoctorUntactWeeksScheduleInfo>() with
+                {
+                    HospNo = base.HospNo,
+                    HospKey = base.HospKey,
+                    DoctNo = request.DoctNo,
+                    DoctNm = request.DoctNm,
+                    DeptCd = request.DeptCd,
+                    DeptNm = request.DeptNm,
+                    ViewRole = request.ViewRole,
+                    ViewMinTime = request.ViewMinTime,
+                    ViewMinCnt = request.ViewMinCnt
+                };
+
+                command.DoctorScheduleList.Add(doctorScheduleInfo);
+            }
 
             var result = await _mediator.Send(command, cancellationToken);
 

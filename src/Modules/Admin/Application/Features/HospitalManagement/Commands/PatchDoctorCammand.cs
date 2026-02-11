@@ -24,8 +24,8 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
         public string HospKey { get; set; }
         public string EmplNo { get; set; }
         public string DoctNm { get; set; }
-        public int ViewMinCnt { get; set; }
-        public int ViewMinTime { get; set; }
+        public string ViewMinCnt { get; set; }
+        public string ViewMinTime { get; set; }
         public FileUploadPayload Image { get; set; }
     }
 

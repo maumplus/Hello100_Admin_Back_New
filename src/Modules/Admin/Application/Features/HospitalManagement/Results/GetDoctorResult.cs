@@ -71,15 +71,12 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Re
 
     public sealed class DoctorScheduleResult
     {
-        public int Ridx { get; set; }
         public string HospNo { get; set; }
         public string HospKey { get; set; }
         public string EmplNo { get; set; }
         public string ClinicYmd { get; set; }
         public int WeekNum { get; set; }
         public string WeekNm { get; set; }
-        public int RsrvCnt { get; set; }
-        public string UseYn { get; set; }
         public int StartHour { get; set; }
         public int StartMinute { get; set; }
         public int EndHour { get; set; }
@@ -90,20 +87,20 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Re
         public int BreakEndMinute { get; set; }
         public int IntervalTime { get; set; }
         public int Hello100Role { get; set; }
-        public string RegDt { get; set; }
+        public int Ridx { get; set; }
+        public string UseYn { get; set; }
+        public int RsrvCnt { get; set; }
         public int UntactStartHour { get; set; }
         public int UntactStartMinute { get; set; }
         public int UntactEndHour { get; set; }
         public int UntactEndMinute { get; set; }
-
         public int UntactBreakStartHour { get; set; }
         public int UntactBreakStartMinute { get; set; }
         public int UntactBreakEndHour { get; set; }
         public int UntactBreakEndMinute { get; set; }
-
         public int UntactIntervalTime { get; set; }
         public string UntactUseYn { get; set; }
-        public int UntactRsrvCnt { get; set; }
+        public int UntactRsrvCnt { get; set; }   
     }
 
     public sealed class GetDoctorResult
@@ -111,6 +108,6 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Re
         public DoctorInfoResult? DoctorInfo { get; set; }
         public List<DoctorScheduleResult> WeeksScheduleList { get; set; }
         public List<DoctorScheduleResult> DaysScheduleList { get; set; }
-        public List<DoctorScheduleResult> UntactScheduleList { get; set; }
+        public List<DoctorScheduleResult> UntactWeeksScheduleList { get; set; }
     }
 }
