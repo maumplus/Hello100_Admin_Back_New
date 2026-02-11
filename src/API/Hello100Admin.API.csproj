@@ -10,6 +10,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Constracts\Admin\RequestsManagement\**" />
+    <Content Remove="Constracts\Admin\RequestsManagement\**" />
+    <EmbeddedResource Remove="Constracts\Admin\RequestsManagement\**" />
+    <None Remove="Constracts\Admin\RequestsManagement\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <InternalsVisibleTo Include="Hello100Admin.Modules.Auth.API.IntegrationTests" />
     <InternalsVisibleTo Include="Hello100Admin.Modules.Customer.API.IntegrationTests" />
   </ItemGroup>
@@ -47,10 +54,6 @@
     <None Update="KCP_AUTH_DEV_CERT.pem">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-	
-  <ItemGroup>
-    <Folder Include="Constracts\Admin\RequestsManagement\" />
   </ItemGroup>
 	
 </Project>

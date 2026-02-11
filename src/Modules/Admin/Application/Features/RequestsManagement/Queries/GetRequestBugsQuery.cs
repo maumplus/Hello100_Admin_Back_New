@@ -11,23 +11,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Hello100Admin.Modules.Admin.Application.Features.RequestsManagement.Queries
 {
-    public record GetRequestBugsQuery: IQuery<Result<ListResult<GetRequestBugsResult>>>
-    {
-        /// <summary>
-        /// 페이지 번호
-        /// </summary>
-        public int PageNo { get; init; }
-
-        /// <summary>
-        /// 페이지 사이즈
-        /// </summary>
-        public int PageSize { get; init; }
-
-        /// <summary>
-        /// 처리여부
-        /// </summary>
-        public bool ApprYn { get; init; }
-    }
+    public record GetRequestBugsQuery(int PageNo, int PageSize, bool ApprYn) : IQuery<Result<ListResult<GetRequestBugsResult>>>;
 
     public class GetRequestBugsQueryValidator : AbstractValidator<GetRequestBugsQuery>
     {
