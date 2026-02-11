@@ -86,7 +86,7 @@ namespace AdminUser.API.IntegrationTests
         }
 
         [Fact]
-        public async Task SearchDiagnosticTestResultAlimtalkSendHistories_ShouldReturnOk_WhenValidCredentials()
+        public async Task SearchExaminationResultAlimtalkHistories_ShouldReturnOk_WhenValidCredentials()
         {
             // Arrange
             var req = new
@@ -164,6 +164,29 @@ namespace AdminUser.API.IntegrationTests
 
             // Act
             var response = await _client.GetAsync($"/api/service-usage/alimtalk-service/examination-results/application-info");
+
+            // Body
+            var body = await response.Content.ReadAsStringAsync();
+
+            // Assert
+            Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task SubmitAlimtalkApplicationRequest_ShouldReturnOk_WhenValidCredentials()
+        {
+            // Arrange
+            var req = new
+            {
+                DoctNm = "1",
+                DoctTel = "1",
+                TmpType = "Test",
+            };
+
+            _client.AsSuperAdmin("B81AFBD0", "대민테스트");
+
+            // Act
+            var response = await _client.PostAsJsonAsync($"/api/service-usage/alimtalk-service/submit", req);
 
             // Body
             var body = await response.Content.ReadAsStringAsync();

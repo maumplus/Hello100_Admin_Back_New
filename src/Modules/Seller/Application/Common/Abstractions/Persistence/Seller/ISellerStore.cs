@@ -1,4 +1,5 @@
-﻿using Hello100Admin.Modules.Seller.Application.Features.Seller.Queries.GetSellerList;
+﻿using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
+using Hello100Admin.Modules.Seller.Application.Features.Seller.Queries.GetSellerList;
 using Hello100Admin.Modules.Seller.Application.Features.Seller.Queries.GetSellerRemitList;
 using Hello100Admin.Modules.Seller.Application.Features.Seller.ReadModels.CreateSeller;
 using Hello100Admin.Modules.Seller.Application.Features.Seller.ReadModels.GetSellerDetail;
@@ -6,6 +7,8 @@ using Hello100Admin.Modules.Seller.Application.Features.Seller.ReadModels.GetSel
 using Hello100Admin.Modules.Seller.Application.Features.Seller.ReadModels.GetSellerRemitList;
 using Hello100Admin.Modules.Seller.Application.Features.Seller.ReadModels.GetSellerRemitWaitList;
 using Hello100Admin.Modules.Seller.Application.Features.Seller.ReadModels.UpdateSellerRemit;
+using Hello100Admin.Modules.Seller.Application.Features.Seller.Results;
+using Hello100Admin.Modules.Seller.Domain.Entities;
 
 namespace Hello100Admin.Modules.Seller.Application.Common.Abstractions.Persistence.Seller
 {
@@ -77,5 +80,23 @@ namespace Hello100Admin.Modules.Seller.Application.Common.Abstractions.Persisten
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         public Task<List<GetSellerRemitWaitListReadModel>> GetSellerRemitWaitListAsync(string startDt, string endDt, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// 병원 검색
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="searchText"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        public Task<List<GetHospitalsResult>> GetHospitalsAsync(DbSession db, string searchText, CancellationToken ct = default);
+
+        /// <summary>
+        /// 관리자 아이디로 관리자 정보 조회
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="aId"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        public Task<TbAdminEntity?> GetAdminByAIdAsync(DbSession db, string aId, CancellationToken ct = default);
     }
 }

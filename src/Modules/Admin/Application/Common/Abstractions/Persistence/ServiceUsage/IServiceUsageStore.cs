@@ -1,4 +1,5 @@
-﻿using Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Queries.ExportExaminationResultAlimtalkHistoriesExcel;
+﻿using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
+using Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Queries.ExportExaminationResultAlimtalkHistoriesExcel;
 using Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Queries.ExportUntactMedicalHistoriesExcel;
 using Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Queries.SearchExaminationResultAlimtalkHistories;
 using Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Queries.SearchUntactMedicalHistories;
@@ -7,6 +8,7 @@ using Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.ReadModels.E
 using Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.ReadModels.GetUntactMedicalPaymentDetail;
 using Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.ReadModels.SearchExaminationResultAlimtalkHistories;
 using Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.ReadModels.SearchUntactMedicalHistories;
+using Hello100Admin.Modules.Admin.Domain.Entities;
 
 namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.ServiceUsage
 {
@@ -51,5 +53,16 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistenc
         /// <param name="token"></param>
         /// <returns></returns>
         public Task<List<GetExaminationResultAlimtalkHistoryForExportReadModel>> GetExaminationResultAlimtalkHistoryForExportAsync(ExportExaminationResultAlimtalkHistoriesExcelQuery req, CancellationToken token);
+
+        /// <summary>
+        /// 알림톡 신청 정보 존재 여부 조회
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="hospNo"></param>
+        /// <param name="hospKey"></param>
+        /// <param name="tmpType"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        public Task<TbKakaoMsgJoinEntity?> FindAlimtalkServiceApplicationAsync(DbSession db, string hospNo, string hospKey, string tmpType, CancellationToken ct);
     }
 }

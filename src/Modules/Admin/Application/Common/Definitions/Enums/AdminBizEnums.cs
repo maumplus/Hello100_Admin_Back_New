@@ -17,6 +17,26 @@
 
     }
 
+    public enum AdvertType
+    {
+        /// <summary>
+        /// 0: 정의되지 않은 광고
+        /// </summary>
+        None = 0,
+        /// <summary>
+        /// 1: 병원 배너광고
+        /// </summary>
+        HO = 1,
+        /// <summary>
+        /// 2: 팝업광고
+        /// </summary>
+        PO = 2,
+        /// <summary>
+        /// 3: 이지스 배너광고
+        /// </summary>
+        BA = 3,
+    }
+
     public enum Hello100RoleType
     {
         /// <summary>

@@ -33,36 +33,41 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Advertisement
             var parameters = new DynamicParameters();
             parameters.Add("Limit", pageSize * pageNo, DbType.Int32);
             parameters.Add("OffSet", (pageNo - 1) * pageSize, DbType.Int32);
-            parameters.Add("AdType", ImageUploadType.PO.ToString(), DbType.String); // AdvertType.PO
+            parameters.Add("AdType", AdvertType.PO.ToString(), DbType.String);
+            parameters.Add("EncKey", "d3fa7fa7873c38097b31feb7bcd1c017ff222aee", DbType.String);
 
             StringBuilder sbCondi = new StringBuilder();
 
-            sbCondi.AppendLine("  WHERE ad_type = @AdType   ");
-            sbCondi.AppendLine("    AND del_yn = 'N'        ");
+            sbCondi.AppendLine("  WHERE a.ad_type = @AdType   ");
+            sbCondi.AppendLine("    AND a.del_yn = 'N'        ");
 
             #region == Query ==
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine($"SET @total_cnt:= (SELECT COUNT(*) FROM VM_ADVERTS {sbCondi.ToString()});");
+            sb.AppendLine($"SET @total_cnt:= (SELECT COUNT(*) FROM VM_ADVERTS a {sbCondi.ToString()});");
             sb.AppendLine($"SET @rownum:= (@total_cnt +1) - @OffSet;");
             sb.AppendLine("  SELECT @rownum:= @rownum - 1 AS RowNum  ");
-            sb.AppendLine("	     ,	ad_id		AS AdId     ");
-            sb.AppendLine("	     ,	ad_type 	AS AdType   ");
-            sb.AppendLine("	     ,	hosp_key	AS HospKey  ");
-            sb.AppendLine("	     ,	md_cd   	AS MdCd     ");
-            sb.AppendLine("	     ,	show_yn 	AS ShowYn   ");
-            sb.AppendLine("	     ,	send_type 	AS SendType ");
-            sb.AppendLine("	     ,	url     	AS Url      ");
-            sb.AppendLine("	     ,	link_type	AS LinkType      ");
-            sb.AppendLine("	     ,	sort_no 	AS SortNo   ");
-            sb.AppendLine("	     ,	del_yn  	AS DelYn    ");
-            sb.AppendLine("	     ,	DATE_FORMAT(start_dt, '%Y-%m-%d')	AS StartDt");
-            sb.AppendLine("	     ,	DATE_FORMAT(end_dt, '%Y-%m-%d')	AS EndDt");
-            sb.AppendLine("	     ,	TIMESTAMPDIFF(day, NOW(), IFNULL(end_dt,'')) AS CntDt");
-            sb.AppendLine("	     ,	from_unixtime(reg_dt, '%Y-%m-%d %H:%i')  AS RegDt");
-            sb.AppendLine("      , img_url      AS ImgUrl");
-            sb.AppendLine("	   FROM VM_ADVERTS              ");
+            sb.AppendLine("	     ,	a.ad_id		AS AdId     ");
+            sb.AppendLine("	     ,	a.ad_type 	AS AdType   ");
+            sb.AppendLine("	     ,	a.hosp_key	AS HospKey  ");
+            sb.AppendLine("	     ,	a.md_cd   	AS MdCd     ");
+            sb.AppendLine("	     ,	a.show_yn 	AS ShowYn   ");
+            sb.AppendLine("	     ,	a.send_type 	AS SendType ");
+            sb.AppendLine("	     ,	a.url     	AS Url      ");
+            sb.AppendLine("	     ,	a.link_type	AS LinkType      ");
+            sb.AppendLine("	     ,	a.sort_no 	AS SortNo   ");
+            sb.AppendLine("	     ,	a.del_yn  	AS DelYn    ");
+            sb.AppendLine("	     ,	DATE_FORMAT(a.start_dt, '%Y-%m-%d')	AS StartDt");
+            sb.AppendLine("	     ,	DATE_FORMAT(a.end_dt, '%Y-%m-%d')	AS EndDt");
+            sb.AppendLine("	     ,	TIMESTAMPDIFF(day, NOW(), IFNULL(a.end_dt,'')) AS CntDt");
+            sb.AppendLine("	     ,	from_unixtime(a.reg_dt, '%Y-%m-%d %H:%i')  AS RegDt");
+            sb.AppendLine("      ,  b.url      AS ImgUrl");
+            sb.AppendLine("      ,  b.img_id      AS ImgId");
+            sb.AppendLine("	   FROM tb_ad_info a             ");
+            sb.AppendLine("    LEFT JOIN tb_image_info b    ");
+            sb.AppendLine("     ON (b.img_key = func_HMACSHA256(@EncKey, CONCAT('ad', a.ad_id, a.ad_type)) ");
+            sb.AppendLine("     AND b.del_yn = 'N')         ");
             sb.AppendLine(sbCondi.ToString());
-            sb.AppendLine("   ORDER BY reg_dt desc  ");
+            sb.AppendLine("   ORDER BY a.reg_dt desc  ");
             sb.AppendLine("   LIMIT @OffSet, @Limit;");
 
             sb.AppendLine($"SELECT @total_cnt;");
@@ -79,7 +84,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Advertisement
             return result;
         }
 
-        public async Task<GetPopupResult> GetPopupAsync(DbSession db, int popupId, CancellationToken ct)
+        public async Task<GetPopupResult> GetAdvertisementAsync(DbSession db, int popupId, CancellationToken ct)
         {
             var parameters = new DynamicParameters();
             parameters.Add("AdId", popupId, DbType.Int32);
@@ -115,7 +120,61 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Advertisement
             var result = await db.QueryFirstOrDefaultAsync<GetPopupResult>(sb.ToString(), parameters, ct, _logger);
 
             if (result == null)
-                throw new BizException(AdminErrorCode.PopupAdvertisementNotFound.ToError());
+                throw new BizException(AdminErrorCode.AdvertisementNotFound.ToError());
+
+            return result;
+        }
+
+        public async Task<ListResult<GetEghisBannersResult>> GetEghisBannersAsync(DbSession db, CancellationToken ct)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("AdType", AdvertType.BA.ToString(), DbType.String);
+            parameters.Add("EncKey", "d3fa7fa7873c38097b31feb7bcd1c017ff222aee", DbType.String);
+
+            StringBuilder sbCondi = new StringBuilder();
+
+            sbCondi.AppendLine("  WHERE a.ad_type = @AdType   ");
+            sbCondi.AppendLine("    AND a.del_yn = 'N'        ");
+
+            #region == Query ==
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"SET @total_cnt:= (SELECT COUNT(*) FROM tb_ad_info a {sbCondi.ToString()});");
+            sb.AppendLine($"SET @rownum:= (@total_cnt +1) - @OffSet;");
+            sb.AppendLine("  SELECT @rownum:= @rownum - 1 AS RowNum  ");
+            sb.AppendLine("	     ,	a.ad_id		AS AdId     ");
+            sb.AppendLine("	     ,	a.ad_type 	AS AdType   ");
+            sb.AppendLine("	     ,	a.hosp_key	AS HospKey  ");
+            sb.AppendLine("	     ,	a.md_cd   	AS MdCd     ");
+            sb.AppendLine("	     ,	a.send_type 	AS SendType ");
+            sb.AppendLine("	     ,	a.show_yn 	AS ShowYn   ");
+            sb.AppendLine("	     ,	a.url     	AS Url      ");
+            sb.AppendLine("	     ,	a.url2     	AS Url2      ");
+            sb.AppendLine("	     ,	a.link_type	AS LinkType      ");
+            sb.AppendLine("	     ,	a.sort_no 	AS SortNo   ");
+            sb.AppendLine("	     ,	a.del_yn  	AS DelYn    ");
+            sb.AppendLine("     ,	DATE_FORMAT(IFNULL(a.start_dt,''), '%Y-%m-%d')	AS StartDt  ");
+            sb.AppendLine("	     ,	DATE_FORMAT(IFNULL(a.end_dt,''), '%Y-%m-%d')	AS EndDt");
+            sb.AppendLine("	     ,	TIMESTAMPDIFF(day, NOW(), IFNULL(a.end_dt,'')) AS CntDt");
+            sb.AppendLine("	     ,	from_unixtime(a.reg_dt, '%Y-%m-%d %H:%i')  AS RegDt");
+            sb.AppendLine("     ,   b.img_id    AS ImgId    ");
+            sb.AppendLine("     ,   b.url       AS ImgUrl   ");
+            sb.AppendLine("	   FROM tb_ad_info a             ");
+            sb.AppendLine("    LEFT JOIN tb_image_info b    ");
+            sb.AppendLine("     ON (b.img_key = func_HMACSHA256(@EncKey, CONCAT('ad', a.ad_id, a.ad_type)) ");
+            sb.AppendLine("     AND b.del_yn = 'N')         ");
+            sb.AppendLine(sbCondi.ToString());
+            sb.AppendLine("   ORDER BY  sort_no, show_yn DESC, IFNULL(start_dt, '19000101') desc;  ");
+            //sb.AppendLine("   LIMIT @OffSet, @Limit;");
+
+            sb.AppendLine($"SELECT @total_cnt;");
+            #endregion
+
+            var multi = await db.QueryMultipleAsync(sb.ToString(), parameters, ct, _logger);
+
+            var result = new ListResult<GetEghisBannersResult>();
+
+            result.Items = (await multi.ReadAsync<GetEghisBannersResult>()).ToList();
+            result.TotalCount = await multi.ReadSingleAsync<int>();
 
             return result;
         }

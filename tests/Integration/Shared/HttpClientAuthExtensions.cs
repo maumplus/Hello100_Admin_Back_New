@@ -7,10 +7,10 @@
         // "A" => "GeneralAdmin",
         // _ => "GeneralAdmin"
 
-        public static HttpClient AsHospitalAdmin(this HttpClient client, string userId = "TEST1234", string name = "병원테스트")
+        public static HttpClient AsHospitalAdmin(this HttpClient client, string userId = "TEST1234", string name = "병원테스트", string hospNo = "10350072", string hospKey = "MzNiMDI0OWI1MDA0MWU2YjcxNTE1YTQ2MDM0YWViYzVmYzY5ZGQ5YjY2M2I5ODBjODgwNDVhNDg3YTdkNzc4NA==")
         {
             client.DefaultRequestHeaders.Remove(TestAuthHandler.HeaderName);
-            client.DefaultRequestHeaders.Add(TestAuthHandler.HeaderName, $"sub={userId};name={name};role=HospitalAdmin");
+            client.DefaultRequestHeaders.Add(TestAuthHandler.HeaderName, $"sub={userId};name={name};role=HospitalAdmin;hospNo={hospNo};hospKey={hospKey}");
             return client;
         }
 

@@ -3,11 +3,14 @@ using Hello100Admin.API.Extensions;
 using Hello100Admin.API.Infrastructure.Attributes;
 using Hello100Admin.BuildingBlocks.Common.Application;
 using Hello100Admin.BuildingBlocks.Common.Errors;
+using Hello100Admin.Modules.Admin.Application.Features.Account.Responses;
+using Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Queries;
 using Hello100Admin.Modules.Seller.Application.Features.Seller.Commands.CreateSeller;
 using Hello100Admin.Modules.Seller.Application.Features.Seller.Commands.CreateSellerRemit;
 using Hello100Admin.Modules.Seller.Application.Features.Seller.Commands.DeleteSellerRemit;
 using Hello100Admin.Modules.Seller.Application.Features.Seller.Commands.UpdateSellerRemit;
 using Hello100Admin.Modules.Seller.Application.Features.Seller.Commands.UpdateSellerRemitEnabled;
+using Hello100Admin.Modules.Seller.Application.Features.Seller.Queries.GetHopsitals;
 using Hello100Admin.Modules.Seller.Application.Features.Seller.Queries.GetRemitBalance;
 using Hello100Admin.Modules.Seller.Application.Features.Seller.Queries.GetSellerDetail;
 using Hello100Admin.Modules.Seller.Application.Features.Seller.Queries.GetSellerList;
@@ -20,6 +23,7 @@ using Hello100Admin.Modules.Seller.Application.Features.Seller.Responses.GetSell
 using Hello100Admin.Modules.Seller.Application.Features.Seller.Responses.GetSellerRemitWaitList;
 using Hello100Admin.Modules.Seller.Application.Features.Seller.Responses.Shared;
 using Hello100Admin.Modules.Seller.Application.Features.Seller.Responses.UpdateSellerRemit;
+using Hello100Admin.Modules.Seller.Application.Features.Seller.Results;
 using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -48,6 +52,7 @@ namespace Hello100Admin.API.Controllers
         /// 셀러 등록
         /// </summary>
         /// <param name="req">셀러 등록 시 요청 정보 <see cref="CreateSellerRequest"/></param>
+        /// <param name="cancellationToken"></param>
         /// <returns>응답 결과 <see cref="Result"/></returns>
         /// <returns></returns>
         [HttpPost("add")]
@@ -71,6 +76,7 @@ namespace Hello100Admin.API.Controllers
         /// 셀러 리스트
         /// </summary>
         /// <param name="req">셀러 등록 시 요청 정보 <see cref="GetSellerListRequest"/></param>
+        /// <param name="cancellationToken"></param>
         /// <returns>응답 리스트가 포함된 결과 <see cref="PagedResult{GetSellerListResponse}"/></returns>
         [HttpPost("list")]
         [Auth(Roles = "SuperAdmin")]
@@ -90,6 +96,7 @@ namespace Hello100Admin.API.Controllers
         /// 셀러 정보 상세
         /// </summary>
         /// <param name="id">셀러 일련번호</param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpGet("{id}")]
         [Auth(Roles = "SuperAdmin")]
@@ -109,6 +116,7 @@ namespace Hello100Admin.API.Controllers
         /// 송금 임시 등록
         /// </summary>
         /// <param name="req">송금 시 요청 정보</param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpPost("remit-add")]
         [Auth(Roles = "SuperAdmin")]
@@ -131,6 +139,7 @@ namespace Hello100Admin.API.Controllers
         /// KCP 송금 요청
         /// </summary>
         /// <param name="req">송금 시 요청 정보</param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpPatch("remit-request")]
         [Auth(Roles = "SuperAdmin")]
@@ -139,7 +148,10 @@ namespace Hello100Admin.API.Controllers
         {
             _logger.LogInformation("PATCH /api/seller/remit-request [{Id}] [{Aid}]", req.Id, Aid);
 
-            var command = req.Adapt<UpdateSellerRemitCommand>();
+            var command = req.Adapt<UpdateSellerRemitCommand>() with
+            {
+                AId = base.Aid
+            };
 
             var result = await _mediator.Send(command, cancellationToken);
 
@@ -230,6 +242,21 @@ namespace Hello100Admin.API.Controllers
             var command = req.Adapt<UpdateSellerRemitEnabledCommand>();
 
             var result = await _mediator.Send(command, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// 요양기관정보 리스트
+        /// </summary>
+        [HttpGet("hospital-list")]
+        [Auth(Roles = "SuperAdmin")]
+        [ProducesResponseType(typeof(ApiResponse<List<GetHospitalsResult>>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetHospitals([FromQuery] string searchText, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("GET /api/seller/hospital-list?searchText={searchText} [{Aid}]", searchText, Aid);
+
+            var result = await _mediator.Send(new GetHospitalsQuery(searchText), cancellationToken);
 
             return result.ToActionResult(this);
         }

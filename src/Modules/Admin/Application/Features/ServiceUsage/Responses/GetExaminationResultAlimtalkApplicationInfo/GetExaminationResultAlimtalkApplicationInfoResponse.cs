@@ -23,6 +23,19 @@
         public string Tel { get; init; } = default!;
 
         /// <summary>
+        /// 신청 의사명
+        /// </summary>
+        public string? DoctNm { get; init; }
+        /// <summary>
+        /// 신청 의사 연락처
+        /// </summary>
+        public string? DoctTel { get; init; }
+        /// <summary>
+        /// 알림톡 발송 서비스 신청 여부
+        /// </summary>
+        public bool IsAlimtalkServiceApplied = false;
+
+        /// <summary>
         /// 알림톡 발송 서비스 신청(검사결과) 카카오 샘플 이미지 URL
         /// </summary>
         public string KakaoSampleImageUrl { get; init; } = default!;

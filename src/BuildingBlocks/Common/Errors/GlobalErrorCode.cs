@@ -60,4 +60,6 @@ public enum GlobalErrorCode
     FailedRequestVerificationCode = 1023,
     [Description("인증코드가 만료되었습니다.")]
     ExpiredVerificationCode = 1024,
+    [Description("입력한 비밀번호가 올바르지 않습니다.")]
+    PasswordAuthFailed = 1025,
 }

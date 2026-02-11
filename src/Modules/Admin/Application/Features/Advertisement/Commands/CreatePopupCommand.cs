@@ -79,6 +79,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.Advertisement.Command
             string imagePath = await _sftpClientService.UploadImageWithPathAsync(req.ImagePayload!, ImageUploadType.PO, "SuperAdmin", ct);
 
             var adInfoEntity = req.Adapt<TbAdInfoEntity>();
+            adInfoEntity.AdType = AdvertType.PO.ToString();
 
             var imageEntity = new TbImageInfoEntity()
             {
@@ -86,7 +87,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.Advertisement.Command
             };
 
             await _db.RunAsync(DataSource.Hello100, 
-                (dbSession, ct) => _advertisementRepository.CreatePopupAsync(dbSession, adInfoEntity, imageEntity, ct)
+                (dbSession, ct) => _advertisementRepository.CreateAdvertisementAsync(dbSession, adInfoEntity, imageEntity, ct)
             , ct);
             
             return Result.Success();

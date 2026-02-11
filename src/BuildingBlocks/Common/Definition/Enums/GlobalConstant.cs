@@ -6,5 +6,12 @@
         {
             public const string Xlsx = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
         }
+
+        public class AdminRoles
+        {
+            public const string SuperAdmin = "S";
+            public const string GeneralAdmin = "A";
+            public const string HospitalAdmin = "C";
+        }
     }
 }

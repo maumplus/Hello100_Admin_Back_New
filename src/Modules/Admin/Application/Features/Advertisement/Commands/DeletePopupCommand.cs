@@ -30,21 +30,18 @@ namespace Hello100Admin.Modules.Admin.Application.Features.Advertisement.Command
 
     public class DeletePopupCommandHandler : IRequestHandler<DeletePopupCommand, Result>
     {
-        private readonly string _adminImageUrl;
         private readonly ILogger<DeletePopupCommandHandler> _logger;
         private readonly IAdvertisementStore _advertisementStore;
         private readonly IAdvertisementRepository _advertisementRepository;
         private readonly ISftpClientService _sftpClientService;
         private readonly IDbSessionRunner _db;
 
-        public DeletePopupCommandHandler(IConfiguration config,
-                                         ILogger<DeletePopupCommandHandler> logger, 
+        public DeletePopupCommandHandler(ILogger<DeletePopupCommandHandler> logger, 
                                          IAdvertisementStore advertisementStore, 
                                          IAdvertisementRepository advertisementRepository,
                                          ISftpClientService sftpClientService,
                                          IDbSessionRunner db)
         {
-            _adminImageUrl = config["AdminImageUrl"] ?? string.Empty;
             _logger = logger;
             _advertisementStore = advertisementStore;
             _advertisementRepository = advertisementRepository;
@@ -57,7 +54,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.Advertisement.Command
             _logger.LogInformation("DeletePopupCommandHandler Handle Start [{AdId}]", req.AdId);
 
             var popupInfo = await _db.RunAsync(DataSource.Hello100,
-                (session, token) => _advertisementStore.GetPopupAsync(session, req.AdId, token),
+                (session, token) => _advertisementStore.GetAdvertisementAsync(session, req.AdId, token),
                 ct);
 
             var adEntity = new TbAdInfoEntity

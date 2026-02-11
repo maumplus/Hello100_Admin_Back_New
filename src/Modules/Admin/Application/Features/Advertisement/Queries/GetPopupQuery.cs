@@ -41,7 +41,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.Advertisement.Queries
             _logger.LogInformation("Handling GetPopupQuery: PopupId={PopupId}", req.PopupId);
 
             var result = await _db.RunAsync(DataSource.Hello100,
-                (session, token) => _advertisementStore.GetPopupAsync(session, req.PopupId, token),
+                (session, token) => _advertisementStore.GetAdvertisementAsync(session, req.PopupId, token),
                 ct);
 
             result.ImgUrl = $"{_adminImageUrl}{result.ImgUrl}";

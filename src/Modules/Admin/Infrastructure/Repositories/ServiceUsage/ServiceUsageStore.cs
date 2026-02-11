@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using System.Data;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Dapper;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.ServiceUsage;
 using Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Queries.SearchUntactMedicalHistories;
 using Microsoft.Extensions.Logging;
@@ -17,6 +18,7 @@ using Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.ReadModels.S
 using Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Queries.SearchExaminationResultAlimtalkHistories;
 using Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Queries.ExportExaminationResultAlimtalkHistoriesExcel;
 using Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.ReadModels.ExportExaminationResultAlimtalkHistoriesExcel;
+using Hello100Admin.Modules.Admin.Domain.Entities;
 
 namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.ServiceUsage
 {
@@ -386,7 +388,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.ServiceUsage
         {
             try
             {
-                _logger.LogInformation("SearchDiagnosticTestResultAlimtalkSendHistoriesAsync() Started");
+                _logger.LogInformation("SearchExaminationResultAlimtalkHistoriesAsync() Started");
 
                 var parameters = new DynamicParameters();
                 parameters.Add("@SearchKeyword", req.SearchKeyword ?? string.Empty, DbType.String);
@@ -484,7 +486,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.ServiceUsage
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "SearchDiagnosticTestResultAlimtalkSendHistoriesAsync() Error");
+                _logger.LogError(e, "SearchExaminationResultAlimtalkHistoriesAsync() Error");
                 throw new BizException(GlobalErrorCode.DataQueryError.ToError());
             }
         }
@@ -590,6 +592,27 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.ServiceUsage
                 _logger.LogError(e, "GetExaminationResultAlimtalkHistoryForExportAsync() Error");
                 throw new BizException(GlobalErrorCode.DataQueryError.ToError());
             }
+        }
+
+        public async Task<TbKakaoMsgJoinEntity?> FindAlimtalkServiceApplicationAsync(DbSession db, string hospNo, string hospKey, string tmpType, CancellationToken ct = default)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("HospNo", hospNo, DbType.String);
+            parameters.Add("HospKey", hospKey, DbType.String);
+            parameters.Add("TmpType", tmpType, DbType.String);
+
+            var query = @"
+                SELECT doct_nm,
+                       doct_tel
+                  FROM hello100.tb_kakao_msg_join
+                 WHERE hosp_no = @HospNo
+	               AND hosp_key = @HospKey
+	               AND tmp_type = @TmpType
+            ";
+
+            var result = await db.QueryFirstOrDefaultAsync<TbKakaoMsgJoinEntity>(query, parameters, ct, _logger);
+
+            return result;
         }
         #endregion
     }

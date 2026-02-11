@@ -2,6 +2,7 @@
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Hospital;
 using Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Results;
 using MediatR;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Queries
@@ -14,13 +15,16 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
 
     public class GetHospitalQueryHandler : IRequestHandler<GetHospitalQuery, Result<GetHospitalResult?>>
     {
+        private readonly string _adminImageUrl;
         private readonly IHospitalManagementStore _hospitalStore;
         private readonly ILogger<GetHospitalQueryHandler> _logger;
 
         public GetHospitalQueryHandler(
-        IHospitalManagementStore hospitalStore,
-        ILogger<GetHospitalQueryHandler> logger)
+            IConfiguration config,
+            IHospitalManagementStore hospitalStore,
+            ILogger<GetHospitalQueryHandler> logger)
         {
+            _adminImageUrl = config["AdminImageUrl"] ?? string.Empty;
             _hospitalStore = hospitalStore;
             _logger = logger;
         }
@@ -37,6 +41,14 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
                 result.Images = await _hospitalStore.GetImageListAsync(result.HospKey, cancellationToken);
                 result.ClinicTimesNew = await _hospitalStore.GetHospMedicalTimeNewListAsync(result.HospKey, cancellationToken);
                 result.KeywordMasters = await _hospitalStore.GetKeywordMasterListAsync(result.HospKey, cancellationToken);
+
+                if (result.Images != null && result.Images.Count > 0)
+                {
+                    foreach (var img in result.Images)
+                    {
+                        img.Url = $"{_adminImageUrl}{img.Url}";
+                    }
+                }
             }
 
             return Result.Success(result);

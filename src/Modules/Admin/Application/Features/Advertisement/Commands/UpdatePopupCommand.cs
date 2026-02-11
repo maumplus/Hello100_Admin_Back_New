@@ -95,7 +95,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.Advertisement.Command
             };
 
             await _db.RunAsync(DataSource.Hello100, 
-                (dbSession, ct) => _advertisementRepository.UpdatePopupAsync(dbSession, adInfoEntity, imageEntity, ct)
+                (dbSession, token) => _advertisementRepository.UpdatePopupAsync(dbSession, adInfoEntity, imageEntity, token)
             , ct);
 
             // 이전 이미지 삭제는??

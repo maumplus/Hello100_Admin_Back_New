@@ -7,6 +7,7 @@ using Hello100Admin.Modules.Auth.Application.Common.Abstractions.Services;
 using Hello100Admin.Modules.Auth.Application.Common.Abstractions.Persistence.Auth;
 using Hello100Admin.Modules.Auth.Application.Features.Auth.ReadModels;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Security;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 
 namespace Hello100Admin.Modules.Auth.Application.UnitTests.Commands
 {
@@ -37,7 +38,8 @@ namespace Hello100Admin.Modules.Auth.Application.UnitTests.Commands
             var authRepo = new Mock<IAuthRepository>();
 			var mockLogger = new Mock<ILogger<LoginCommandHandler>>();
 			var mockCrypt = new Mock<ICryptoService>();
-			var handler = new LoginCommandHandler(mockPasswordHasher.Object, mockTokenService.Object, authRepo.Object, authStore.Object, mockLogger.Object, mockCrypt.Object);
+			var mockDb = new Mock<IDbSessionRunner>();
+			var handler = new LoginCommandHandler(mockPasswordHasher.Object, mockTokenService.Object, authRepo.Object, authStore.Object, mockLogger.Object, mockCrypt.Object, mockDb.Object);
 			var command = new LoginCommand { AccountId = user.AccId, Password = "password", IpAddress = "127.0.0.1" };
 
 			// Act
@@ -61,7 +63,8 @@ namespace Hello100Admin.Modules.Auth.Application.UnitTests.Commands
 			var authRepo = new Mock<IAuthRepository>();
 			var mockLogger = new Mock<ILogger<LoginCommandHandler>>();
             var mockCrypt = new Mock<ICryptoService>();
-            var handler = new LoginCommandHandler(mockPasswordHasher.Object, mockTokenService.Object, authRepo.Object, authStore.Object, mockLogger.Object, mockCrypt.Object);
+            var mockDb = new Mock<IDbSessionRunner>();
+            var handler = new LoginCommandHandler(mockPasswordHasher.Object, mockTokenService.Object, authRepo.Object, authStore.Object, mockLogger.Object, mockCrypt.Object, mockDb.Object);
             var command = new LoginCommand { AccountId = "notfound", Password = "password", IpAddress = "127.0.0.1" };
 
 			// Act
@@ -94,7 +97,8 @@ namespace Hello100Admin.Modules.Auth.Application.UnitTests.Commands
 			var authRepo = new Mock<IAuthRepository>();
 			var mockLogger = new Mock<ILogger<LoginCommandHandler>>();
             var mockCrypt = new Mock<ICryptoService>();
-            var handler = new LoginCommandHandler(mockPasswordHasher.Object, mockTokenService.Object, authRepo.Object, authStore.Object, mockLogger.Object, mockCrypt.Object);
+            var mockDb = new Mock<IDbSessionRunner>();
+            var handler = new LoginCommandHandler(mockPasswordHasher.Object, mockTokenService.Object, authRepo.Object, authStore.Object, mockLogger.Object, mockCrypt.Object, mockDb.Object);
             var command = new LoginCommand { AccountId = user.AccId, Password = "wrongpassword", IpAddress = "127.0.0.1" };
 
 			// Act

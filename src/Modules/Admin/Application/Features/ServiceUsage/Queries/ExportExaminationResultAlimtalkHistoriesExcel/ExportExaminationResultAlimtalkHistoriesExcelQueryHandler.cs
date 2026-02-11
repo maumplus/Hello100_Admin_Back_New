@@ -54,7 +54,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Queries.
 
                 var bizResult = await _bizApiClientService.SendHistoryAsync(kakaoBizRequest, token);
 
-                if (bizResult != null && bizResult.ResultCd == 0 && bizResult.ResultData.ListCount > 0)
+                if (bizResult != null && bizResult.ResultCd == 0 && bizResult.ResultData?.ListCount > 0)
                 {
                     var joinedItems = resultList.Join(
                         bizResult.ResultData.List,

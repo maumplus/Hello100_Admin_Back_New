@@ -1,5 +1,9 @@
 ﻿using Hello100Admin.BuildingBlocks.Common.Application;
+using Hello100Admin.BuildingBlocks.Common.Definition.Enums;
+using Hello100Admin.BuildingBlocks.Common.Errors;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Extensions;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Security.Hash;
 using Hello100Admin.Modules.Seller.Application.Common.Abstractions.External;
 using Hello100Admin.Modules.Seller.Application.Common.Abstractions.Persistence.Seller;
 using Hello100Admin.Modules.Seller.Application.Common.Constracts.External.Web.Seller.Request;
@@ -13,27 +17,45 @@ namespace Hello100Admin.Modules.Seller.Application.Features.Seller.Commands.Upda
 {
     public class UpdateSellerRemitCommandHandler : IRequestHandler<UpdateSellerRemitCommand, Result<UpdateSellerRemitResponse>>
     {
-        private readonly ILogger<UpdateSellerRemitCommandHandler> logger;
+        private readonly ILogger<UpdateSellerRemitCommandHandler> _logger;
         private readonly ISellerRepository _sellerRepository;
         private readonly ISellerStore _sellerStore;
         private readonly IKcpRemitService _kcpRemitService;
+        private readonly IHasher _hasher;
+        private readonly IDbSessionRunner _db;
 
         public UpdateSellerRemitCommandHandler(ILogger<UpdateSellerRemitCommandHandler> logger, 
                                                ISellerRepository sellerRepository, 
                                                ISellerStore sellerStore,
-                                               IKcpRemitService kcpRemitService)
+                                               IKcpRemitService kcpRemitService,
+                                               IHasher hasher,
+                                               IDbSessionRunner db)
         {
-            this.logger = logger;
+            _logger = logger;
             _sellerRepository = sellerRepository;
             _sellerStore = sellerStore;
             _kcpRemitService = kcpRemitService;
+            _hasher = hasher;
+            _db = db;
         }
 
-        public async Task<Result<UpdateSellerRemitResponse>> Handle(UpdateSellerRemitCommand command, CancellationToken cancellationToken)
+        public async Task<Result<UpdateSellerRemitResponse>> Handle(UpdateSellerRemitCommand req, CancellationToken ct)
         {
-            logger.LogDebug("Processing update seller remit [{Id}]", command.Id);
+            _logger.LogDebug("Processing update seller remit [{Id}]", req.Id);
 
-            var remitWaitInfo = await _sellerStore.GetHospSellerRemitWaitInfoAsync(command.Id, cancellationToken);
+            var hashedPwd = this.GetHashedPassword(req.AId, req.Password);
+
+            var adminInfo = await _db.RunAsync(DataSource.Hello100, 
+                (session, token) => _sellerStore.GetAdminByAIdAsync(session, req.AId, token), 
+            ct);
+
+            if (adminInfo == null)
+                return Result.Success<UpdateSellerRemitResponse>().WithError(GlobalErrorCode.AuthFailed.ToError());
+
+            if (!_hasher.VerifyHashedData(adminInfo.AccPwd, req.Password, adminInfo.Aid, _logger))
+                return Result.Success<UpdateSellerRemitResponse>().WithError(GlobalErrorCode.PasswordAuthFailed.ToError());
+
+            var remitWaitInfo = await _sellerStore.GetHospSellerRemitWaitInfoAsync(req.Id, ct);
 
             if (remitWaitInfo == null || remitWaitInfo.Status != "0" || remitWaitInfo.IsSync != "1" || remitWaitInfo.Enabled != "1")
             {
@@ -44,7 +66,7 @@ namespace Hello100Admin.Modules.Seller.Application.Features.Seller.Commands.Upda
                     ResEnMsg = "Invalid request state"
                 };
 
-                return Result<UpdateSellerRemitResponse>.Success(failedResult).WithError(SellerErrorCode.InvalidStateForRequest.ToError());
+                return Result.Success(failedResult).WithError(SellerErrorCode.InvalidStateForRequest.ToError());
             }
 
             // KCP 송금 요청
@@ -71,7 +93,7 @@ namespace Hello100Admin.Modules.Seller.Application.Features.Seller.Commands.Upda
                     ResEnMsg = "No response from KCP"
                 };
 
-                return Result<UpdateSellerRemitResponse>.Success(failedResult).WithError(SellerErrorCode.KcpNoResponse.ToError());
+                return Result.Success(failedResult).WithError(SellerErrorCode.KcpNoResponse.ToError());
             }
 
             var updateParams = new UpdateSellerRemitParams
@@ -90,7 +112,7 @@ namespace Hello100Admin.Modules.Seller.Application.Features.Seller.Commands.Upda
                 VanAppTime = kcpResult.VanApptime,
             };
 
-            var updateCount = await _sellerRepository.UpdateSellerRemitAsync(updateParams, command.Id, command.Etc, cancellationToken);
+            var updateCount = await _sellerRepository.UpdateSellerRemitAsync(updateParams, req.Id, req.Etc, ct);
 
             var result = new UpdateSellerRemitResponse
             {
@@ -108,7 +130,24 @@ namespace Hello100Admin.Modules.Seller.Application.Features.Seller.Commands.Upda
                 VanAppTime = kcpResult.VanApptime,
             };
 
-            return Result<UpdateSellerRemitResponse>.Success(result);
+            return Result.Success(result);
+        }
+
+        private string GetHashedPassword(string aId, string pwd)
+        {
+            var hashedPwd = string.Empty;
+
+            try
+            {
+                hashedPwd = _hasher.HashWithSalt(pwd, aId);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Password hash generation failed during SHA256 computation.");
+                throw new BizException(SellerErrorCode.PasswordHashGenerationError.ToError());
+            }
+
+            return hashedPwd;
         }
     }
 }

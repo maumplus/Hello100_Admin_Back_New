@@ -17,9 +17,12 @@ namespace Auth.API.IntegrationTests
             // Arrange
             var loginCommand = new
             {
-                AccountId = "testst",
-                Password = "testst"
+                AccountId = "daemin",
+                Password = "qwer1234",
+                AppContext = "H02"
             };
+
+            _client.AsSuperAdmin("B81AFBD0", "´ë¹ÎÅ×½ºÆ®");
 
             // Act
             var response = await _client.PostAsJsonAsync("/api/auth/login", loginCommand);

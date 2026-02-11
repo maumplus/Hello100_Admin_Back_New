@@ -15,6 +15,8 @@ namespace Hello100Admin.API.Controllers
         protected string Grade => User.FindFirst("grade")?.Value ?? "";
         protected string HospNo => User.FindFirst("hospNo")?.Value ?? "";
         protected string HospKey => User.FindFirst("hospKey")?.Value ?? "";
+        protected string? UserAgent => this.GetClientUserAgent();
+        protected string? ClientIpAddress => this.GetClientIpAddress();
 
         protected string? GetClientUserAgent()
         {

@@ -9,6 +9,8 @@ using Hello100Admin.BuildingBlocks.Common.Infrastructure.Security;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Serialization;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Common;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Hospital;
+using Hello100Admin.Modules.Admin.Application.Common.Errors;
+using Hello100Admin.Modules.Admin.Application.Common.Extensions;
 using Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Results;
 using Mapster;
 using MediatR;
@@ -60,6 +62,9 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
             _logger.LogInformation("Handling GetHelloDeskSettingQuery HospNo:{HospNo}", req.HospNo);
 
             var hospInfo = await _hospitalProfileProvider.GetCurrentHospitalProfileByHospNoAsync(req.HospNo, ct);
+
+            if (hospInfo.TabletCnt <= 0)
+                return Result.Success<GetDeviceSettingResult<TabletRo>>().WithError(AdminErrorCode.TabletNotRegistered.ToError());
 
             var result = await _db.RunAsync(DataSource.Hello100, 
                 (session, token) => _hospitalStore.GetHelloDeskSettingAsync(session, req.HospNo, req.HospKey, req.EmplNo, 2, token),  // SetDeviceType.Tablet: 2

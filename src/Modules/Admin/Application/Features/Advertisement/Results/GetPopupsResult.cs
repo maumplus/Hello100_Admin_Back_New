@@ -47,6 +47,10 @@
         /// </summary>
         public string DelYn { get; set; } = default!;
         /// <summary>
+        /// 이미지 ID
+        /// </summary>
+        public int ImgId { get; set; }
+        /// <summary>
         /// 이미지 URL
         /// </summary>
         public string? ImgUrl { get; set; }
