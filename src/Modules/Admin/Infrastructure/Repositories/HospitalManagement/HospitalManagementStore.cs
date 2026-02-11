@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Mapster;
 using Hello100Admin.Modules.Admin.Application.Common.Models;
 using System.Text;
+using Hello100Admin.Modules.Admin.Domain.Entities;
 
 namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManagement
 {
@@ -895,6 +896,212 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             using var connection = CreateConnection();
 
             return (await connection.QueryAsync<GetDoctorScheduleResult>(sql, parameters)).ToList();
+        }
+
+        public async Task<EghisDoctRsrvInfoEntity?> GetEghisDoctRsrvInfo(string hospNo, string emplNo, int weekNum, string clinicYmd, CancellationToken cancellationToken = default)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@HospNo", hospNo, DbType.String);
+            parameters.Add("@EmplNo", emplNo, DbType.String);
+            parameters.Add("@WeekNum", weekNum, DbType.Int32);
+            parameters.Add("@ClinicYmd", clinicYmd, DbType.String);
+
+            var sql = $@"
+                SELECT rIdx                                     AS Ridx,
+                       hosp_no                                  AS HospNo,
+                       empl_no                                  AS EmplNo,
+                       week_num                                 AS WeekNum,
+                       clinic_ymd                               AS ClinicYmd,
+                       rsrv_interval_time                       AS RsrvIntervalTime,
+                       rsrv_interval_cnt                        AS RsrvIntervalCnt,
+                       DATE_FORMAT(reg_dt, '%Y-%m-%d %H:%i:%s') AS RegDt,
+                       untact_rsrv_interval_time                AS UntactRsrvIntervalTime,
+                       untact_rsrv_interval_cnt                 AS UntactRsrvIntervalCnt,
+                       CASE
+                         WHEN LENGTH(untact_ava_start_time) = 4 THEN
+                           CONCAT(SUBSTRING(untact_ava_start_time, 1, 2), ':', SUBSTRING(untact_ava_start_time, 3, 2))
+                         ELSE
+                           ''
+                       END                                      AS UntactAvaStartTime,
+                       CASE
+                         WHEN LENGTH(untact_ava_end_time) = 4 THEN
+                           CONCAT(SUBSTRING(untact_ava_end_time, 1, 2), ':', SUBSTRING(untact_ava_end_time, 3, 2))
+                         ELSE
+                           ''
+                       END                                      AS UntactAvaEndTime,
+                       untact_ava_use_yn                        AS UntactAvaUseYn
+                 FROM hello100_api.eghis_doct_rsrv_info
+                WHERE hosp_no = @HospNo
+                  AND empl_no = @EmplNo
+                  AND week_num = @WeekNum
+                  AND clinic_ymd = @ClinicYmd;
+            ";
+
+            using var connection = CreateConnection();
+
+            return await connection.QueryFirstOrDefaultAsync<EghisDoctRsrvInfoEntity>(sql, parameters);
+        }
+
+        public async Task<List<EghisDoctRsrvDetailInfoEntity>> GetEghisDoctRsrvDetailList(int ridx, string receptType, CancellationToken cancellationToken = default)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@Ridx", ridx, DbType.Int32);
+            parameters.Add("@ReceptType", receptType, DbType.String);
+
+            var sql = $@"
+                SELECT rsIdx                                    AS RsIdx,
+                       ridx                                     AS Ridx,
+                       start_time                               AS StartTime,
+                       end_time                                 AS EndTime,
+                       rsrv_cnt                                 AS RsrvCnt,
+                       com_cnt                                  AS ComCnt,
+                       DATE_FORMAT(reg_dt, '%Y-%m-%d %H:%i:%s') AS RegDt,
+                       recept_type                              AS ReceptType
+                  FROM hello100_api.eghis_doct_rsrv_detail_info
+                 WHERE rIdx = @Ridx 
+                   AND recept_type = @ReceptType;
+            ";
+
+            using var connection = CreateConnection();
+
+            return (await connection.QueryAsync<EghisDoctRsrvDetailInfoEntity>(sql, parameters)).ToList();
+        }
+
+        public async Task<List<EghisRsrvInfoEntity>> GetEghisRsrvList(string hospNo, string emplNo, int weekNum, CancellationToken cancellationToken = default)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@HospNo", hospNo, DbType.String);
+            parameters.Add("@EmplNo", emplNo, DbType.String);
+            parameters.Add("@WeekNum", weekNum, DbType.Int32);
+
+            var sql = $@"
+                SELECT a.hospNo                                    AS HospNo,
+                       a.rsrvReceptNo                              AS RsrvReceptNo,
+                       a.receptNo                                  AS ReceptNo,
+                       a.serialNo                                  AS SerialNo,
+                       a.reqDate                                   AS ReqDate,
+                       a.rsrvYmd                                   AS RsrvYmd,
+                       a.rsrvTime                                  AS RsrvTime,
+                       a.appUid                                    AS AppUid,
+                       a.deptCd                                    AS DeptCd,
+                       a.deptNm                                    AS DeptNm,
+                       a.ptntNo                                    AS PtntNo,
+                       a.doctEmplNo                                AS DoctEmplNo,
+                       a.ptntState                                 AS PtntState,
+                       a.waitSeq                                   AS WaitSeq,
+                       a.ptntNm                                    AS PtntNm,
+                       a.resultCd                                  AS ResultCd,
+                       a.allergyList                               AS AllergyList,
+                       DATE_FORMAT(a.regDate, '%Y-%m-%d %H:%i:%s') AS RegDate,
+                       DATE_FORMAT(a.modDate, '%Y-%m-%d %H:%i:%s') AS ModDate,
+                       a.transYn                                   AS TransYn,
+                       a.message                                   AS Message
+                 FROM hello100_api.eghis_rsrv_info a
+                WHERE a.hospNo = @HospNo
+                  AND a.doctEmplNo = @EmplNo
+                  AND WEEKDAY(a.rsrvYmd) + 1 = @WeekNum
+                  AND a.rsrvYmd > DATE_FORMAT(NOW(), '%Y%m%d')
+                  AND a.rsrvYmd NOT IN ( SELECT b.clinic_ymd
+                                           FROM hello100_api.eghis_doct_info b
+                                          WHERE b.hosp_no = a.hospNo
+                                            AND b.empl_no = a.doctEmplNo
+                                            AND IFNULL(b.clinic_ymd, '') <> '' )
+                  AND a.ptntState = 4
+                ORDER BY a.rsrvYmd, a.rsrvTime;
+            ";
+
+            using var connection = CreateConnection();
+
+            return (await connection.QueryAsync<EghisRsrvInfoEntity>(sql, parameters)).ToList();
+        }
+
+        public async Task<List<EghisRsrvInfoEntity>> GetEghisRsrvList(string hospNo, string emplNo, string clinicYmd, CancellationToken cancellationToken = default)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@HospNo", hospNo, DbType.String);
+            parameters.Add("@EmplNo", emplNo, DbType.String);
+            parameters.Add("@ClinicYmd", clinicYmd, DbType.String);
+
+            var sql = $@"
+                SELECT a.hospNo                                    AS HospNo,
+                       a.rsrvReceptNo                              AS RsrvReceptNo,
+                       a.receptNo                                  AS ReceptNo,
+                       a.serialNo                                  AS SerialNo,
+                       a.reqDate                                   AS ReqDate,
+                       a.rsrvYmd                                   AS RsrvYmd,
+                       a.rsrvTime                                  AS RsrvTime,
+                       a.appUid                                    AS AppUid,
+                       a.deptCd                                    AS DeptCd,
+                       a.deptNm                                    AS DeptNm,
+                       a.ptntNo                                    AS PtntNo,
+                       a.doctEmplNo                                AS DoctEmplNo,
+                       a.ptntState                                 AS PtntState,
+                       a.waitSeq                                   AS WaitSeq,
+                       a.ptntNm                                    AS PtntNm,
+                       a.resultCd                                  AS ResultCd,
+                       a.allergyList                               AS AllergyList,
+                       DATE_FORMAT(a.regDate, '%Y-%m-%d %H:%i:%s') AS RegDate,
+                       DATE_FORMAT(a.modDate, '%Y-%m-%d %H:%i:%s') AS ModDate,
+                       a.transYn                                   AS TransYn,
+                       a.message                                   AS Message
+                 FROM hello100_api.eghis_rsrv_info a
+                WHERE a.hospNo = @HospNo
+                  AND a.doctEmplNo = @EmplNo
+                  AND a.rsrvYmd = @ClinicYmd
+                  AND a.rsrvYmd > DATE_FORMAT(NOW(), '%Y%m%d')
+                  AND a.ptntState = 4
+                ORDER BY a.rsrvYmd, a.rsrvTime;
+            ";
+
+            using var connection = CreateConnection();
+
+            return (await connection.QueryAsync<EghisRsrvInfoEntity>(sql, parameters)).ToList();
+        }
+
+        public async Task<List<EghisRsrvInfoEntity>> GetEghisUntactRsrvList(string hospNo, string emplNo, int weekNum, CancellationToken cancellationToken = default)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@HospNo", hospNo, DbType.String);
+            parameters.Add("@EmplNo", emplNo, DbType.String);
+            parameters.Add("@WeekNum", weekNum, DbType.Int32);
+
+            var sql = $@"
+                SELECT a.hosp_no                                  AS HospNo,
+                       NULL                                       AS RsrvReceptNo,
+                       a.recept_no                                AS ReceptNo,
+                       a.serial_no                                AS SerialNo,
+                       a.req_date                                 AS ReqDate,
+                       a.req_date                                 AS RsrvYmd,
+                       a.req_time                                 AS RsrvTime,
+                       CONCAT(a.uid, a.mid)                       AS AppUid,
+                       NULL                                       AS DeptCd,
+                       NULL                                       AS DeptNm,
+                       a.ptnt_no                                  AS PtntNo,
+                       a.doct_empl_no                             AS DoctEmplNo,
+                       a.ptnt_state                               AS PtntState,
+                       a.wait_seq                                 AS WaitSeq,
+                       b.name                                     AS PtntNm,
+                       a.result_cd                                AS ResultCd,
+                       NULL                                       AS AllergyList,
+                       DATE_FORMAT(a.reg_dt, '%Y-%m-%d %H:%i:%s') AS RegDate,
+                       DATE_FORMAT(a.msd_dt, '%Y-%m-%d %H:%i:%s') AS ModDate,
+                       2                                          AS TransYn,
+                       a.msg                                      AS Message
+                  FROM hello100.tb_eghis_hosp_receipt_info a
+                  LEFT JOIN hello100.tb_member b
+                    ON a.mid = b.mid
+                 WHERE a.hosp_no = @HospNo
+                   AND a.recept_type = 'NR'
+                   AND a.empl_no = @EmplNo
+                   AND a.ptnt_state = 1
+                   AND a.req_date >= DATE_FORMAT(NOW(), '%Y%m%d')
+                   AND WEEKDAY(a.req_date) + 1 = @WeekNum
+                ORDER BY a.req_date, a.req_time;
+            ";
+
+            using var connection = CreateConnection();
+
+            return (await connection.QueryAsync<EghisRsrvInfoEntity>(sql, parameters)).ToList();
         }
     }
 }

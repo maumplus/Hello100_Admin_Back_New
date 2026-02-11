@@ -458,6 +458,72 @@ namespace Hello100Admin.API.Controllers
             return result.ToActionResult(this);
         }
 
+        /// <summary>
+        /// [병원정보관리 > 의료진관리 > 주간 스케쥴 관리]예약 정보 API
+        /// </summary>
+        [HttpGet("doctor-weeks-reservation-list")]
+        [ProducesResponseType(typeof(GetDoctorWeeksReservationListResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetDoctorWeeksReservationList(GetDoctorWeeksReservationListRequest request, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("GET /api/hospital-management/doctor-weeks-reservation-list");
+
+            var command = new GetDoctorWeeksReservationListQuery()
+            {
+                HospNo = base.HospNo,
+                EmplNo = request.EmplNo,
+                WeekNum = request.WeekNum
+            };
+
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [병원정보관리 > 의료진관리 > 지정 스케쥴 관리]예약 정보 API
+        /// </summary>
+        [HttpGet("doctor-days-reservation-list")]
+        [ProducesResponseType(typeof(GetDoctorDaysReservationListResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetDoctorDaysReservationList(GetDoctorDaysReservationListRequest request, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("GET /api/hospital-management/doctor-days-reservation-list");
+
+            var command = new GetDoctorDaysReservationListQuery()
+            {
+                HospNo = base.HospNo,
+                EmplNo = request.EmplNo,
+                ClinicYmd = request.ClinicYmd
+            };
+
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [병원정보관리 > 의료진관리 > 비대면 스케쥴 관리]예약 정보 API
+        /// </summary>
+        [HttpGet("doctor-untact-weeks-reservation-list")]
+        [ProducesResponseType(typeof(GetDoctorUntactWeeksReservationListResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetDoctorUntactWeeksReservationList(GetDoctorUntactWeeksReservationListRequest request, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("GET /api/hospital-management/doctor-untact-weeks-reservation-list");
+
+            var command = new GetDoctorUntactWeeksReservationListQuery()
+            {
+                HospNo = base.HospNo,
+                EmplNo = request.EmplNo,
+                WeekNum = request.WeekNum
+            };
+
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
         #region INTERNAL METHOD AREA ********************************************
         private List<FileUploadPayload>? GetImagePayload(List<IFormFile>? images)
         {
