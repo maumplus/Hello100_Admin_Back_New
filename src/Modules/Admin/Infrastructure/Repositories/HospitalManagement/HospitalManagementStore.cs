@@ -1103,5 +1103,27 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
 
             return (await connection.QueryAsync<EghisRsrvInfoEntity>(sql, parameters)).ToList();
         }
+
+        public async Task<List<EghisDoctInfoMdEntity>> GetEghisDoctInfoMd(string hospNo, string emplNo, CancellationToken cancellationToken = default)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@HospNo", hospNo, DbType.String);
+            parameters.Add("@EmplNo", emplNo, DbType.String);
+
+            var sql = $@"
+                SELECT hosp_no                                  AS HospNo,
+                       hosp_key                                 AS HospKey,
+                       empl_no                                  AS EmplNo,
+                       md_cd                                    AS MdCd,
+                       DATE_FORMAT(reg_dt, '%Y-%m-%d %H:%i:%s') AS RegDt
+                  FROM hello100_api.eghis_doct_info_md
+                 WHERE hosp_no = @HospNo
+                   AND empl_no = @EmplNo;
+            ";
+
+            using var connection = CreateConnection();
+
+            return (await connection.QueryAsync<EghisDoctInfoMdEntity>(sql, parameters)).ToList();
+        }
     }
 }

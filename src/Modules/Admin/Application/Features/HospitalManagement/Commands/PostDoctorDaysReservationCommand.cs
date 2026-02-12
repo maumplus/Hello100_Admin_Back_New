@@ -18,25 +18,25 @@ using System.Threading.Tasks;
 
 namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Commands
 {
-    public class PatchDoctorWeeksReservationCommand : IRequest<Result>
+    public class PostDoctorDaysReservationCommand : IRequest<Result>
     {
         public string HospNo { get; set; }
         public string EmplNo { get; set; }
-        public int WeekNum { get; set; }
+        public string ClinicYmd { get; set; }
         public int RsrvIntervalTime { get; set; }
         public int RsrvIntervalCnt { get; set; }
         public List<EghisDoctRsrvDetailInfoEntity> EghisDoctRsrvDetailInfoList { get; set; }
     }
 
-    public class PatchDoctorWeeksReservationCommandHandler : IRequestHandler<PatchDoctorWeeksReservationCommand, Result>
+    public class PostDoctorDaysReservationCommandHandler : IRequestHandler<PostDoctorDaysReservationCommand, Result>
     {
         private readonly IHospitalManagementRepository _hospitalRepository;
-        private readonly ILogger<PatchDoctorWeeksReservationCommandHandler> _logger;
+        private readonly ILogger<PostDoctorDaysReservationCommandHandler> _logger;
         private readonly IDbSessionRunner _db;
 
-        public PatchDoctorWeeksReservationCommandHandler(
+        public PostDoctorDaysReservationCommandHandler(
         IHospitalManagementRepository hospitalRepository,
-        ILogger<PatchDoctorWeeksReservationCommandHandler> logger,
+        ILogger<PostDoctorDaysReservationCommandHandler> logger,
         IDbSessionRunner db)
         {
             _hospitalRepository = hospitalRepository;
@@ -44,14 +44,14 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
             _db = db;
         }
 
-        public async Task<Result> Handle(PatchDoctorWeeksReservationCommand command, CancellationToken cancellationToken)
+        public async Task<Result> Handle(PostDoctorDaysReservationCommand command, CancellationToken cancellationToken)
         {
             var eghisDoctRsrvInfoEntity = new EghisDoctRsrvInfoEntity()
             {
                 HospNo = command.HospNo,
                 EmplNo = command.EmplNo,
-                ClinicYmd = string.Empty,
-                WeekNum = command.WeekNum,
+                ClinicYmd = command.ClinicYmd,
+                WeekNum = 11,
                 RsrvIntervalTime = command.RsrvIntervalTime,
                 RsrvIntervalCnt = command.RsrvIntervalCnt
             };

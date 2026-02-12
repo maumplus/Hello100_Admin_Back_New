@@ -15,6 +15,7 @@ using System.Text.Encodings.Web;
 using Org.BouncyCastle.Ocsp;
 using Microsoft.Extensions.FileProviders;
 using DocumentFormat.OpenXml.Drawing;
+using Hello100Admin.Modules.Admin.Domain.Entities;
 
 namespace Hello100Admin.API.Controllers
 {
@@ -548,14 +549,14 @@ namespace Hello100Admin.API.Controllers
         /// <summary>
         /// [병원정보관리 > 의료진관리 > 주간 스케쥴 관리]예약 저장 API
         /// </summary>
-        [HttpPatch("doctor/weeks-schedule/reservation")]
+        [HttpPost("doctor/weeks-schedule/reservation")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> PatchDoctorWeeksReservation(PatchDoctorWeeksReservationRequest request, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> PostDoctorWeeksReservation(PostDoctorWeeksReservationRequest request, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("PATCH /api/hospital-management/doctor/weeks-schedule/reservation");
+            _logger.LogInformation("POST /api/hospital-management/doctor/weeks-schedule/reservation");
 
-            var command = new PatchDoctorWeeksReservationCommand()
+            var command = new PostDoctorWeeksReservationCommand()
             {
                 HospNo = base.HospNo,
                 EmplNo = request.EmplNo,
@@ -573,14 +574,14 @@ namespace Hello100Admin.API.Controllers
         /// <summary>
         /// [병원정보관리 > 의료진관리 > 지정 스케쥴 관리]예약 저장 API
         /// </summary>
-        [HttpPatch("doctor/days-schedule/reservation")]
+        [HttpPost("doctor/days-schedule/reservation")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> PatchDoctorDaysReservation(PatchDoctorDaysReservationRequest request, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> PostDoctorDaysReservation(PostDoctorDaysReservationRequest request, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("PATCH /api/hospital-management/doctor/days-schedule/reservation");
+            _logger.LogInformation("POST /api/hospital-management/doctor/days-schedule/reservation");
 
-            var command = new PatchDoctorDaysReservationCommand()
+            var command = new PostDoctorDaysReservationCommand()
             {
                 HospNo = base.HospNo,
                 EmplNo = request.EmplNo,
@@ -598,14 +599,14 @@ namespace Hello100Admin.API.Controllers
         /// <summary>
         /// [병원정보관리 > 의료진관리 > 비대면 스케쥴 관리]예약 저장 API
         /// </summary>
-        [HttpPatch("doctor/untact-weeks-schedule/reservation")]
+        [HttpPost("doctor/untact-weeks-schedule/reservation")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> PatchDoctorUntactWeeksScheduleReservation(PatchDoctorUntactWeeksReservationRequest request, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> PostDoctorUntactWeeksScheduleReservation(PostDoctorUntactWeeksReservationRequest request, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("PATCH /api/hospital-management/doctor/untact-weeks-schedule/reservation");
+            _logger.LogInformation("POST /api/hospital-management/doctor/untact-weeks-schedule/reservation");
 
-            var command = new PatchDoctorUntactWeeksReservationCommand()
+            var command = new PostDoctorUntactWeeksReservationCommand()
             {
                 HospNo = base.HospNo,
                 EmplNo = request.EmplNo,
@@ -613,6 +614,62 @@ namespace Hello100Admin.API.Controllers
                 UntactRsrvIntervalTime = request.UntactRsrvIntervalTime,
                 UntactRsrvIntervalCnt = request.UntactRsrvIntervalCnt,
                 EghisDoctRsrvDetailInfoList = request.EghisDoctRsrvDetailInfoList
+            };
+
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [병원정보관리 > 의료진관리]의료진 진료 과목 설정 목록 API
+        /// </summary>
+        [HttpGet("doctor/medical-list")]
+        [ProducesResponseType(typeof(GetDoctorMedicalListResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetDoctorMedicalList(GetDoctorMedicalListRequest request, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("GET /api/hospital-management/doctor/medical-list");
+
+            var query = new GetDoctorMedicalListQuery()
+            {
+                HospNo = base.HospNo,
+                EmplNo = request.EmplNo
+            };
+
+            var result = await _mediator.Send(query, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [병원정보관리 > 의료진관리]의료진 진료 과목 설정 저장 API
+        /// </summary>
+        [HttpPost("doctor/medical")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> PostDoctorMedical(PostDoctorMedicalRequest request, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("POST /api/hospital-management/doctor/medical");
+
+            var eghisDoctInfoMdList = new List<EghisDoctInfoMdEntity>();
+
+            foreach (var mdCd in request.MdCdList)
+            {
+                var eghisDoctInfoMdEntity = new EghisDoctInfoMdEntity()
+                {
+                    MdCd = mdCd
+                };
+
+                eghisDoctInfoMdList.Add(eghisDoctInfoMdEntity);
+            }
+
+            var command = new PostDoctorMedicalCommand()
+            {
+                HospNo = base.HospNo,
+                HospKey = base.HospKey,
+                EmplNo = request.EmplNo,
+                EghisDoctInfoMdList = eghisDoctInfoMdList
             };
 
             var result = await _mediator.Send(command, cancellationToken);

@@ -15,6 +15,7 @@ using Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Result
 using DocumentFormat.OpenXml.Wordprocessing;
 using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 using Org.BouncyCastle.Ocsp;
+using Renci.SshNet;
 
 namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManagement
 {
@@ -852,6 +853,38 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
                 INSERT INTO hello100_api.eghis_doct_rsrv_detail_info
                   (ridx, start_time, end_time, rsrv_cnt, com_cnt, reg_dt, recept_type)
                 VALUES {values}
+            ";
+
+            return await db.ExecuteScalarAsync<int>(query, parameters, ct, _logger);
+        }
+
+        public async Task<int> RemoveEghisDoctInfoMdAsync(DbSession db, EghisDoctInfoMdEntity eghisDoctInfoMdEntity, CancellationToken ct)
+        {
+            DynamicParameters parameters = new DynamicParameters();
+            parameters.Add("HospNo", eghisDoctInfoMdEntity.HospNo, DbType.String);
+            parameters.Add("EmplNo", eghisDoctInfoMdEntity.EmplNo, DbType.String);
+
+            var query = @"
+                DELETE FROM hello100_api.eghis_doct_info_md
+                      WHERE hosp_no = @HospNo
+                        AND empl_no = @EmplNo;
+            ";
+
+            return await db.ExecuteScalarAsync<int>(query, parameters, ct, _logger);
+        }
+
+        public async Task<int> InsertEghisDoctInfoMdAsync(DbSession db, EghisDoctInfoMdEntity eghisDoctInfoMdEntity, CancellationToken ct)
+        {
+            DynamicParameters parameters = new DynamicParameters();
+            parameters.Add("HospNo", eghisDoctInfoMdEntity.HospNo, DbType.String);
+            parameters.Add("HospKey", eghisDoctInfoMdEntity.HospKey, DbType.String);
+            parameters.Add("EmplNo", eghisDoctInfoMdEntity.EmplNo, DbType.String);
+            parameters.Add("MdCd", eghisDoctInfoMdEntity.MdCd, DbType.String);
+
+            var query = @"
+                INSERT INTO hello100_api.eghis_doct_info_md
+                  ( hosp_no, hosp_key, empl_no, md_cd, reg_dt)
+                VALUES ( @HospNo, @HospKey, @EmplNo, @MdCd, NOW());
             ";
 
             return await db.ExecuteScalarAsync<int>(query, parameters, ct, _logger);

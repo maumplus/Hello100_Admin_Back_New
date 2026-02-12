@@ -129,5 +129,6 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistenc
         public Task<List<EghisRsrvInfoEntity>> GetEghisRsrvList(string hospNo, string emplNo, int weekNum, CancellationToken cancellationToken = default);
         public Task<List<EghisRsrvInfoEntity>> GetEghisRsrvList(string hospNo, string emplNo, string clinicYmd, CancellationToken cancellationToken = default);
         public Task<List<EghisRsrvInfoEntity>> GetEghisUntactRsrvList(string hospNo, string emplNo, int weekNum, CancellationToken cancellationToken = default);
+        public Task<List<EghisDoctInfoMdEntity>> GetEghisDoctInfoMd(string hospNo, string emplNo, CancellationToken cancellationToken = default);
     }
 }

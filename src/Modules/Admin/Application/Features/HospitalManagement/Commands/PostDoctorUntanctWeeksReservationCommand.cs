@@ -18,7 +18,7 @@ using System.Threading.Tasks;
 
 namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Commands
 {
-    public class PatchDoctorUntactWeeksReservationCommand : IRequest<Result>
+    public class PostDoctorUntactWeeksReservationCommand : IRequest<Result>
     {
         public string HospNo { get; set; }
         public string EmplNo { get; set; }
@@ -28,15 +28,15 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
         public List<EghisDoctRsrvDetailInfoEntity> EghisDoctRsrvDetailInfoList { get; set; }
     }
 
-    public class PatchDoctorUntactWeeksReservationCommandHandler : IRequestHandler<PatchDoctorUntactWeeksReservationCommand, Result>
+    public class PostDoctorUntactWeeksReservationCommandHandler : IRequestHandler<PostDoctorUntactWeeksReservationCommand, Result>
     {
         private readonly IHospitalManagementRepository _hospitalRepository;
-        private readonly ILogger<PatchDoctorUntactWeeksReservationCommandHandler> _logger;
+        private readonly ILogger<PostDoctorUntactWeeksReservationCommandHandler> _logger;
         private readonly IDbSessionRunner _db;
 
-        public PatchDoctorUntactWeeksReservationCommandHandler(
+        public PostDoctorUntactWeeksReservationCommandHandler(
         IHospitalManagementRepository hospitalRepository,
-        ILogger<PatchDoctorUntactWeeksReservationCommandHandler> logger,
+        ILogger<PostDoctorUntactWeeksReservationCommandHandler> logger,
         IDbSessionRunner db)
         {
             _hospitalRepository = hospitalRepository;
@@ -44,7 +44,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
             _db = db;
         }
 
-        public async Task<Result> Handle(PatchDoctorUntactWeeksReservationCommand command, CancellationToken cancellationToken)
+        public async Task<Result> Handle(PostDoctorUntactWeeksReservationCommand command, CancellationToken cancellationToken)
         {
             var eghisDoctRsrvInfoEntity = new EghisDoctRsrvInfoEntity()
             {
