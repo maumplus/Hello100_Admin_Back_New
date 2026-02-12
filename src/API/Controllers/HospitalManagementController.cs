@@ -458,12 +458,12 @@ namespace Hello100Admin.API.Controllers
         /// <summary>
         /// [병원정보관리 > 의료진관리 > 주간 스케쥴 관리]예약 정보 API
         /// </summary>
-        [HttpGet("doctor/weeks-schedule/reservation")]
+        [HttpPost("doctor/weeks-schedule/reservation")]
         [ProducesResponseType(typeof(GetDoctorWeeksReservationListResult), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetDoctorWeeksReservationList(GetDoctorWeeksReservationListRequest request, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("GET /api/hospital-management/doctor/weeks-schedule/reservation");
+            _logger.LogInformation("POST /api/hospital-management/doctor/weeks-schedule/reservation");
 
             var command = new GetDoctorWeeksReservationListQuery()
             {
@@ -487,12 +487,12 @@ namespace Hello100Admin.API.Controllers
         /// <summary>
         /// [병원정보관리 > 의료진관리 > 지정 스케쥴 관리]예약 정보 API
         /// </summary>
-        [HttpGet("doctor/days-schedule/reservation")]
+        [HttpPost("doctor/days-schedule/reservation")]
         [ProducesResponseType(typeof(GetDoctorDaysReservationListResult), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetDoctorDaysReservationList(GetDoctorDaysReservationListRequest request, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("GET /api/hospital-management/doctor/days-schedule/reservation");
+            _logger.LogInformation("POST /api/hospital-management/doctor/days-schedule/reservation");
 
             var command = new GetDoctorDaysReservationListQuery()
             {
@@ -516,12 +516,12 @@ namespace Hello100Admin.API.Controllers
         /// <summary>
         /// [병원정보관리 > 의료진관리 > 비대면 스케쥴 관리]예약 정보 API
         /// </summary>
-        [HttpGet("doctor/untact-weeks-schedule/reservation")]
+        [HttpPost("doctor/untact-weeks-schedule/reservation")]
         [ProducesResponseType(typeof(GetDoctorUntactWeeksReservationListResult), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetDoctorUntactWeeksScheduleReservation(GetDoctorUntactWeeksReservationListRequest request, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("GET /api/hospital-management/doctor/untact-weeks-schedule/reservation");
+            _logger.LogInformation("POST /api/hospital-management/doctor/untact-weeks-schedule/reservation");
 
             var command = new GetDoctorUntactWeeksReservationListQuery()
             {
@@ -545,12 +545,12 @@ namespace Hello100Admin.API.Controllers
         /// <summary>
         /// [병원정보관리 > 의료진관리 > 주간 스케쥴 관리]예약 저장 API
         /// </summary>
-        [HttpPost("doctor/weeks-schedule/reservation")]
+        [HttpPatch("doctor/weeks-schedule/reservation")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> PostDoctorWeeksReservation(PostDoctorWeeksReservationRequest request, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("POST /api/hospital-management/doctor/weeks-schedule/reservation");
+            _logger.LogInformation("PATCH /api/hospital-management/doctor/weeks-schedule/reservation");
 
             var command = new PostDoctorWeeksReservationCommand()
             {
@@ -570,12 +570,12 @@ namespace Hello100Admin.API.Controllers
         /// <summary>
         /// [병원정보관리 > 의료진관리 > 지정 스케쥴 관리]예약 저장 API
         /// </summary>
-        [HttpPost("doctor/days-schedule/reservation")]
+        [HttpPatch("doctor/days-schedule/reservation")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> PostDoctorDaysReservation(PostDoctorDaysReservationRequest request, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("POST /api/hospital-management/doctor/days-schedule/reservation");
+            _logger.LogInformation("PATCH /api/hospital-management/doctor/days-schedule/reservation");
 
             var command = new PostDoctorDaysReservationCommand()
             {
@@ -595,12 +595,12 @@ namespace Hello100Admin.API.Controllers
         /// <summary>
         /// [병원정보관리 > 의료진관리 > 비대면 스케쥴 관리]예약 저장 API
         /// </summary>
-        [HttpPost("doctor/untact-weeks-schedule/reservation")]
+        [HttpPatch("doctor/untact-weeks-schedule/reservation")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> PostDoctorUntactWeeksScheduleReservation(PostDoctorUntactWeeksReservationRequest request, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("POST /api/hospital-management/doctor/untact-weeks-schedule/reservation");
+            _logger.LogInformation("PATCH /api/hospital-management/doctor/untact-weeks-schedule/reservation");
 
             var command = new PostDoctorUntactWeeksReservationCommand()
             {
