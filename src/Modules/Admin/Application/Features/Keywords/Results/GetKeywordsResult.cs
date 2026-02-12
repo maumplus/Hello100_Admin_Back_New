@@ -1,6 +1,6 @@
-﻿namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Results
+﻿namespace Hello100Admin.Modules.Admin.Application.Features.Keywords.Results
 {
-    public class GetClinicalKeywordsResult
+    public class GetKeywordsResult
     {
         /// <summary>
         /// 키워드 ID

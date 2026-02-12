@@ -400,36 +400,39 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.ServiceUsage
                 parameters.Add("@DecKey", "08a0d3a6ec32e85e", DbType.String); // AES256Key
                 parameters.Add("@HospNo", req.HospNo, DbType.String);
 
-                #region QUREY
-                StringBuilder sb = new StringBuilder();
-
-                var conditions1 = new List<string>();
-                var conditions2 = new List<string>();
-
-                // 기본 조건
-                conditions1.Add("erern.hospNo = @HospNo");
-                conditions2.Add("erern.hospNo = @HospNo");
-
                 string dateColumn = "erern.regDate";
 
                 if (req.SearchDateType == 1) dateColumn = "erern.regDate";
                 else if (req.SearchDateType == 2) dateColumn = @"erern.`date`";
 
-                conditions1.Add($"DATE_FORMAT({dateColumn}, '%Y%m%d') BETWEEN @FromDt AND @ToDt");
-                conditions2.Add($"DATE_FORMAT({dateColumn}, '%Y%m%d') BETWEEN @FromDt AND @ToDt");
+                var conditions = new List<List<string>>()
+                {
+                    new List<string>()
+                    {
+                        "erern.hospNo = @HospNo",
+                        $"DATE_FORMAT({dateColumn}, '%Y%m%d') BETWEEN @FromDt AND @ToDt"
+                    },
+                    new List<string>()
+                    {
+                        "erern.hospNo = @HospNo",
+                        $"DATE_FORMAT({dateColumn}, '%Y%m%d') BETWEEN @FromDt AND @ToDt"
+                    }
+                };
 
                 // 검색어
-                if (!string.IsNullOrEmpty(req.SearchKeyword))
+                if (string.IsNullOrWhiteSpace(req.SearchKeyword) == false)
                 {
-                    conditions1.Add(@"CONVERT(AES_DECRYPT(FROM_BASE64(tm.name), @NameKey, '\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0') USING utf8mb4) LIKE CONCAT('%', @SearchKeyword, '%')");
-                    conditions2.Add(@"CONVERT(AES_DECRYPT(FROM_BASE64(erer.ptntNm), @DecKey, '\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0') USING utf8mb4) LIKE CONCAT('%', @SearchKeyword, '%')");
+                    conditions[0].Add(@"CONVERT(AES_DECRYPT(FROM_BASE64(tm.name), @NameKey, '\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0') USING utf8mb4) LIKE CONCAT('%', @SearchKeyword, '%')");
+                    conditions[1].Add(@"CONVERT(AES_DECRYPT(FROM_BASE64(erern.ptntNm), @DecKey, '\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0') USING utf8mb4) LIKE CONCAT('%', @SearchKeyword, '%')");
                 }
+
+                StringBuilder sb = new StringBuilder();
 
                 sb.AppendLine("SET block_encryption_mode = 'aes-128-cbc';");
 
-                sb.AppendLine($"SELECT ROW_NUMBER() OVER(ORDER BY a.SendDate DESC) AS RowNum, a.*");
+                sb.AppendLine($"SELECT ROW_NUMBER() OVER(ORDER BY a.`Date` DESC, a.ReceptNo DESC) AS RowNum, a.*");
                 sb.AppendLine($"  FROM (");
-                sb.AppendLine(@"         SELECT CONVERT(AES_DECRYPT(FROM_BASE64(erern.ptntNm), '08a0d3a6ec32e85e', '\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0') USING utf8mb4) AS PtntName");
+                sb.AppendLine(@"         SELECT CONVERT(AES_DECRYPT(FROM_BASE64(tm.name), 'dcc2b29aaa9f271d', '\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0') USING utf8mb4) AS PtntName");
                 sb.AppendLine(@"              , CONVERT(AES_DECRYPT(FROM_BASE64(tm.sex), '08a0d3a6ec32e85e', '\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0') USING utf8mb4) AS PtntSex");
                 sb.AppendLine($"              , erern.`date` AS `Date`");
                 sb.AppendLine($"              , erern.receptNo AS ReceptNo");
@@ -438,15 +441,16 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.ServiceUsage
                 sb.AppendLine($"              , CASE WHEN erern.talkYn = 'Y' THEN '미발송' WHEN erern.pushYn = 'Y' THEN '-' END AS SendStatus");
                 sb.AppendLine($"              , CASE WHEN erern.talkYn = 'Y' THEN '카카오톡' WHEN erern.pushYn = 'Y' THEN 'App Push' end AS SendType");
                 sb.AppendLine($"              , CASE");
-                sb.AppendLine($"                     WHEN erern.talkYn = 'Y' AND (erern.ptntNm IS NULL OR erern.ptntNm = '') THEN '전자차트에 등록된 환자명 혹은 전화번호가 없습니다.'");
-                sb.AppendLine($"                     WHEN erern.talkYn = 'Y' AND (erern.phone IS NULL OR erern.phone = '') THEN '전자차트에 등록된 환자명 혹은 전화번호가 없습니다.'");
+                sb.AppendLine($"                     WHEN erern.talkYn = 'Y' AND (erern.ptntNm IS NULL OR erern.ptntNm = '' OR erern.ptntNm = '+0K2HSgMT6X+z7YDJry9YQ==') THEN '전자차트에 등록된 환자명 혹은 전화번호가 없습니다.'");
+                sb.AppendLine($"                     WHEN erern.talkYn = 'Y' AND (erern.phone IS NULL OR erern.phone = '' OR erern.phone = '+0K2HSgMT6X+z7YDJry9YQ==') THEN '전자차트에 등록된 환자명 혹은 전화번호가 없습니다.'");
                 sb.AppendLine($"                     WHEN erern.talkYn = 'Y' AND (erern.examPushSet IS NULL OR erern.examPushSet NOT IN (1, 2, 4)) THEN '검사결과 알림 서비스 사용 안함 상태입니다. 병원정보관리>헬로100설정에서 설정할 수 있습니다.'");
                 sb.AppendLine($"                END AS Message");
-                sb.AppendLine($"              , HEX(erern.notificationId) AS NotificationId");
+                sb.AppendLine($"              , HEX(erern.notificationId) as NotificationId");
                 sb.AppendLine($"           FROM hello100_api.eghis_recept_examination_result_notification erern");
+                sb.AppendLine($"           LEFT JOIN hello100_api.eghis_recept_examination_result erer ON erer.hospNo = erern.hospNo AND erer.receptNo = erern.receptNo AND erer.date = erern.date");
                 sb.AppendLine($"          INNER JOIN tb_eghis_hosp_receipt_info teri ON teri.hosp_no = erern.hospNo AND teri.recept_no = erern.receptNo");
                 sb.AppendLine($"          INNER JOIN tb_member tm on tm.uid = teri.uid AND tm.mid = teri.mid");
-                sb.AppendLine($"          WHERE {(conditions1.Any() ? string.Join($"{Environment.NewLine}            AND ", conditions1) : string.Empty)}");
+                sb.AppendLine($"          WHERE {(conditions[0].Any() ? $"{string.Join($"{Environment.NewLine}            AND ", conditions[0])}" : string.Empty)}");
                 sb.AppendLine($"         UNION ALL");
                 sb.AppendLine(@"         SELECT CONVERT(AES_DECRYPT(FROM_BASE64(erern.ptntNm), '08a0d3a6ec32e85e', '\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0') USING utf8mb4) AS PtntName");
                 sb.AppendLine($"              , '-' AS PtntSex");
@@ -468,9 +472,8 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.ServiceUsage
                 sb.AppendLine($"                               FROM tb_eghis_hosp_receipt_info teri");
                 sb.AppendLine($"                              WHERE teri.hosp_no = erern.hospNo");
                 sb.AppendLine($"                                AND teri.recept_no = erern.receptNo )");
-                sb.AppendLine($"            AND {(conditions2.Any() ? string.Join($"{Environment.NewLine}            AND ", conditions2) : string.Empty)}");
-                sb.AppendLine($"       ) a LIMIT @OffSet, @Limit;");
-                #endregion
+                sb.AppendLine($"            {(conditions[1].Any() ? $"AND {string.Join($"{Environment.NewLine}            AND ", conditions[1])}" : string.Empty)}");
+                sb.AppendLine($"       ) a;");
 
                 using var connection = _connection.CreateConnection();
                 var queryResult = (await connection.QueryAsync<SearchExaminationResultAlimtalkHistoriesRow>(sb.ToString(), parameters)).ToList();
@@ -508,36 +511,39 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.ServiceUsage
                 parameters.Add("@HospNo", req.HospNo, DbType.String);
                 //parameters.Add("@HospNo", "10350072", DbType.String);
 
-                #region QUREY
-                StringBuilder sb = new StringBuilder();
-
-                var conditions1 = new List<string>();
-                var conditions2 = new List<string>();
-
-                // 기본 조건
-                conditions1.Add("erern.hospNo = @HospNo");
-                conditions2.Add("erern.hospNo = @HospNo");
-
                 string dateColumn = "erern.regDate";
 
                 if (req.SearchDateType == 1) dateColumn = "erern.regDate";
                 else if (req.SearchDateType == 2) dateColumn = @"erern.`date`";
 
-                conditions1.Add($"DATE_FORMAT({dateColumn}, '%Y%m%d') BETWEEN @FromDt AND @ToDt");
-                conditions2.Add($"DATE_FORMAT({dateColumn}, '%Y%m%d') BETWEEN @FromDt AND @ToDt");
+                var conditions = new List<List<string>>()
+                {
+                    new List<string>()
+                    {
+                        "erern.hospNo = @HospNo",
+                        $"DATE_FORMAT({dateColumn}, '%Y%m%d') BETWEEN @FromDt AND @ToDt"
+                    },
+                    new List<string>()
+                    {
+                        "erern.hospNo = @HospNo",
+                        $"DATE_FORMAT({dateColumn}, '%Y%m%d') BETWEEN @FromDt AND @ToDt"
+                    }
+                };
 
                 // 검색어
-                if (!string.IsNullOrEmpty(req.SearchKeyword))
+                if (string.IsNullOrWhiteSpace(req.SearchKeyword) == false)
                 {
-                    conditions1.Add(@"CONVERT(AES_DECRYPT(FROM_BASE64(tm.name), @NameKey, '\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0') USING utf8mb4) LIKE CONCAT('%', @SearchKeyword, '%')");
-                    conditions2.Add(@"CONVERT(AES_DECRYPT(FROM_BASE64(erer.ptntNm), @DecKey, '\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0') USING utf8mb4) LIKE CONCAT('%', @SearchKeyword, '%')");
+                    conditions[0].Add(@"CONVERT(AES_DECRYPT(FROM_BASE64(tm.name), @NameKey, '\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0') USING utf8mb4) LIKE CONCAT('%', @SearchKeyword, '%')");
+                    conditions[1].Add(@"CONVERT(AES_DECRYPT(FROM_BASE64(erern.ptntNm), @DecKey, '\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0') USING utf8mb4) LIKE CONCAT('%', @SearchKeyword, '%')");
                 }
+
+                StringBuilder sb = new StringBuilder();
 
                 sb.AppendLine("SET block_encryption_mode = 'aes-128-cbc';");
 
-                sb.AppendLine($"SELECT ROW_NUMBER() OVER(ORDER BY a.SendDate DESC) AS RowNum, a.*");
+                sb.AppendLine($"SELECT ROW_NUMBER() OVER(ORDER BY a.`Date` DESC, a.ReceptNo DESC) AS RowNum, a.*");
                 sb.AppendLine($"  FROM (");
-                sb.AppendLine(@"         SELECT CONVERT(AES_DECRYPT(FROM_BASE64(erern.ptntNm), '08a0d3a6ec32e85e', '\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0') USING utf8mb4) AS PtntName");
+                sb.AppendLine(@"         SELECT CONVERT(AES_DECRYPT(FROM_BASE64(tm.name), 'dcc2b29aaa9f271d', '\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0') USING utf8mb4) AS PtntName");
                 sb.AppendLine(@"              , CONVERT(AES_DECRYPT(FROM_BASE64(tm.sex), '08a0d3a6ec32e85e', '\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0') USING utf8mb4) AS PtntSex");
                 sb.AppendLine($"              , erern.`date` AS `Date`");
                 sb.AppendLine($"              , erern.receptNo AS ReceptNo");
@@ -546,15 +552,16 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.ServiceUsage
                 sb.AppendLine($"              , CASE WHEN erern.talkYn = 'Y' THEN '미발송' WHEN erern.pushYn = 'Y' THEN '-' END AS SendStatus");
                 sb.AppendLine($"              , CASE WHEN erern.talkYn = 'Y' THEN '카카오톡' WHEN erern.pushYn = 'Y' THEN 'App Push' end AS SendType");
                 sb.AppendLine($"              , CASE");
-                sb.AppendLine($"                     WHEN erern.talkYn = 'Y' AND (erern.ptntNm IS NULL OR erern.ptntNm = '') THEN '전자차트에 등록된 환자명 혹은 전화번호가 없습니다.'");
-                sb.AppendLine($"                     WHEN erern.talkYn = 'Y' AND (erern.phone IS NULL OR erern.phone = '') THEN '전자차트에 등록된 환자명 혹은 전화번호가 없습니다.'");
+                sb.AppendLine($"                     WHEN erern.talkYn = 'Y' AND (erern.ptntNm IS NULL OR erern.ptntNm = '' OR erern.ptntNm = '+0K2HSgMT6X+z7YDJry9YQ==') THEN '전자차트에 등록된 환자명 혹은 전화번호가 없습니다.'");
+                sb.AppendLine($"                     WHEN erern.talkYn = 'Y' AND (erern.phone IS NULL OR erern.phone = '' OR erern.phone = '+0K2HSgMT6X+z7YDJry9YQ==') THEN '전자차트에 등록된 환자명 혹은 전화번호가 없습니다.'");
                 sb.AppendLine($"                     WHEN erern.talkYn = 'Y' AND (erern.examPushSet IS NULL OR erern.examPushSet NOT IN (1, 2, 4)) THEN '검사결과 알림 서비스 사용 안함 상태입니다. 병원정보관리>헬로100설정에서 설정할 수 있습니다.'");
                 sb.AppendLine($"                END AS Message");
-                sb.AppendLine($"              , HEX(erern.notificationId) AS NotificationId");
+                sb.AppendLine($"              , HEX(erern.notificationId) as NotificationId");
                 sb.AppendLine($"           FROM hello100_api.eghis_recept_examination_result_notification erern");
+                sb.AppendLine($"           LEFT JOIN hello100_api.eghis_recept_examination_result erer ON erer.hospNo = erern.hospNo AND erer.receptNo = erern.receptNo AND erer.date = erern.date");
                 sb.AppendLine($"          INNER JOIN tb_eghis_hosp_receipt_info teri ON teri.hosp_no = erern.hospNo AND teri.recept_no = erern.receptNo");
                 sb.AppendLine($"          INNER JOIN tb_member tm on tm.uid = teri.uid AND tm.mid = teri.mid");
-                sb.AppendLine($"          WHERE {(conditions1.Any() ? string.Join($"{Environment.NewLine}            AND ", conditions1) : string.Empty)}");
+                sb.AppendLine($"          WHERE {(conditions[0].Any() ? $"{string.Join($"{Environment.NewLine}            AND ", conditions[0])}" : string.Empty)}");
                 sb.AppendLine($"         UNION ALL");
                 sb.AppendLine(@"         SELECT CONVERT(AES_DECRYPT(FROM_BASE64(erern.ptntNm), '08a0d3a6ec32e85e', '\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0') USING utf8mb4) AS PtntName");
                 sb.AppendLine($"              , '-' AS PtntSex");
@@ -576,9 +583,8 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.ServiceUsage
                 sb.AppendLine($"                               FROM tb_eghis_hosp_receipt_info teri");
                 sb.AppendLine($"                              WHERE teri.hosp_no = erern.hospNo");
                 sb.AppendLine($"                                AND teri.recept_no = erern.receptNo )");
-                sb.AppendLine($"            AND {(conditions2.Any() ? string.Join($"{Environment.NewLine}            AND ", conditions2) : string.Empty)}");
+                sb.AppendLine($"            {(conditions[1].Any() ? $"AND {string.Join($"{Environment.NewLine}            AND ", conditions[1])}" : string.Empty)}");
                 sb.AppendLine($"       ) a;");
-                #endregion
 
                 using var connection = _connection.CreateConnection();
                 var queryResult = (await connection.QueryAsync<GetExaminationResultAlimtalkHistoryForExportRow>(sb.ToString(), parameters)).ToList();

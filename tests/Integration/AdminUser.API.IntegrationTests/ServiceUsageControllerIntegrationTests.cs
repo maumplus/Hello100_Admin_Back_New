@@ -1,6 +1,5 @@
 ﻿using Hello100Admin.Integration.Shared;
 using System.Net.Http.Json;
-using Seller.API.IntegrationTests;
 
 namespace AdminUser.API.IntegrationTests
 {
@@ -93,8 +92,8 @@ namespace AdminUser.API.IntegrationTests
             {
                 PageNo = 1,
                 PageSize = 20,
-                FromDate = "2025-01-01",
-                ToDate = "2026-01-01",
+                FromDate = "2025-10-01",
+                ToDate = "2025-10-31",
                 DateRangeType = "1",
                 SearchDateType = "1",
                 SearchKeyword = "",

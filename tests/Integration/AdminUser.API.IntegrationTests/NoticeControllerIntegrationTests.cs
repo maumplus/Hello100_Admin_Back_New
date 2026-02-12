@@ -3,7 +3,6 @@ using Hello100Admin.BuildingBlocks.Common.Errors;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Serialization;
 using Hello100Admin.Integration.Shared;
 using Microsoft.AspNetCore.WebUtilities;
-using Seller.API.IntegrationTests;
 
 namespace AdminUser.API.IntegrationTests
 {

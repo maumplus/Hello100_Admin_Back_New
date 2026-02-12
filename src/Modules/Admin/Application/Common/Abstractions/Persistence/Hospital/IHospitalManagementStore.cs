@@ -1,7 +1,10 @@
 ﻿using Hello100Admin.BuildingBlocks.Common.Definition.Enums;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 using Hello100Admin.Modules.Admin.Application.Common.Models;
+using Hello100Admin.Modules.Admin.Application.Features.Departments.Results;
 using Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Results;
+using Hello100Admin.Modules.Admin.Application.Features.Keywords.Results;
+using Hello100Admin.Modules.Admin.Domain.Entities;
 
 namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Hospital
 {
@@ -65,23 +68,6 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistenc
         /// <param name="ct"></param>
         /// <returns></returns>
         Task<GetHello100SettingResult?> GetHello100SettingAsync(DbSession db, string hospKey, CancellationToken ct = default);
-        /// <summary>
-        /// 전체 진료과목 조회
-        /// </summary>
-        /// <param name="db"></param>
-        /// <param name="clsCd"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        public Task<ListResult<GetMedicalDepartmentsResult>> GetMedicalDepartmentsAsync(DbSession db, string clsCd, CancellationToken cancellationToken = default);
-        /// <summary>
-        /// 증상/검진 키워드 조회
-        /// </summary>
-        /// <param name="db"></param>
-        /// <param name="keyword"></param>
-        /// <param name="masterSeq"></param>
-        /// <param name="ct"></param>
-        /// <returns></returns>
-        public Task<List<GetClinicalKeywordsResult>> GetClinicalKeywordsAsync(DbSession db, string? keyword, string? masterSeq, CancellationToken ct = default);
 
         /// <summary>
         /// 헬로데스크 설정 조회
@@ -121,7 +107,13 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistenc
         public Task<ListResult<DoctorBaseRo>> GetDoctorsAsync(
             DbSession db, string hospNo, int pageNo, int pageSize, CancellationToken ct = default);
 
-        Task<List<GetDoctorListResult>> GetDoctorList(string hospNo, CancellationToken cancellationToken = default);
-        Task<List<GetDoctorScheduleResult>> GetDoctorList(string hospNo, string emplNo, CancellationToken cancellationToken = default);
+        public Task<List<GetDoctorListResult>> GetDoctorList(string hospNo, CancellationToken cancellationToken = default);
+        public Task<List<GetDoctorScheduleResult>> GetDoctorList(string hospNo, string emplNo, CancellationToken cancellationToken = default);
+        public Task<EghisDoctRsrvInfoEntity?> GetEghisDoctRsrvInfo(string hospNo, string emplNo, int weekNum, string clinicYmd, CancellationToken cancellationToken = default);
+        public Task<List<EghisDoctRsrvDetailInfoEntity>> GetEghisDoctRsrvDetailList(int ridx, string receptType, CancellationToken cancellationToken = default);
+        public Task<List<EghisRsrvInfoEntity>> GetEghisRsrvList(string hospNo, string emplNo, int weekNum, CancellationToken cancellationToken = default);
+        public Task<List<EghisRsrvInfoEntity>> GetEghisRsrvList(string hospNo, string emplNo, string clinicYmd, CancellationToken cancellationToken = default);
+        public Task<List<EghisRsrvInfoEntity>> GetEghisUntactRsrvList(string hospNo, string emplNo, int weekNum, CancellationToken cancellationToken = default);
+        public Task<List<EghisDoctInfoMdEntity>> GetEghisDoctInfoMd(string hospNo, string emplNo, CancellationToken cancellationToken = default);
     }
 }
