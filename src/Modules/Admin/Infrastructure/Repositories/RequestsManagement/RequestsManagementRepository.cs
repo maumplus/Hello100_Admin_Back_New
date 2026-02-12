@@ -24,7 +24,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.RequestsManage
         }
         #endregion
 
-        #region IHOSPITALUSERREPOSITORY IMPLEMENTS METHOD AREA **************************************
+        #region IREQUESTSMANAGEMENTREPOSITORY IMPLEMENTS METHOD AREA **************************************
 
         public async Task<int> UpdateRequestBugAsync(DbSession db, TbHospitalProposalInfoEntity entity, CancellationToken ct)
         {
@@ -47,11 +47,8 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.RequestsManage
 
             var result = await db.ExecuteAsync(query, parameters, ct, _logger);
 
-            // TO-DO 에러메시지 만들어서 넣어야 함
-            /*
             if (result <= 0)
-                throw new BizException(AdminErrorCode.DeleteUserFailed.ToError());
-            */
+                throw new BizException(AdminErrorCode.UpdateRequestBug.ToError());
 
             return result;
         }

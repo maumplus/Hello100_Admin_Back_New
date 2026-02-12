@@ -96,5 +96,7 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Errors
         CreateHospitalFailed = 4043,
         [Description("병원 삭제에 실패하였습니다. 확인 후 다시 시도해주세요.")]
         DeleteHospitalFailed = 4044,
+        [Description("관리자확인 갱신에 실패하였습니다. 확인 후 다시 시도해주세요.")]
+        UpdateRequestBug = 4045,
     }
 }
