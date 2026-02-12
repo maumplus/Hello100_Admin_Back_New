@@ -2,6 +2,7 @@
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 using Hello100Admin.Modules.Admin.Application.Common.Models;
 using Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Results;
+using Hello100Admin.Modules.Admin.Domain.Entities;
 
 namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Hospital
 {
@@ -121,7 +122,13 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistenc
         public Task<ListResult<DoctorBaseRo>> GetDoctorsAsync(
             DbSession db, string hospNo, int pageNo, int pageSize, CancellationToken ct = default);
 
-        Task<List<GetDoctorListResult>> GetDoctorList(string hospNo, CancellationToken cancellationToken = default);
-        Task<List<GetDoctorScheduleResult>> GetDoctorList(string hospNo, string emplNo, CancellationToken cancellationToken = default);
+        public Task<List<GetDoctorListResult>> GetDoctorList(string hospNo, CancellationToken cancellationToken = default);
+        public Task<List<GetDoctorScheduleResult>> GetDoctorList(string hospNo, string emplNo, CancellationToken cancellationToken = default);
+        public Task<EghisDoctRsrvInfoEntity?> GetEghisDoctRsrvInfo(string hospNo, string emplNo, int weekNum, string clinicYmd, CancellationToken cancellationToken = default);
+        public Task<List<EghisDoctRsrvDetailInfoEntity>> GetEghisDoctRsrvDetailList(int ridx, string receptType, CancellationToken cancellationToken = default);
+        public Task<List<EghisRsrvInfoEntity>> GetEghisRsrvList(string hospNo, string emplNo, int weekNum, CancellationToken cancellationToken = default);
+        public Task<List<EghisRsrvInfoEntity>> GetEghisRsrvList(string hospNo, string emplNo, string clinicYmd, CancellationToken cancellationToken = default);
+        public Task<List<EghisRsrvInfoEntity>> GetEghisUntactRsrvList(string hospNo, string emplNo, int weekNum, CancellationToken cancellationToken = default);
+        public Task<List<EghisDoctInfoMdEntity>> GetEghisDoctInfoMd(string hospNo, string emplNo, CancellationToken cancellationToken = default);
     }
 }
