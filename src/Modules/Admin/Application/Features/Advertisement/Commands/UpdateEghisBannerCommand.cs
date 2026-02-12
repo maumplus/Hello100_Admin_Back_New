@@ -25,15 +25,15 @@ namespace Hello100Admin.Modules.Admin.Application.Features.Advertisement.Command
         /// <summary>
         /// 노출여부
         /// </summary>
-        public required string ShowYn { get; init; } = default!;
+        public string ShowYn { get; init; } = default!;
         /// <summary>
         /// 송신 타입 [A: 안드로이드, I: 아이폰, 0: 전체]
         /// </summary>
-        public required string SendType { get; init; } = default!;
+        public string SendType { get; init; } = default!;
         /// <summary>
         /// 링크구분 [O: 외부, I: 내부, M: 메뉴이동, N: 링크없음]
         /// </summary>
-        public required string LinkType { get; init; } = default!;
+        public string LinkType { get; init; } = default!;
         /// <summary>
         /// 링크경로
         /// </summary>
@@ -53,7 +53,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.Advertisement.Command
         /// <summary>
         /// 정렬 순서
         /// </summary>
-        public required int SortNo { get; init; }
+        public int SortNo { get; init; }
         /// <summary>
         /// 이미지 파일 (이지스 배너 이미지)
         /// </summary>

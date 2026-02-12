@@ -1,6 +1,5 @@
 ﻿using System.Net.Http.Json;
 using Hello100Admin.Integration.Shared;
-using Seller.API.IntegrationTests;
 
 namespace AdminUser.API.IntegrationTests
 {
