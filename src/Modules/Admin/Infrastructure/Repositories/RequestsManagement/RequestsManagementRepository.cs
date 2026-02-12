@@ -47,8 +47,11 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.RequestsManage
 
             var result = await db.ExecuteAsync(query, parameters, ct, _logger);
 
+            // TO-DO 에러메시지 만들어서 넣어야 함
+            /*
             if (result <= 0)
                 throw new BizException(AdminErrorCode.DeleteUserFailed.ToError());
+            */
 
             return result;
         }
