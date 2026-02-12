@@ -39,7 +39,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
             DoctorInfoResult? doctorInfo = null;
             List<DoctorScheduleResult> weeksScheduleList = new List<DoctorScheduleResult>();
             List<DoctorScheduleResult> daysScheduleList = new List<DoctorScheduleResult>();
-            List<DoctorScheduleResult> untactScheduleList = new List<DoctorScheduleResult>();
+            List<DoctorScheduleResult> untactWeeksScheduleList = new List<DoctorScheduleResult>();
 
             if (doctorScheduleResult.Count > 0)
             {
@@ -101,9 +101,9 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
                             HospNo = doctorScheduleResult[0].HospNo,
                             HospKey = doctorScheduleResult[0].HospKey,
                             EmplNo = doctorScheduleResult[0].EmplNo,
+                            ClinicYmd = string.Empty,
                             WeekNum = i + 1,
                             WeekNm = weekName,
-                            ClinicYmd = string.Empty,
                             StartHour = doctorScheduleResult[0].StartHour,
                             StartMinute = doctorScheduleResult[0].StartMinute,
                             EndHour = doctorScheduleResult[0].EndHour,
@@ -127,16 +127,17 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
                             UntactBreakStartMinute = doctorScheduleResult[0].UntactBreakStartMinute,
                             UntactBreakEndMinute = doctorScheduleResult[0].UntactBreakEndMinute,
                             UntactRsrvCnt = doctorScheduleResult[0].UntactRsrvCnt,
+                            UntactUseYn = doctorScheduleResult[0].UntactUseYn
                         });
 
-                        untactScheduleList.Add(new DoctorScheduleResult
+                        untactWeeksScheduleList.Add(new DoctorScheduleResult
                         {
                             HospNo = doctorScheduleResult[0].HospNo,
                             HospKey = doctorScheduleResult[0].HospKey,
                             EmplNo = doctorScheduleResult[0].EmplNo,
+                            ClinicYmd = string.Empty,
                             WeekNum = i + 1,
                             WeekNm = weekName,
-                            ClinicYmd = string.Empty,
                             StartHour = doctorScheduleResult[0].StartHour,
                             StartMinute = doctorScheduleResult[0].StartMinute,
                             EndHour = doctorScheduleResult[0].EndHour,
@@ -155,12 +156,12 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
                             UntactEndHour = doctorScheduleResult[0].UntactEndHour,
                             UntactEndMinute = doctorScheduleResult[0].UntactEndMinute,
                             UntactIntervalTime = doctorScheduleResult[0].UntactIntervalTime,
-                            UntactUseYn = doctorScheduleResult[0].UntactUseYn,
                             UntactBreakStartHour = doctorScheduleResult[0].UntactBreakStartHour,
                             UntactBreakEndHour = doctorScheduleResult[0].UntactBreakEndHour,
                             UntactBreakStartMinute = doctorScheduleResult[0].UntactBreakStartMinute,
                             UntactBreakEndMinute = doctorScheduleResult[0].UntactBreakEndMinute,
-                            UntactRsrvCnt = doctorScheduleResult[0].UntactRsrvCnt
+                            UntactRsrvCnt = doctorScheduleResult[0].UntactRsrvCnt,
+                            UntactUseYn = doctorScheduleResult[0].UntactUseYn
                         });
                     }
                     else
@@ -170,9 +171,9 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
                             HospNo = schedule[0].HospNo,
                             HospKey = schedule[0].HospKey,
                             EmplNo = schedule[0].EmplNo,
+                            ClinicYmd = schedule[0].ClinicYmd,
                             WeekNum = schedule[0].WeekNum,
                             WeekNm = weekName,
-                            ClinicYmd = schedule[0].ClinicYmd,
                             StartHour = schedule[0].StartHour,
                             StartMinute = schedule[0].StartMinute,
                             EndHour = schedule[0].EndHour,
@@ -195,17 +196,18 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
                             UntactBreakEndHour = doctorScheduleResult[0].UntactBreakEndHour,
                             UntactBreakStartMinute = doctorScheduleResult[0].UntactBreakStartMinute,
                             UntactBreakEndMinute = doctorScheduleResult[0].UntactBreakEndMinute,
-                            UntactRsrvCnt = doctorScheduleResult[0].UntactRsrvCnt
+                            UntactRsrvCnt = doctorScheduleResult[0].UntactRsrvCnt,
+                            UntactUseYn = doctorScheduleResult[0].UntactUseYn
                         });
 
-                        untactScheduleList.Add(new DoctorScheduleResult
+                        untactWeeksScheduleList.Add(new DoctorScheduleResult
                         {
                             HospNo = schedule[0].HospNo,
                             HospKey = schedule[0].HospKey,
                             EmplNo = schedule[0].EmplNo,
+                            ClinicYmd = schedule[0].ClinicYmd,
                             WeekNum = schedule[0].WeekNum,
                             WeekNm = weekName,
-                            ClinicYmd = schedule[0].ClinicYmd,
                             StartHour = schedule[0].StartHour,
                             StartMinute = schedule[0].StartMinute,
                             EndHour = schedule[0].EndHour,
@@ -224,12 +226,12 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
                             UntactEndHour = schedule[0].UntactEndHour,
                             UntactEndMinute = schedule[0].UntactEndMinute,
                             UntactIntervalTime = schedule[0].UntactIntervalTime,
-                            UntactUseYn = schedule[0].UntactUseYn,
                             UntactBreakStartHour = schedule[0].UntactBreakStartHour,
                             UntactBreakEndHour = schedule[0].UntactBreakEndHour,
                             UntactBreakStartMinute = schedule[0].UntactBreakStartMinute,
                             UntactBreakEndMinute = schedule[0].UntactBreakEndMinute,
-                            UntactRsrvCnt = schedule[0].UntactRsrvCnt
+                            UntactRsrvCnt = schedule[0].UntactRsrvCnt,
+                            UntactUseYn = schedule[0].UntactUseYn
                         });
                     }
                 }
@@ -245,9 +247,9 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
                             HospNo = x.HospNo,
                             HospKey = x.HospKey,
                             EmplNo = x.EmplNo,
+                            ClinicYmd = x.ClinicYmd,
                             WeekNum = x.WeekNum,
                             WeekNm = "예외",
-                            ClinicYmd = x.ClinicYmd,
                             StartHour = x.StartHour,
                             StartMinute = x.StartMinute,
                             EndHour = x.EndHour,
@@ -265,7 +267,13 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
                             UntactStartMinute = x.UntactStartMinute,
                             UntactEndHour = x.UntactEndHour,
                             UntactEndMinute = x.UntactEndMinute,
-                            UntactIntervalTime = x.UntactIntervalTime
+                            UntactIntervalTime = x.UntactIntervalTime,
+                            UntactBreakStartHour = x.UntactBreakStartHour,
+                            UntactBreakEndHour = x.UntactBreakEndHour,
+                            UntactBreakStartMinute = x.UntactBreakStartMinute,
+                            UntactBreakEndMinute = x.UntactBreakEndMinute,
+                            UntactRsrvCnt = x.UntactRsrvCnt,
+                            UntactUseYn = x.UntactUseYn
                         });
                     });
             }
@@ -275,7 +283,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
                 DoctorInfo = doctorInfo,
                 WeeksScheduleList = weeksScheduleList,
                 DaysScheduleList = daysScheduleList,
-                UntactScheduleList = untactScheduleList
+                UntactWeeksScheduleList = untactWeeksScheduleList
             };
 
             return Result.Success(result);
