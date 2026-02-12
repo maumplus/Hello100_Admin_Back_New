@@ -3,7 +3,6 @@ using Hello100Admin.BuildingBlocks.Common.Errors;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Serialization;
 using Hello100Admin.Integration.Shared;
 using Microsoft.AspNetCore.WebUtilities;
-using Seller.API.IntegrationTests;
 
 namespace AdminUser.API.IntegrationTests
 {
@@ -80,41 +79,6 @@ namespace AdminUser.API.IntegrationTests
             var response = await _client.PostAsJsonAsync($"/api/hospital-management/hello100-setting", req);
 
             // Body
-            var body = await response.Content.ReadAsStringAsync();
-
-            // Assert
-            Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
-        }
-
-        [Fact]
-        public async Task GetMedicalDepartments_ShouldReturnOk_WhenValidCredentials()
-        {
-            _client.AsSuperAdmin("B81AFBD0", "대민테스트");
-
-            // Act
-            var response = await _client.GetAsync($"/api/hospital-management/medical-departments");
-
-            // Body
-            var body = await response.Content.ReadAsStringAsync();
-
-            // Assert
-            Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
-        }
-
-        [Fact]
-        public async Task GetClinicalKeywords_ShouldReturnOk_WhenValidCredentials()
-        {
-            var query = new Dictionary<string, string?>
-            {
-                ["keyword"] = default!,
-                ["masterSeq"] = default!,
-            };
-
-            var url = QueryHelpers.AddQueryString("/api/hospital-management/clinical-keywords", query);
-
-            _client.AsSuperAdmin("B81AFBD0", "대민테스트");
-
-            var response = await _client.GetAsync(url);
             var body = await response.Content.ReadAsStringAsync();
 
             // Assert

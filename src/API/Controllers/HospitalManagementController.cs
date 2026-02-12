@@ -12,9 +12,6 @@ using Hello100Admin.API.Infrastructure.Attributes;
 using System.Text.Json.Serialization;
 using System.Text.Json;
 using System.Text.Encodings.Web;
-using Org.BouncyCastle.Ocsp;
-using Microsoft.Extensions.FileProviders;
-using DocumentFormat.OpenXml.Drawing;
 using Hello100Admin.Modules.Admin.Domain.Entities;
 
 namespace Hello100Admin.API.Controllers
@@ -78,36 +75,6 @@ namespace Hello100Admin.API.Controllers
             _logger.LogInformation("GET /api/hospital-management/hospital");
 
             var result = await _mediator.Send(new GetHospitalQuery(base.HospNo), cancellationToken);
-
-            return result.ToActionResult(this);
-        }
-
-        /// <summary>
-        /// [병원관리자] 병원정보관리 > 병원정보관리 > 전체 진료과목 조회(모달)
-        /// Common한 기능으로 보이는데, 일단 현재 해당 페이지에서 사용하므로 추후 검토 필요
-        /// </summary>
-        [HttpGet("medical-departments")]
-        [ProducesResponseType(typeof(ApiResponse<ListResult<GetMedicalDepartmentsResult>>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetMedicalDepartments(CancellationToken cancellationToken = default)
-        {
-            _logger.LogInformation("GET /api/hospital-management/medical-departments");
-
-            var result = await _mediator.Send(new GetMedicalDepartmentsQuery(), cancellationToken);
-
-            return result.ToActionResult(this);
-        }
-
-        /// <summary>
-        /// [병원관리자] 병원정보관리 > 병원정보관리 > 증상/키워드 조회(모달)
-        /// Common한 기능으로 보이는데, 일단 현재 해당 페이지에서 사용하므로 추후 검토 필요
-        /// </summary>
-        [HttpGet("clinical-keywords")]
-        [ProducesResponseType(typeof(ApiResponse<List<GetClinicalKeywordsResult>>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetClinicalKeywords(string? keyword, string? masterSeq, CancellationToken cancellationToken = default)
-        {
-            _logger.LogInformation("GET /api/hospital-management/clinical-keywords");
-
-            var result = await _mediator.Send(new GetClinicalKeywordsQuery(keyword, masterSeq), cancellationToken);
 
             return result.ToActionResult(this);
         }

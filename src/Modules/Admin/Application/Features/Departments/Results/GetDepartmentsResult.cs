@@ -1,6 +1,6 @@
-﻿namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Results
+﻿namespace Hello100Admin.Modules.Admin.Application.Features.Departments.Results
 {
-    public class GetMedicalDepartmentsResult
+    public class GetDepartmentsResult
     {
         /// <summary>
         /// 공통시퀀스

@@ -7,6 +7,10 @@
         /// </summary>
         public int RowNum { get; set; }
         /// <summary>
+        /// 공지 ID
+        /// </summary>
+        public int NotiId { get; set; }
+        /// <summary>
         /// 제목
         /// </summary>
         public string Title { get; set; } = default!;
