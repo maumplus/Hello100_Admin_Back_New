@@ -14,5 +14,6 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistenc
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         public Task<ListResult<GetDepartmentsResult>> GetDepartmentsAsync(DbSession db, string clsCd, CancellationToken cancellationToken = default);
+        public Task<ListResult<GetDepartmentsResult>> GetHospitalMedicalsAsync(DbSession db, string hospKey, string clsCd, CancellationToken ct = default);
     }
 }

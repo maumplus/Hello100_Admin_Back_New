@@ -59,6 +59,51 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Departments
             return result;
         }
 
+        public async Task<ListResult<GetDepartmentsResult>> GetHospitalMedicalsAsync(DbSession db, string hospKey, string clsCd, CancellationToken ct = default)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@HospKey", hospKey, DbType.String);
+            parameters.Add("@ClsCode", clsCd, DbType.String);
+
+            var sql = @"
+                SELECT a.cm_seq                             AS CmSeq,
+                       a.cls_cd                             AS ClsCode,
+                       a.cm_cd                              AS CmCode,
+                       a.cls_name                           AS ClsName,
+                       a.cm_name                            AS CmName,
+                       a.locale                             AS Locale,
+                       a.del_yn                             AS DelYn,
+                       a.sort                               AS Sort,
+                       DATE_FORMAT(a.reg_dt, '%Y-%m-%d %T') AS RegDate
+                  FROM tb_common a
+                 WHERE a.cls_cd = @ClsCode
+                   AND a.del_yn = 'N'
+                   AND EXISTS ( SELECT 'Y'
+                                  FROM tb_hospital_medical_info t
+                                 WHERE t.hosp_key = @HospKey
+                                   AND a.cm_cd = t.md_cd )
+                 ORDER BY a.sort ASC; 
+
+                SELECT COUNT(*) AS TotalCount 
+                  FROM tb_common a
+                 WHERE a.cls_cd = @ClsCode 
+                   AND a.del_yn = 'N'
+                   AND EXISTS ( SELECT 'Y'
+                                  FROM tb_hospital_medical_info t
+                                 WHERE t.hosp_key = @HospKey
+                                   AND a.cm_cd = t.md_cd )
+            ";
+
+            var multi = await db.QueryMultipleAsync(sql, parameters, ct, _logger);
+
+            var result = new ListResult<GetDepartmentsResult>();
+
+            result.Items = (await multi.ReadAsync<GetDepartmentsResult>()).ToList();
+            result.TotalCount = Convert.ToInt32(await multi.ReadSingleAsync<long>());
+
+            return result;
+        }
+
         #endregion
     }
 }

@@ -4,6 +4,7 @@ using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Ho
 using Hello100Admin.Modules.Admin.Application.Common.Definitions.Enums;
 using Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Results;
 using MediatR;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -19,20 +20,20 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
         public string EmplNo { get; set; } = string.Empty;
     }
 
-    public class GetDoctorQueryHandler : IRequestHandler<GetDoctorQuery, Result<GetDoctorResult>>
+    public class GetDoctorQueryHandler : IRequestHandler<GetDoctorQuery, Result<GetDoctorResult?>>
     {
+        private readonly string _adminImageUrl;
         private readonly IHospitalManagementStore _hospitalStore;
         private readonly ILogger<GetDoctorQueryHandler> _logger;
 
-        public GetDoctorQueryHandler(
-        IHospitalManagementStore hospitalStore,
-        ILogger<GetDoctorQueryHandler> logger)
+        public GetDoctorQueryHandler(IConfiguration config, IHospitalManagementStore hospitalStore, ILogger<GetDoctorQueryHandler> logger)
         {
+            _adminImageUrl = config["AdminImageUrl"] ?? string.Empty;
             _hospitalStore = hospitalStore;
             _logger = logger;
         }
 
-        public async Task<Result<GetDoctorResult>> Handle(GetDoctorQuery query, CancellationToken cancellationToken)
+        public async Task<Result<GetDoctorResult?>> Handle(GetDoctorQuery query, CancellationToken cancellationToken)
         {
             var doctorScheduleResult = await _hospitalStore.GetDoctorList(query.HospNo, query.EmplNo, cancellationToken);
 
@@ -52,12 +53,13 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
                     DoctNm = doctorScheduleResult[0].DoctNm,
                     DeptCd = doctorScheduleResult[0].DeptCd,
                     DeptNm = doctorScheduleResult[0].DeptNm,
+                    EghisDoctInfoMdList = await _hospitalStore.GetEghisDoctInfoMd(query.HospNo, query.EmplNo, cancellationToken),
                     ViewRole = doctorScheduleResult[0].ViewRole,
                     ViewMinCnt = doctorScheduleResult[0].ViewMinCnt,
                     ViewMinTime = doctorScheduleResult[0].ViewMinTime,
                     UntactJoinYn = doctorScheduleResult[0].UntactJoinYn,
                     DoctModifyYn = doctorScheduleResult[0].DoctModifyYn,
-                    DoctFilePath = doctorScheduleResult[0].DoctFilePath
+                    ImageUrl = $"{_adminImageUrl}{doctorScheduleResult[0].DoctFilePath}"
                 };
 
                 //주중스케줄 작성
@@ -278,7 +280,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
                     });
             }
 
-            var result = new GetDoctorResult()
+            GetDoctorResult? result = new GetDoctorResult()
             {
                 DoctorInfo = doctorInfo,
                 WeeksScheduleList = weeksScheduleList,
@@ -286,7 +288,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
                 UntactWeeksScheduleList = untactWeeksScheduleList
             };
 
-            return Result.Success(result);
+            return Result.Success<GetDoctorResult?>(result);
         }
     }
 }

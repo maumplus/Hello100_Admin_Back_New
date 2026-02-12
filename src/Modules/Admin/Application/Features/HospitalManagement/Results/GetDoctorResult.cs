@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Hello100Admin.Modules.Admin.Domain.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -61,12 +62,13 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Re
         public string DoctNm { get; set; }
         public string DeptCd { get; set; }
         public string DeptNm { get; set; }
+        public List<EghisDoctInfoMdEntity> EghisDoctInfoMdList { get; set; }
         public int ViewRole { get; set; }
         public string ViewMinTime { get; set; }
         public string ViewMinCnt { get; set; }
         public string UntactJoinYn { get; set; }
         public string DoctModifyYn { get; set; }
-        public string DoctFilePath { get; set; }
+        public string ImageUrl { get; set; }
     }
 
     public sealed class DoctorScheduleResult

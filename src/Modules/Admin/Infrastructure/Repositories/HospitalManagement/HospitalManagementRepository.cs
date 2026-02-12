@@ -847,7 +847,6 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
                 
                 values += "( @Ridx{i}, @StartTime{i}, @EndTime{i}, @RsrvCnt{i}, @ComCnt{i}, NOW(), @ReceptType{i} )";
             }
-            
 
             var query = $@"
                 INSERT INTO hello100_api.eghis_doct_rsrv_detail_info

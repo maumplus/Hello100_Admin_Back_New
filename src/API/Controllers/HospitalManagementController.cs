@@ -13,6 +13,7 @@ using System.Text.Json.Serialization;
 using System.Text.Json;
 using System.Text.Encodings.Web;
 using Hello100Admin.Modules.Admin.Domain.Entities;
+using System.Collections.Generic;
 
 namespace Hello100Admin.API.Controllers
 {
@@ -237,13 +238,20 @@ namespace Hello100Admin.API.Controllers
         /// [병원정보관리 > 의료진관리]의료진 수정 API
         /// </summary>
         [HttpPatch("doctor")]
-        [ProducesResponseType(typeof(List<GetDoctorListResult>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> PatchDoctor([FromForm] PatchDoctorRequest request, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("PATCH /api/hospital-management/doctor");
 
-            var payloads = this.GetImagePayload(new List<IFormFile>() { request.Image });
+            List<IFormFile> images = new List<IFormFile>();
+
+            if (request.Image != null)
+            {
+                images.Add(request.Image);
+            }
+
+            var payloads = this.GetImagePayload(images);
 
             var command = request.Adapt<PatchDoctorCammand>() with
             {
@@ -253,7 +261,7 @@ namespace Hello100Admin.API.Controllers
                 DoctNm = request.DoctNm,
                 ViewMinCnt = request.ViewMinCnt,
                 ViewMinTime = request.ViewMinTime,
-                Image = payloads[0]
+                Image = payloads == null || payloads.Count == 0 ? null : payloads[0]
             };
 
             var result = await _mediator.Send(command, cancellationToken);
@@ -262,10 +270,31 @@ namespace Hello100Admin.API.Controllers
         }
 
         /// <summary>
+        /// [병원정보관리 > 의료진관리]비대면 의료진 상세 API
+        /// </summary>
+        [HttpGet("doctor-untanct/{emplNo}")]
+        [ProducesResponseType(typeof(GetDoctorUntactResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetDoctorUntanct(string emplNo, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("GET /api/hospital-management/doctor-untact");
+
+            var query = new GetDoctorUntactQuery()
+            {
+                HospNo = base.HospNo,
+                EmplNo = emplNo
+            };
+
+            var result = await _mediator.Send(query, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
         /// [병원정보관리 > 의료진관리]비대면 의료진 수정 API
         /// </summary>
         [HttpPatch("doctor-untanct")]
-        [ProducesResponseType(typeof(List<GetDoctorListResult>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> PatchDoctorUntanct([FromForm] PatchDoctorUntactRequest request, CancellationToken cancellationToken = default)
         {
@@ -584,27 +613,6 @@ namespace Hello100Admin.API.Controllers
             };
 
             var result = await _mediator.Send(command, cancellationToken);
-
-            return result.ToActionResult(this);
-        }
-
-        /// <summary>
-        /// [병원정보관리 > 의료진관리]의료진 진료 과목 설정 목록 API
-        /// </summary>
-        [HttpGet("doctor/medical-list")]
-        [ProducesResponseType(typeof(GetDoctorMedicalListResult), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetDoctorMedicalList(GetDoctorMedicalListRequest request, CancellationToken cancellationToken = default)
-        {
-            _logger.LogInformation("GET /api/hospital-management/doctor/medical-list");
-
-            var query = new GetDoctorMedicalListQuery()
-            {
-                HospNo = base.HospNo,
-                EmplNo = request.EmplNo
-            };
-
-            var result = await _mediator.Send(query, cancellationToken);
 
             return result.ToActionResult(this);
         }

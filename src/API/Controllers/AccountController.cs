@@ -38,7 +38,7 @@ namespace Hello100Admin.API.Controllers
         /// <summary>
         /// 차트구분 목록 API
         /// </summary>
-        [HttpPost("chart-types")]
+        [HttpGet("chart-types")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetChartTypeList(GetChartTypeListQuery query)
