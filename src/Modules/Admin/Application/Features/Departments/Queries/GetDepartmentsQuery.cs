@@ -9,7 +9,10 @@ using Microsoft.Extensions.Logging;
 
 namespace Hello100Admin.Modules.Admin.Application.Features.Departments.Queries
 {
-    public record GetDepartmentsQuery() : IQuery<Result<ListResult<GetDepartmentsResult>>>;
+    public class GetDepartmentsQuery : IQuery<Result<ListResult<GetDepartmentsResult>>>
+    {
+        public string? HospKey { get; set; }
+    }
 
     public class GetDepartmentsQueryQueryHandler : IRequestHandler<GetDepartmentsQuery, Result<ListResult<GetDepartmentsResult>>>
     {
@@ -31,9 +34,20 @@ namespace Hello100Admin.Modules.Admin.Application.Features.Departments.Queries
         {
             _logger.LogInformation("Handling GetDepartmentsQuery");
 
-            var result = await _db.RunAsync(DataSource.Hello100,
+            var result = new ListResult<GetDepartmentsResult>();
+
+            if (string.IsNullOrEmpty(req.HospKey))
+            {
+                result = await _db.RunAsync(DataSource.Hello100,
                 (session, token) => _departmentsStore.GetDepartmentsAsync(session, "03", token),
             ct);
+            }
+            else
+            {
+                result = await _db.RunAsync(DataSource.Hello100,
+                (session, token) => _departmentsStore.GetHospitalMedicalsAsync(session, req.HospKey, "03", token),
+            ct);
+            }
 
             return Result.Success(result);
         }

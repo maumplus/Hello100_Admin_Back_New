@@ -24,9 +24,9 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
         public string HospKey { get; set; }
         public string EmplNo { get; set; }
         public string DoctNm { get; set; }
-        public string ViewMinCnt { get; set; }
         public string ViewMinTime { get; set; }
-        public FileUploadPayload Image { get; set; }
+        public string ViewMinCnt { get; set; }
+        public FileUploadPayload? Image { get; set; }
     }
 
     public class PatchDoctorCammandHandler : IRequestHandler<PatchDoctorCammand, Result>
@@ -55,7 +55,13 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
         {
             _logger.LogInformation("Handling PatchDoctorCammand HospNo:{HospNo}", request.HospNo);
 
-            string imagePath = await _sftpClientService.UploadImageWithPathAsync(request.Image, ImageUploadType.UNTACT, _cryptoService.EncryptToBase64WithDesEcbPkcs7(request.HospNo), cancellationToken);
+            string imagePath = string.Empty;
+
+            if (request.Image != null)
+            {
+                imagePath = await _sftpClientService.UploadImageWithPathAsync(request.Image, ImageUploadType.UNTACT, _cryptoService.EncryptToBase64WithDesEcbPkcs7(request.HospNo), cancellationToken);
+            }
+            
 
             var eghisDoctInfoEntity = new EghisDoctInfoEntity
             {
@@ -67,28 +73,32 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
                 ViewMinCnt = request.ViewMinCnt
             };
 
-            var tbFileInfoEntity = new TbFileInfoEntity
-            {
-                ClsCd = "24",
-                CmCd = "U04",
-                FilePath = imagePath,
-                FileSize = request.Image.Length,
-                OriginFileName = request.Image.FileName,
-                DelYn = "N"
-            };
-
-            var tbEghisDoctInfoFileEntity = new TbEghisDoctInfoFileEntity
-            {
-                HospNo = request.HospNo,
-                HospKey = request.HospKey,
-                EmplNo = request.EmplNo,
-                TbFileInfoEntity = tbFileInfoEntity
-            };
-
             await _db.RunInTransactionAsync(DataSource.Hello100, async (session, token) =>
             {
                 await _hospitalManagementRepository.UpdateDoctorInfoAsync(session, eghisDoctInfoEntity, token);
-                await _hospitalManagementRepository.UpdateDoctorInfoFileAsync(session, tbEghisDoctInfoFileEntity, token);
+
+                if (request.Image != null && !string.IsNullOrEmpty(imagePath))
+                {
+                    var tbFileInfoEntity = new TbFileInfoEntity
+                    {
+                        ClsCd = "24",
+                        CmCd = "U04",
+                        FilePath = imagePath,
+                        FileSize = request.Image.Length,
+                        OriginFileName = request.Image.FileName,
+                        DelYn = "N"
+                    };
+
+                    var tbEghisDoctInfoFileEntity = new TbEghisDoctInfoFileEntity
+                    {
+                        HospNo = request.HospNo,
+                        HospKey = request.HospKey,
+                        EmplNo = request.EmplNo,
+                        TbFileInfoEntity = tbFileInfoEntity
+                    };
+
+                    await _hospitalManagementRepository.UpdateDoctorInfoFileAsync(session, tbEghisDoctInfoFileEntity, token);
+                }
             },
             cancellationToken);
 
