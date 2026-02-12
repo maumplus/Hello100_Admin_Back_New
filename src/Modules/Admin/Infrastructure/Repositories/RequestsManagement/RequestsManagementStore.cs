@@ -31,78 +31,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.RequestsManage
         }
         #endregion
 
-        #region IVISITPURPOSESTORE IMPLEMENTS METHOD AREA **************************************
-        public async Task<ListResult<GetRequestsResult>> GetRequestsAsync(string hospKey, int pageSize, int pageNum, string? apprYn, CancellationToken token)
-        {
-            try
-            {
-                _logger.LogInformation("GetRequestsAsync() Started");
-
-                var parameters = new DynamicParameters();
-                parameters.Add("HospKey", hospKey, DbType.String);
-                parameters.Add("Limit", pageSize, DbType.Int32);
-                parameters.Add("OffSet", (pageNum - 1) * pageSize, DbType.Int32);
-                parameters.Add("ApprYn", apprYn == "Y" ? string.Empty : "N", DbType.String);
-
-                #region == Query ==
-                StringBuilder sb = new StringBuilder();
-
-                string sWhere = " hosp_key = @HospKey AND appr_type NOT IN ('KW', 'HO') AND appr_yn LIKE CONCAT('%',@ApprYn, '%')";
-
-                sb.AppendLine(" SELECT 	ROW_NUMBER() OVER (ORDER BY req_dt ASC) AS RowNum    ");
-                sb.AppendLine(" 	,	hosp_key		AS HospKey          ");
-                sb.AppendLine(" 	,	appr_id		    AS ApprId           ");
-                sb.AppendLine(" 	,	appr_type	    AS ApprType         ");
-                sb.AppendLine(" 	,	DATA			AS Data             ");
-                sb.AppendLine(" 	,	aid			    AS AId              ");
-                sb.AppendLine(" 	,	aid_name		AS AIdName          ");
-                sb.AppendLine(" 	,	req_aid		    AS ReqAId           ");
-                sb.AppendLine(" 	,	appr_yn		    AS ApprYn           ");
-                sb.AppendLine(" 	,	from_unixtime(appr_dt, '%Y-%m-%d %H:%i')	AS ApprDt");
-                sb.AppendLine(" 	,	from_unixtime(req_dt, '%Y-%m-%d %H:%i')	AS ReqDt");
-                sb.AppendLine(" 	,	hosp_cls_cd	    AS HospClsCd        ");
-                sb.AppendLine(" 	,	NAME			AS Name             ");
-                sb.AppendLine(" 	,	addr			AS Addr             ");
-                sb.AppendLine(" 	,	post_cd		    AS PostCd           ");
-                sb.AppendLine(" 	,	tel			    AS Tel              ");
-                sb.AppendLine(" 	,	site			AS Site             ");
-                sb.AppendLine(" 	,	lat			    AS Lat              ");
-                sb.AppendLine(" 	,	lng			    AS Lng              ");
-                sb.AppendLine(" 	,	from_unixtime(reg_dt, '%Y-%m-%d %H:%i')  AS RegDt");
-                sb.AppendLine("    FROM VM_APPROVAL_INFO                    ");
-                sb.AppendLine($"   WHERE {sWhere}  ");
-                sb.AppendLine("   ORDER BY ReqDt DESC                              ");
-                sb.AppendLine("   LIMIT @OffSet, @Limit;");
-
-                sb.AppendLine($" SELECT COUNT(*) FROM VM_APPROVAL_INFO WHERE {sWhere};");
-                #endregion
-                /*
-                System.Diagnostics.Debug.WriteLine("Executing SQL:\n" + sb.ToString());
-                foreach (var paramName in parameters.ParameterNames)
-                {
-                    System.Diagnostics.Debug.WriteLine($"Parameter {paramName} = {parameters.Get<object>(paramName)}");
-                }*/
-
-                using var connection = _connection.CreateConnection();
-                var multi = await connection.QueryMultipleAsync(sb.ToString(), parameters);
-
-                var queryList = (await multi.ReadAsync<GetRequestsResult>()).AsList();
-                var totalCount = await multi.ReadSingleAsync<int>();
-
-                var result = new ListResult<GetRequestsResult>
-                {
-                    Items = queryList,
-                    TotalCount = totalCount
-                };
-
-                return result;
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "GetRequestsResult() Error");
-                throw new BizException(GlobalErrorCode.DataQueryError.ToError());
-            }
-        }
+        #region IREQUESTSMANAGEMENTSTORE IMPLEMENTS METHOD AREA **************************************
 
         public async Task<ListResult<GetRequestBugsResult>> GetRequestBugsAsync(int pageSize, int pageNum, bool apprYn, CancellationToken token)
         {

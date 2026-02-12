@@ -53,7 +53,7 @@ namespace AdminUser.API.IntegrationTests
         [Fact]
         public async Task UpdateRequestBug_ShouldReturnOk_WhenValidCredentials()
         {
-            int hpId = 305;
+            int hpId = 400;
 
             var req = new
             {
