@@ -23,6 +23,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.RequestsManagement.Co
         public UpdateRequestBugCommandValidator()
         {
             RuleFor(x => x.HpId).NotNull().WithMessage("요청ID는 필수입니다.");
+            RuleFor(x => x.ApprAid).NotNull().WithMessage("확인 관리자ID는 필수입니다.");
         }
     }
 

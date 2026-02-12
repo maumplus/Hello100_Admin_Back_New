@@ -33,6 +33,7 @@ using Hello100Admin.Modules.Admin.Infrastructure.External.Web.BizSite;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Account;
 using Hello100Admin.Modules.Admin.Infrastructure.Repositories.Account;
 using Hello100Admin.Modules.Admin.Infrastructure.Repositories.Notice;
+using Hello100Admin.Modules.Admin.Infrastructure.Repositories.RequestsManagement;
 
 namespace Hello100Admin.Modules.Admin.Infrastructure;
 
@@ -71,7 +72,8 @@ public static class DependencyInjection
         services.AddScoped<INoticeRepository, NoticeRepository>();
         services.AddScoped<ISftpClientService, SftpClientService>();
         services.AddScoped<IExcelExporter, ClosedXmlExcelExporter>();
-        services.AddScoped<IRequestsManagementStore, IRequestsManagementStore>();
+        services.AddScoped<IRequestsManagementStore, RequestsManagementStore>();
+        services.AddScoped<IRequestsManagementRepository, RequestsManagementRepository>();
         services.AddSingleton<IHasher, Sha256Hasher>();
 
         var kakaoBizUrl = configuration.GetSection("KakaoBizUrl").Value;

@@ -3,6 +3,7 @@ using Hello100Admin.BuildingBlocks.Common.Errors;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Dapper;
 using Hello100Admin.Modules.Admin.Application.Common.Errors;
+using Hello100Admin.Modules.Admin.Application.Common.Extensions;
 using Hello100Admin.Modules.Admin.Domain.Entities;
 using Hello100Admin.Modules.Admin.Domain.Repositories;
 using Microsoft.Extensions.Logging;
@@ -38,12 +39,16 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.RequestsManage
                  WHERE hp_id = @HpId
             ";
 
+            System.Diagnostics.Debug.WriteLine("Executing SQL:\n" + query);
+            foreach (var paramName in parameters.ParameterNames)
+            {
+                System.Diagnostics.Debug.WriteLine($"Parameter {paramName} = {parameters.Get<object>(paramName)}");
+            }
+
             var result = await db.ExecuteAsync(query, parameters, ct, _logger);
 
-            /* TODO : 에러코드 머지 후 에러 코드 넣어주기
             if (result <= 0)
-                throw new BizException(AdminErrorCode.UpdateUserRoleFailed.ToError());
-            */
+                throw new BizException(AdminErrorCode.DeleteUserFailed.ToError());
 
             return result;
         }

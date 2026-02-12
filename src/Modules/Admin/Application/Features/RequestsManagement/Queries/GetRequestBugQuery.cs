@@ -11,10 +11,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Hello100Admin.Modules.Admin.Application.Features.RequestsManagement.Queries
 {
-    public record GetRequestBugQuery: IQuery<Result<GetRequestBugResult>>
-    {
-        public long HpId { get; init; }
-    }
+    public record GetRequestBugQuery(int HpId): IQuery<Result<GetRequestBugResult>>;
 
     public class GetRequestBugQueryValidator : AbstractValidator<GetRequestBugQuery>
     {
@@ -45,6 +42,8 @@ namespace Hello100Admin.Modules.Admin.Application.Features.RequestsManagement.Qu
             _logger.LogInformation("Handling GetRequestBugQuery");
 
             var requestBug = await _requestsManagementStore.GetRequestBugAsync(req.HpId, ct);
+
+            requestBug.Email = string.IsNullOrEmpty(requestBug.Email) ? string.Empty : _cryptoService.DecryptWithNoVector(requestBug.Email, CryptoKeyType.Email);
 
             return Result.Success(requestBug);
         }

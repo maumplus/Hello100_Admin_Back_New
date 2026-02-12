@@ -10,6 +10,9 @@ using Hello100Admin.Modules.Admin.Application.Features.RequestsManagement.Result
 using Hello100Admin.Modules.Admin.Application.Features.HospitalUser.Queries;
 using Mapster;
 using Hello100Admin.Modules.Admin.Application.Features.Advertisement.Queries;
+using Hello100Admin.API.Constracts.Admin.Advertisement;
+using Hello100Admin.API.Constracts.Admin.RequestsManagement;
+using Hello100Admin.Modules.Admin.Application.Features.Advertisement.Commands;
 
 namespace Hello100Admin.API.Controllers
 {
@@ -20,15 +23,21 @@ namespace Hello100Admin.API.Controllers
     [Route("api/requests-management")]
     public class RequestsManagementController : BaseController
     {
+        #region FIELD AREA ****************************************
         private readonly ILogger<RequestsManagementController> _logger;
         private readonly IMediator _mediator;
+        #endregion
 
+
+        #region CONSTRUCTOR AREA ***********************************
         public RequestsManagementController(IMediator mediator, ILogger<RequestsManagementController> logger)
         {
             _logger = logger;
             _mediator = mediator;
         }
+        #endregion
 
+        #region ACTION METHOD AREA *******************************
         [HttpGet("bugs")]
         [ProducesResponseType(typeof(ApiResponse<ListResult<GetRequestBugsResult>>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetRequestBugs(int pageNo, int pageSize, bool apprYn, CancellationToken cancellationToken = default)
@@ -39,6 +48,35 @@ namespace Hello100Admin.API.Controllers
 
             return result.ToActionResult(this);
         }
+
+        [HttpGet("bugs/{hpId}")]
+        [ProducesResponseType(typeof(ApiResponse<GetRequestBugResult>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetRequestBug(int hpId, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("GET api/requests-management/bugs/{hpId} [{Aid}]", hpId, Aid);
+
+            var result = await _mediator.Send(new GetRequestBugQuery(hpId), cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        [HttpPatch("bugs/{hpId}")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        public async Task<IActionResult> UpdateRequestBug(int hpId, UpdateRequestBugRequest req, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("PATCH api/requests-management/bugs/{hpId} [{Aid}]", hpId, Aid);
+
+            var command = req.Adapt<UpdateRequestBugCommand>() with
+            {
+                HpId = hpId,
+                ApprAid = req.ApprAId
+            };
+
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+        #endregion
 
     }
 }
