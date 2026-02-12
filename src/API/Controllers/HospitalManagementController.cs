@@ -296,7 +296,7 @@ namespace Hello100Admin.API.Controllers
         [HttpPatch("doctor-untanct")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> PatchDoctorUntanct([FromForm] PatchDoctorUntactRequest request, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> PatchDoctorUntanct(PatchDoctorUntactRequest request, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("PATCH /api/hospital-management/doctor-untact");
 
