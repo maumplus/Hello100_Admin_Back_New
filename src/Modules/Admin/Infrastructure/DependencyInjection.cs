@@ -33,6 +33,9 @@ using Hello100Admin.Modules.Admin.Infrastructure.External.Web.BizSite;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Account;
 using Hello100Admin.Modules.Admin.Infrastructure.Repositories.Account;
 using Hello100Admin.Modules.Admin.Infrastructure.Repositories.Notice;
+using Hello100Admin.Modules.Admin.Infrastructure.Repositories.Hospitals;
+using Hello100Admin.Modules.Admin.Infrastructure.Repositories.Departments;
+using Hello100Admin.Modules.Admin.Infrastructure.Repositories.Keywords;
 using Hello100Admin.Modules.Admin.Infrastructure.Repositories.RequestsManagement;
 
 namespace Hello100Admin.Modules.Admin.Infrastructure;
@@ -70,6 +73,10 @@ public static class DependencyInjection
         services.AddScoped<IAdvertisementRepository, AdvertisementRepository>();
         services.AddScoped<INoticeStore, NoticeStore>();
         services.AddScoped<INoticeRepository, NoticeRepository>();
+        services.AddScoped<IHospitalsStore, HospitalsStore>();
+        services.AddScoped<IHospitalsRepository, HospitalsRepository>();
+        services.AddScoped<IDepartmentsStore, DepartmentsStore>();
+        services.AddScoped<IKeywordsStore, KeywordsStore>();
         services.AddScoped<ISftpClientService, SftpClientService>();
         services.AddScoped<IExcelExporter, ClosedXmlExcelExporter>();
         services.AddScoped<IRequestsManagementStore, RequestsManagementStore>();

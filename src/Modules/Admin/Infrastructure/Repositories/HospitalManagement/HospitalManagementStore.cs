@@ -10,6 +10,7 @@ using Mapster;
 using Hello100Admin.Modules.Admin.Application.Common.Models;
 using System.Text;
 using Hello100Admin.Modules.Admin.Domain.Entities;
+using Hello100Admin.Modules.Admin.Application.Features.Keywords.Results;
 
 namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManagement
 {
@@ -467,100 +468,6 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             ";
 
             var result = await db.QueryFirstOrDefaultAsync<GetHello100SettingResult>(sql, parameters, ct, _logger);
-
-            return result;
-        }
-
-        public async Task<ListResult<GetMedicalDepartmentsResult>> GetMedicalDepartmentsAsync(DbSession db, string clsCd, CancellationToken ct = default)
-        {
-            var parameters = new DynamicParameters();
-            parameters.Add("@ClsCode", clsCd, DbType.String);
-
-            var sql = @"
-                SELECT cm_seq                             AS CmSeq,
-                       cls_cd                             AS ClsCode,
-                       cm_cd                              AS CmCode,
-                       cls_name                           AS ClsName,
-                       cm_name                            AS CmName,
-                       locale                             AS Locale,
-                       del_yn                             AS DelYn,
-                       sort                               AS Sort,
-                       DATE_FORMAT(reg_dt, '%Y-%m-%d %T') AS RegDate
-                  FROM tb_common 
-                 WHERE cls_cd = @ClsCode
-                   AND del_yn = 'N'
-                 ORDER BY sort asc; 
-
-                SELECT COUNT(*) AS TotalCount 
-                  FROM tb_common 
-                 WHERE cls_cd = @ClsCode 
-                   AND del_yn = 'N'
-            ";
-
-            var multi = await db.QueryMultipleAsync(sql, parameters, ct, _logger);
-
-            var result = new ListResult<GetMedicalDepartmentsResult>();
-
-            result.Items = (await multi.ReadAsync<GetMedicalDepartmentsResult>()).ToList();
-            result.TotalCount = Convert.ToInt32(await multi.ReadSingleAsync<long>());
-
-            return result;
-        }
-
-        public async Task<List<GetClinicalKeywordsResult>> GetClinicalKeywordsAsync(DbSession db, string? keyword, string? masterSeq, CancellationToken ct = default)
-        {
-            // 파라미터 사용 안함
-            //var parameters = new DynamicParameters();
-            //parameters.Add("@Keyword", keyword, DbType.String);
-
-            #region == Query ==
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine("   select	");
-            sb.AppendLine("      CONCAT(master_seq,'_',detail_seq) as Kid,   	");
-            sb.AppendLine("      master_seq as MasterSeq,   	");
-            sb.AppendLine("      detail_seq as DetailSeq,	");
-            sb.AppendLine("      detail_name as Keyword,	");
-            sb.AppendLine("      sort_no as SortNo,	");
-            sb.AppendLine("      search_cnt as SearchCnt,	");
-            sb.AppendLine("      'N' as DelYn	");
-            sb.AppendLine("   from	");
-            sb.AppendLine("      hello100.tb_keyword_detail tkd 	");
-            sb.AppendLine("   where	 ");
-            sb.AppendLine("   (select detail_use_yn from hello100.tb_keyword_master tkm where tkm.master_seq=tkd.master_seq)!='N' ");
-            if (!string.IsNullOrEmpty(masterSeq))
-            {
-                sb.AppendLine("     and master_seq=" + masterSeq + " 	");
-            }
-            if (keyword != "")
-            {
-                sb.AppendLine("     and detail_name like '%" + keyword + "%'");
-            }
-
-            sb.AppendLine("     union	");
-            sb.AppendLine("     select	");
-            sb.AppendLine("        CONCAT(master_seq,'_',0) as Kid,     	");
-            sb.AppendLine("        master_seq as MasterSeq,      	");
-            sb.AppendLine("        0 as DetailSeq,  	");
-            sb.AppendLine("        concat('[대표] ',master_name) as Keyword,      	");
-            sb.AppendLine("        sort_no as SortNo,    	");
-            sb.AppendLine("        search_cnt as SearchCnt,   	");
-            sb.AppendLine("        'N' as DelYn	");
-            sb.AppendLine("     from	");
-            sb.AppendLine("        hello100.tb_keyword_master tkm 	");
-            sb.AppendLine("   where	 show_yn='Y' ");
-            if (!string.IsNullOrEmpty(masterSeq))
-            {
-                sb.AppendLine("     and master_seq=" + masterSeq + " 	");
-            }
-            if (keyword != "")
-            {
-                sb.AppendLine("     and master_name like '%" + keyword + "%'");
-            }
-
-            sb.AppendLine("        order by MasterSeq asc ,DetailSeq asc  	");
-            #endregion
-
-            var result = (await db.QueryAsync<GetClinicalKeywordsResult>(sb.ToString(), ct: ct, logger: _logger)).ToList();
 
             return result;
         }

@@ -82,6 +82,60 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Common
                 throw new BizException(GlobalErrorCode.DataQueryError.ToError());
             }
         }
+
+        // 위 쿼리와 동일하니 추후 병합
+        public async Task<GetCurrentHospitalProfileReadModel> GetCurrentHospitalProfileByHospKeyAsync(string hospKey, CancellationToken token)
+        {
+            try
+            {
+                _logger.LogInformation("GetCurrentHospitalProfileAsync() Started");
+
+                var parameters = new DynamicParameters();
+                parameters.Add("@HospKey", hospKey, DbType.String);
+
+                var query = @"
+                    SELECT z.hosp_key                                      AS HospKey,
+                           z.hosp_no                                       AS HospNo,
+                           z.name                                          AS Name,
+                           z.hosp_cls_cd                                   AS HospClsCd,
+                           z.addr                                          AS Addr,
+                           z.post_cd                                       AS PostCd,
+                           z.tel                                           AS Tel,
+                           z.closing_yn                                    AS ClosingYn,
+                           z.del_yn                                        AS DelYn,
+                           z.`Desc`                                        AS Descrption,
+                           z.md_cd                                         AS MdCd,
+                           ( SELECT COUNT(*) 
+                               FROM tb_eghis_hosp_device_settings_info 
+                              WHERE hosp_no = z.hosp_no 
+                                AND device_type = 1 
+                                AND use_yn = 'Y' )                         AS KioskCnt,
+                           ( SELECT COUNT(*) 
+                               FROM tb_eghis_hosp_device_settings_info 
+                              WHERE hosp_no = z.hosp_no 
+                                AND device_type = 2 
+                                AND use_yn = 'Y' )                         AS TabletCnt,
+                           z.chart_type                                    AS ChartType
+                      FROM VM_HOSPITAL_DETAIL z
+                     WHERE hosp_key = @HospKey
+                ";
+
+                using var connection = _connection.CreateConnection();
+                var queryResult = await connection.QueryFirstOrDefaultAsync<CurrentHospitalInfo>(query, parameters);
+
+                var result = queryResult.Adapt<GetCurrentHospitalProfileReadModel>();
+
+                if (result == null)
+                    throw new BizException(AdminErrorCode.NotFoundCurrentHospital.ToError());
+
+                return result;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "GetCurrentHospitalProfileAsync() Error");
+                throw new BizException(GlobalErrorCode.DataQueryError.ToError());
+            }
+        }
         #endregion
     }
 }

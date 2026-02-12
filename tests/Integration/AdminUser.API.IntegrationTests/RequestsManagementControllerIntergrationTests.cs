@@ -1,8 +1,6 @@
 ﻿using Hello100Admin.Integration.Shared;
 using System.Net.Http.Json;
-using Seller.API.IntegrationTests;
 using Hello100Admin.BuildingBlocks.Common.Errors;
-using Microsoft.AspNetCore.WebUtilities;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Serialization;
 
 namespace AdminUser.API.IntegrationTests

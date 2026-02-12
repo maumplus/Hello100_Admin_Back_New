@@ -90,5 +90,11 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Errors
         UpdateNoticeFailed = 4040,
         [Description("공지사항 삭제에 실패하였습니다. 확인 후 다시 시도해주세요.")]
         DeleteNoticeFailed = 4041,
+        [Description("병원 정보 조회에 실패하였습니다. 확인 후 다시 시도해주세요.")]
+        NotFoundHospital = 4042,
+        [Description("신규 병원 생성에 실패하였습니다. 확인 후 다시 시도해주세요.")]
+        CreateHospitalFailed = 4043,
+        [Description("병원 삭제에 실패하였습니다. 확인 후 다시 시도해주세요.")]
+        DeleteHospitalFailed = 4044,
     }
 }

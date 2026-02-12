@@ -1,5 +1,4 @@
 ﻿using Hello100Admin.Integration.Shared;
-using Seller.API.IntegrationTests;
 
 namespace AdminUser.API.IntegrationTests
 {

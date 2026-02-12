@@ -11,6 +11,7 @@ using Hello100Admin.Modules.Admin.Domain.Entities;
 using Hello100Admin.Modules.Admin.Domain.Repositories;
 using Mapster;
 using MediatR;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Commands
@@ -122,6 +123,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
 
     public class UpsertHospitalCommandHandler : IRequestHandler<UpsertHospitalCommand, Result>
     {
+        private readonly string _adminImageUrl;
         private readonly ILogger<UpsertHospitalCommandHandler> _logger;
         private readonly IHospitalManagementRepository _hospitalRepository;
         private readonly ICurrentHospitalProfileProvider _currentHospitalProfileProvider;
@@ -130,6 +132,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
         private readonly IDbSessionRunner _db;
 
         public UpsertHospitalCommandHandler(
+            IConfiguration config,
             ILogger<UpsertHospitalCommandHandler> logger,
             IHospitalManagementRepository hospitalRepository,
             ICurrentHospitalProfileProvider currentHospitalProfileProvider,
@@ -137,6 +140,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
             ICryptoService cryptoService,
             IDbSessionRunner db)
         {
+            _adminImageUrl = config["AdminImageUrl"] ?? string.Empty;
             _logger = logger;
             _hospitalRepository = hospitalRepository;
             _currentHospitalProfileProvider = currentHospitalProfileProvider;
@@ -166,13 +170,19 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
             bizReq.Name = hospInfo.Name;
             bizReq.Images = images;
 
-            if (images.Count > 0)
+            var storedImages = bizReq.ImgFiles;
+
+            if (storedImages is { Count: > 0 })
             {
-                bizReq.ImgFiles?.ForEach(x =>
+                foreach (var img in storedImages)
                 {
-                    x.ImgKey = ""; // set existing key to empty
-                    images.Add(x); // add existing image infos
-                });
+                    // 기존 이미지의 경우 admin image url 경로 포함하고 있으니 경로 삭제 필요
+                    if (!string.IsNullOrEmpty(img.Url))
+                        img.Url = img.Url.Replace(_adminImageUrl, "");
+
+                    img.ImgKey = "";
+                    images.Add(img);
+                }
             }
 
             bizReq.ClinicTimesNew?.ForEach(s =>
@@ -192,7 +202,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
             var clinicTimesNewEntity = bizReq.ClinicTimesNew.Adapt<List<TbEghisHospMedicalTimeNewEntity>>();
             var deptCodesEntity = bizReq.DeptCodes.Adapt<List<TbHospitalMedicalInfoEntity>>();
             var keywordsEntity = bizReq.Keywords.Adapt<List<TbEghisHospKeywordInfoEntity>>();
-            var imagesEntity = bizReq.ImgFiles.Adapt<List<TbImageInfoEntity>>();
+            var imagesEntity = images.Adapt<List<TbImageInfoEntity>>();
 
             // Update Database
             await _db.RunInTransactionAsync(DataSource.Hello100, async (session, token) =>
