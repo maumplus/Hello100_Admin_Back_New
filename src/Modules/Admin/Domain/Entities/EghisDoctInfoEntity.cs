@@ -26,7 +26,7 @@ namespace Hello100Admin.Modules.Admin.Domain.Entities
         public int BreakEndHour { get; set; }
         public int BreakEndMinute { get; set; }
         public int IntervalTime { get; set; }
-        public string Message { get; set; }
+        public string? Message { get; set; }
         public int Hello100Role { get; set; }
         public int Ridx { get; set; }
         public int ViewRole { get; set; }

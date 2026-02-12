@@ -95,8 +95,8 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
                         var eghisDoctRsrvDetailInfoEntity = new EghisDoctRsrvDetailInfoEntity()
                         {
                             Ridx = eghisDoctRsrvInfoEntity.Ridx,
-                            StartTime = i.Value.ToString("HH:mm"),
-                            EndTime = (i.Value + time).ToString("HH:mm"),
+                            StartTime = i.Value.ToString("HHmm"),
+                            EndTime = (i.Value + time).ToString("HHmm"),
                             RsrvCnt = eghisDoctRsrvInfoEntity.RsrvIntervalCnt,
                             ComCnt = 0,
                             ReceptType = "NR"

@@ -5,7 +5,7 @@ namespace Hello100Admin.API.Constracts.Admin.HospitalManagement
     public class GetDoctorDaysReservationListRequest
     {
         [JsonIgnore]
-        public string HospNo { get; set; }
+        public string? HospNo { get; set; }
         public string EmplNo { get; set; }
         public string ClinicYmd { get; set; }
         public string ReCalculateYn { get; set; } = "N";

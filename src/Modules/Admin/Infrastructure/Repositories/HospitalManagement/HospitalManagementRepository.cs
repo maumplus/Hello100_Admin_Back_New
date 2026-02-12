@@ -562,26 +562,28 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
 
             var values = string.Empty;
 
-            foreach (var eghisDoctInfo in eghisDoctInfoList)
+            for (int i = 0; i < eghisDoctInfoList.Count; i++)
             {
-                parameters.Add("Insert_ClinicYmd", eghisDoctInfo.ClinicYmd, DbType.String);
-                parameters.Add("Insert_WeekNum", eghisDoctInfo.WeekNum, DbType.Int32);
-                parameters.Add("Insert_StartHour", eghisDoctInfo.StartHour, DbType.Int32);
-                parameters.Add("Insert_StartMinute", eghisDoctInfo.StartMinute, DbType.Int32);
-                parameters.Add("Insert_EndHour", eghisDoctInfo.EndHour, DbType.Int32);
-                parameters.Add("Insert_EndMinute", eghisDoctInfo.EndMinute, DbType.Int32);
-                parameters.Add("Insert_BreakStartHour", eghisDoctInfo.BreakStartHour, DbType.Int32);
-                parameters.Add("Insert_BreakStartMinute", eghisDoctInfo.BreakStartMinute, DbType.Int32);
-                parameters.Add("Insert_BreakEndHour", eghisDoctInfo.BreakEndHour, DbType.Int32);
-                parameters.Add("Insert_BreakEndMinute", eghisDoctInfo.BreakEndMinute, DbType.Int32);
-                parameters.Add("Insert_IntervalTime", eghisDoctInfo.IntervalTime, DbType.Int32);
-                parameters.Add("Insert_Message", eghisDoctInfo.Message, DbType.String);
-                parameters.Add("Insert_Hello100Role", eghisDoctInfo.Hello100Role, DbType.Int32);
-                parameters.Add("Insert_Ridx", eghisDoctInfo.Ridx, DbType.Int32);
-                parameters.Add("Insert_ViewRole", eghisDoctInfo.ViewRole, DbType.Int32);
-                parameters.Add("Insert_ViewMinTime", eghisDoctInfo.ViewMinTime, DbType.String);
-                parameters.Add("Insert_ViewMinCnt", eghisDoctInfo.ViewMinCnt, DbType.String);
-                parameters.Add("Insert_UseYn", eghisDoctInfo.UseYn, DbType.String);
+                var eghisDoctInfo = eghisDoctInfoList[i];
+
+                parameters.Add($"Insert_ClinicYmd{i}", eghisDoctInfo.ClinicYmd, DbType.String);
+                parameters.Add($"Insert_WeekNum{i}", eghisDoctInfo.WeekNum, DbType.Int32);
+                parameters.Add($"Insert_StartHour{i}", eghisDoctInfo.StartHour, DbType.Int32);
+                parameters.Add($"Insert_StartMinute{i}", eghisDoctInfo.StartMinute, DbType.Int32);
+                parameters.Add($"Insert_EndHour{i}", eghisDoctInfo.EndHour, DbType.Int32);
+                parameters.Add($"Insert_EndMinute{i}", eghisDoctInfo.EndMinute, DbType.Int32);
+                parameters.Add($"Insert_BreakStartHour{i}", eghisDoctInfo.BreakStartHour, DbType.Int32);
+                parameters.Add($"Insert_BreakStartMinute{i}", eghisDoctInfo.BreakStartMinute, DbType.Int32);
+                parameters.Add($"Insert_BreakEndHour{i}", eghisDoctInfo.BreakEndHour, DbType.Int32);
+                parameters.Add($"Insert_BreakEndMinute{i}", eghisDoctInfo.BreakEndMinute, DbType.Int32);
+                parameters.Add($"Insert_IntervalTime{i}", eghisDoctInfo.IntervalTime, DbType.Int32);
+                parameters.Add($"Insert_Message{i}", eghisDoctInfo.Message, DbType.String);
+                parameters.Add($"Insert_Hello100Role{i}", eghisDoctInfo.Hello100Role, DbType.Int32);
+                parameters.Add($"Insert_Ridx{i}", eghisDoctInfo.Ridx, DbType.Int32);
+                parameters.Add($"Insert_ViewRole{i}", eghisDoctInfo.ViewRole, DbType.Int32);
+                parameters.Add($"Insert_ViewMinTime{i}", eghisDoctInfo.ViewMinTime, DbType.String);
+                parameters.Add($"Insert_ViewMinCnt{i}", eghisDoctInfo.ViewMinCnt, DbType.String);
+                parameters.Add($"Insert_UseYn{i}", eghisDoctInfo.UseYn, DbType.String);
 
                 if (!string.IsNullOrEmpty(values))
                 {
@@ -589,9 +591,9 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
                 }
 
                 values += $@"
-                    ( @HospNo, @HospKey, @EmplNo, @Insert_ClinicYmd, @DoctNo, @DoctNm, @DeptCd, @DeptNm,
-                      @Insert_WeekNum, @Insert_StartHour, @Insert_StartMinute, @Insert_EndHour, @Insert_EndMinute, @Insert_BreakStartHour, @Insert_BreakStartMinute, @Insert_BreakEndHour, @Insert_BreakEndMinute, @Insert_IntervalTime,
-                      @Insert_Message, @Insert_Hello100Role, @Insert_Ridx, @Insert_ViewRole, @Insert_ViewMinTime, @Insert_ViewMinCnt, @Insert_UseYn, NOW() )
+                    ( @HospNo, @HospKey, @EmplNo, @Insert_ClinicYmd{i}, @DoctNo, @DoctNm, @DeptCd, @DeptNm,
+                      @Insert_WeekNum{i}, @Insert_StartHour{i}, @Insert_StartMinute{i}, @Insert_EndHour{i}, @Insert_EndMinute{i}, @Insert_BreakStartHour{i}, @Insert_BreakStartMinute{i}, @Insert_BreakEndHour{i}, @Insert_BreakEndMinute{i}, @Insert_IntervalTime{i},
+                      @Insert_Message{i}, @Insert_Hello100Role{i}, @Insert_Ridx{i}, @Insert_ViewRole{i}, @Insert_ViewMinTime{i}, @Insert_ViewMinCnt{i}, @Insert_UseYn{i}, NOW() )
                 ";
             }
 
@@ -600,7 +602,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
                   ( hosp_no, hosp_key, empl_no, clinic_ymd, doct_no, doct_nm, dept_cd, dept_nm,
                     week_num, start_hour, start_minute, end_hour, end_minute, break_start_hour, break_start_minute, break_end_hour, break_end_minute, interval_time,
                     message, hello100_role, ridx, view_role, view_min_time, view_min_cnt, use_yn, reg_dt )
-                VALUES {values}
+                VALUES {values};
             ";
 
             queries.Add(query);
@@ -625,7 +627,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
                   end_hour = VALUES(end_hour),
                   end_minute = VALUES(end_minute),
                   break_start_hour = VALUES(break_start_hour),
-                  break_start_minute = VALUES(break_start_minute\),
+                  break_start_minute = VALUES(break_start_minute),
                   break_end_hour = VALUES(break_end_hour),
                   break_end_minute = VALUES(break_end_minute),
                   interval_time = VALUES(interval_time),
@@ -641,7 +643,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
 
             queries.Add(query);
 
-            query = string.Join("\n", queries.ToArray());
+            query = string.Join("", queries.ToArray());
 
             return await db.ExecuteAsync(query, parameters, ct, _logger);
         }
@@ -686,19 +688,21 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
 
             var values = string.Empty;
 
-            foreach (var eghisDoctInfo in eghisDoctInfoList)
+            for (int i = 0; i < eghisDoctInfoList.Count; i++)
             {
-                parameters.Add("Insert_WeekNum", eghisDoctInfo.WeekNum, DbType.Int32);
-                parameters.Add("Insert_UntactStartHour", eghisDoctInfo.UntactStartHour, DbType.Int32);
-                parameters.Add("Insert_UntactStartMinute", eghisDoctInfo.UntactStartMinute, DbType.Int32);
-                parameters.Add("Insert_UntactEndHour", eghisDoctInfo.UntactEndHour, DbType.Int32);
-                parameters.Add("Insert_UntactEndMinute", eghisDoctInfo.UntactEndMinute, DbType.Int32);
-                parameters.Add("Insert_UntactIntervalTime", eghisDoctInfo.UntactIntervalTime, DbType.Int32);
-                parameters.Add("Insert_UntactUseYn", eghisDoctInfo.UntactUseYn, DbType.String);
-                parameters.Add("Insert_UntactBreakStartHour", eghisDoctInfo.UntactBreakStartHour, DbType.Int32);
-                parameters.Add("Insert_UntactBreakStartMinute", eghisDoctInfo.UntactBreakStartMinute, DbType.Int32);
-                parameters.Add("Insert_UntactBreakEndHour", eghisDoctInfo.UntactBreakEndHour, DbType.Int32);
-                parameters.Add("Insert_UntactBreakEndMinute", eghisDoctInfo.UntactBreakEndMinute, DbType.Int32);
+                var eghisDoctInfo = eghisDoctInfoList[i];
+
+                parameters.Add($"Insert_WeekNum{i}", eghisDoctInfo.WeekNum, DbType.Int32);
+                parameters.Add($"Insert_UntactStartHour{i}", eghisDoctInfo.UntactStartHour, DbType.Int32);
+                parameters.Add($"Insert_UntactStartMinute{i}", eghisDoctInfo.UntactStartMinute, DbType.Int32);
+                parameters.Add($"Insert_UntactEndHour{i}", eghisDoctInfo.UntactEndHour, DbType.Int32);
+                parameters.Add($"Insert_UntactEndMinute{i}", eghisDoctInfo.UntactEndMinute, DbType.Int32);
+                parameters.Add($"Insert_UntactIntervalTime{i}", eghisDoctInfo.UntactIntervalTime, DbType.Int32);
+                parameters.Add($"Insert_UntactUseYn{i}", eghisDoctInfo.UntactUseYn, DbType.String);
+                parameters.Add($"Insert_UntactBreakStartHour{i}", eghisDoctInfo.UntactBreakStartHour, DbType.Int32);
+                parameters.Add($"Insert_UntactBreakStartMinute{i}", eghisDoctInfo.UntactBreakStartMinute, DbType.Int32);
+                parameters.Add($"Insert_UntactBreakEndHour{i}", eghisDoctInfo.UntactBreakEndHour, DbType.Int32);
+                parameters.Add($"Insert_UntactBreakEndMinute{i}", eghisDoctInfo.UntactBreakEndMinute, DbType.Int32);
 
                 if (!string.IsNullOrEmpty(values))
                 {
@@ -707,8 +711,8 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
 
                 values += $@"
                     ( @HospNo, @HospKey, @EmplNo,
-                      @Insert_WeekNum, @Insert_UntactStartHour, @Insert_UntactStartMinute, @Insert_UntactEndHour, @Insert_UntactEndMinute , @Insert_UntactIntervalTime, @Insert_UntactUseYn,
-                      @Insert_UntactBreakStartHour, @Insert_UntactBreakStartMinute , @Insert_UntactBreakEndHour, @Insert_UntactBreakEndMinute )"; 
+                      @Insert_WeekNum{i}, @Insert_UntactStartHour{i}, @Insert_UntactStartMinute{i}, @Insert_UntactEndHour{i}, @Insert_UntactEndMinute{i}, @Insert_UntactIntervalTime{i}, @Insert_UntactUseYn{i},
+                      @Insert_UntactBreakStartHour{i}, @Insert_UntactBreakStartMinute{i}, @Insert_UntactBreakEndHour{i}, @Insert_UntactBreakEndMinute{i} )"; 
             }
 
             queries.Add(query);
@@ -746,7 +750,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
 
             queries.Add(query);
 
-            query = string.Join("\n", queries.ToArray());
+            query = string.Join("", queries.ToArray());
 
             return await db.ExecuteAsync(query, parameters, ct, _logger);
         }
