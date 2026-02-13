@@ -609,6 +609,9 @@ namespace Hello100Admin.API.Controllers
                 WeekNum = request.WeekNum,
                 UntactRsrvIntervalTime = request.UntactRsrvIntervalTime,
                 UntactRsrvIntervalCnt = request.UntactRsrvIntervalCnt,
+                UntactAvaStartTime = request.UntactAvaStartTime,
+                UntactAvaEndTime = request.UntactAvaEndTime,
+                UntactAvaUseYn = request.UntactAvaUseYn,
                 EghisDoctRsrvDetailInfoList = request.EghisDoctRsrvDetailInfoList
             };
 

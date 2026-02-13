@@ -1034,7 +1034,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
                        a.result_cd                                AS ResultCd,
                        NULL                                       AS AllergyList,
                        DATE_FORMAT(a.reg_dt, '%Y-%m-%d %H:%i:%s') AS RegDate,
-                       DATE_FORMAT(a.msd_dt, '%Y-%m-%d %H:%i:%s') AS ModDate,
+                       DATE_FORMAT(a.mod_dt, '%Y-%m-%d %H:%i:%s') AS ModDate,
                        2                                          AS TransYn,
                        a.msg                                      AS Message
                   FROM hello100.tb_eghis_hosp_receipt_info a

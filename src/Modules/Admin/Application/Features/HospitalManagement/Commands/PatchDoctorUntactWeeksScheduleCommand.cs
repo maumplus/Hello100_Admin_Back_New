@@ -103,7 +103,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
 
                     if ((hello100Role & Hello100RoleType.Rsrv) == 0)
                     {
-                        await _hospitalManagementRepository.RemoveEghisDoctRsrvAsync(session, doctorSchedule.Ridx, token);
+                        await _hospitalManagementRepository.RemoveEghisDoctRsrvAsync(session, doctorSchedule.Ridx, "NR", token);
                     }
 
                     var eghisDoctInfoEntity = new EghisDoctInfoEntity()

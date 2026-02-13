@@ -72,20 +72,30 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
                 eghisDoctRsrvDetailEntityList = await _hospitalStore.GetEghisDoctRsrvDetailList(eghisDoctRsrvInfoEntity.Ridx, "RS", cancellationToken);
             }
 
-            if (eghisDoctRsrvDetailEntityList.Count == 0)
+            
+            if (eghisDoctRsrvDetailEntityList.Count == 0 && (eghisDoctRsrvInfoEntity.RsrvIntervalTime - 1) > 0)
             {
                 TimeSpan time = new TimeSpan(00, eghisDoctRsrvInfoEntity.RsrvIntervalTime, 00);
+                TimeSpan addTime = new TimeSpan(00, eghisDoctRsrvInfoEntity.RsrvIntervalTime - 1, 00);
 
                 var startDateTime = query.StartTime.ToDateTime("HHmm");
                 var endDateTime = query.EndTime.ToDateTime("HHmm");
                 var breakStartDateTime = query.BreakStartTime.ToDateTime("HHmm");
                 var breakEndDateTime = query.BreakEndTime.ToDateTime("HHmm");
 
-                if (endDateTime > startDateTime)
+                if (startDateTime == null || endDateTime == null || breakStartDateTime == null || breakEndDateTime == null)
                 {
-                    for (var i = startDateTime; i < endDateTime; i += time)
+
+                }
+                else if (startDateTime.Value >= endDateTime.Value)
+                {
+
+                }
+                else
+                {
+                    for (var i = startDateTime.Value; i < endDateTime.Value; i += time)
                     {
-                        if (breakStartDateTime <= i && i < breakEndDateTime)
+                        if (i >= breakStartDateTime.Value && i < breakEndDateTime.Value)
                         {
                             continue;
                         }
@@ -93,8 +103,8 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
                         var eghisDoctRsrvDetailInfoEntity = new EghisDoctRsrvDetailInfoEntity()
                         {
                             Ridx = eghisDoctRsrvInfoEntity.Ridx,
-                            StartTime = i.Value.ToString("HHmm"),
-                            EndTime = (i.Value + time).ToString("HHmm"),
+                            StartTime = i.ToString("HHmm"),
+                            EndTime = (i + addTime).ToString("HHmm"),
                             RsrvCnt = eghisDoctRsrvInfoEntity.RsrvIntervalCnt,
                             ComCnt = 0,
                             ReceptType = "RS"

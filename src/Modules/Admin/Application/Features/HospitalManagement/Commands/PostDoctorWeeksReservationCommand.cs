@@ -58,7 +58,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
 
             await _db.RunInTransactionAsync(DataSource.Hello100, async (session, token) =>
             {
-                await _hospitalRepository.RemoveEghisDoctRsrvAsync(session, eghisDoctRsrvInfoEntity, token);
+                await _hospitalRepository.RemoveEghisDoctRsrvAsync(session, eghisDoctRsrvInfoEntity, "RS", token);
 
                 var ridx = await _hospitalRepository.InsertEghisDoctRsrvAsync(session, eghisDoctRsrvInfoEntity, token);
 

@@ -1,4 +1,5 @@
-﻿using Hello100Admin.BuildingBlocks.Common.Application;
+﻿using DocumentFormat.OpenXml.ExtendedProperties;
+using Hello100Admin.BuildingBlocks.Common.Application;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Extensions;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Hospital;
 using Hello100Admin.Modules.Admin.Application.Common.Definitions.Enums;
@@ -74,20 +75,29 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
                 eghisDoctRsrvDetailEntityList = await _hospitalStore.GetEghisDoctRsrvDetailList(eghisDoctRsrvInfoEntity.Ridx, "NR", cancellationToken);
             }
 
-            if (eghisDoctRsrvDetailEntityList.Count == 0)
+            if (eghisDoctRsrvDetailEntityList.Count == 0 && (eghisDoctRsrvInfoEntity.UntactRsrvIntervalTime - 1) > 0)
             {
                 TimeSpan time = new TimeSpan(00, eghisDoctRsrvInfoEntity.UntactRsrvIntervalTime, 00);
+                TimeSpan addTime = new TimeSpan(00, eghisDoctRsrvInfoEntity.UntactRsrvIntervalTime - 1, 00);
 
                 var untactStartDateTime = query.UntactStartTime.ToDateTime("HHmm");
                 var untactEndDateTime = query.UntactEndTime.ToDateTime("HHmm");
                 var untactBreakStartDateTime = query.UntactBreakStartTime.ToDateTime("HHmm");
                 var untactBreakEndDateTime = query.UntactBreakEndTime.ToDateTime("HHmm");
 
-                if (untactStartDateTime > untactEndDateTime)
+                if (untactStartDateTime == null || untactEndDateTime == null || untactBreakStartDateTime == null || untactBreakEndDateTime == null)
                 {
-                    for (var i = untactStartDateTime; i < untactEndDateTime; i += time)
+
+                }
+                else if (untactStartDateTime.Value >= untactEndDateTime.Value)
+                {
+                    
+                }
+                else
+                {
+                    for (var i = untactStartDateTime.Value; i < untactEndDateTime.Value; i += time)
                     {
-                        if (untactBreakStartDateTime <= i && i < untactBreakEndDateTime)
+                        if (i >= untactBreakStartDateTime.Value && i < untactBreakEndDateTime.Value)
                         {
                             continue;
                         }
@@ -95,8 +105,8 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
                         var eghisDoctRsrvDetailInfoEntity = new EghisDoctRsrvDetailInfoEntity()
                         {
                             Ridx = eghisDoctRsrvInfoEntity.Ridx,
-                            StartTime = i.Value.ToString("HHmm"),
-                            EndTime = (i.Value + time).ToString("HHmm"),
+                            StartTime = i.ToString("HHmm"),
+                            EndTime = (i + addTime).ToString("HHmm"),
                             RsrvCnt = eghisDoctRsrvInfoEntity.RsrvIntervalCnt,
                             ComCnt = 0,
                             ReceptType = "NR"
