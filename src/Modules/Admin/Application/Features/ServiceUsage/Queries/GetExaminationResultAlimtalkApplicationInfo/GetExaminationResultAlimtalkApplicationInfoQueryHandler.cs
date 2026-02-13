@@ -3,6 +3,8 @@ using Hello100Admin.BuildingBlocks.Common.Definition.Enums;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Common;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.ServiceUsage;
+using Hello100Admin.Modules.Admin.Application.Common.Errors;
+using Hello100Admin.Modules.Admin.Application.Common.Extensions;
 using Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Responses.GetExaminationResultAlimtalkApplicationInfo;
 using Mapster;
 using MediatR;
@@ -16,20 +18,20 @@ namespace Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Queries.
         private readonly string _adminImageUrl;
         private readonly string _kakaoSampleImagePath;
         private readonly ILogger<GetExaminationResultAlimtalkApplicationInfoQueryHandler> _logger;
-        private readonly ICurrentHospitalProfileProvider _currentHospitalProfileProvider;
+        private readonly IHospitalInfoProvider _hospitalInfoProvider;
         private readonly IServiceUsageStore _serviceUsageStore;
         private readonly IDbSessionRunner _db;
 
         public GetExaminationResultAlimtalkApplicationInfoQueryHandler(IConfiguration config,
                                                                       ILogger<GetExaminationResultAlimtalkApplicationInfoQueryHandler> logger,
-                                                                      ICurrentHospitalProfileProvider currentHospitalProfileProvider,
+                                                                      IHospitalInfoProvider hospitalInfoProvider,
                                                                       IServiceUsageStore serviceUsageStore,
                                                                       IDbSessionRunner db)
         {
             _adminImageUrl = config["AdminImageUrl"] ?? string.Empty;
             _kakaoSampleImagePath = config["KakaoExaminationResultSampleImagePath"] ?? string.Empty;
             _logger = logger;
-            _currentHospitalProfileProvider = currentHospitalProfileProvider;
+            _hospitalInfoProvider = hospitalInfoProvider;
             _serviceUsageStore = serviceUsageStore;
             _db = db;
         }
@@ -44,7 +46,10 @@ namespace Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Queries.
                 (session, token) => _serviceUsageStore.FindAlimtalkServiceApplicationAsync(session, req.HospNo, req.HospKey, "KakaoJoinTestResult", token),
             ct);
 
-            var currentHospitalInfo = await _currentHospitalProfileProvider.GetCurrentHospitalProfileByHospNoAsync(req.HospNo, ct);
+            var currentHospitalInfo = await _hospitalInfoProvider.GetHospitalInfoByHospNoAsync(req.HospNo, ct);
+
+            if (currentHospitalInfo == null)
+                return Result.Success<GetExaminationResultAlimtalkApplicationInfoResponse>().WithError(AdminErrorCode.NotFoundCurrentHospital.ToError());
 
             var response = currentHospitalInfo.Adapt<GetExaminationResultAlimtalkApplicationInfoResponse>() with
             {

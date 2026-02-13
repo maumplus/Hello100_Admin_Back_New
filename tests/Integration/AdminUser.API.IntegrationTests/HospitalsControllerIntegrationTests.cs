@@ -1,4 +1,6 @@
 ﻿using System.Net.Http.Json;
+using System.Text;
+using System.Text.Json;
 using Hello100Admin.BuildingBlocks.Common.Errors;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Serialization;
 using Hello100Admin.Integration.Shared;
@@ -45,7 +47,7 @@ namespace AdminUser.API.IntegrationTests
 
             var req = new
             {
-                HospNo = "12345123",
+                HospNo = "12345124",
                 Name = "테스트 DM병원",
                 Addr = "경기도 주소",
                 PostCd = "12345",
@@ -105,18 +107,32 @@ namespace AdminUser.API.IntegrationTests
         //    Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
         //}
 
-        //[Fact]
-        //public async Task DeleteNotice_ShouldReturnOk_WhenValidCredentials()
-        //{
-        //    _client.AsSuperAdmin("B81AFBD0", "대민테스트");
+        [Fact]
+        public async Task DeleteHospital_ShouldReturnOk_WhenValidCredentials()
+        {
+            _client.AsSuperAdmin("B81AFBD0", "대민테스트");
 
-        //    var response = await _client.DeleteAsync("/api/notice/notices/968");
-        //    var body = await response.Content.ReadAsStringAsync();
+            var req = new
+            {
+                HospKey = "MjRiNjRkNjU2ZjI2NjNkYWE5ZDYyMGQ3Y2ZjMDE3OTgyOWI3ZjQyMzJkODk0NGNkMTNkYmE2MGFhYTA3MmIyMQ=="
+            };
 
-        //    var bodyKor = body.FromJson<ApiResponse>();
+            var json = JsonSerializer.Serialize(req);
 
-        //    Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
-        //}
+            using var request = new HttpRequestMessage(HttpMethod.Delete, "/api/hospitals")
+            {
+                Content = new StringContent(json, Encoding.UTF8, "application/json")
+            };
+
+            var response = await _client.SendAsync(request);
+
+            //var response = await _client.DeleteAsync("/api/hospitals", req);
+            var body = await response.Content.ReadAsStringAsync();
+
+            var bodyKor = body.FromJson<ApiResponse>();
+
+            Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+        }
 
         [Fact]
         public async Task ExportHospitalsExcel_ShouldReturnOk_WhenValidCredentials()

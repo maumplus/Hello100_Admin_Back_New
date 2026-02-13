@@ -2,7 +2,7 @@
 
 namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Common
 {
-    public interface ICurrentHospitalProfileProvider
+    public interface IHospitalInfoProvider
     {
         /// <summary>
         /// 요양기관번호로 요양기관 프로필 조회
@@ -10,7 +10,7 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistenc
         /// <param name="hospNo"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        public Task<GetCurrentHospitalProfileReadModel> GetCurrentHospitalProfileByHospNoAsync(string hospNo, CancellationToken token);
+        public Task<GetHospitalInfoReadModel?> GetHospitalInfoByHospNoAsync(string hospNo, CancellationToken token);
 
         /// <summary>
         /// 요양기관 키로 요양기관 프로필 조회
@@ -18,6 +18,6 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistenc
         /// <param name="hospKey"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        public Task<GetCurrentHospitalProfileReadModel> GetCurrentHospitalProfileByHospKeyAsync(string hospKey, CancellationToken token);
+        public Task<GetHospitalInfoReadModel?> GetHospitalInfoByHospKeyAsync(string hospKey, CancellationToken token);
     }
 }
