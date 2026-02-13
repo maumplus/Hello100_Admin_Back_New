@@ -445,14 +445,14 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             return await db.ExecuteAsync(query, parameters, ct, _logger);
         }
 
-        public async Task<int> UpdateDoctorUntanctAsync(DbSession db, TbEghisDoctUntanctEntity eghisDoctUntanct, CancellationToken ct)
+        public async Task<int> UpdateDoctorUntactAsync(DbSession db, TbEghisDoctUntactEntity eghisDoctUntact, CancellationToken ct)
         {
             DynamicParameters parameters = new DynamicParameters();
-            parameters.Add("HospNo", eghisDoctUntanct.HospNo, DbType.String);
-            parameters.Add("EmplNo", eghisDoctUntanct.EmplNo, DbType.String);
-            parameters.Add("DoctIntro", eghisDoctUntanct.DoctIntro, DbType.String);
-            parameters.Add("ClinicGuide", eghisDoctUntanct.ClinicGuide, DbType.String);
-            parameters.Add("DoctHistory", eghisDoctUntanct.DoctHistory, DbType.String);
+            parameters.Add("HospNo", eghisDoctUntact.HospNo, DbType.String);
+            parameters.Add("EmplNo", eghisDoctUntact.EmplNo, DbType.String);
+            parameters.Add("DoctIntro", eghisDoctUntact.DoctIntro, DbType.String);
+            parameters.Add("ClinicGuide", eghisDoctUntact.ClinicGuide, DbType.String);
+            parameters.Add("DoctHistory", eghisDoctUntact.DoctHistory, DbType.String);
 
             var query = @"
                 UPDATE hello100.tb_eghis_doct_untact

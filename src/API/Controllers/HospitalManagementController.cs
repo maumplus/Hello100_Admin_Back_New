@@ -272,10 +272,10 @@ namespace Hello100Admin.API.Controllers
         /// <summary>
         /// [병원정보관리 > 의료진관리]비대면 의료진 상세 API
         /// </summary>
-        [HttpGet("doctor-untanct/{emplNo}")]
+        [HttpGet("doctor-untact/{emplNo}")]
         [ProducesResponseType(typeof(GetDoctorUntactResult), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetDoctorUntanct(string emplNo, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetDoctorUntact(string emplNo, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("GET /api/hospital-management/doctor-untact");
 
@@ -293,10 +293,10 @@ namespace Hello100Admin.API.Controllers
         /// <summary>
         /// [병원정보관리 > 의료진관리]비대면 의료진 수정 API
         /// </summary>
-        [HttpPatch("doctor-untanct")]
+        [HttpPatch("doctor-untact")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> PatchDoctorUntanct(PatchDoctorUntactRequest request, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> PatchDoctorUntact(PatchDoctorUntactRequest request, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("PATCH /api/hospital-management/doctor-untact");
 
