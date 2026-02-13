@@ -1,6 +1,7 @@
 ﻿using DocumentFormat.OpenXml.Drawing;
 using Hello100Admin.BuildingBlocks.Common.Application;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Extensions;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Security;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Hospital;
 using Hello100Admin.Modules.Admin.Application.Common.Definitions.Enums;
 using Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Results;
@@ -33,13 +34,16 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
 
     public class GetDoctorWeeksReservationListQueryHandler : IRequestHandler<GetDoctorWeeksReservationListQuery, Result<GetDoctorWeeksReservationListResult>>
     {
+        private readonly ICryptoService _cryptoService;
         private readonly IHospitalManagementStore _hospitalStore;
         private readonly ILogger<GetDoctorWeeksReservationListQueryHandler> _logger;
 
         public GetDoctorWeeksReservationListQueryHandler(
-        IHospitalManagementStore hospitalStore,
-        ILogger<GetDoctorWeeksReservationListQueryHandler> logger)
+            ICryptoService cryptoService,
+            IHospitalManagementStore hospitalStore,
+            ILogger<GetDoctorWeeksReservationListQueryHandler> logger)
         {
+            _cryptoService = cryptoService;
             _hospitalStore = hospitalStore;
             _logger = logger;
         }
@@ -116,6 +120,12 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
             }
 
             var eghisRsrvInfoEntityList = await _hospitalStore.GetEghisRsrvList(query.HospNo, query.EmplNo, query.WeekNum, cancellationToken);
+
+            foreach (var eghisRsrvInfoEntity in eghisRsrvInfoEntityList)
+            {
+                eghisRsrvInfoEntity.PtntNo = _cryptoService.DecryptWithNoVector(eghisRsrvInfoEntity.PtntNo);
+                eghisRsrvInfoEntity.PtntNm = _cryptoService.DecryptWithNoVector(eghisRsrvInfoEntity.PtntNm);
+            }
 
             var result = new GetDoctorWeeksReservationListResult()
             {

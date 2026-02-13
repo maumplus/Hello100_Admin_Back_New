@@ -59,11 +59,13 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
     {
         private readonly ILogger<PatchDoctorWeeksScheduleCommandHandler> _logger;
         private readonly IHospitalManagementRepository _hospitalManagementRepository;
+        private readonly ICryptoService _cryptoService;
         private readonly IDbSessionRunner _db;
 
         public PatchDoctorWeeksScheduleCommandHandler(
             ILogger<PatchDoctorWeeksScheduleCommandHandler> logger,
-            IHospitalManagementRepository hospitalManagementRepository,
+            IHospitalManagementRepository hospitalManagementRepository,,
+            ICryptoService cryptoService,
             IDbSessionRunner db)
         {
             _logger = logger;
@@ -97,7 +99,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
                         HospNo = doctorSchedule.HospNo,
                         HospKey = doctorSchedule.HospKey,
                         EmplNo = doctorSchedule.EmplNo,
-                        DoctNo = doctorSchedule.DoctNo,
+                        DoctNo = _cryptoService.EncryptWithNoVector(doctorSchedule.DoctNo),
                         DoctNm = doctorSchedule.DoctNm,
                         DeptCd = doctorSchedule.DeptCd,
                         DeptNm = doctorSchedule.DeptNm,

@@ -1,5 +1,6 @@
 ﻿using Hello100Admin.BuildingBlocks.Common.Application;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Extensions;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Security;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Hospital;
 using Hello100Admin.Modules.Admin.Application.Common.Definitions.Enums;
 using Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Results;
@@ -32,13 +33,16 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
 
     public class GetDoctorDaysReservationListQueryHandler : IRequestHandler<GetDoctorDaysReservationListQuery, Result<GetDoctorDaysReservationListResult>>
     {
+        private readonly ICryptoService _cryptoService;
         private readonly IHospitalManagementStore _hospitalStore;
         private readonly ILogger<GetDoctorDaysReservationListQueryHandler> _logger;
 
         public GetDoctorDaysReservationListQueryHandler(
-        IHospitalManagementStore hospitalStore,
-        ILogger<GetDoctorDaysReservationListQueryHandler> logger)
+            ICryptoService cryptoService,
+            IHospitalManagementStore hospitalStore,
+            ILogger<GetDoctorDaysReservationListQueryHandler> logger)
         {
+            _cryptoService = cryptoService;
             _hospitalStore = hospitalStore;
             _logger = logger;
         }
@@ -114,6 +118,12 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
             }
 
             var eghisRsrvInfoEntityList = await _hospitalStore.GetEghisRsrvList(query.HospNo, query.EmplNo, query.ClinicYmd, cancellationToken);
+
+            foreach (var eghisRsrvInfoEntity in eghisRsrvInfoEntityList)
+            {
+                eghisRsrvInfoEntity.PtntNo = _cryptoService.DecryptWithNoVector(eghisRsrvInfoEntity.PtntNo);
+                eghisRsrvInfoEntity.PtntNm = _cryptoService.DecryptWithNoVector(eghisRsrvInfoEntity.PtntNm);
+            }
 
             var result = new GetDoctorDaysReservationListResult()
             {

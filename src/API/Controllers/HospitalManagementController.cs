@@ -14,6 +14,7 @@ using System.Text.Json;
 using System.Text.Encodings.Web;
 using Hello100Admin.Modules.Admin.Domain.Entities;
 using System.Collections.Generic;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Security;
 
 namespace Hello100Admin.API.Controllers
 {
@@ -25,13 +26,16 @@ namespace Hello100Admin.API.Controllers
     public class HospitalManagementController : BaseController
     {
         private readonly IMediator _mediator;
+        private readonly ICryptoService _cryptoService;
         private readonly ILogger<HospitalManagementController> _logger;
 
         public HospitalManagementController(
         IMediator mediator,
+        ICryptoService cryptoService,
         ILogger<HospitalManagementController> logger)
         {
             _mediator = mediator;
+            _cryptoService = cryptoService;
             _logger = logger;
         }
 
@@ -196,6 +200,7 @@ namespace Hello100Admin.API.Controllers
             return result.ToActionResult(this);
         }
 
+        /// <summary>
         /// [병원정보관리 > 의료진관리]의료진 목록 API
         /// </summary>
         [HttpGet("doctors")]
@@ -328,7 +333,7 @@ namespace Hello100Admin.API.Controllers
             {
                 HospNo = base.HospNo,
                 HospKey = base.HospKey,
-                DoctNo = request.DoctNo,
+                DoctNo = _cryptoService.EncryptWithNoVector(request.DoctNo),
                 DoctNm = request.DoctNm,
                 DeptCd = request.DeptCd,
                 DeptNm = request.DeptNm,
@@ -344,7 +349,7 @@ namespace Hello100Admin.API.Controllers
                 {
                     HospNo = base.HospNo,
                     HospKey = base.HospKey,
-                    DoctNo = request.DoctNo,
+                    DoctNo = _cryptoService.EncryptWithNoVector(request.DoctNo),
                     DoctNm = request.DoctNm,
                     DeptCd = request.DeptCd,
                     DeptNm = request.DeptNm,
@@ -375,7 +380,7 @@ namespace Hello100Admin.API.Controllers
             {
                 HospNo = base.HospNo,
                 HospKey = base.HospKey,
-                DoctNo = request.DoctNo,
+                DoctNo = _cryptoService.EncryptWithNoVector(request.DoctNo),
                 DoctNm = request.DoctNm,
                 DeptCd = request.DeptCd,
                 DeptNm = request.DeptNm,
@@ -391,7 +396,7 @@ namespace Hello100Admin.API.Controllers
                 {
                     HospNo = base.HospNo,
                     HospKey = base.HospKey,
-                    DoctNo = request.DoctNo,
+                    DoctNo = _cryptoService.EncryptWithNoVector(request.DoctNo),
                     DoctNm = request.DoctNm,
                     DeptCd = request.DeptCd,
                     DeptNm = request.DeptNm,
@@ -422,7 +427,7 @@ namespace Hello100Admin.API.Controllers
             {
                 HospNo = base.HospNo,
                 HospKey = base.HospKey,
-                DoctNo = request.DoctNo,
+                DoctNo = _cryptoService.EncryptWithNoVector(request.DoctNo),
                 DoctNm = request.DoctNm,
                 DeptCd = request.DeptCd,
                 DeptNm = request.DeptNm,
@@ -438,7 +443,7 @@ namespace Hello100Admin.API.Controllers
                 {
                     HospNo = base.HospNo,
                     HospKey = base.HospKey,
-                    DoctNo = request.DoctNo,
+                    DoctNo = _cryptoService.EncryptWithNoVector(request.DoctNo),
                     DoctNm = request.DoctNm,
                     DeptCd = request.DeptCd,
                     DeptNm = request.DeptNm,
