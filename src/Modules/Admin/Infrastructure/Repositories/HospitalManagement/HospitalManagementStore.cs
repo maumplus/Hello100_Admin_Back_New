@@ -807,7 +807,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             return (await connection.QueryAsync<GetDoctorScheduleResult>(sql, parameters)).ToList();
         }
 
-        public async Task<TbEghisDoctUntactEntity?> GetDoctorUntanctInfo(string hospNo, string emplNo, CancellationToken cancellationToken = default)
+        public async Task<TbEghisDoctUntactEntity?> GetDoctorUntactInfo(string hospNo, string emplNo, CancellationToken cancellationToken = default)
         {
             DynamicParameters parameters = new DynamicParameters();
             parameters.Add("HospNo", hospNo, DbType.String);
