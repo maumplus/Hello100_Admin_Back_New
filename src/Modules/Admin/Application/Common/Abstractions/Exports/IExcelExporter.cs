@@ -1,4 +1,6 @@
-﻿namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Exports
+﻿using ClosedXML.Excel;
+
+namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Exports
 {
     public interface IExcelExporter
     {
@@ -21,6 +23,26 @@
             string title,
             IReadOnlyList<ExcelColumn<T>> columns,
             int titleFontSize = 18,
+            bool titleBold = true);
+
+        /// <summary>
+        /// 시트가 여러개일 경우 사용
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="wb"></param>
+        /// <param name="rows"></param>
+        /// <param name="sheetName"></param>
+        /// <param name="title"></param>
+        /// <param name="columns"></param>
+        /// <param name="titleFontSize"></param>
+        /// <param name="titleBold"></param>
+        public void AddSheet<T>(
+            XLWorkbook wb,
+            IReadOnlyList<T> rows,
+            string sheetName,
+            string title,
+            IReadOnlyList<ExcelColumn<T>> columns,
+            int titleFontSize = 16,
             bool titleBold = true);
     }
 }
