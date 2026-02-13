@@ -52,7 +52,7 @@ public static class DependencyInjection
 
         services.AddScoped<IDbSessionRunner, DbSessionRunner>();
         services.AddScoped<IDbConnectionFactory, MySqlConnectionFactory>();
-        services.AddScoped<ICurrentHospitalProfileProvider, CurrentHospitalProfileProvider>();
+        services.AddScoped<IHospitalInfoProvider, HospitalInfoProvider>();
         services.AddScoped<IAccountRepository, AccountRepository>();
         services.AddScoped<IAccountStore, AccountStore>();
         services.AddScoped<IAdminUserRepository, AdminUserRepository>();

@@ -1,6 +1,6 @@
 ﻿namespace Hello100Admin.Modules.Admin.Application.Common.ReadModels
 {
-    public class GetCurrentHospitalProfileReadModel
+    public class GetHospitalInfoReadModel
     {
         /// <summary>
         /// 요양기관 키

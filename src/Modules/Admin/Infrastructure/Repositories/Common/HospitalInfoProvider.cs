@@ -9,20 +9,19 @@ using Mapster;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Extensions;
 using Hello100Admin.Modules.Admin.Application.Common.ReadModels;
 using Hello100Admin.Modules.Admin.Application.Common.Extensions;
-using Hello100Admin.Modules.Admin.Application.Common.Errors;
 
 namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Common
 {
-    public class CurrentHospitalProfileProvider : ICurrentHospitalProfileProvider
+    public class HospitalInfoProvider : IHospitalInfoProvider
     {
         #region FIELD AREA ***************************************************
-        private readonly ILogger<CurrentHospitalProfileProvider> _logger;
+        private readonly ILogger<HospitalInfoProvider> _logger;
         private readonly IDbConnectionFactory _connection;
         #endregion
 
         #region CONSTRUCTOR AREA *********************************************
-        public CurrentHospitalProfileProvider(ILogger<CurrentHospitalProfileProvider> logger,
-                                              IDbConnectionFactory connection)
+        public HospitalInfoProvider(ILogger<HospitalInfoProvider> logger,
+                                    IDbConnectionFactory connection)
         {
             _logger = logger;
             _connection = connection;
@@ -30,11 +29,11 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Common
         #endregion
 
         #region GENERAL METHOD AREA **************************************
-        public async Task<GetCurrentHospitalProfileReadModel> GetCurrentHospitalProfileByHospNoAsync(string hospNo, CancellationToken token)
+        public async Task<GetHospitalInfoReadModel?> GetHospitalInfoByHospNoAsync(string hospNo, CancellationToken token)
         {
             try
             {
-                _logger.LogInformation("GetCurrentHospitalProfileAsync() Started");
+                _logger.LogInformation("GetHospitalInfoByHospNoAsync() Started");
 
                 var parameters = new DynamicParameters();
                 parameters.Add("@HospNo", hospNo, DbType.String);
@@ -69,26 +68,23 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Common
                 using var connection = _connection.CreateConnection();
                 var queryResult = await connection.QueryFirstOrDefaultAsync<CurrentHospitalInfo>(query, parameters);
 
-                var result = queryResult.Adapt<GetCurrentHospitalProfileReadModel>();
-
-                if (result == null)
-                    throw new BizException(AdminErrorCode.NotFoundCurrentHospital.ToError());
+                var result = queryResult.Adapt<GetHospitalInfoReadModel>();
 
                 return result;
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "GetCurrentHospitalProfileAsync() Error");
+                _logger.LogError(e, "GetHospitalInfoByHospNoAsync() Error");
                 throw new BizException(GlobalErrorCode.DataQueryError.ToError());
             }
         }
 
         // 위 쿼리와 동일하니 추후 병합
-        public async Task<GetCurrentHospitalProfileReadModel> GetCurrentHospitalProfileByHospKeyAsync(string hospKey, CancellationToken token)
+        public async Task<GetHospitalInfoReadModel?> GetHospitalInfoByHospKeyAsync(string hospKey, CancellationToken token)
         {
             try
             {
-                _logger.LogInformation("GetCurrentHospitalProfileAsync() Started");
+                _logger.LogInformation("GetHospitalInfoByHospKeyAsync() Started");
 
                 var parameters = new DynamicParameters();
                 parameters.Add("@HospKey", hospKey, DbType.String);
@@ -123,16 +119,13 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Common
                 using var connection = _connection.CreateConnection();
                 var queryResult = await connection.QueryFirstOrDefaultAsync<CurrentHospitalInfo>(query, parameters);
 
-                var result = queryResult.Adapt<GetCurrentHospitalProfileReadModel>();
-
-                if (result == null)
-                    throw new BizException(AdminErrorCode.NotFoundCurrentHospital.ToError());
+                var result = queryResult.Adapt<GetHospitalInfoReadModel>();
 
                 return result;
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "GetCurrentHospitalProfileAsync() Error");
+                _logger.LogError(e, "GetHospitalInfoByHospKeyAsync() Error");
                 throw new BizException(GlobalErrorCode.DataQueryError.ToError());
             }
         }

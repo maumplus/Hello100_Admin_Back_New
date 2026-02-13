@@ -1,10 +1,11 @@
 ﻿using Hello100Admin.BuildingBlocks.Common.Application;
 using Hello100Admin.BuildingBlocks.Common.Definition.Enums;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
-using Hello100Admin.BuildingBlocks.Common.Infrastructure.Serialization;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.External;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Common;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Hospital;
+using Hello100Admin.Modules.Admin.Application.Common.Errors;
+using Hello100Admin.Modules.Admin.Application.Common.Extensions;
 using Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Results;
 using Mapster;
 using MediatR;
@@ -22,20 +23,20 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
     public class GetHello100SettingQueryHandler : IRequestHandler<GetHello100SettingQuery, Result<GetHello100SettingResult?>>
     {
         private readonly IHospitalManagementStore _hospitalStore;
-        private readonly ICurrentHospitalProfileProvider _currentHospitalProfileProvider;
+        private readonly IHospitalInfoProvider _hospitalInfoProvider;
         private readonly IBizSiteApiClientService _bizSiteApiClientService;
         private readonly ILogger<GetHello100SettingQueryHandler> _logger;
         private readonly IDbSessionRunner _db;
 
         public GetHello100SettingQueryHandler(
             IHospitalManagementStore hospitalStore,
-            ICurrentHospitalProfileProvider currentHospitalProfileProvider,
+            IHospitalInfoProvider hospitalInfoProvider,
             IBizSiteApiClientService bizSiteApiClientService,
             ILogger<GetHello100SettingQueryHandler> logger,
             IDbSessionRunner db)
         {
             _hospitalStore = hospitalStore;
-            _currentHospitalProfileProvider = currentHospitalProfileProvider;
+            _hospitalInfoProvider = hospitalInfoProvider;
             _bizSiteApiClientService = bizSiteApiClientService;
             _logger = logger;
             _db = db;
@@ -44,8 +45,11 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
         public async Task<Result<GetHello100SettingResult?>> Handle(GetHello100SettingQuery req, CancellationToken ct)
         {
             var hospInfo = await _db.RunAsync(DataSource.Hello100, 
-                (dbSession, token) => _currentHospitalProfileProvider.GetCurrentHospitalProfileByHospNoAsync(req.HospNo, token)
+                (dbSession, token) => _hospitalInfoProvider.GetHospitalInfoByHospNoAsync(req.HospNo, token)
             , ct);
+
+            if (hospInfo == null)
+                return Result.Success<GetHello100SettingResult?>().WithError(AdminErrorCode.NotFoundCurrentHospital.ToError());
 
             var result = await _db.RunAsync(DataSource.Hello100, 
                 (dbSession, token) => _hospitalStore.GetHello100SettingAsync(dbSession, req.HospKey, token)

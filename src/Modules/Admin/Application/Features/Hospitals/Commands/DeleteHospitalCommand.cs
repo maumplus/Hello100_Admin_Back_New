@@ -2,8 +2,6 @@
 using Hello100Admin.BuildingBlocks.Common.Definition.Enums;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Common;
-using Hello100Admin.Modules.Admin.Application.Common.Errors;
-using Hello100Admin.Modules.Admin.Application.Common.Extensions;
 using Hello100Admin.Modules.Admin.Domain.Repositories;
 using Mapster;
 using MediatR;
@@ -17,18 +15,18 @@ namespace Hello100Admin.Modules.Admin.Application.Features.Hospitals.Commands
     {
         private readonly ILogger<DeleteHospitalCommandHandler> _logger;
         private readonly IHospitalsRepository _hospitalsRepository;
-        private readonly ICurrentHospitalProfileProvider _hospitalProfileProvider;
+        private readonly IHospitalInfoProvider _hospitalInfoProvider;
         private readonly IDbSessionRunner _db;
 
         public DeleteHospitalCommandHandler(
             ILogger<DeleteHospitalCommandHandler> logger,
             IHospitalsRepository hospitalsRepository,
-            ICurrentHospitalProfileProvider hospitalProfileProvider,
+            IHospitalInfoProvider hospitalInfoProvider,
             IDbSessionRunner db)
         {
             _logger = logger;
             _hospitalsRepository = hospitalsRepository;
-            _hospitalProfileProvider = hospitalProfileProvider;
+            _hospitalInfoProvider = hospitalInfoProvider;
             _db = db;
         }
 
@@ -36,13 +34,10 @@ namespace Hello100Admin.Modules.Admin.Application.Features.Hospitals.Commands
         {
             _logger.LogInformation("Handle CreateHospitalCommandHandler");
 
-            var hospInfo = await _hospitalProfileProvider.GetCurrentHospitalProfileByHospKeyAsync(req.HospKey, ct);
-
-            if (hospInfo == null)
-                return Result.Success().WithError(AdminErrorCode.NotFoundHospital.ToError());
+            var hospInfo = await _hospitalInfoProvider.GetHospitalInfoByHospKeyAsync(req.HospKey, ct);
 
             await _db.RunAsync(DataSource.Hello100,
-                (session, token) => _hospitalsRepository.DeleteHospitalAsync(session, hospInfo.HospNo, req.HospKey, token),
+                (session, token) => _hospitalsRepository.DeleteHospitalAsync(session, hospInfo?.HospNo, req.HospKey, token),
             ct);
 
             return Result.Success();

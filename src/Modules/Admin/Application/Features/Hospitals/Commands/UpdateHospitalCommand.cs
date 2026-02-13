@@ -1,9 +1,6 @@
 ﻿using Hello100Admin.BuildingBlocks.Common.Application;
 using Hello100Admin.BuildingBlocks.Common.Definition.Enums;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
-using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Common;
-using Hello100Admin.Modules.Admin.Application.Common.Errors;
-using Hello100Admin.Modules.Admin.Application.Common.Extensions;
 using Hello100Admin.Modules.Admin.Domain.Entities;
 using Hello100Admin.Modules.Admin.Domain.Repositories;
 using Mapster;
@@ -66,29 +63,21 @@ namespace Hello100Admin.Modules.Admin.Application.Features.Hospitals.Commands
     {
         private readonly ILogger<UpdateHospitalCommandHandler> _logger;
         private readonly IHospitalsRepository _hospitalsRepository;
-        private readonly ICurrentHospitalProfileProvider _hospitalProfileProvider;
         private readonly IDbSessionRunner _db;
 
         public UpdateHospitalCommandHandler(
             ILogger<UpdateHospitalCommandHandler> logger,
             IHospitalsRepository hospitalsRepository,
-            ICurrentHospitalProfileProvider hospitalProfileProvider,
             IDbSessionRunner db)
         {
             _logger = logger;
             _hospitalsRepository = hospitalsRepository;
-            _hospitalProfileProvider = hospitalProfileProvider;
             _db = db;
         }
 
         public async Task<Result> Handle(UpdateHospitalCommand req, CancellationToken ct)
         {
             _logger.LogInformation("Handle CreateHospitalCommandHandler");
-
-            var hospInfo = await _hospitalProfileProvider.GetCurrentHospitalProfileByHospKeyAsync(req.HospKey, ct);
-
-            if (hospInfo == null)
-                return Result.Success().WithError(AdminErrorCode.NotFoundHospital.ToError());
 
             var medicalEntity = (req.MdCds ?? Enumerable.Empty<string>())
                                .Select(md => new TbHospitalMedicalInfoEntity { MdCd = md })

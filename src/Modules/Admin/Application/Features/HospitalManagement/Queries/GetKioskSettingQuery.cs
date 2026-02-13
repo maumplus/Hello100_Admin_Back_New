@@ -35,18 +35,18 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
     {
         private readonly ILogger<GetKioskSettingQueryHandler> _logger;
         private readonly IHospitalManagementStore _hospitalStore;
-        private readonly ICurrentHospitalProfileProvider _hospitalProfileProvider;
+        private readonly IHospitalInfoProvider _hospitalInfoProvider;
         private readonly IDbSessionRunner _db;
 
         public GetKioskSettingQueryHandler(
             ILogger<GetKioskSettingQueryHandler> logger,
-            ICurrentHospitalProfileProvider hospitalProfileProvider,
+            IHospitalInfoProvider hospitalInfoProvider,
             IDbSessionRunner db,
             IHospitalManagementStore hospitalStore)
         {
             _logger = logger;
             _hospitalStore = hospitalStore;
-            _hospitalProfileProvider = hospitalProfileProvider;
+            _hospitalInfoProvider = hospitalInfoProvider;
             _db = db;
         }
 
@@ -54,7 +54,10 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
         {
             _logger.LogInformation("Handling GetKioskSettingQuery HospNo:{HospNo}", req.HospNo);
 
-            var hospInfo = await _hospitalProfileProvider.GetCurrentHospitalProfileByHospNoAsync(req.HospNo, ct);
+            var hospInfo = await _hospitalInfoProvider.GetHospitalInfoByHospNoAsync(req.HospNo, ct);
+
+            if (hospInfo == null)
+                return Result.Success<GetDeviceSettingResult<KioskRo>>().WithError(AdminErrorCode.NotFoundCurrentHospital.ToError());
 
             if (hospInfo.KioskCnt <= 0)
                 return Result.Success<GetDeviceSettingResult<KioskRo>>().WithError(AdminErrorCode.KioskNotRegistered.ToError());

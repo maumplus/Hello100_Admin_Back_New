@@ -6,6 +6,8 @@ using Hello100Admin.BuildingBlocks.Common.Infrastructure.Serialization;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.External;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Common;
 using Hello100Admin.Modules.Admin.Application.Common.Definitions.Enums;
+using Hello100Admin.Modules.Admin.Application.Common.Errors;
+using Hello100Admin.Modules.Admin.Application.Common.Extensions;
 using Hello100Admin.Modules.Admin.Application.Common.Models;
 using Hello100Admin.Modules.Admin.Domain.Entities;
 using Hello100Admin.Modules.Admin.Domain.Repositories;
@@ -126,7 +128,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
         private readonly string _adminImageUrl;
         private readonly ILogger<UpsertHospitalCommandHandler> _logger;
         private readonly IHospitalManagementRepository _hospitalRepository;
-        private readonly ICurrentHospitalProfileProvider _currentHospitalProfileProvider;
+        private readonly IHospitalInfoProvider _hospitalInfoProvider;
         private readonly ISftpClientService _sftpClientService;
         private readonly ICryptoService _cryptoService;
         private readonly IDbSessionRunner _db;
@@ -135,7 +137,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
             IConfiguration config,
             ILogger<UpsertHospitalCommandHandler> logger,
             IHospitalManagementRepository hospitalRepository,
-            ICurrentHospitalProfileProvider currentHospitalProfileProvider,
+            IHospitalInfoProvider hospitalInfoProvider,
             ISftpClientService sftpClientService,
             ICryptoService cryptoService,
             IDbSessionRunner db)
@@ -143,7 +145,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
             _adminImageUrl = config["AdminImageUrl"] ?? string.Empty;
             _logger = logger;
             _hospitalRepository = hospitalRepository;
-            _currentHospitalProfileProvider = currentHospitalProfileProvider;
+            _hospitalInfoProvider = hospitalInfoProvider;
             _sftpClientService = sftpClientService;
             _cryptoService = cryptoService;
             _db = db;
@@ -153,7 +155,10 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
         {
             _logger.LogInformation("Handling UpsertHospitalCommand HospNo:[{HospNo}]", req.HospNo);
 
-            var hospInfo = await _currentHospitalProfileProvider.GetCurrentHospitalProfileByHospNoAsync(req.HospNo, ct);
+            var hospInfo = await _hospitalInfoProvider.GetHospitalInfoByHospNoAsync(req.HospNo, ct);
+
+            if (hospInfo == null)
+                return Result.Success().WithError(AdminErrorCode.NotFoundCurrentHospital.ToError());
 
             // Upload Image List
             var customRootDirectory = _cryptoService.EncryptToBase64WithDesEcbPkcs7(req.HospNo);

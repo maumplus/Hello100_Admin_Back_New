@@ -35,6 +35,6 @@ namespace Hello100Admin.Modules.Admin.Domain.Repositories
         /// <param name="hospKey"></param>
         /// <param name="ct"></param>
         /// <returns></returns>
-        public Task<int> DeleteHospitalAsync(DbSession db, string hospNo, string hospKey, CancellationToken ct);
+        public Task<int> DeleteHospitalAsync(DbSession db, string? hospNo, string hospKey, CancellationToken ct);
     }
 }
