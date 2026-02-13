@@ -64,12 +64,13 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
 
         public PatchDoctorWeeksScheduleCommandHandler(
             ILogger<PatchDoctorWeeksScheduleCommandHandler> logger,
-            IHospitalManagementRepository hospitalManagementRepository,,
+            IHospitalManagementRepository hospitalManagementRepository,
             ICryptoService cryptoService,
             IDbSessionRunner db)
         {
             _logger = logger;
             _hospitalManagementRepository = hospitalManagementRepository;
+            _cryptoService = cryptoService;
             _db = db;
         }
 

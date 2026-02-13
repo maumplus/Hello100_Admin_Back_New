@@ -52,7 +52,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
         {
             var eghisDoctRsrvInfoEntity = await _hospitalStore.GetEghisDoctRsrvInfo(query.HospNo, query.EmplNo, query.WeekNum, string.Empty, cancellationToken);
 
-            var eghisDoctRsrvDetailEntityList = new List<EghisDoctRsrvDetailInfoEntity>();
+            var eghisDoctRsrvDetailInfoEntityList = new List<EghisDoctRsrvDetailInfoEntity>();
 
             if (eghisDoctRsrvInfoEntity == null)
             {
@@ -76,10 +76,10 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
             }
             else
             {
-                eghisDoctRsrvDetailEntityList = await _hospitalStore.GetEghisDoctRsrvDetailList(eghisDoctRsrvInfoEntity.Ridx, "NR", cancellationToken);
+                eghisDoctRsrvDetailInfoEntityList = await _hospitalStore.GetEghisDoctRsrvDetailList(eghisDoctRsrvInfoEntity.Ridx, "NR", cancellationToken);
             }
 
-            if (eghisDoctRsrvDetailEntityList.Count == 0 && (eghisDoctRsrvInfoEntity.UntactRsrvIntervalTime - 1) > 0)
+            if (eghisDoctRsrvDetailInfoEntityList.Count == 0 && (eghisDoctRsrvInfoEntity.UntactRsrvIntervalTime - 1) > 0)
             {
                 TimeSpan time = new TimeSpan(00, eghisDoctRsrvInfoEntity.UntactRsrvIntervalTime, 00);
                 TimeSpan addTime = new TimeSpan(00, eghisDoctRsrvInfoEntity.UntactRsrvIntervalTime - 1, 00);
@@ -116,7 +116,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
                             ReceptType = "NR"
                         };
 
-                        eghisDoctRsrvDetailEntityList.Add(eghisDoctRsrvDetailInfoEntity);
+                        eghisDoctRsrvDetailInfoEntityList.Add(eghisDoctRsrvDetailInfoEntity);
                     }
                 }
             }
@@ -132,7 +132,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
             var result = new GetDoctorUntactWeeksReservationListResult()
             {
                 EghisDoctRsrvInfo = eghisDoctRsrvInfoEntity,
-                EghisDoctRsrvDetailList = eghisDoctRsrvDetailEntityList,
+                EghisDoctRsrvDetailInfoList = eghisDoctRsrvDetailInfoEntityList,
                 EghisUntactRsrvList = eghisRsrvInfoEntityList
             };
 

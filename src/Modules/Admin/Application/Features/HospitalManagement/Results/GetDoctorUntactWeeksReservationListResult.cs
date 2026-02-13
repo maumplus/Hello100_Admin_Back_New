@@ -10,7 +10,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Re
     public class GetDoctorUntactWeeksReservationListResult
     {
         public EghisDoctRsrvInfoEntity? EghisDoctRsrvInfo { get; set; }
-        public List<EghisDoctRsrvDetailInfoEntity> EghisDoctRsrvDetailList { get; set; }
+        public List<EghisDoctRsrvDetailInfoEntity> EghisDoctRsrvDetailInfoList { get; set; }
         public List<EghisRsrvInfoEntity> EghisUntactRsrvList { get; set; }
     }
 }
