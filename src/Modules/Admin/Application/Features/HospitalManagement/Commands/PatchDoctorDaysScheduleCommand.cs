@@ -1,6 +1,7 @@
 ﻿using Hello100Admin.BuildingBlocks.Common.Application;
 using Hello100Admin.BuildingBlocks.Common.Definition.Enums;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Security;
 using Hello100Admin.Modules.Admin.Application.Common.Definitions.Enums;
 using Hello100Admin.Modules.Admin.Domain.Entities;
 using Hello100Admin.Modules.Admin.Domain.Repositories;
@@ -56,15 +57,18 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
     {
         private readonly ILogger<PatchDoctorDaysScheduleCommandHandler> _logger;
         private readonly IHospitalManagementRepository _hospitalManagementRepository;
+        private readonly ICryptoService _cryptoService;
         private readonly IDbSessionRunner _db;
 
         public PatchDoctorDaysScheduleCommandHandler(
             ILogger<PatchDoctorDaysScheduleCommandHandler> logger,
             IHospitalManagementRepository hospitalManagementRepository,
+            ICryptoService cryptoService,
             IDbSessionRunner db)
         {
             _logger = logger;
             _hospitalManagementRepository = hospitalManagementRepository;
+            _cryptoService = cryptoService;
             _db = db;
         }
 
@@ -86,7 +90,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
 
                     if ((hello100Role & Hello100RoleType.Rsrv) == 0)
                     {
-                        await _hospitalManagementRepository.RemoveEghisDoctRsrvAsync(session, doctorSchedule.Ridx, token);
+                        await _hospitalManagementRepository.RemoveEghisDoctRsrvAsync(session, doctorSchedule.Ridx, "RS", token);
                     }
 
                     var eghisDoctInfoEntity = new EghisDoctInfoEntity()
@@ -94,7 +98,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
                         HospNo = doctorSchedule.HospNo,
                         HospKey = doctorSchedule.HospKey,
                         EmplNo = doctorSchedule.EmplNo,
-                        DoctNo = doctorSchedule.DoctNo,
+                        DoctNo = _cryptoService.EncryptWithNoVector(doctorSchedule.DoctNo),
                         DoctNm = doctorSchedule.DoctNm,
                         DeptCd = doctorSchedule.DeptCd,
                         DeptNm = doctorSchedule.DeptNm,

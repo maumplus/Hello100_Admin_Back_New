@@ -107,7 +107,7 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistenc
         public Task<ListResult<DoctorBaseRo>> GetDoctorsAsync(
             DbSession db, string hospNo, int pageNo, int pageSize, CancellationToken ct = default);
         public Task<List<GetDoctorListResult>> GetDoctorList(string hospNo, CancellationToken cancellationToken = default);
-        public Task<TbEghisDoctUntanctEntity?> GetDoctorUntanctInfo(string hospNo, string emplNo, CancellationToken cancellationToken = default);
+        public Task<TbEghisDoctUntactEntity?> GetDoctorUntactInfo(string hospNo, string emplNo, CancellationToken cancellationToken = default);
         public Task<List<GetDoctorScheduleResult>> GetDoctorList(string hospNo, string emplNo, CancellationToken cancellationToken = default);
         public Task<EghisDoctRsrvInfoEntity?> GetEghisDoctRsrvInfo(string hospNo, string emplNo, int weekNum, string clinicYmd, CancellationToken cancellationToken = default);
         public Task<List<EghisDoctRsrvDetailInfoEntity>> GetEghisDoctRsrvDetailList(int ridx, string receptType, CancellationToken cancellationToken = default);

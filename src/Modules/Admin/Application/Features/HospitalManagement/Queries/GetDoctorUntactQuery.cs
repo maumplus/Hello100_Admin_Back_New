@@ -38,20 +38,20 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
 
         public async Task<Result<GetDoctorUntactResult?>> Handle(GetDoctorUntactQuery query, CancellationToken cancellationToken)
         {
-            var tbEghisDoctUntanctEntity = await _hospitalStore.GetDoctorUntanctInfo(query.HospNo, query.EmplNo, cancellationToken);
+            var tbEghisDoctUntactEntity = await _hospitalStore.GetDoctorUntactInfo(query.HospNo, query.EmplNo, cancellationToken);
 
             GetDoctorUntactResult? result = null;
 
-            if (tbEghisDoctUntanctEntity != null)
+            if (tbEghisDoctUntactEntity != null)
             {
-                var doctHistoryInfoList = tbEghisDoctUntanctEntity.DoctHistory.FromJson<List<TbEghisDoctUntanctEntity.DoctHistoryInfo>>();
+                var doctHistoryInfoList = tbEghisDoctUntactEntity.DoctHistory.FromJson<List<TbEghisDoctUntactEntity.DoctHistoryInfo>>();
 
                 result = new GetDoctorUntactResult()
                 {
-                    DoctNm = tbEghisDoctUntanctEntity.DoctNm,
-                    EmplNo = tbEghisDoctUntanctEntity.EmplNo,
-                    DoctIntro = tbEghisDoctUntanctEntity.DoctIntro,
-                    ClinicGuide = tbEghisDoctUntanctEntity.ClinicGuide,
+                    DoctNm = tbEghisDoctUntactEntity.DoctNm,
+                    EmplNo = tbEghisDoctUntactEntity.EmplNo,
+                    DoctIntro = tbEghisDoctUntactEntity.DoctIntro,
+                    ClinicGuide = tbEghisDoctUntactEntity.ClinicGuide,
                     DoctHistoryList = doctHistoryInfoList == null || doctHistoryInfoList.Count == 0 ? new List<string>() : doctHistoryInfoList.Select(x => x.history).ToList()
                 };
             }

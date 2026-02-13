@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Hello100Admin.Modules.Admin.Domain.Entities
 {
-    public class TbEghisDoctUntanctEntity
+    public class TbEghisDoctUntactEntity
     {
         public class DoctHistoryInfo
         {

@@ -25,6 +25,9 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
         public int WeekNum { get; set; }
         public int UntactRsrvIntervalTime { get; set; }
         public int UntactRsrvIntervalCnt { get; set; }
+        public string UntactAvaStartTime { get; set; }
+        public string UntactAvaEndTime { get; set; }
+        public string UntactAvaUseYn { get; set; }
         public List<EghisDoctRsrvDetailInfoEntity> EghisDoctRsrvDetailInfoList { get; set; }
     }
 
@@ -53,12 +56,15 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
                 ClinicYmd = string.Empty,
                 WeekNum = command.WeekNum,
                 UntactRsrvIntervalTime = command.UntactRsrvIntervalTime,
-                UntactRsrvIntervalCnt = command.UntactRsrvIntervalCnt
+                UntactRsrvIntervalCnt = command.UntactRsrvIntervalCnt,
+                UntactAvaStartTime = command.UntactAvaStartTime,
+                UntactAvaEndTime = command.UntactAvaEndTime,
+                UntactAvaUseYn = command.UntactAvaUseYn
             };
 
             await _db.RunInTransactionAsync(DataSource.Hello100, async (session, token) =>
             {
-                await _hospitalRepository.RemoveEghisDoctRsrvAsync(session, eghisDoctRsrvInfoEntity, token);
+                await _hospitalRepository.RemoveEghisDoctRsrvAsync(session, eghisDoctRsrvInfoEntity, "NR", token);
 
                 var ridx = await _hospitalRepository.InsertEghisDoctUntactRsrvAsync(session, eghisDoctRsrvInfoEntity, token);
 

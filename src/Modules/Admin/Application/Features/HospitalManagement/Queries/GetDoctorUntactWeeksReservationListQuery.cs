@@ -1,5 +1,7 @@
-﻿using Hello100Admin.BuildingBlocks.Common.Application;
+﻿using DocumentFormat.OpenXml.ExtendedProperties;
+using Hello100Admin.BuildingBlocks.Common.Application;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Extensions;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Security;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Hospital;
 using Hello100Admin.Modules.Admin.Application.Common.Definitions.Enums;
 using Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Results;
@@ -32,13 +34,16 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
 
     public class GetDoctorUntactWeeksReservationListQueryHandler : IRequestHandler<GetDoctorUntactWeeksReservationListQuery, Result<GetDoctorUntactWeeksReservationListResult>>
     {
+        private readonly ICryptoService _cryptoService;
         private readonly IHospitalManagementStore _hospitalStore;
         private readonly ILogger<GetDoctorUntactWeeksReservationListQueryHandler> _logger;
 
         public GetDoctorUntactWeeksReservationListQueryHandler(
-        IHospitalManagementStore hospitalStore,
-        ILogger<GetDoctorUntactWeeksReservationListQueryHandler> logger)
+            ICryptoService cryptoService,
+            IHospitalManagementStore hospitalStore,
+            ILogger<GetDoctorUntactWeeksReservationListQueryHandler> logger)
         {
+            _cryptoService = cryptoService;
             _hospitalStore = hospitalStore;
             _logger = logger;
         }
@@ -47,7 +52,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
         {
             var eghisDoctRsrvInfoEntity = await _hospitalStore.GetEghisDoctRsrvInfo(query.HospNo, query.EmplNo, query.WeekNum, string.Empty, cancellationToken);
 
-            var eghisDoctRsrvDetailEntityList = new List<EghisDoctRsrvDetailInfoEntity>();
+            var eghisDoctRsrvDetailInfoEntityList = new List<EghisDoctRsrvDetailInfoEntity>();
 
             if (eghisDoctRsrvInfoEntity == null)
             {
@@ -71,23 +76,32 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
             }
             else
             {
-                eghisDoctRsrvDetailEntityList = await _hospitalStore.GetEghisDoctRsrvDetailList(eghisDoctRsrvInfoEntity.Ridx, "NR", cancellationToken);
+                eghisDoctRsrvDetailInfoEntityList = await _hospitalStore.GetEghisDoctRsrvDetailList(eghisDoctRsrvInfoEntity.Ridx, "NR", cancellationToken);
             }
 
-            if (eghisDoctRsrvDetailEntityList.Count == 0)
+            if (eghisDoctRsrvDetailInfoEntityList.Count == 0 && (eghisDoctRsrvInfoEntity.UntactRsrvIntervalTime - 1) > 0)
             {
                 TimeSpan time = new TimeSpan(00, eghisDoctRsrvInfoEntity.UntactRsrvIntervalTime, 00);
+                TimeSpan addTime = new TimeSpan(00, eghisDoctRsrvInfoEntity.UntactRsrvIntervalTime - 1, 00);
 
                 var untactStartDateTime = query.UntactStartTime.ToDateTime("HHmm");
                 var untactEndDateTime = query.UntactEndTime.ToDateTime("HHmm");
                 var untactBreakStartDateTime = query.UntactBreakStartTime.ToDateTime("HHmm");
                 var untactBreakEndDateTime = query.UntactBreakEndTime.ToDateTime("HHmm");
 
-                if (untactStartDateTime > untactEndDateTime)
+                if (untactStartDateTime == null || untactEndDateTime == null || untactBreakStartDateTime == null || untactBreakEndDateTime == null)
                 {
-                    for (var i = untactStartDateTime; i < untactEndDateTime; i += time)
+
+                }
+                else if (untactStartDateTime.Value >= untactEndDateTime.Value)
+                {
+                    
+                }
+                else
+                {
+                    for (var i = untactStartDateTime.Value; i < untactEndDateTime.Value; i += time)
                     {
-                        if (untactBreakStartDateTime <= i && i < untactBreakEndDateTime)
+                        if (i >= untactBreakStartDateTime.Value && i < untactBreakEndDateTime.Value)
                         {
                             continue;
                         }
@@ -95,24 +109,30 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
                         var eghisDoctRsrvDetailInfoEntity = new EghisDoctRsrvDetailInfoEntity()
                         {
                             Ridx = eghisDoctRsrvInfoEntity.Ridx,
-                            StartTime = i.Value.ToString("HHmm"),
-                            EndTime = (i.Value + time).ToString("HHmm"),
+                            StartTime = i.ToString("HHmm"),
+                            EndTime = (i + addTime).ToString("HHmm"),
                             RsrvCnt = eghisDoctRsrvInfoEntity.RsrvIntervalCnt,
                             ComCnt = 0,
                             ReceptType = "NR"
                         };
 
-                        eghisDoctRsrvDetailEntityList.Add(eghisDoctRsrvDetailInfoEntity);
+                        eghisDoctRsrvDetailInfoEntityList.Add(eghisDoctRsrvDetailInfoEntity);
                     }
                 }
             }
 
             var eghisRsrvInfoEntityList = await _hospitalStore.GetEghisUntactRsrvList(query.HospNo, query.EmplNo, query.WeekNum, cancellationToken);
 
+            foreach (var eghisRsrvInfoEntity in eghisRsrvInfoEntityList)
+            {
+                eghisRsrvInfoEntity.PtntNo = _cryptoService.DecryptWithNoVector(eghisRsrvInfoEntity.PtntNo);
+                eghisRsrvInfoEntity.PtntNm = _cryptoService.DecryptWithNoVector(eghisRsrvInfoEntity.PtntNm);
+            }
+
             var result = new GetDoctorUntactWeeksReservationListResult()
             {
                 EghisDoctRsrvInfo = eghisDoctRsrvInfoEntity,
-                EghisDoctRsrvDetailList = eghisDoctRsrvDetailEntityList,
+                EghisDoctRsrvDetailInfoList = eghisDoctRsrvDetailInfoEntityList,
                 EghisUntactRsrvList = eghisRsrvInfoEntityList
             };
 

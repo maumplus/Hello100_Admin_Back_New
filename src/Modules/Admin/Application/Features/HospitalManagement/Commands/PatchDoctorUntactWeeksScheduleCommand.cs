@@ -72,15 +72,18 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
     {
         private readonly ILogger<PatchDoctorUntactWeeksScheduleCommandHandler> _logger;
         private readonly IHospitalManagementRepository _hospitalManagementRepository;
+        private readonly ICryptoService _cryptoService;
         private readonly IDbSessionRunner _db;
 
         public PatchDoctorUntactWeeksScheduleCommandHandler(
             ILogger<PatchDoctorUntactWeeksScheduleCommandHandler> logger,
             IHospitalManagementRepository hospitalManagementRepository,
+            ICryptoService cryptoService,
             IDbSessionRunner db)
         {
             _logger = logger;
             _hospitalManagementRepository = hospitalManagementRepository;
+            _cryptoService = cryptoService;
             _db = db;
         }
 
@@ -103,7 +106,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
 
                     if ((hello100Role & Hello100RoleType.Rsrv) == 0)
                     {
-                        await _hospitalManagementRepository.RemoveEghisDoctRsrvAsync(session, doctorSchedule.Ridx, token);
+                        await _hospitalManagementRepository.RemoveEghisDoctRsrvAsync(session, doctorSchedule.Ridx, "NR", token);
                     }
 
                     var eghisDoctInfoEntity = new EghisDoctInfoEntity()
@@ -111,7 +114,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
                         HospNo = doctorSchedule.HospNo,
                         HospKey = doctorSchedule.HospKey,
                         EmplNo = doctorSchedule.EmplNo,
-                        DoctNo = doctorSchedule.DoctNo,
+                        DoctNo = _cryptoService.EncryptWithNoVector(doctorSchedule.DoctNo),
                         DoctNm = doctorSchedule.DoctNm,
                         DeptCd = doctorSchedule.DeptCd,
                         DeptNm = doctorSchedule.DeptNm,

@@ -445,14 +445,14 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             return await db.ExecuteAsync(query, parameters, ct, _logger);
         }
 
-        public async Task<int> UpdateDoctorUntanctAsync(DbSession db, TbEghisDoctUntanctEntity eghisDoctUntanct, CancellationToken ct)
+        public async Task<int> UpdateDoctorUntactAsync(DbSession db, TbEghisDoctUntactEntity eghisDoctUntact, CancellationToken ct)
         {
             DynamicParameters parameters = new DynamicParameters();
-            parameters.Add("HospNo", eghisDoctUntanct.HospNo, DbType.String);
-            parameters.Add("EmplNo", eghisDoctUntanct.EmplNo, DbType.String);
-            parameters.Add("DoctIntro", eghisDoctUntanct.DoctIntro, DbType.String);
-            parameters.Add("ClinicGuide", eghisDoctUntanct.ClinicGuide, DbType.String);
-            parameters.Add("DoctHistory", eghisDoctUntanct.DoctHistory, DbType.String);
+            parameters.Add("HospNo", eghisDoctUntact.HospNo, DbType.String);
+            parameters.Add("EmplNo", eghisDoctUntact.EmplNo, DbType.String);
+            parameters.Add("DoctIntro", eghisDoctUntact.DoctIntro, DbType.String);
+            parameters.Add("ClinicGuide", eghisDoctUntact.ClinicGuide, DbType.String);
+            parameters.Add("DoctHistory", eghisDoctUntact.DoctHistory, DbType.String);
 
             var query = @"
                 UPDATE hello100.tb_eghis_doct_untact
@@ -466,27 +466,29 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             return await db.ExecuteAsync(query, parameters, ct, _logger);
         }
 
-        public async Task<int> RemoveEghisDoctRsrvAsync(DbSession db, int ridx, CancellationToken ct)
+        public async Task<int> RemoveEghisDoctRsrvAsync(DbSession db, int ridx, string receptType, CancellationToken ct)
         {
             DynamicParameters parameters = new DynamicParameters();
             parameters.Add("Ridx", ridx, DbType.Int32);
+            parameters.Add("ReceptType", receptType, DbType.String);
 
             var query = $@"
                 DELETE FROM hello100_api.eghis_doct_rsrv_detail_info
                       WHERE ridx = @Ridx
-                        AND recept_type != 'NR';
+                        AND recept_type = @ReceptType;
             ";
 
             return await db.ExecuteAsync(query, parameters, ct, _logger);
         }
         
-        public async Task<int> RemoveEghisDoctRsrvAsync(DbSession db, EghisDoctRsrvInfoEntity eghisDoctRsrvInfoEntity, CancellationToken ct)
+        public async Task<int> RemoveEghisDoctRsrvAsync(DbSession db, EghisDoctRsrvInfoEntity eghisDoctRsrvInfoEntity, string receptType, CancellationToken ct)
         {
             DynamicParameters parameters = new DynamicParameters();
             parameters.Add("HospNo", eghisDoctRsrvInfoEntity.HospNo, DbType.String);
             parameters.Add("EmplNo", eghisDoctRsrvInfoEntity.EmplNo, DbType.String);
             parameters.Add("WeekNum", eghisDoctRsrvInfoEntity.WeekNum, DbType.Int32);
             parameters.Add("ClinicYmd", eghisDoctRsrvInfoEntity.ClinicYmd, DbType.String);
+            parameters.Add("ReceptType", receptType, DbType.String);
 
             var query =$@"
                 DELETE FROM hello100_api.eghis_doct_rsrv_detail_info
@@ -496,7 +498,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
                                          AND empl_no = @EmplNo
                                          AND week_num = @WeekNum
                                          AND clinic_ymd = @ClinicYmd )
-                        AND recept_type != 'NR';
+                        AND recept_type = @ReceptType;
             ";
 
             return await db.ExecuteAsync(query, parameters, ct, _logger);
@@ -722,7 +724,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
                   ( hosp_no, hosp_key, empl_no,
                     week_num, untact_start_hour, untact_start_minute, untact_end_hour, untact_end_minute, untact_interval_time, untact_use_yn,
                     untact_break_start_hour, untact_break_start_minute, untact_break_end_hour, untact_break_end_minute )
-                VALUES {values}
+                VALUES {values};
             ";
 
             queries.Add(query);
@@ -809,7 +811,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
                     @UntactRsrvIntervalTime, @UntactRsrvIntervalCnt, @UntactAvaStartTime, @UntactAvaEndTime, @UntactAvaUseYn )
                 ON DUPLICATE KEY UPDATE
                   rsrv_interval_time = VALUES(rsrv_interval_time),
-                  rsrv_interval_cnt = VALUES(RsrvIntervalCnt),
+                  rsrv_interval_cnt = VALUES(rsrv_interval_cnt),
                   reg_dt = VALUES(reg_dt),
                   untact_rsrv_interval_time = VALUES(untact_rsrv_interval_time),
                   untact_rsrv_interval_cnt = VALUES(untact_rsrv_interval_cnt),
@@ -849,13 +851,13 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
                     values += ", ";
                 }
                 
-                values += "( @Ridx{i}, @StartTime{i}, @EndTime{i}, @RsrvCnt{i}, @ComCnt{i}, NOW(), @ReceptType{i} )";
+                values += $"( @Ridx{i}, @StartTime{i}, @EndTime{i}, @RsrvCnt{i}, @ComCnt{i}, NOW(), @ReceptType{i} )";
             }
 
             var query = $@"
                 INSERT INTO hello100_api.eghis_doct_rsrv_detail_info
                   (ridx, start_time, end_time, rsrv_cnt, com_cnt, reg_dt, recept_type)
-                VALUES {values}
+                VALUES {values};
             ";
 
             return await db.ExecuteScalarAsync<int>(query, parameters, ct, _logger);

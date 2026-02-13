@@ -1,5 +1,6 @@
 ﻿using DocumentFormat.OpenXml.EMMA;
 using Hello100Admin.BuildingBlocks.Common.Application;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Security;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Hospital;
 using Hello100Admin.Modules.Admin.Application.Common.Definitions.Enums;
 using Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Results;
@@ -23,12 +24,14 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
     public class GetDoctorQueryHandler : IRequestHandler<GetDoctorQuery, Result<GetDoctorResult?>>
     {
         private readonly string _adminImageUrl;
+        private readonly ICryptoService _cryptoService;
         private readonly IHospitalManagementStore _hospitalStore;
         private readonly ILogger<GetDoctorQueryHandler> _logger;
 
-        public GetDoctorQueryHandler(IConfiguration config, IHospitalManagementStore hospitalStore, ILogger<GetDoctorQueryHandler> logger)
+        public GetDoctorQueryHandler(IConfiguration config, ICryptoService cryptoService, IHospitalManagementStore hospitalStore, ILogger<GetDoctorQueryHandler> logger)
         {
             _adminImageUrl = config["AdminImageUrl"] ?? string.Empty;
+            _cryptoService = cryptoService;
             _hospitalStore = hospitalStore;
             _logger = logger;
         }
@@ -49,7 +52,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
                     HospNo = doctorScheduleResult[0].HospNo,
                     HospKey = doctorScheduleResult[0].HospKey,
                     EmplNo = doctorScheduleResult[0].EmplNo,
-                    DoctNo = doctorScheduleResult[0].DoctNo,
+                    DoctNo = _cryptoService.DecryptWithNoVector(doctorScheduleResult[0].DoctNo),
                     DoctNm = doctorScheduleResult[0].DoctNm,
                     DeptCd = doctorScheduleResult[0].DeptCd,
                     DeptNm = doctorScheduleResult[0].DeptNm,

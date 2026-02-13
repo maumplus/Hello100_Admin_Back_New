@@ -51,9 +51,10 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
                 doctHistoryJson += $"{{ \"history\": \"{doctHistory}\" }}";
             }
 
-            var eghisDoctUntanct = new TbEghisDoctUntanctEntity
+            var eghisDoctUntact = new TbEghisDoctUntactEntity
             {
                 HospNo = request.HospNo,
+                EmplNo = request.EmplNo,
                 DoctIntro = request.DoctIntro,
                 ClinicGuide = request.ClinicGuide,
                 DoctHistory = $"[{doctHistoryJson}]"
@@ -61,7 +62,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
 
             await _db.RunInTransactionAsync(DataSource.Hello100, async (session, token) =>
             {
-                await _hospitalManagementRepository.UpdateDoctorUntanctAsync(session, eghisDoctUntanct, token);
+                await _hospitalManagementRepository.UpdateDoctorUntactAsync(session, eghisDoctUntact, token);
             }
             , cancellationToken);
 
