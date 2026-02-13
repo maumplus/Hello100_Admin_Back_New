@@ -111,7 +111,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
                             Ridx = eghisDoctRsrvInfoEntity.Ridx,
                             StartTime = i.ToString("HHmm"),
                             EndTime = (i + addTime).ToString("HHmm"),
-                            RsrvCnt = eghisDoctRsrvInfoEntity.RsrvIntervalCnt,
+                            RsrvCnt = eghisDoctRsrvInfoEntity.UntactRsrvIntervalCnt,
                             ComCnt = 0,
                             ReceptType = "NR"
                         };
