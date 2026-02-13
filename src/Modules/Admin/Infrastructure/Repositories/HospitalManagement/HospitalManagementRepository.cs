@@ -774,7 +774,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
                   (@HospNo, @EmplNo, @ClinicYmd, @WeekNum, @RsrvIntervalTime, @RsrvIntervalCnt, NOW())
                 ON DUPLICATE KEY UPDATE
                   rsrv_interval_time = VALUES(rsrv_interval_time),
-                  rsrv_interval_cnt = VALUES(RsrvIntervalCnt),
+                  rsrv_interval_cnt = VALUES(rsrv_interval_cnt),
                   reg_dt = VALUES(reg_dt);
                 SELECT IFNULL(MAX(rIdx), 0)
                   FROM hello100_api.eghis_doct_rsrv_info
