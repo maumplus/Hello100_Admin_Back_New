@@ -1,4 +1,5 @@
 ﻿using Hello100Admin.Integration.Shared;
+using Microsoft.AspNetCore.WebUtilities;
 using System.Net.Http.Json;
 
 namespace AdminUser.API.IntegrationTests
@@ -189,6 +190,120 @@ namespace AdminUser.API.IntegrationTests
 
             // Body
             var body = await response.Content.ReadAsStringAsync();
+
+            // Assert
+            Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task GetHospitalServiceUsageStatus_ShouldReturnOk_WhenValidCredentials()
+        {
+            _client.AsSuperAdmin("B81AFBD0", "대민테스트");
+
+            var query = new Dictionary<string, string?>
+            {
+                ["PageNo"] = 1.ToString(),
+                ["PageSize"] = 10.ToString(),
+                ["FromDate"] = "2024-01-01",
+                ["ToDate"] = "2026-02-13",
+                ["SearchKeyword"] = "10350011",
+                ["SearchType"] = 2.ToString(),
+                ["QrCheckInYn"] = "Y",
+                ["TodayRegistrationYn"] = "Y",
+                ["AppointmentYn"] = "Y",
+                ["TelemedicineYn"] = "Y",
+                ["ExcludeTestHospitalsYn"] = "Y",
+            };
+
+            var url = QueryHelpers.AddQueryString("/api/service-usage/hospitals", query);
+
+            _client.AsSuperAdmin("B81AFBD0", "대민테스트");
+
+            var response = await _client.GetAsync(url);
+
+            // Body
+            var body = await response.Content.ReadAsStringAsync();
+
+            // Assert
+            Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task ExportServiceUnitReceptionStatusExcel_ShouldReturnOk_WhenValidCredentials()
+        {
+            var query = new Dictionary<string, string?>
+            {
+                ["FromDate"] = "2024-01-01",
+                ["ToDate"] = "2026-02-13",
+                ["SearchKeyword"] = "TESTDM",
+                ["SearchType"] = 1.ToString(),
+                ["QrCheckInYn"] = "Y",
+                ["TodayRegistrationYn"] = "Y",
+                ["AppointmentYn"] = "Y",
+                ["TelemedicineYn"] = "Y",
+                ["ExcludeTestHospitalsYn"] = "Y"
+            };
+
+            var url = QueryHelpers.AddQueryString("/api/service-usage/receptions/excel/by-service-unit", query);
+
+            _client.AsSuperAdmin("B81AFBD0", "대민테스트");
+
+            var response = await _client.GetAsync(url);
+
+            // Body
+            var body = await response.Content.ReadAsStringAsync();
+
+            var bytes = await response.Content.ReadAsByteArrayAsync();
+            await File.WriteAllBytesAsync($"병원별서비스이용현황(상단)_{DateTime.Now:yyyyMMdd}.xlsx", bytes);
+
+            // Assert
+            Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task ExportHospitalUnitReceptionStatusExcel_ShouldReturnOk_WhenValidCredentials()
+        {
+            var query = new Dictionary<string, string?>
+            {
+                ["FromDate"] = "2024-01-01",
+                ["ToDate"] = "2026-02-13",
+                ["SearchKeyword"] = "",
+                ["SearchType"] = 1.ToString(),
+                ["QrCheckInYn"] = "Y",
+                ["TodayRegistrationYn"] = "Y",
+                ["AppointmentYn"] = "Y",
+                ["TelemedicineYn"] = "Y",
+                ["ExcludeTestHospitalsYn"] = "Y"
+            };
+
+            var url = QueryHelpers.AddQueryString("/api/service-usage/receptions/excel/by-hospital-unit", query);
+
+            _client.AsSuperAdmin("B81AFBD0", "대민테스트");
+
+            var response = await _client.GetAsync(url);
+
+            // Body
+            var body = await response.Content.ReadAsStringAsync();
+
+            var bytes = await response.Content.ReadAsByteArrayAsync();
+            await File.WriteAllBytesAsync($"병원별서비스이용현황(하단)_{DateTime.Now:yyyyMMdd}.xlsx", bytes);
+
+            // Assert
+            Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task ExportHello100ReceptionStatusExcel_ShouldReturnOk_WhenValidCredentials()
+        {
+            _client.AsSuperAdmin("B81AFBD0", "대민테스트");
+
+            var response = await _client.GetAsync("/api/service-usage/receptions/excel/by-hello100?fromDate=2024-01-01&toDate=2026-02-13");
+
+            // Body
+            var body = await response.Content.ReadAsStringAsync();
+
+            var bytes = await response.Content.ReadAsByteArrayAsync();
+            await File.WriteAllBytesAsync($"헬로100접수현황_{DateTime.Now:yyyyMMdd}.xlsx", bytes);
 
             // Assert
             Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);

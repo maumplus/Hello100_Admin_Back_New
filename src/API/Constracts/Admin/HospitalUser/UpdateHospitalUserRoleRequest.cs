@@ -2,6 +2,6 @@
 {
     public sealed record UpdateHospitalUserRoleRequest
     {
-        public required int UserRole { get; set; }
+        public required int UserRole { get; init; }
     }
 }

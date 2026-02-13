@@ -7,8 +7,8 @@
     {
         public class StringYn
         {
-            public readonly string YES = "Y";
-            public readonly string NO = "N";
+            public const string YES = "Y";
+            public const string NO = "N";
         }
     }
 }
