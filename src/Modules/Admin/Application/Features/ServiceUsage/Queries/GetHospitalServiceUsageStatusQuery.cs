@@ -2,6 +2,7 @@
 using Hello100Admin.BuildingBlocks.Common.Application;
 using Hello100Admin.BuildingBlocks.Common.Definition.Enums;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Serialization;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.ServiceUsage;
 using Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Results;
 using MediatR;
@@ -20,13 +21,17 @@ namespace Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Queries
         /// </summary>
         public int PageSize { get; init; }
         /// <summary>
-        /// 조회 시작일 (yyyy-mm-dd)
+        /// 조회 시작일
         /// </summary>
-        public string FromDate { get; init; } = default!;
+        public string? FromDate { get; init; }
         /// <summary>
-        /// 조회 종료일 (yyyy-mm-dd)
+        /// 조회 종료일
         /// </summary>
-        public string ToDate { get; init; } = default!;
+        public string? ToDate { get; init; }
+        /// <summary>
+        /// 검색 차트타입 [전체: "", 이지스: "E", 닉스: "N"]
+        /// </summary>
+        public string? SearchChartType { get; init; }
         /// <summary>
         /// 검색 타입 [1: 병원명, 2: 요양기관번호]
         /// </summary>
@@ -90,13 +95,13 @@ namespace Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Queries
 
             var statusByServiceUnit = await _db.RunAsync(DataSource.Hello100,
                 (session, token) => _serviceUsageStore.GetServiceUnitReceptionStatusAsync(
-                    session, req.FromDate, req.ToDate, req.SearchType, req.SearchKeyword, req.QrCheckInYn, 
+                    session, req.FromDate, req.ToDate, req.SearchChartType, req.SearchType, req.SearchKeyword, req.QrCheckInYn, 
                     req.TodayRegistrationYn, req.AppointmentYn, req.TelemedicineYn, req.ExcludeTestHospitalsYn, token),
             ct);
 
             var statusByHospitalUnit = await _db.RunAsync(DataSource.Hello100,
                 (session, token) => _serviceUsageStore.GetHospitalUnitReceptionStatusAsync(
-                    session, req.PageNo, req.PageSize, req.FromDate, req.ToDate, req.SearchType, req.SearchKeyword, req.QrCheckInYn, 
+                    session, req.PageNo, req.PageSize, req.FromDate, req.ToDate, req.SearchChartType, req.SearchType, req.SearchKeyword, req.QrCheckInYn, 
                     req.TodayRegistrationYn, req.AppointmentYn, req.TelemedicineYn, req.ExcludeTestHospitalsYn, token),
             ct);
 
@@ -115,6 +120,8 @@ namespace Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Queries
                 StatusByServiceUnit = statusByServiceUnit,
                 StatusByHospitalUnit = statusByHospitalUnit
             };
+
+            var test = result.ToJsonForStorage();
 
             return Result.Success(result);
         }
