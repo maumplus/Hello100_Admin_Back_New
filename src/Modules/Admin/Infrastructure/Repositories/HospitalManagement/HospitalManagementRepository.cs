@@ -928,21 +928,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
         public async Task<int> InsertEghisDoctUntactJoinAsync(DbSession db, TbEghisDoctUntactJoinEntity tbEghisDoctUntactJoinEntity, CancellationToken ct)
         {
             DynamicParameters parameters = new DynamicParameters();
-            parameters.Add("HospNo", tbEghisDoctUntactJoinEntity.HospNo, DbType.String);
-            parameters.Add("HospKey", tbEghisDoctUntactJoinEntity.HospKey, DbType.String);
-            parameters.Add("HospNm", tbEghisDoctUntactJoinEntity.HospNm, DbType.String);
-            parameters.Add("EmplNo", tbEghisDoctUntactJoinEntity.EmplNo, DbType.String);
-            parameters.Add("HospTel", tbEghisDoctUntactJoinEntity.HospTel, DbType.String);
-            parameters.Add("PostCd", tbEghisDoctUntactJoinEntity.PostCd, DbType.String);
-            parameters.Add("DoctNo", tbEghisDoctUntactJoinEntity.DoctNo, DbType.String);
-            parameters.Add("DoctNoType", tbEghisDoctUntactJoinEntity.DoctNoType, DbType.String);
-            parameters.Add("DoctBirthday", tbEghisDoctUntactJoinEntity.DoctBirthday, DbType.String);
-            parameters.Add("DoctTel", tbEghisDoctUntactJoinEntity.DoctTel, DbType.String);
-            parameters.Add("DoctIntro", tbEghisDoctUntactJoinEntity.DoctIntro, DbType.String);
-            parameters.Add("DoctHistory", tbEghisDoctUntactJoinEntity.DoctHistory, DbType.String);
-            parameters.Add("ClinicTime", tbEghisDoctUntactJoinEntity.ClinicTime, DbType.String);
-            parameters.Add("ClinicGuide", tbEghisDoctUntactJoinEntity.ClinicGuide, DbType.String);
-            parameters.Add("JoinState", tbEghisDoctUntactJoinEntity.JoinState, DbType.String);
+            
 
             var queries = new List<string>();
             var query = string.Empty;
@@ -968,6 +954,13 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
                 }
                 else
                 {
+                    parameters.Add($"ClsCd{i}", fileInfo.ClsCd, DbType.String);
+                    parameters.Add($"CmCd{i}", fileInfo.CmCd, DbType.String);
+                    parameters.Add($"FilePath{i}", fileInfo.FilePath, DbType.String);
+                    parameters.Add($"OriginFileName{i}", fileInfo.OriginFileName, DbType.String);
+                    parameters.Add($"FileSize{i}", fileInfo.FileSize, DbType.String);
+                    parameters.Add($"DelYn{i}", fileInfo.DelYn, DbType.String);
+
                     query = $@"
                         SET @maxFileSeq{i} := ( SELECT IFNULL(MAX(seq), 0) + 1
                                                 FROM tb_file_info );
@@ -983,6 +976,23 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
                 
             }
 
+            parameters.Add("HospNo", tbEghisDoctUntactJoinEntity.HospNo, DbType.String);
+            parameters.Add("HospKey", tbEghisDoctUntactJoinEntity.HospKey, DbType.String);
+            parameters.Add("HospNm", tbEghisDoctUntactJoinEntity.HospNm, DbType.String);
+            parameters.Add("EmplNo", tbEghisDoctUntactJoinEntity.EmplNo, DbType.String);
+            parameters.Add("HospTel", tbEghisDoctUntactJoinEntity.HospTel, DbType.String);
+            parameters.Add("PostCd", tbEghisDoctUntactJoinEntity.PostCd, DbType.String);
+            parameters.Add("DoctNo", tbEghisDoctUntactJoinEntity.DoctNo, DbType.String);
+            parameters.Add("DoctNoType", tbEghisDoctUntactJoinEntity.DoctNoType, DbType.String);
+            parameters.Add("DoctNm", tbEghisDoctUntactJoinEntity.DoctNm, DbType.String);
+            parameters.Add("DoctBirthday", tbEghisDoctUntactJoinEntity.DoctBirthday, DbType.String);
+            parameters.Add("DoctTel", tbEghisDoctUntactJoinEntity.DoctTel, DbType.String);
+            parameters.Add("DoctIntro", tbEghisDoctUntactJoinEntity.DoctIntro, DbType.String);
+            parameters.Add("DoctHistory", tbEghisDoctUntactJoinEntity.DoctHistory, DbType.String);
+            parameters.Add("ClinicTime", tbEghisDoctUntactJoinEntity.ClinicTime, DbType.String);
+            parameters.Add("ClinicGuide", tbEghisDoctUntactJoinEntity.ClinicGuide, DbType.String);
+            parameters.Add("JoinState", tbEghisDoctUntactJoinEntity.JoinState, DbType.String);
+
             query = @"
                 INSERT INTO hello100.tb_eghis_doct_untact_join
                   ( hosp_no, hosp_key, hosp_nm, empl_no, hosp_tel, post_cd,
@@ -997,6 +1007,8 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             ";
 
             queries.Add(query);
+
+            query = string.Join("", queries.ToArray());
 
             return await db.ExecuteAsync(query, parameters, ct, _logger);
         }

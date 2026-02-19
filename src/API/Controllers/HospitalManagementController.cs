@@ -708,8 +708,6 @@ namespace Hello100Admin.API.Controllers
         {
             _logger.LogInformation("POST /api/hospital-management/doctor-untact/join");
 
-            request.HospNo = base.HospNo;
-
             List<IFormFile> images = new List<IFormFile>();
 
             if (request.DoctLicenseFile != null)

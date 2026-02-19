@@ -4,8 +4,6 @@ namespace Hello100Admin.API.Constracts.Admin.HospitalManagement
 {
     public class PostDoctorUntactJoinRequest
     {
-        [JsonIgnore]
-        public string? HospNo { get; set; }
         public string EmplNo { get; set; }
         public string HospNm { get; set; }
         public string HospTel { get; set; }

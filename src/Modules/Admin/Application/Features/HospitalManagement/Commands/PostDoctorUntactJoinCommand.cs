@@ -55,6 +55,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
         {
             _logger = logger;
             _hospitalManagementStore = hospitalManagementStore;
+            _hospitalManagementRepository = hospitalManagementRepository;
             _sftpClientService = sftpClientService;
             _cryptoService = cryptoService;
             _db = db;
@@ -92,7 +93,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
                         var fileInfoEntity = new TbFileInfoEntity
                         {
                             ClsCd = "24",
-                            CmCd = "U04",
+                            CmCd = $"U0{i+1}",
                             FilePath = imagePath,
                             FileSize = request.Images[i].Length,
                             OriginFileName = request.Images[i].FileName,
