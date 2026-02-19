@@ -1,4 +1,6 @@
-﻿namespace Hello100Admin.API.Constracts.Admin.HospitalManagement
+﻿using System.Text.Json.Serialization;
+
+namespace Hello100Admin.API.Constracts.Admin.HospitalManagement
 {
     public class PatchDoctorWeeksScheduleInfo
     {
@@ -23,6 +25,7 @@
     {
         public string HospNo { get; set; }
         public string HospKey { get; set; }
+        public string EmplNo { get; set; }
         public string DoctNo { get; set; }
         public string DoctNm { get; set; }
         public string DeptCd { get; set; }

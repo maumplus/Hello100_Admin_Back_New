@@ -536,6 +536,22 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             return await db.ExecuteAsync(query, parameters, ct, _logger);
         }
 
+        public async Task<int> RemoveDoctorInfoScheduleAsync(DbSession db, EghisDoctInfoEntity eghisDoctInfoEntity, CancellationToken ct)
+        {
+            DynamicParameters parameters = new DynamicParameters();
+            parameters.Add("HospNo", eghisDoctInfoEntity.HospNo, DbType.String);
+            parameters.Add("EmplNo", eghisDoctInfoEntity.EmplNo, DbType.String);
+            parameters.Add("WeekNum", eghisDoctInfoEntity.WeekNum, DbType.Int32);
+            
+            var query = $@"
+                    DELETE FROM hello100_api.eghis_doct_info
+                          WHERE hosp_no = @HospNo
+                            AND empl_no = @EmplNo
+                            AND week_num = @WeekNum;";
+
+            return await db.ExecuteAsync(query, parameters, ct, _logger);
+        }
+
         public async Task<int> UpdateDoctorInfoScheduleAsync(DbSession db, List<EghisDoctInfoEntity> eghisDoctInfoList, CancellationToken ct)
         {
             var hospNo = eghisDoctInfoList[0].HospNo;

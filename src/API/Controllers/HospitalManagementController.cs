@@ -370,6 +370,7 @@ namespace Hello100Admin.API.Controllers
             {
                 HospNo = base.HospNo,
                 HospKey = base.HospKey,
+                EmplNo = request.EmplNo,
                 DoctNo = request.DoctNo,
                 DoctNm = request.DoctNm,
                 DeptCd = request.DeptCd,
@@ -386,6 +387,7 @@ namespace Hello100Admin.API.Controllers
                 {
                     HospNo = base.HospNo,
                     HospKey = base.HospKey,
+                    EmplNo = request.EmplNo,
                     DoctNo = request.DoctNo,
                     DoctNm = request.DoctNm,
                     DeptCd = request.DeptCd,
@@ -417,6 +419,7 @@ namespace Hello100Admin.API.Controllers
             {
                 HospNo = base.HospNo,
                 HospKey = base.HospKey,
+                EmplNo = request.EmplNo,
                 DoctNo = request.DoctNo,
                 DoctNm = request.DoctNm,
                 DeptCd = request.DeptCd,
@@ -433,6 +436,7 @@ namespace Hello100Admin.API.Controllers
                 {
                     HospNo = base.HospNo,
                     HospKey = base.HospKey,
+                    EmplNo = request.EmplNo,
                     DoctNo = request.DoctNo,
                     DoctNm = request.DoctNm,
                     DeptCd = request.DeptCd,
@@ -464,6 +468,7 @@ namespace Hello100Admin.API.Controllers
             {
                 HospNo = base.HospNo,
                 HospKey = base.HospKey,
+                EmplNo = request.EmplNo,
                 DoctNo = request.DoctNo,
                 DoctNm = request.DoctNm,
                 DeptCd = request.DeptCd,
@@ -480,6 +485,7 @@ namespace Hello100Admin.API.Controllers
                 {
                     HospNo = base.HospNo,
                     HospKey = base.HospKey,
+                    EmplNo = request.EmplNo,
                     DoctNo = request.DoctNo,
                     DoctNm = request.DoctNm,
                     DeptCd = request.DeptCd,
