@@ -8,6 +8,7 @@ using Hello100Admin.API.Constracts.Admin.AdminUser;
 using Hello100Admin.Modules.Admin.Application.Features.AdminUser.Commands.UpdatePassword;
 using Hello100Admin.Modules.Admin.Application.Features.AdminUser.Results;
 using Hello100Admin.Modules.Admin.Application.Features.AdminUser.Queries;
+using Hello100Admin.Modules.Admin.Application.Common.Models;
 
 namespace Hello100Admin.API.Controllers;
 
@@ -52,7 +53,7 @@ public class AdminUserController : BaseController
     /// [전체 관리자] 관리자관리 > 관리자목록 > 조회 (병원관리자 제외)
     /// </summary>
     [HttpGet("list")]
-    [ProducesResponseType(typeof(ApiResponse<GetAdminUsersResult>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<ListResult<GetAdminUsersResult>>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAdminUsersAsync(int pageNo, int pageSize, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("GET api/admin-user/list [{Aid}]", Aid);
