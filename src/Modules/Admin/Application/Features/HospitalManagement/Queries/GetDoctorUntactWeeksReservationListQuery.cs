@@ -76,6 +76,8 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
             }
             else
             {
+                eghisDoctRsrvInfoEntity.UntactRsrvIntervalTime = eghisDoctRsrvInfoEntity.UntactRsrvIntervalTime == 0 ? 10 : eghisDoctRsrvInfoEntity.UntactRsrvIntervalTime;
+
                 eghisDoctRsrvDetailInfoEntityList = await _hospitalStore.GetEghisDoctRsrvDetailList(eghisDoctRsrvInfoEntity.Ridx, "NR", cancellationToken);
             }
 
@@ -126,7 +128,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
             foreach (var eghisRsrvInfoEntity in eghisRsrvInfoEntityList)
             {
                 eghisRsrvInfoEntity.PtntNo = _cryptoService.DecryptWithNoVector(eghisRsrvInfoEntity.PtntNo);
-                eghisRsrvInfoEntity.PtntNm = _cryptoService.DecryptWithNoVector(eghisRsrvInfoEntity.PtntNm);
+                eghisRsrvInfoEntity.PtntNm = _cryptoService.DecryptWithNoVector(eghisRsrvInfoEntity.PtntNm, CryptoKeyType.Name);
             }
 
             var result = new GetDoctorUntactWeeksReservationListResult()
