@@ -15,7 +15,7 @@
         /// <summary>
         /// 병원명
         /// </summary>
-        public string Name { get; set; } = default!;
+        public string HospName { get; set; } = default!;
 
         /// <summary>
         /// 병원분류코드

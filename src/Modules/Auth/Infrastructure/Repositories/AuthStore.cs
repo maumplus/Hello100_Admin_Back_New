@@ -173,7 +173,7 @@ namespace Hello100Admin.Modules.Auth.Infrastructure.Repositories
             var query = @"
                     SELECT z.hosp_key                                      AS HospKey,
                            z.hosp_no                                       AS HospNo,
-                           z.name                                          AS Name,
+                           z.name                                          AS HospName,
                            z.hosp_cls_cd                                   AS HospClsCd,
                            z.addr                                          AS Addr,
                            z.post_cd                                       AS PostCd,
