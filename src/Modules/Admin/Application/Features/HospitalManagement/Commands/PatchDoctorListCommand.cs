@@ -57,6 +57,16 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
 
             List<EghisDoctInfoEntity> eghisDoctInfoList = new List<EghisDoctInfoEntity>();
 
+            foreach (var doctorInfo in request.DoctorList)
+            {
+                eghisDoctInfoList.Add(new EghisDoctInfoEntity()
+                {
+                    HospNo = doctorInfo.HospNo,
+                    EmplNo = doctorInfo.EmplNo,
+                    FrontViewRole = doctorInfo.FrontViewRole
+                });
+            }
+
             await _db.RunAsync(DataSource.Hello100,
                 (session, token) => _hospitalManagementRepository.UpdateDoctorListAsync(session, eghisDoctInfoList, token),
             cancellationToken);
