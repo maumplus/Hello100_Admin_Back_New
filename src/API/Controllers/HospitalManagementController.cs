@@ -29,18 +29,15 @@ namespace Hello100Admin.API.Controllers
     public class HospitalManagementController : BaseController
     {
         private readonly IMediator _mediator;
-        private readonly ICryptoService _cryptoService;
         private readonly ISftpClientService _sftpClientService;
         private readonly ILogger<HospitalManagementController> _logger;
 
         public HospitalManagementController(
         IMediator mediator,
-        ICryptoService cryptoService,
         ISftpClientService sftpClientService,
         ILogger<HospitalManagementController> logger)
         {
             _mediator = mediator;
-            _cryptoService = cryptoService;
             _sftpClientService = sftpClientService;
             _logger = logger;
         }
@@ -371,7 +368,7 @@ namespace Hello100Admin.API.Controllers
             {
                 HospNo = base.HospNo,
                 HospKey = base.HospKey,
-                DoctNo = _cryptoService.EncryptWithNoVector(request.DoctNo),
+                DoctNo = request.DoctNo,
                 DoctNm = request.DoctNm,
                 DeptCd = request.DeptCd,
                 DeptNm = request.DeptNm,
@@ -387,7 +384,7 @@ namespace Hello100Admin.API.Controllers
                 {
                     HospNo = base.HospNo,
                     HospKey = base.HospKey,
-                    DoctNo = _cryptoService.EncryptWithNoVector(request.DoctNo),
+                    DoctNo = request.DoctNo,
                     DoctNm = request.DoctNm,
                     DeptCd = request.DeptCd,
                     DeptNm = request.DeptNm,
@@ -418,7 +415,7 @@ namespace Hello100Admin.API.Controllers
             {
                 HospNo = base.HospNo,
                 HospKey = base.HospKey,
-                DoctNo = _cryptoService.EncryptWithNoVector(request.DoctNo),
+                DoctNo = request.DoctNo,
                 DoctNm = request.DoctNm,
                 DeptCd = request.DeptCd,
                 DeptNm = request.DeptNm,
@@ -434,7 +431,7 @@ namespace Hello100Admin.API.Controllers
                 {
                     HospNo = base.HospNo,
                     HospKey = base.HospKey,
-                    DoctNo = _cryptoService.EncryptWithNoVector(request.DoctNo),
+                    DoctNo = request.DoctNo,
                     DoctNm = request.DoctNm,
                     DeptCd = request.DeptCd,
                     DeptNm = request.DeptNm,
@@ -465,7 +462,7 @@ namespace Hello100Admin.API.Controllers
             {
                 HospNo = base.HospNo,
                 HospKey = base.HospKey,
-                DoctNo = _cryptoService.EncryptWithNoVector(request.DoctNo),
+                DoctNo = request.DoctNo,
                 DoctNm = request.DoctNm,
                 DeptCd = request.DeptCd,
                 DeptNm = request.DeptNm,
@@ -481,7 +478,7 @@ namespace Hello100Admin.API.Controllers
                 {
                     HospNo = base.HospNo,
                     HospKey = base.HospKey,
-                    DoctNo = _cryptoService.EncryptWithNoVector(request.DoctNo),
+                    DoctNo = request.DoctNo,
                     DoctNm = request.DoctNm,
                     DeptCd = request.DeptCd,
                     DeptNm = request.DeptNm,
