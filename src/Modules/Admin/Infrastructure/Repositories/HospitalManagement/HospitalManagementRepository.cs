@@ -381,6 +381,36 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             return result;
         }
 
+        public async Task<int> UpdateDoctorListAsync(DbSession db, List<EghisDoctInfoEntity> eghisDoctInfoList, CancellationToken ct)
+        {
+            DynamicParameters parameters = new DynamicParameters();
+
+            var query = string.Empty;
+            var queries = new List<string>();
+
+            for (int i = 0; i< eghisDoctInfoList.Count; i++)
+            {
+                var eghisDoctInfo = eghisDoctInfoList[i];
+
+                parameters.Add($"HospNo{i}", eghisDoctInfo.HospNo, DbType.String);
+                parameters.Add($"EmplNo{i}", eghisDoctInfo.EmplNo, DbType.String);
+                parameters.Add($"FrontViewRole{i}", eghisDoctInfo.FrontViewRole, DbType.Int32);
+
+                query = $@"
+                    UPDATE hello100_api.eghis_doct_info
+                       SET front_view_role = @FrontViewRole{i}
+                     WHERE hosp_no  = @HospNo{i}
+                       AND empl_no  = @EmplNo{i};
+                ";
+
+                queries.Add(query);
+            }
+
+            query = string.Join("", queries.ToArray());
+
+            return await db.ExecuteAsync(query, parameters, ct, _logger);
+        }
+
         public async Task<int> UpdateDoctorInfoAsync(DbSession db, EghisDoctInfoEntity eghisDoctInfo, CancellationToken ct)
         {
             DynamicParameters parameters = new DynamicParameters();

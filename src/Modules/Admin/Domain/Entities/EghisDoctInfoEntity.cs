@@ -43,5 +43,6 @@ namespace Hello100Admin.Modules.Admin.Domain.Entities
         public int UntactBreakStartMinute { get; set; }
         public int UntactBreakEndHour { get; set; }
         public int UntactBreakEndMinute { get; set; }
+        public int FrontViewRole { get; set; }
     }
 }

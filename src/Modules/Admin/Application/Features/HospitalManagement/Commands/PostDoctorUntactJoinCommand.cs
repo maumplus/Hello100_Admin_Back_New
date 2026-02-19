@@ -23,6 +23,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
     public class PostDoctorUntactJoinCommand : IRequest<Result>
     {
         public string HospNo { get; set; }
+        public string EmplNo { get; set; }
         public string DoctNo { get; set; }
         public string DoctNoType { get; set; }
         public string DoctNm { get; set; }

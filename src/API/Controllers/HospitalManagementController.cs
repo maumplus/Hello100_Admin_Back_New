@@ -226,6 +226,38 @@ namespace Hello100Admin.API.Controllers
         }
 
         /// <summary>
+        /// [병원정보관리 > 의료진관리]의료진 목록 수정 API
+        /// </summary>
+        [HttpPatch("doctors")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> PatchDoctorList(PatchDoctorListRequest request, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("PATCH /api/hospital-management/doctors");
+
+            List<Modules.Admin.Application.Features.HospitalManagement.Commands.PatchDoctorInfo> doctorList = new List<Modules.Admin.Application.Features.HospitalManagement.Commands.PatchDoctorInfo>();
+
+            foreach (var doctorInfo in request.DoctorList)
+            {
+                doctorList.Add(new Modules.Admin.Application.Features.HospitalManagement.Commands.PatchDoctorInfo()
+                {
+                    HospNo = base.HospNo,
+                    EmplNo = doctorInfo.EmplNo,
+                    FrontViewRole = doctorInfo.FrontViewRole
+                });
+            }
+
+            var query = new PatchDoctorListCommand()
+            {
+                HospNo = base.HospNo,
+                DoctorList = doctorList
+            };
+            var result = await _mediator.Send(query, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
         /// [병원정보관리 > 의료진관리]의료진 상세 API
         /// </summary>
         [HttpGet("doctor/{emplNo}")]
@@ -705,6 +737,7 @@ namespace Hello100Admin.API.Controllers
             var command = new PostDoctorUntactJoinCommand()
             {
                 HospNo = base.HospNo,
+                EmplNo = request.EmplNo,
                 DoctNo = request.DoctNo,
                 DoctNoType = request.DoctNoType,
                 DoctNm = request.DoctNm,
