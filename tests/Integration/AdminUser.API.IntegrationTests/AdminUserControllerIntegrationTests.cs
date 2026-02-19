@@ -33,5 +33,21 @@ namespace AdminUser.API.IntegrationTests
             // Assert
             Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
         }
+
+        [Fact]
+        public async Task GetAdminUsersAsync_ShouldReturnOk_WhenValidCredentials()
+        {
+            // Arrange
+            _client.AsMySuperAdmin("B81AFBD0", "대민테스트");
+
+            // Act
+            var response = await _client.GetAsync($"api/admin-user/list?pageNo=2&pageSize=10");
+
+            // Body
+            var body = await response.Content.ReadAsStringAsync();
+
+            // Assert
+            Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+        }
     }
 }
