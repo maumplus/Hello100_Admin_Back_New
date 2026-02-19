@@ -33,8 +33,10 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Re
         public int BreakEndMinute { get; set; }
         public int Hello100Role { get; set; }
         public int ViewRole { get; set; }
-        public string ViewMinTime { get; set; }
+        public string ViewMinCntYn { get; set; }
+        public string ViewMinTimeYn { get; set; }
         public string ViewMinCnt { get; set; }
+        public string ViewMinTime { get; set; }
         public int IntervalTime { get; set; }
         public string Message { get; set; }
         public string UseYn { get; set; }

@@ -299,7 +299,9 @@ namespace Hello100Admin.API.Controllers
                 HospKey = base.HospKey,
                 EmplNo = request.EmplNo,
                 DoctNm = request.DoctNm,
+                ViewMinCntYn = request.ViewMinCntYn,
                 ViewMinCnt = request.ViewMinCnt,
+                ViewMinTimeYn = request.ViewMinTimeYn,
                 ViewMinTime = request.ViewMinTime,
                 Image = payloads == null || payloads.Count == 0 ? null : payloads[0]
             };
