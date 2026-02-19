@@ -1,4 +1,6 @@
-﻿using Hello100Admin.Integration.Shared;
+﻿using Hello100Admin.BuildingBlocks.Common.Errors;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Serialization;
+using Hello100Admin.Integration.Shared;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Net.Http.Json;
 
@@ -307,6 +309,95 @@ namespace AdminUser.API.IntegrationTests
 
             var bytes = await response.Content.ReadAsByteArrayAsync();
             await File.WriteAllBytesAsync($"헬로100접수현황_{DateTime.Now:yyyyMMdd}.xlsx", bytes);
+
+            // Assert
+            Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task GetUntactMedicalUsageStatus_ShouldReturnOk_WhenValidCredentials()
+        {
+            _client.AsSuperAdmin("B81AFBD0", "대민테스트");
+
+            // Arrange
+            var req = new
+            {
+                PageNo = 1,
+                PageSize = 20,
+                FromDate = "2026-02-19",
+                ToDate = "2026-02-19",
+                SearchDateType = "0",
+                SearchKeyword = "",
+                SearchStateTypes = new[] { "end" },
+                SearchPaymentTypes = new[] { "fail" }
+            };
+
+            var query = new Dictionary<string, string?>
+            {
+                ["PageNo"] = "1",
+                ["PageSize"] = "20",
+                ["FromDate"] = "2026-02-19",
+                ["ToDate"] = "2026-02-19",
+                ["SearchDateType"] = "0",
+                ["SearchType"] = "1",
+                ["SearchKeyword"] = "",
+                ["SearchStateTypes"] = req.SearchStateTypes.ToJson().ToString(),
+                ["SearchPaymentTypes"] = req.SearchPaymentTypes.ToJson().ToString(),
+            };
+
+
+            var url = QueryHelpers.AddQueryString("/api/service-usage/untact-medical/status", query);
+
+            // Act
+            var response = await _client.GetAsync(url);
+
+            // Body
+            var body = await response.Content.ReadAsStringAsync();
+
+            var bodyKor = body.FromJson<ApiResponse>();
+
+            // Assert
+            Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task ExportUntactMedicalUsageStatusExcel_ShouldReturnOk_WhenValidCredentials()
+        {
+            _client.AsSuperAdmin("B81AFBD0", "대민테스트");
+
+            var req = new
+            {
+                PageNo = 1,
+                PageSize = 20,
+                FromDate = "2026-02-19",
+                ToDate = "2026-02-19",
+                SearchDateType = "0",
+                SearchKeyword = "",
+                SearchStateTypes = new[] { "total", "recept", "end", "cancel" },
+                SearchPaymentTypes = new[] { "total", "success", "fail" }
+            };
+
+            var query = new Dictionary<string, string?>
+            {
+                ["FromDate"] = "2026-02-19",
+                ["ToDate"] = "2026-02-19",
+                ["SearchDateType"] = "0",
+                ["SearchType"] = "1",
+                ["SearchKeyword"] = "",
+                ["SearchStateTypes"] = req.SearchStateTypes.ToJson().ToString(),
+                ["SearchPaymentTypes"] = req.SearchPaymentTypes.ToJson().ToString(),
+            };
+
+
+            var url = QueryHelpers.AddQueryString("/api/service-usage/untact-medical/status/excel", query);
+
+            var response = await _client.GetAsync(url);
+
+            // Body
+            var body = await response.Content.ReadAsStringAsync();
+
+            var bytes = await response.Content.ReadAsByteArrayAsync();
+            await File.WriteAllBytesAsync($"비대면진료현황_{DateTime.Now:yyyyMMdd}.xlsx", bytes);
 
             // Assert
             Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);

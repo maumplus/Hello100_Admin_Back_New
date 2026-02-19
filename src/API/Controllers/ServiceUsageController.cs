@@ -256,6 +256,42 @@ namespace Hello100Admin.API.Controllers
             var file = result?.Data!;
             return File(file.Content, file.ContentType, file.FileName);
         }
+
+        /// <summary>
+        /// [전체 관리자] 서비스이용관리 > 비대면진료 현황 > 조회
+        /// </summary>
+        [HttpGet("untact-medical/status")]
+        [ProducesResponseType(typeof(ApiResponse<GetUntactMedicalUsageStatusResult>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetUntactMedicalUsageStatus([FromQuery] GetUntactMedicalUsageStatusRequest req, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("GET /api/service-usage/untact-medical/status [{Aid}]", Aid);
+
+            var query = req.Adapt<GetUntactMedicalUsageStatusQuery>();
+
+            var result = await _mediator.Send(query, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [전체 관리자] 서비스이용관리 > 비대면진료 현황 > 엑셀출력
+        /// </summary>
+        [HttpGet("untact-medical/status/excel")]
+        [ProducesResponseType(typeof(ExcelFile), StatusCodes.Status200OK)]
+        public async Task<IActionResult> ExportUntactMedicalUsageStatusExcel([FromQuery] ExportUntactMedicalUsageStatusExcelRequest req, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("GET /api/service-usage/untact-medical/status/excel [{Aid}]", Aid);
+
+            var query = req.Adapt<ExportUntactMedicalUsageStatusExcelQuery>();
+
+            var result = await _mediator.Send(query, cancellationToken);
+
+            if (result.ErrorInfo != null)
+                return result.ToActionResult(this);
+
+            var file = result?.Data!;
+            return File(file.Content, file.ContentType, file.FileName);
+        }
         #endregion
     }
 }
