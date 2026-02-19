@@ -10,7 +10,6 @@ using Mapster;
 using Hello100Admin.Modules.Admin.Application.Common.Models;
 using System.Text;
 using Hello100Admin.Modules.Admin.Domain.Entities;
-using Hello100Admin.Modules.Admin.Application.Features.Keywords.Results;
 
 namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManagement
 {
@@ -1079,6 +1078,26 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             using var connection = CreateConnection();
 
             return (await connection.QueryAsync<EghisDoctInfoMdEntity>(sql, parameters)).ToList();
+        }
+
+        public async Task<EghisDoctInfoEntity?> GetDoctorInfoAsync(DbSession db, string hospNo, string emplNo, CancellationToken ct)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@HospNo", hospNo, DbType.String);
+            parameters.Add("@EmplNo", emplNo, DbType.String);
+
+            var query = @"
+                SELECT a.empl_no AS EmplNo,
+                       a.doct_no AS DoctNo,
+                       a.doct_nm AS DoctNm
+                  FROM hello100_api.eghis_doct_info a
+                 WHERE a.hosp_no = @HospNo
+                   AND a.empl_no = @EmplNo
+            ";
+
+            var result = await db.QueryFirstOrDefaultAsync<EghisDoctInfoEntity>(query, parameters, ct, _logger);
+
+            return result;
         }
     }
 }

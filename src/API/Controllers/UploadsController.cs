@@ -31,9 +31,10 @@ namespace Hello100Admin.API.Controllers
         /// </summary>
         [HttpPost("editor-image")]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
+        [Consumes("multipart/form-data")]
         public async Task<IActionResult> FileUpload([FromForm] FileUploadRequest req, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("POST /api/uploads/image [{AId}]", Aid);
+            _logger.LogInformation("POST /api/uploads/editor-image [{AId}]", Aid);
 
             var payload = GetImagePayload(req.File);
 

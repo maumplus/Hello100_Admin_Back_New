@@ -1,9 +1,7 @@
 ﻿using Hello100Admin.BuildingBlocks.Common.Definition.Enums;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 using Hello100Admin.Modules.Admin.Application.Common.Models;
-using Hello100Admin.Modules.Admin.Application.Features.Departments.Results;
 using Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Results;
-using Hello100Admin.Modules.Admin.Application.Features.Keywords.Results;
 using Hello100Admin.Modules.Admin.Domain.Entities;
 
 namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Hospital
@@ -115,5 +113,14 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistenc
         public Task<List<EghisRsrvInfoEntity>> GetEghisRsrvList(string hospNo, string emplNo, string clinicYmd, CancellationToken cancellationToken = default);
         public Task<List<EghisRsrvInfoEntity>> GetEghisUntactRsrvList(string hospNo, string emplNo, int weekNum, CancellationToken cancellationToken = default);
         public Task<List<EghisDoctInfoMdEntity>> GetEghisDoctInfoMd(string hospNo, string emplNo, CancellationToken cancellationToken = default);
+        /// <summary>
+        /// 의사 정보 조회
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="hospNo"></param>
+        /// <param name="emplNo"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        public Task<EghisDoctInfoEntity?> GetDoctorInfoAsync(DbSession db, string hospNo, string emplNo, CancellationToken ct);
     }
 }

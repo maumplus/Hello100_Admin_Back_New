@@ -13,11 +13,7 @@ using System.Text.Json.Serialization;
 using System.Text.Json;
 using System.Text.Encodings.Web;
 using Hello100Admin.Modules.Admin.Domain.Entities;
-using System.Collections.Generic;
-using Hello100Admin.BuildingBlocks.Common.Infrastructure.Security;
-using Hello100Admin.Modules.Admin.Application.Common.Definitions.Enums;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.External;
-using Hello100Admin.Modules.Admin.Infrastructure.External.Sftp;
 
 namespace Hello100Admin.API.Controllers
 {
@@ -754,6 +750,20 @@ namespace Hello100Admin.API.Controllers
             };
 
             var result = await _mediator.Send(command, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [병원관리자] 병원정보관리 > 의료진관리 > 편집 > 비대면 신청 > 조회
+        /// </summary>
+        [HttpGet("doctor/{emplNo}/untact-medical-application")]
+        [ProducesResponseType(typeof(ApiResponse<GetDoctorUntactApplicationResult>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetDoctorUntactApplicationAsync(string emplNo, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("GET api/hospital-management/doctor/{emplNo}/untact-medical-application [{Aid}]", emplNo, Aid);
+
+            var result = await _mediator.Send(new GetDoctorUntactApplicationQuery(emplNo, base.HospNo), cancellationToken);
 
             return result.ToActionResult(this);
         }

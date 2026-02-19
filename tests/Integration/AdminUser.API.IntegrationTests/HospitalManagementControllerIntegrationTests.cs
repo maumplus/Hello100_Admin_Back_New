@@ -103,5 +103,20 @@ namespace AdminUser.API.IntegrationTests
             // Assert
             Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
         }
+
+        [Fact]
+        public async Task GetDoctorUntactApplicationAsync_ShouldReturnOk_WhenValidCredentials()
+        {
+            _client.AsSuperAdmin("B81AFBD0", "대민테스트");
+
+            // Act
+            var response = await _client.GetAsync($"api/hospital-management/doctor/2/untact-medical-application");
+
+            // Body
+            var body = await response.Content.ReadAsStringAsync();
+
+            // Assert
+            Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+        }
     }
 }
