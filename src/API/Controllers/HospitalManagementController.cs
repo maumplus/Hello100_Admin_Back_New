@@ -15,6 +15,9 @@ using System.Text.Encodings.Web;
 using Hello100Admin.Modules.Admin.Domain.Entities;
 using System.Collections.Generic;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Security;
+using Hello100Admin.Modules.Admin.Application.Common.Definitions.Enums;
+using Hello100Admin.Modules.Admin.Application.Common.Abstractions.External;
+using Hello100Admin.Modules.Admin.Infrastructure.External.Sftp;
 
 namespace Hello100Admin.API.Controllers
 {
@@ -27,15 +30,18 @@ namespace Hello100Admin.API.Controllers
     {
         private readonly IMediator _mediator;
         private readonly ICryptoService _cryptoService;
+        private readonly ISftpClientService _sftpClientService;
         private readonly ILogger<HospitalManagementController> _logger;
 
         public HospitalManagementController(
         IMediator mediator,
         ICryptoService cryptoService,
+        ISftpClientService sftpClientService,
         ILogger<HospitalManagementController> logger)
         {
             _mediator = mediator;
             _cryptoService = cryptoService;
+            _sftpClientService = sftpClientService;
             _logger = logger;
         }
 
@@ -653,6 +659,62 @@ namespace Hello100Admin.API.Controllers
                 HospKey = base.HospKey,
                 EmplNo = request.EmplNo,
                 EghisDoctInfoMdList = eghisDoctInfoMdList
+            };
+
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [병원정보관리 > 의료진관리]비대면 의료진 신청 API
+        /// </summary>
+        [HttpPost("doctor-untact/join")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> PostDoctorUntactJoin([FromForm] PostDoctorUntactJoinRequest request, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("POST /api/hospital-management/doctor-untact/join");
+
+            request.HospNo = base.HospNo;
+
+            List<IFormFile> images = new List<IFormFile>();
+
+            if (request.DoctLicenseFile != null)
+            {
+                images.Add(request.DoctLicenseFile);
+            }
+
+            if (request.DoctFile != null)
+            {
+                images.Add(request.DoctFile);
+            }
+
+            if (request.AccountInfoFile != null)
+            {
+                images.Add(request.AccountInfoFile);
+            }
+
+            if (request.BusinessFile != null)
+            {
+                images.Add(request.BusinessFile);
+            }
+
+            var payloads = this.GetImagePayload(images);
+
+            var command = new PostDoctorUntactJoinCommand()
+            {
+                HospNo = base.HospNo,
+                DoctNo = request.DoctNo,
+                DoctNoType = request.DoctNoType,
+                DoctNm = request.DoctNm,
+                DoctBirthday = request.DoctBirthday,
+                DoctTel = request.DoctTel,
+                DoctIntro = request.DoctIntro,
+                DoctHistoryList = request.DoctHistoryList,
+                ClinicTime = request.ClinicTime,
+                ClinicGuide = request.ClinicGuide,
+                Images = payloads
             };
 
             var result = await _mediator.Send(command, cancellationToken);

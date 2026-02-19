@@ -894,5 +894,81 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
 
             return await db.ExecuteScalarAsync<int>(query, parameters, ct, _logger);
         }
+
+        public async Task<int> InsertEghisDoctUntactJoinAsync(DbSession db, TbEghisDoctUntactJoinEntity tbEghisDoctUntactJoinEntity, CancellationToken ct)
+        {
+            DynamicParameters parameters = new DynamicParameters();
+            parameters.Add("HospNo", tbEghisDoctUntactJoinEntity.HospNo, DbType.String);
+            parameters.Add("HospKey", tbEghisDoctUntactJoinEntity.HospKey, DbType.String);
+            parameters.Add("HospNm", tbEghisDoctUntactJoinEntity.HospNm, DbType.String);
+            parameters.Add("EmplNo", tbEghisDoctUntactJoinEntity.EmplNo, DbType.String);
+            parameters.Add("HospTel", tbEghisDoctUntactJoinEntity.HospTel, DbType.String);
+            parameters.Add("PostCd", tbEghisDoctUntactJoinEntity.PostCd, DbType.String);
+            parameters.Add("DoctNo", tbEghisDoctUntactJoinEntity.DoctNo, DbType.String);
+            parameters.Add("DoctNoType", tbEghisDoctUntactJoinEntity.DoctNoType, DbType.String);
+            parameters.Add("DoctBirthday", tbEghisDoctUntactJoinEntity.DoctBirthday, DbType.String);
+            parameters.Add("DoctTel", tbEghisDoctUntactJoinEntity.DoctTel, DbType.String);
+            parameters.Add("DoctIntro", tbEghisDoctUntactJoinEntity.DoctIntro, DbType.String);
+            parameters.Add("DoctHistory", tbEghisDoctUntactJoinEntity.DoctHistory, DbType.String);
+            parameters.Add("ClinicTime", tbEghisDoctUntactJoinEntity.ClinicTime, DbType.String);
+            parameters.Add("ClinicGuide", tbEghisDoctUntactJoinEntity.ClinicGuide, DbType.String);
+            parameters.Add("JoinState", tbEghisDoctUntactJoinEntity.JoinState, DbType.String);
+
+            var queries = new List<string>();
+            var query = string.Empty;
+
+            var fileInfoList = new List<TbFileInfoEntity?> {
+                tbEghisDoctUntactJoinEntity.DoctLicenseFileInfo,
+                tbEghisDoctUntactJoinEntity.DoctFileSeqInfo,
+                tbEghisDoctUntactJoinEntity.AccountInfoFileInfo,
+                tbEghisDoctUntactJoinEntity.BusinessFileInfo,
+            };
+            
+            for (int i = 0; i <  fileInfoList.Count(); i++)
+            {
+                var fileInfo = fileInfoList[i];
+
+                if (fileInfo == null)
+                {
+                    query = $@"
+                        SET @maxFileSeq{i} := 0;
+                    ";
+
+                    queries.Add(query);
+                }
+                else
+                {
+                    query = $@"
+                        SET @maxFileSeq{i} := ( SELECT IFNULL(MAX(seq), 0) + 1
+                                                FROM tb_file_info );
+
+                        INSERT INTO tb_file_info
+                          (seq, ord_seq, cls_cd, cm_cd, file_path, origin_file_name, file_size, del_yn, del_dt, reg_dt)
+                        VALUES
+                          (@maxFileSeq{i}, ( SELECT IFNULL(MAX(tfi.ord_seq), 0) + 1 FROM tb_file_info tfi WHERE tfi.seq = @maxFileSeq{i} ), @ClsCd{i}, @CmCd{i}, @FilePath{i}, @OriginFileName{i}, @FileSize{i}, @DelYn{i}, NULL, UNIX_TIMESTAMP(NOW()));
+                    ";
+
+                    queries.Add(query);
+                }
+                
+            }
+
+            query = @"
+                INSERT INTO hello100.tb_eghis_doct_untact_join
+                  ( hosp_no, hosp_key, hosp_nm, empl_no, hosp_tel, post_cd,
+                    doct_no, doct_no_type, doct_license_file_seq, doct_nm, doct_birthday,
+                    doct_tel, doct_intro, doct_file_seq, doct_history,
+                    clinic_time, clinic_guide, account_info_file_seq, business_file_seq, join_state, reg_dt )
+                VALUES
+                  ( @HospNo, @HospKey, @HospNm, @EmplNo, @HospTel, @PostCd,
+                    @DoctNo, @DoctNoType, @maxFileSeq0, @DoctNm, @DoctBirthday,
+                    @DoctTel, @DoctIntro, @maxFileSeq1, @DoctHistory,
+                    @ClinicTime, @ClinicGuide, @maxFileSeq2, @maxFileSeq3, @JoinState, UNIX_TIMESTAMP(NOW()) );
+            ";
+
+            queries.Add(query);
+
+            return await db.ExecuteAsync(query, parameters, ct, _logger);
+        }
     }
 }

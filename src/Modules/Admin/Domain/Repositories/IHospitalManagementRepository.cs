@@ -87,5 +87,6 @@ namespace Hello100Admin.Modules.Admin.Domain.Repositories
         public Task<int> InsertEghisDoctRsrvDetailAsync(DbSession db, List<EghisDoctRsrvDetailInfoEntity> eghisDoctRsrvDetailInfoList, CancellationToken ct);
         public Task<int> RemoveEghisDoctInfoMdAsync(DbSession db, EghisDoctInfoMdEntity eghisDoctInfoMdEntity, CancellationToken ct);
         public Task<int> InsertEghisDoctInfoMdAsync(DbSession db, EghisDoctInfoMdEntity eghisDoctInfoMdEntity, CancellationToken ct);
+        public Task<int> InsertEghisDoctUntactJoinAsync(DbSession db, TbEghisDoctUntactJoinEntity tbEghisDoctUntactJoinEntity, CancellationToken ct);
     }
 }
