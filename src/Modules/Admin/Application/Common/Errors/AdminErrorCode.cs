@@ -98,5 +98,7 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Errors
         DeleteHospitalFailed = 4044,
         [Description("관리자확인 갱신에 실패하였습니다. 확인 후 다시 시도해주세요.")]
         UpdateRequestBug = 4045,
+        [Description("해당 의사 정보를 찾지 못하였습니다. 확인 후 다시 시도해주세요.")]
+        NotFoundDoctorInfo = 4046,
     }
 }

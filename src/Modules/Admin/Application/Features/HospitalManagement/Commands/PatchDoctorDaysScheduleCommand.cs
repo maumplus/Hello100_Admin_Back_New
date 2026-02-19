@@ -43,6 +43,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
     {
         public string HospNo { get; set; }
         public string HospKey { get; set; }
+        public string EmplNo { get; set; }
         public string DoctNo { get; set; }
         public string DoctNm { get; set; }
         public string DeptCd { get; set; }
@@ -125,7 +126,19 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
                     eghisDoctInfoList.Add(eghisDoctInfoEntity);
                 }
 
-                await _hospitalManagementRepository.UpdateDoctorInfoScheduleAsync(session, eghisDoctInfoList, token);
+                var eghisDoctInfo = new EghisDoctInfoEntity()
+                {
+                    HospNo = request.HospNo,
+                    EmplNo = request.EmplNo,
+                    WeekNum = 11
+                };
+
+                await _hospitalManagementRepository.RemoveDoctorInfoScheduleAsync(session, eghisDoctInfo, token);
+
+                if (eghisDoctInfoList.Count > 0)
+                {
+                    await _hospitalManagementRepository.UpdateDoctorInfoScheduleAsync(session, eghisDoctInfoList, token);
+                }
             },
             cancellationToken);
 

@@ -33,6 +33,7 @@
     {
         public string HospNo { get; set; }
         public string HospKey { get; set; }
+        public string EmplNo { get; set; }
         public string DoctNo { get; set; }
         public string DoctNm { get; set; }
         public string DeptCd { get; set; }

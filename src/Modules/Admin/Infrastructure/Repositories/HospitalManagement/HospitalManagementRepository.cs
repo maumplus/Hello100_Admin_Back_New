@@ -418,14 +418,16 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             parameters.Add("HospKey", eghisDoctInfo.HospKey, DbType.String);
             parameters.Add("EmplNo", eghisDoctInfo.EmplNo, DbType.String);
             parameters.Add("DoctNm", eghisDoctInfo.DoctNm, DbType.String);
-            parameters.Add("ViewMinTime", eghisDoctInfo.ViewMinTime, DbType.Int32);
+            parameters.Add("ViewRole", eghisDoctInfo.ViewRole, DbType.Int32);
             parameters.Add("ViewMinCnt", eghisDoctInfo.ViewMinCnt, DbType.Int32);
+            parameters.Add("ViewMinTime", eghisDoctInfo.ViewMinTime, DbType.Int32);
 
             var query = @"
                 UPDATE hello100_api.eghis_doct_info
                    SET doct_nm       = @DoctNm,
-                       view_min_time = @ViewMinTime,
-                       view_min_cnt  = @ViewMinCnt
+                       view_role     = @ViewRole,
+                       view_min_cnt  = @ViewMinCnt,
+                       view_min_time = @ViewMinTime
                  WHERE hosp_no  = @HospNo
                    AND hosp_key = @HospKey
                    AND empl_no  = @EmplNo;
@@ -530,6 +532,22 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
                                          AND clinic_ymd = @ClinicYmd )
                         AND recept_type = @ReceptType;
             ";
+
+            return await db.ExecuteAsync(query, parameters, ct, _logger);
+        }
+
+        public async Task<int> RemoveDoctorInfoScheduleAsync(DbSession db, EghisDoctInfoEntity eghisDoctInfoEntity, CancellationToken ct)
+        {
+            DynamicParameters parameters = new DynamicParameters();
+            parameters.Add("HospNo", eghisDoctInfoEntity.HospNo, DbType.String);
+            parameters.Add("EmplNo", eghisDoctInfoEntity.EmplNo, DbType.String);
+            parameters.Add("WeekNum", eghisDoctInfoEntity.WeekNum, DbType.Int32);
+            
+            var query = $@"
+                    DELETE FROM hello100_api.eghis_doct_info
+                          WHERE hosp_no = @HospNo
+                            AND empl_no = @EmplNo
+                            AND week_num = @WeekNum;";
 
             return await db.ExecuteAsync(query, parameters, ct, _logger);
         }
