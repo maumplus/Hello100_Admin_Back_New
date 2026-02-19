@@ -1,6 +1,11 @@
-﻿using Dapper;
+﻿using System.Data;
+using System.Text;
+using Dapper;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Dapper;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.AdminUser;
+using Hello100Admin.Modules.Admin.Application.Common.Models;
+using Hello100Admin.Modules.Admin.Application.Features.AdminUser.Results;
 using Hello100Admin.Modules.Admin.Domain.Entities;
 using Hello100Admin.Modules.Admin.Infrastructure.Persistence.DbModels.AdminUser;
 using Microsoft.Extensions.Logging;
@@ -16,6 +21,48 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.AdminUser
         {
             _connectionFactory = connectionFactory;
             _logger = logger;
+        }
+
+        public async Task<ListResult<GetAdminUsersResult>> GetAdminUsersAsync(DbSession db, int pageNo, int pageSize, CancellationToken ct)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("Limit", pageSize, DbType.Int32);
+            parameters.Add("OffSet", (pageNo - 1) * pageSize, DbType.Int32);
+
+            #region == Query ==
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine(" SET @total_count:= (SELECT COUNT(*) FROM tb_admin WHERE grade IN ('S', 'A') AND del_yn = 'N');");
+            sb.AppendLine(" SET @row_num:=@total_count + 1 - @OffSet;      ");
+            sb.AppendLine(" SELECT 	@row_num := @row_num - 1 AS RowNum     ");
+            sb.AppendLine("    ,    a.aid                      AS AId      ");
+            sb.AppendLine("    , 	a.acc_id                   AS AccId    ");
+            sb.AppendLine("    ,    a.acc_pwd                  AS AccPwd   ");
+            sb.AppendLine("    , 	a.hosp_no                  AS HospNo   ");
+            sb.AppendLine("    , 	a.grade                    AS Grade    ");
+            sb.AppendLine("    , 	b.cm_name                  AS GradeName");
+            sb.AppendLine("    , 	a.name                     AS Name     ");
+            sb.AppendLine("    , 	a.tel                      AS Tel      ");
+            sb.AppendLine("    , 	a.del_yn                   AS DelYn    ");
+            sb.AppendLine("    , 	CASE WHEN last_login_dt IS NULL THEN '' ELSE FROM_UNIXTIME(a.last_login_dt, '%Y-%m-%d %H:%i')  END AS LastLoginDt ");
+            sb.AppendLine("  FROM tb_admin a                               ");
+            sb.AppendLine("  LEFT JOIN tb_common b                         ");
+            sb.AppendLine("    ON b.cls_cd = '07' AND b.del_yn = 'N' AND a.grade = b.cm_cd");
+            sb.AppendLine(" WHERE a.grade IN ('S', 'A')                    ");
+            sb.AppendLine("   AND a.del_yn = 'N'                           ");
+            sb.AppendLine(" ORDER BY a.aid DESC	                           ");
+            sb.AppendLine(" LIMIT @OffSet, @Limit;                         ");
+            sb.AppendLine(" SELECT @total_count;                           ");
+            #endregion
+
+            var multi = await db.QueryMultipleAsync(sb.ToString(), parameters, ct, _logger);
+
+            var result = new ListResult<GetAdminUsersResult>
+            {
+                Items = (await multi.ReadAsync<GetAdminUsersResult>()).ToList(),
+                TotalCount = Convert.ToInt32(await multi.ReadFirstAsync<long>())
+            };
+
+            return result;
         }
 
         public async Task<AdminUserEntity?> GetByIdAsync(string accountId, CancellationToken cancellationToken = default)

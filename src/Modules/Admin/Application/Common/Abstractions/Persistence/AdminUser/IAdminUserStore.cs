@@ -1,9 +1,21 @@
-﻿using Hello100Admin.Modules.Admin.Domain.Entities;
+﻿using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
+using Hello100Admin.Modules.Admin.Application.Common.Models;
+using Hello100Admin.Modules.Admin.Application.Features.AdminUser.Results;
+using Hello100Admin.Modules.Admin.Domain.Entities;
 
 namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.AdminUser
 {
     public interface IAdminUserStore
     {
+        /// <summary>
+        /// 관리자 사용자 조회 (병원관리자 제외)
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="pageNo"></param>
+        /// <param name="pageSize"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        public Task<ListResult<GetAdminUsersResult>> GetAdminUsersAsync(DbSession db, int pageNo, int pageSize, CancellationToken ct);
         /// <summary>
         /// 관리자 사용자 조회 (가볍게)
         /// </summary>
