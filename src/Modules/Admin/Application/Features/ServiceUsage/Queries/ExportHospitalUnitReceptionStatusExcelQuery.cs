@@ -19,11 +19,15 @@ namespace Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Queries
         /// <summary>
         /// 조회 시작일
         /// </summary>
-        public string FromDate { get; init; } = default!;
+        public string? FromDate { get; init; }
         /// <summary>
         /// 조회 종료일
         /// </summary>
-        public string ToDate { get; init; } = default!;
+        public string? ToDate { get; init; }
+        /// <summary>
+        /// 검색 차트타입 [전체: "", 이지스: "E", 닉스: "N"]
+        /// </summary>
+        public string? SearchChartType { get; init; }
         /// <summary>
         /// 검색 타입 [1: 병원명, 2: 요양기관번호]
         /// </summary>
@@ -79,7 +83,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Queries
 
             var historyData = await _db.RunAsync(DataSource.Hello100,
                 (session, token) => _serviceUsageStore.ExportHospitalUnitReceptionStatusExcelAsync(
-                    session, req.FromDate, req.ToDate, req.SearchType, req.SearchKeyword, req.QrCheckInYn,
+                    session, req.FromDate, req.ToDate, req.SearchChartType, req.SearchType, req.SearchKeyword, req.QrCheckInYn,
                     req.TodayRegistrationYn, req.AppointmentYn, req.TelemedicineYn, req.ExcludeTestHospitalsYn, token),
             ct);
 

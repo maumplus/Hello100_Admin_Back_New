@@ -204,9 +204,10 @@ namespace AdminUser.API.IntegrationTests
             {
                 ["PageNo"] = 1.ToString(),
                 ["PageSize"] = 10.ToString(),
-                ["FromDate"] = "2024-01-01",
-                ["ToDate"] = "2026-02-13",
-                ["SearchKeyword"] = "10350011",
+                //["FromDate"] = "2024-01-01",
+                //["ToDate"] = "2026-02-13",
+                //["SearchChartType"] = "N",
+                //["SearchKeyword"] = "10350011",
                 ["SearchType"] = 2.ToString(),
                 ["QrCheckInYn"] = "Y",
                 ["TodayRegistrationYn"] = "Y",
@@ -233,9 +234,10 @@ namespace AdminUser.API.IntegrationTests
         {
             var query = new Dictionary<string, string?>
             {
-                ["FromDate"] = "2024-01-01",
-                ["ToDate"] = "2026-02-13",
-                ["SearchKeyword"] = "TESTDM",
+                //["FromDate"] = "2024-01-01",
+                //["ToDate"] = "2026-02-13",
+                ["SearchChartType"] = "",
+                //["SearchKeyword"] = "TESTDM",
                 ["SearchType"] = 1.ToString(),
                 ["QrCheckInYn"] = "Y",
                 ["TodayRegistrationYn"] = "Y",
@@ -265,8 +267,9 @@ namespace AdminUser.API.IntegrationTests
         {
             var query = new Dictionary<string, string?>
             {
-                ["FromDate"] = "2024-01-01",
-                ["ToDate"] = "2026-02-13",
+                //["FromDate"] = "2024-01-01",
+                //["ToDate"] = "2026-02-13",
+                ["SearchChartType"] = "",
                 ["SearchKeyword"] = "",
                 ["SearchType"] = 1.ToString(),
                 ["QrCheckInYn"] = "Y",

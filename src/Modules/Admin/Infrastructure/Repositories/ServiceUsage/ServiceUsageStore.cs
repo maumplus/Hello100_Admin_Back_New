@@ -22,7 +22,6 @@ using Hello100Admin.Modules.Admin.Domain.Entities;
 using Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Results;
 using Hello100Admin.Modules.Admin.Application.Common.Models;
 using Hello100Admin.Modules.Admin.Application.Common.Definitions.Constants;
-using Hello100Admin.Modules.Admin.Application.Features.Advertisement.Results;
 
 namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.ServiceUsage
 {
@@ -626,11 +625,11 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.ServiceUsage
         }
 
         public async Task<List<GetHospitalServiceUsageStatusResultItemByServiceUnit>> GetServiceUnitReceptionStatusAsync(
-            DbSession db, string fromDate, string toDate, int searchType, string? searchKeyword, string qrCheckYn, 
+            DbSession db, string? fromDate, string? toDate, string? searchChartType, int searchType, string? searchKeyword, string qrCheckYn, 
             string todayRegistrationYn, string appointmentYn, string telemedicineYn, string excludeTestHospitalsYn, CancellationToken ct)
         {
-            var fromDt = fromDate.Replace("-", "");
-            var toDt = toDate.Replace("-", "");
+            var fromDt = string.IsNullOrWhiteSpace(fromDate) ? string.Empty : fromDate.Replace("-", "");
+            var toDt = string.IsNullOrWhiteSpace(toDate) ? string.Empty : toDate.Replace("-", "");
 
             #region ParamSet
             var chkGroup = new Dictionary<string, string>
@@ -713,8 +712,13 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.ServiceUsage
                 else
                 {
                     //요양기관 검색
-                    sb.AppendLine("                          AND tehri.hosp_no = '" + searchKeyword + "'");
+                    sb.AppendLine("                          AND tehri.hosp_no LIKE '%" + searchKeyword + "%'");
                 }
+            }
+
+            if (string.IsNullOrWhiteSpace(searchChartType) == false)
+            {
+                sb.AppendLine("                          AND tehi.chart_type = '" + searchChartType + "'");
             }
 
             sb.AppendLine("                       GROUP BY tehri.recept_type, tehri.ptnt_state ) x              ");
@@ -731,11 +735,11 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.ServiceUsage
         }
 
         public async Task<ListResult<GetHospitalServiceUsageStatusResultItemByHospitalUnit>> GetHospitalUnitReceptionStatusAsync(
-            DbSession db, int pageNo, int pageSize, string fromDate, string toDate, int searchType, string? searchKeyword, string qrCheckYn,
+            DbSession db, int pageNo, int pageSize, string? fromDate, string? toDate, string? searchChartType, int searchType, string? searchKeyword, string qrCheckYn,
             string todayRegistrationYn, string appointmentYn, string telemedicineYn, string excludeTestHospitalsYn, CancellationToken ct)
         {
-            var fromDt = fromDate.Replace("-", "");
-            var toDt = toDate.Replace("-", "");
+            var fromDt = string.IsNullOrWhiteSpace(fromDate) ? string.Empty : fromDate.Replace("-", "");
+            var toDt = string.IsNullOrWhiteSpace(toDate) ? string.Empty : toDate.Replace("-", "");
 
             var parameters = new DynamicParameters();
             parameters.Add("SearchKeyword", searchKeyword, DbType.String);
@@ -809,13 +813,18 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.ServiceUsage
                 //병원명 검색
                 if (searchType == 1)
                 {
-                    sb.AppendLine("            AND ti.hosp_no IN ( SELECT hosp_no FROM hello100.vm_eghis_hospitals vh WHERE vh.name LIKE CONCAT('%', @SearchKeyword, '%'))");
+                    sb.AppendLine("            AND ti.hosp_no IN ( SELECT hosp_no FROM hello100.vm_eghis_hospitals vh WHERE vh.name LIKE CONCAT('%', @SearchKeyword, '%') )");
                 }
                 else
                 {
                     //요양기관 검색
-                    sb.AppendLine("            AND ti.hosp_no = @SearchKeyword");
+                    sb.AppendLine("            AND ti.hosp_no LIKE CONCAT('%', @SearchKeyword, '%')");
                 }
+            }
+
+            if (string.IsNullOrWhiteSpace(searchChartType) == false)
+            {
+                sb.AppendLine("                          AND tehi.chart_type = '" + searchChartType + "'");
             }
 
             sb.AppendLine("         GROUP BY ti.hosp_no, ti.recept_type, ti.ptnt_state");
@@ -838,11 +847,11 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.ServiceUsage
 
         // this.GetHospitalUnitReceptionStatusAsync() 과 pagenation 차이. 추후 병합 가능?
         public async Task<List<GetHospitalServiceUsageStatusResultItemByHospitalUnit>> ExportHospitalUnitReceptionStatusExcelAsync(
-            DbSession db, string fromDate, string toDate, int searchType, string? searchKeyword, string qrCheckYn,
+            DbSession db, string? fromDate, string? toDate, string? searchChartType, int searchType, string? searchKeyword, string qrCheckYn,
             string todayRegistrationYn, string appointmentYn, string telemedicineYn, string excludeTestHospitalsYn, CancellationToken ct)
         {
-            var fromDt = fromDate.Replace("-", "");
-            var toDt = toDate.Replace("-", "");
+            var fromDt = string.IsNullOrWhiteSpace(fromDate) ? string.Empty : fromDate.Replace("-", "");
+            var toDt = string.IsNullOrWhiteSpace(toDate) ? string.Empty : toDate.Replace("-", "");
 
             var parameters = new DynamicParameters();
             parameters.Add("SearchKeyword", searchKeyword, DbType.String);
@@ -919,8 +928,13 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.ServiceUsage
                 else
                 {
                     //요양기관 검색
-                    sb.AppendLine("            AND ti.hosp_no = @SearchKeyword");
+                    sb.AppendLine("            AND ti.hosp_no LIKE CONCAT('%', @SearchKeyword, '%')");
                 }
+            }
+
+            if (string.IsNullOrWhiteSpace(searchChartType) == false)
+            {
+                sb.AppendLine("                          AND tehi.chart_type = '" + searchChartType + "'");
             }
 
             sb.AppendLine("         GROUP BY ti.hosp_no, ti.recept_type, ti.ptnt_state");

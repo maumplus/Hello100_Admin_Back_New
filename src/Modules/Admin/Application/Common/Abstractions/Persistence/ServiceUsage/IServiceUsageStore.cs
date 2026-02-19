@@ -74,6 +74,7 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistenc
         /// <param name="fromDate"></param>
         /// <param name="toDate"></param>
         /// <param name="searchType"></param>
+        /// <param name="searchChartType"></param>
         /// <param name="searchKeyword"></param>
         /// <param name="qrCheckYn"></param>
         /// <param name="todayRegistrationYn"></param>
@@ -83,7 +84,7 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistenc
         /// <param name="ct"></param>
         /// <returns></returns>
         public Task<List<GetHospitalServiceUsageStatusResultItemByServiceUnit>> GetServiceUnitReceptionStatusAsync(
-            DbSession db, string fromDate, string toDate, int searchType, string? searchKeyword, string qrCheckYn,
+            DbSession db, string? fromDate, string? toDate, string? searchChartType, int searchType, string? searchKeyword, string qrCheckYn,
             string todayRegistrationYn, string appointmentYn, string telemedicineYn, string excludeTestHospitalsYn, CancellationToken ct);
 
         /// <summary>
@@ -94,6 +95,7 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistenc
         /// <param name="pageSize"></param>
         /// <param name="fromDate"></param>
         /// <param name="toDate"></param>
+        /// <param name="searchChartType"></param>
         /// <param name="searchType"></param>
         /// <param name="searchKeyword"></param>
         /// <param name="qrCheckYn"></param>
@@ -104,7 +106,7 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistenc
         /// <param name="ct"></param>
         /// <returns></returns>
         public Task<ListResult<GetHospitalServiceUsageStatusResultItemByHospitalUnit>> GetHospitalUnitReceptionStatusAsync(
-            DbSession db, int pageNo, int pageSize, string fromDate, string toDate, int searchType, string? searchKeyword, string qrCheckYn,
+            DbSession db, int pageNo, int pageSize, string? fromDate, string? toDate, string? searchChartType, int searchType, string? searchKeyword, string qrCheckYn,
             string todayRegistrationYn, string appointmentYn, string telemedicineYn, string excludeTestHospitalsYn, CancellationToken ct);
 
         /// <summary>
@@ -113,6 +115,7 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistenc
         /// <param name="db"></param>
         /// <param name="fromDate"></param>
         /// <param name="toDate"></param>
+        /// <param name="searchChartType"></param>
         /// <param name="searchType"></param>
         /// <param name="searchKeyword"></param>
         /// <param name="qrCheckYn"></param>
@@ -123,7 +126,7 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistenc
         /// <param name="ct"></param>
         /// <returns></returns>
         public Task<List<GetHospitalServiceUsageStatusResultItemByHospitalUnit>> ExportHospitalUnitReceptionStatusExcelAsync(
-            DbSession db, string fromDate, string toDate, int searchType, string? searchKeyword, string qrCheckYn,
+            DbSession db, string? fromDate, string? toDate, string? searchChartType, int searchType, string? searchKeyword, string qrCheckYn,
             string todayRegistrationYn, string appointmentYn, string telemedicineYn, string excludeTestHospitalsYn, CancellationToken ct);
 
         /// <summary>

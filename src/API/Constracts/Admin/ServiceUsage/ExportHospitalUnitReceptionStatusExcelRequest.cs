@@ -5,11 +5,15 @@
         /// <summary>
         /// 조회 시작일
         /// </summary>
-        public required string FromDate { get; init; }
+        public string? FromDate { get; init; }
         /// <summary>
         /// 조회 종료일
         /// </summary>
-        public required string ToDate { get; init; }
+        public string? ToDate { get; init; }
+        /// <summary>
+        /// 검색 차트타입 [전체: "", 이지스: "E", 닉스: "N"]
+        /// </summary>
+        public string? SearchChartType { get; init; }
         /// <summary>
         /// 검색 타입 [1: 병원명, 2: 요양기관번호]
         /// </summary>
