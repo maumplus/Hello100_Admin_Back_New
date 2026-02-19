@@ -7,7 +7,7 @@ namespace Hello100Admin.API.Extensions;
 public static class ResultToActionResultExtensions
 {
     /// <summary>
-    /// Result<T>를 ControllerBase의 IActionResult로 변환합니다.
+    /// Result&lt;T&gt;를 ControllerBase의 IActionResult로 변환합니다.
     /// authEndpoint 플래그를 통해 인증 관련 엔드포인트에서의 ErrorCodes.AuthFailed -> 401 매핑을 제어할 수 있습니다.
     /// </summary>
     public static IActionResult ToActionResult<T>(this Result<T> result, ControllerBase controller, bool authEndpoint = false)
