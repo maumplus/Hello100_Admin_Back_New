@@ -72,6 +72,8 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
             }
             else
             {
+                eghisDoctRsrvInfoEntity.RsrvIntervalTime = eghisDoctRsrvInfoEntity.RsrvIntervalTime == 0 ? 10 : eghisDoctRsrvInfoEntity.RsrvIntervalTime;
+
                 eghisDoctRsrvDetailInfoEntityList = await _hospitalStore.GetEghisDoctRsrvDetailList(eghisDoctRsrvInfoEntity.Ridx, "RS", cancellationToken);
             }
 

@@ -66,8 +66,10 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Re
         public string DeptNm { get; set; }
         public List<EghisDoctInfoMdEntity> EghisDoctInfoMdList { get; set; }
         public int ViewRole { get; set; }
-        public string ViewMinTime { get; set; }
         public string ViewMinCnt { get; set; }
+        public string ViewMinCntYn { get; set; }
+        public string ViewMinTime { get; set; }
+        public string ViewMinTimeYn { get; set; }
         public string UntactJoinYn { get; set; }
         public string DoctModifyYn { get; set; }
         public string ImageUrl { get; set; }
