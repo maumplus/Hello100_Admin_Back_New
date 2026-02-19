@@ -1044,6 +1044,339 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.ServiceUsage
 
             return result;
         }
+
+        public async Task<GetUntactMedicalUsageStatusResult> GetUntactMedicalUsageStatusAsync(
+            DbSession db, int pageNo, int pageSize, string fromDate, string toDate, int searchDateType, int searchType, string? searchKeyword,
+            List<string> searchStateTypes, List<string> searchPaymentTypes, CancellationToken ct)
+        {
+            var fromDt = fromDate.Replace("-", "");
+            var toDt = toDate.Replace("-", "");
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@SearchKeyword", searchKeyword ?? string.Empty, DbType.String);
+            parameters.Add("@Limit", pageSize, DbType.Int32);
+            parameters.Add("@OffSet", (pageNo - 1) * pageSize, DbType.Int32);
+            parameters.Add("@FromDt", fromDt, DbType.String);
+            parameters.Add("@ToDt", toDt, DbType.String);
+            parameters.Add("@NameKey", "dcc2b29aaa9f271d", DbType.String);
+            parameters.Add("@PhoneKey", "08a0d3a6ec32e85e", DbType.String);
+
+            #region QUERY **********
+            StringBuilder sb = new StringBuilder();
+
+            var conditions = new List<string>();
+
+            // 기본 조건
+            conditions.Add(" tehri.recept_type = 'NR'");
+
+            // 당일, 기간
+            if (searchDateType == 0)
+            {
+                conditions.Add(" tehri.req_date = DATE_FORMAT(CURDATE(), '%Y%m%d')	");
+            }
+            else if (!string.IsNullOrEmpty(fromDt))
+            {
+                conditions.Add(" tehri.req_date BETWEEN @FromDt AND @ToDt 	");
+            }
+
+            // 검색어
+            if (!string.IsNullOrEmpty(searchKeyword))
+            {
+                // req.SearchType, 1:병원명, 2:요양기관번호, 3:회원명, 4:전화번호
+                switch (searchType)
+                {
+                    case 1: conditions.Add(" thi.name like concat('%', @SearchKeyword , '%')"); break;
+                    case 2: conditions.Add(" tehri.hosp_no like concat('%', @SearchKeyword , '%')"); break;
+                    case 3: conditions.Add(@" CONVERT(AES_DECRYPT(FROM_BASE64(tm.name), @NameKey, '\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0') USING utf8mb4) like concat('%', @SearchKeyword , '%')"); break;
+                    case 4: conditions.Add(" nkp.ordr_idxx like concat('%', @SearchKeyword , '%')"); break;
+                }
+            }
+
+            // req.SearchStateTypes 선택한 값에 따라 ptntState 구분
+            // total : 전체
+            // recept : 접수(예약)완료 = 1
+            // end : 진료완료 = 9, 11, 12, 13, 14, 15
+            // cancel : 접수(예약)취소 = 7, 8
+
+            var conditionMap = new Dictionary<string, List<int>>
+                    {
+                        { "recept", new List<int> { 1 } },
+                        { "end", new List<int> { 9, 11, 12, 13, 14, 15 } },
+                        { "cancel", new List<int> { 7, 8 } }
+                    };
+
+            var combinedConditions = new List<int>();
+
+            if (searchStateTypes is { Count: > 0 })
+            {
+                foreach (var state in searchStateTypes)
+                {
+                    if (state == "total") break;
+                    else if (conditionMap.TryGetValue(state, out List<int>? values))
+                    {
+                        if (values != null)
+                        {
+                            combinedConditions.AddRange(values);
+                        }
+                    }
+                }
+            }
+            var distinctConditions = combinedConditions.Distinct().OrderBy(x => x).ToList();
+
+            if (distinctConditions.Any())
+            {
+                // 'con in (1,2,4,5)'와 같은 형식의 문자열 생성
+                conditions.Add($" tehri.ptnt_state IN ({string.Join(",", distinctConditions)})");
+            }
+
+            // req.SearchPaymentypes 선택한 값에 따라 res_cd 구분
+            // total : 전체
+            // success : 0000
+            // fail : 0000 외
+            if (searchPaymentTypes is { Count: > 0})
+            {
+                foreach (var payment in searchPaymentTypes)
+                {
+                    if (payment == "total") break;
+                    else
+                    {
+                        switch (payment)
+                        {
+                            case "success": conditions.Add($" nkp.res_cd = '0000'"); break;
+                            case "fail": conditions.Add($" (nkp.res_cd <> '0000' or nkp.res_cd is null)"); break;
+                        }
+                    }
+                }
+            }
+
+            sb.AppendLine("SET block_encryption_mode = 'aes-128-cbc';");
+
+            sb.AppendLine("select count(1) as TotalCount");
+            sb.AppendLine("       , count(case when tehri.ptnt_state = 1 then 1 end) as TotalRsrv");
+            sb.AppendLine("       , count(case when tehri.ptnt_state >= 9 then 1 end) as TotalClinicEnd");
+            sb.AppendLine("       , count(case when tehri.ptnt_state in (7,8) then 1 end) as TotalClinicCancel");
+            sb.AppendLine("       , count(case when nkp.res_cd = '0000' then 1 end) as TotalPaymentSuccess");
+            sb.AppendLine("       , count(case when nkp.res_cd <> '0000' or nkp.res_cd is null then 1 end) as TotalPaymentFail");
+            sb.AppendLine("       , sum(nkp.amount) as TotalSumAmt");
+            sb.AppendLine("  from tb_eghis_hosp_receipt_info tehri ");
+            sb.AppendLine("       inner join tb_eghis_hosp_info tehi on tehri.hosp_no = tehi.hosp_no ");
+            sb.AppendLine("       inner join tb_hospital_info thi on thi.hosp_key = tehi.hosp_key");
+            sb.AppendLine("       inner join tb_member tm on tm.mid = tehri.mid");
+            sb.AppendLine("       left join hello100_api.nhn_kcp_payment nkp on nkp.hosp_no = tehri.hosp_no and nkp.recept_no = tehri.recept_no");
+
+            if (conditions.Any())
+            {
+                sb.AppendLine(" where");
+                sb.AppendLine(string.Join($"{Environment.NewLine}   and ", conditions));
+            }
+
+            sb.AppendLine(";");
+
+            sb.AppendLine("select row_number() over(order by tehri.req_date desc, tehri.req_time desc, nkp.payment_id desc) as RowNum");
+            sb.AppendLine("       , tehri.req_date as ReqDate");
+            sb.AppendLine("       , TIME_FORMAT(LPAD(tehri.req_time, 6, '0'), '%H:%i:%s') as ReqTime");
+            sb.AppendLine("       , tehri.recept_no as ReceptNo");
+            sb.AppendLine("       , tehri.serial_no as serialNo");
+            sb.AppendLine("       , tehri.hosp_no as hospNo");
+            sb.AppendLine("       , thi.name as HospName");
+            sb.AppendLine("       , edi.doct_nm as DoctorName");
+            sb.AppendLine("       , tehri.uid");
+            sb.AppendLine("       , tehri.mid");
+            sb.AppendLine(@"       , CONVERT(AES_DECRYPT(FROM_BASE64(tm.name), @NameKey, '\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0') USING utf8mb4) as PtntName");
+            sb.AppendLine(@"       , CONVERT(AES_DECRYPT(FROM_BASE64(tm.phone), @PhoneKey, '\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0') USING utf8mb4) as phoneNumber");
+            sb.AppendLine("       , '' as ReceptType");
+            sb.AppendLine("       , tc.cm_name as PtntState");
+            sb.AppendLine("       , nkp.amount as PaymentAmt");
+            sb.AppendLine("       , if(nkp.res_cd = '0000', '결제성공', '결제실패') as PaymentStatus");
+            sb.AppendLine("       , nkp.ordr_idxx as OrdrIdxx");
+            sb.AppendLine("       , nkp.card_name as CardName");
+            sb.AppendLine("       , ifnull(cnt, 0) as FaxCount");
+            sb.AppendLine("  from tb_eghis_hosp_receipt_info tehri ");
+            sb.AppendLine("       inner join tb_eghis_hosp_info tehi on tehri.hosp_no = tehi.hosp_no");
+            sb.AppendLine("       inner join tb_hospital_info thi on thi.hosp_key = tehi.hosp_key");
+            sb.AppendLine("       inner join tb_member tm on tm.mid = tehri.mid");
+            sb.AppendLine("       inner join tb_common tc on tc.cls_cd = 26 and  tc.cm_cd = tehri.ptnt_state");
+            sb.AppendLine("       left join");
+            sb.AppendLine("       	(select hosp_no, empl_no, doct_nm");
+            sb.AppendLine("       	   from hello100_api.eghis_doct_info group by hosp_no, empl_no, doct_nm) edi on edi.hosp_no = tehri.hosp_no and edi.empl_no = tehri.empl_no ");
+            sb.AppendLine("       left join hello100_api.nhn_kcp_payment nkp on nkp.hosp_no = tehri.hosp_no and nkp.recept_no = tehri.recept_no");
+            sb.AppendLine("       left join");
+            sb.AppendLine("        (select fax.hosp_no, fax.recept_no, count(1) cnt");
+            sb.AppendLine("           from tb_fax_request fax");
+            sb.AppendLine("          where fax.tr_sendstat = '2'");
+            sb.AppendLine("            and fax.tr_rsltstat = '0'");
+            sb.AppendLine("          group by fax.hosp_no, fax.recept_no ) fax on fax.hosp_no = tehri.hosp_no and fax.recept_no = tehri.recept_no");
+
+            if (conditions.Any())
+            {
+                sb.AppendLine(" where");
+                sb.AppendLine(string.Join($"{Environment.NewLine}   and ", conditions));
+            }
+
+            sb.AppendLine(" LIMIT @OffSet, @Limit;");
+            #endregion
+
+            var multi = await db.QueryMultipleAsync(sb.ToString(), parameters, ct, _logger);
+
+            var result = await multi.ReadFirstAsync<GetUntactMedicalUsageStatusResult>();
+            result.UsageStatusItems = (await multi.ReadAsync<GetUntactMedicalUsageStatusResultItem>()).ToList();
+
+            return result;
+        }
+
+        public async Task<List<ExportUntactMedicalUsageStatusExcelResult>> ExportUntactMedicalUsageStatusExcelAsync(
+            DbSession db, string fromDate, string toDate, int searchDateType, int searchType, string? searchKeyword,
+            List<string> searchStateTypes, List<string> searchPaymentTypes, CancellationToken ct)
+        {
+            var fromDt = fromDate.Replace("-", "");
+            var toDt = toDate.Replace("-", "");
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@SearchKeyword", searchKeyword ?? string.Empty, DbType.String);
+            parameters.Add("@FromDt", fromDt, DbType.String);
+            parameters.Add("@ToDt", toDt, DbType.String);
+            parameters.Add("@NameKey", "dcc2b29aaa9f271d", DbType.String);
+            parameters.Add("@PhoneKey", "08a0d3a6ec32e85e", DbType.String);
+
+            #region QUERY **********
+            StringBuilder sb = new StringBuilder();
+
+            var conditions = new List<string>();
+
+            // 기본 조건
+            conditions.Add(" tehri.recept_type = 'NR'");
+
+            // 당일, 기간
+            if (searchDateType == 0)
+            {
+                conditions.Add(" tehri.req_date = DATE_FORMAT(CURDATE(), '%Y%m%d')	");
+            }
+            else if (!string.IsNullOrEmpty(fromDt))
+            {
+                conditions.Add(" tehri.req_date BETWEEN @FromDt AND @ToDt 	");
+            }
+
+            // 검색어
+            if (!string.IsNullOrEmpty(searchKeyword))
+            {
+                // req.SearchType, 1:병원명, 2:요양기관번호, 3:회원명, 4:전화번호
+                switch (searchType)
+                {
+                    case 1: conditions.Add(" thi.name like concat('%', @SearchKeyword , '%')"); break;
+                    case 2: conditions.Add(" tehri.hosp_no like concat('%', @SearchKeyword , '%')"); break;
+                    case 3: conditions.Add(@" CONVERT(AES_DECRYPT(FROM_BASE64(tm.name), @NameKey, '\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0') USING utf8mb4) like concat('%', @SearchKeyword , '%')"); break;
+                    case 4: conditions.Add(" nkp.ordr_idxx like concat('%', @SearchKeyword , '%')"); break;
+                }
+            }
+
+            // req.SearchStateTypes 선택한 값에 따라 ptntState 구분
+            // total : 전체
+            // recept : 접수(예약)완료 = 1
+            // end : 진료완료 = 9, 11, 12, 13, 14, 15
+            // cancel : 접수(예약)취소 = 7, 8
+
+            var conditionMap = new Dictionary<string, List<int>>
+                    {
+                        { "recept", new List<int> { 1 } },
+                        { "end", new List<int> { 9, 11, 12, 13, 14, 15 } },
+                        { "cancel", new List<int> { 7, 8 } }
+                    };
+
+            var combinedConditions = new List<int>();
+
+            if (searchStateTypes is { Count: > 0})
+            {
+                foreach (var state in searchStateTypes)
+                {
+                    if (state == "total") break;
+                    else if (conditionMap.TryGetValue(state, out List<int>? values))
+                    {
+                        if (values != null)
+                        {
+                            combinedConditions.AddRange(values);
+                        }
+                    }
+                }
+            }
+            var distinctConditions = combinedConditions.Distinct().OrderBy(x => x).ToList();
+
+            if (distinctConditions.Any())
+            {
+                // 'con in (1,2,4,5)'와 같은 형식의 문자열 생성
+                conditions.Add($" tehri.ptnt_state IN ({string.Join(",", distinctConditions)})");
+            }
+
+            // req.SearchPaymentypes 선택한 값에 따라 res_cd 구분
+            // total : 전체
+            // success : 0000
+            // fail : 0000 외
+            if (searchPaymentTypes is { Count: > 0})
+            {
+                foreach (var payment in searchPaymentTypes)
+                {
+                    if (payment == "total") break;
+                    else
+                    {
+                        switch (payment)
+                        {
+                            case "success": conditions.Add($" nkp.res_cd = '0000'"); break;
+                            case "fail": conditions.Add($" (nkp.res_cd <> '0000' or nkp.res_cd is null)"); break;
+                        }
+                    }
+                }
+            }
+
+            sb.AppendLine("SET block_encryption_mode = 'aes-128-cbc';");
+
+            sb.AppendLine("select row_number() over(order by tehri.req_date desc, tehri.req_time desc, nkp.payment_id desc) as RowNum");
+            sb.AppendLine("       , tehri.req_date as ReqDate");
+            sb.AppendLine("       , TIME_FORMAT(LPAD(tehri.req_time, 6, '0'), '%H:%i:%s') as ReqTime");
+            sb.AppendLine("       , tehri.recept_no as ReceptNo");
+            sb.AppendLine("       , tehri.serial_no as serialNo");
+            sb.AppendLine("       , tehri.hosp_no as hospNo");
+            sb.AppendLine("       , thi.name as HospName");
+            sb.AppendLine("       , edi.doct_nm as DoctorName");
+            sb.AppendLine("       , tehri.uid");
+            sb.AppendLine("       , tehri.mid");
+            sb.AppendLine(@"       , CONVERT(AES_DECRYPT(FROM_BASE64(tm.name), @NameKey, '\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0') USING utf8mb4) as PtntName");
+            sb.AppendLine(@"       , CONVERT(AES_DECRYPT(FROM_BASE64(tm.phone), @PhoneKey, '\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0') USING utf8mb4) as phoneNumber");
+            sb.AppendLine("       , '' as ReceptType");
+            sb.AppendLine("       , tc.cm_name as PtntState");
+            sb.AppendLine("       , nkp.amount as PaymentAmt");
+            sb.AppendLine("       , if(nkp.res_cd = '0000', '결제성공', '결제실패') as PaymentStatus");
+            sb.AppendLine("       , nkp.ordr_idxx as OrdrIdxx");
+            sb.AppendLine("       , nkp.card_name as CardName");
+            sb.AppendLine("       , ifnull(cnt, 0) as FaxCount");
+            sb.AppendLine("  from tb_eghis_hosp_receipt_info tehri ");
+            sb.AppendLine("       inner join tb_eghis_hosp_info tehi on tehri.hosp_no = tehi.hosp_no");
+            sb.AppendLine("       inner join tb_hospital_info thi on thi.hosp_key = tehi.hosp_key");
+            sb.AppendLine("       inner join tb_member tm on tm.mid = tehri.mid");
+            sb.AppendLine("       inner join tb_common tc on tc.cls_cd = 26 and  tc.cm_cd = tehri.ptnt_state");
+            sb.AppendLine("       left join");
+            sb.AppendLine("       	(select hosp_no, empl_no, doct_nm");
+            sb.AppendLine("       	   from hello100_api.eghis_doct_info group by hosp_no, empl_no, doct_nm) edi on edi.hosp_no = tehri.hosp_no and edi.empl_no = tehri.empl_no ");
+            sb.AppendLine("       left join hello100_api.nhn_kcp_payment nkp on nkp.hosp_no = tehri.hosp_no and nkp.recept_no = tehri.recept_no");
+         
+            sb.AppendLine("       left join");
+            sb.AppendLine("        (select fax.hosp_no, fax.recept_no, count(1) cnt");
+            sb.AppendLine("           from tb_fax_request fax");
+            sb.AppendLine("          where fax.tr_sendstat = '2'");
+            sb.AppendLine("            and fax.tr_rsltstat = '0'");
+            sb.AppendLine("          group by fax.hosp_no, fax.recept_no ) fax on fax.hosp_no = tehri.hosp_no and fax.recept_no = tehri.recept_no");
+
+            if (conditions.Any())
+            {
+                sb.AppendLine(" where");
+                sb.AppendLine(string.Join($"{Environment.NewLine}   and ", conditions));
+            }
+            #endregion
+
+            var multi = await db.QueryMultipleAsync(sb.ToString(), parameters, ct, _logger);
+
+            var result = (await multi.ReadAsync<ExportUntactMedicalUsageStatusExcelResult>()).ToList();
+
+            return result;
+        }
         #endregion
     }
 }

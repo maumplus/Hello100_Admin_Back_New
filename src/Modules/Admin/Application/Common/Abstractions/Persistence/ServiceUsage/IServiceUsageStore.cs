@@ -139,5 +139,28 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistenc
         /// <returns></returns>
         public Task<ExportHello100ReceptionStatusExcelResult> ExportHello100ReceptionStatusExcelAsync(
             DbSession db, string fromDate, string toDate, CancellationToken ct);
+
+        /// <summary>
+        /// 비대면 진료 현황 조회
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="pageNo"></param>
+        /// <param name="pageSize"></param>
+        /// <param name="fromDate"></param>
+        /// <param name="toDate"></param>
+        /// <param name="searchDateType"></param>
+        /// <param name="searchType"></param>
+        /// <param name="searchKeyword"></param>
+        /// <param name="searchStateTypes"></param>
+        /// <param name="searchPaymentTypes"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        public Task<GetUntactMedicalUsageStatusResult> GetUntactMedicalUsageStatusAsync(
+            DbSession db, int pageNo, int pageSize, string fromDate, string toDate, int searchDateType, int searchType, string? searchKeyword,
+            List<string> searchStateTypes, List<string> searchPaymentTypes, CancellationToken ct);
+
+        public Task<List<ExportUntactMedicalUsageStatusExcelResult>> ExportUntactMedicalUsageStatusExcelAsync(
+            DbSession db, string fromDate, string toDate, int searchDateType, int searchType, string? searchKeyword,
+            List<string> searchStateTypes, List<string> searchPaymentTypes, CancellationToken ct);
     }
 }

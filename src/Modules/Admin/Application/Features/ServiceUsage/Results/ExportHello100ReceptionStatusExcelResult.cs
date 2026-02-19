@@ -21,11 +21,11 @@
         // 전체(공통) 상태별 집계
         public int TotalCount { get; set; } // 총계
         public int ReservationWaitingCount { get; set; } // 예약대기 (ptnt_state = 3)
-        public int WaitingCount { get; set; } // 대기     (ptnt_state = 2)
-        public int ReceptionCount { get; set; } // 접수     (ptnt_state = 1)
-        public int CanceledCount { get; set; } // 취소     (ptnt_state = 8)
-        public int CompletedCount { get; set; } // 완료     (ptnt_state >= 9)
-        public int FailedCount { get; set; } // 실패     (ptnt_state = 7)
+        public int WaitingCount { get; set; } // 대기 (ptnt_state = 2)
+        public int ReceptionCount { get; set; } // 접수 (ptnt_state = 1)
+        public int CanceledCount { get; set; } // 취소 (ptnt_state = 8)
+        public int CompletedCount { get; set; } // 완료 (ptnt_state >= 9)
+        public int FailedCount { get; set; } // 실패 (ptnt_state = 7)
 
         // QR접수 (recept_type = 'RC')
         public int QrReservationWaitingCount { get; set; } // QR접수_예약대기
