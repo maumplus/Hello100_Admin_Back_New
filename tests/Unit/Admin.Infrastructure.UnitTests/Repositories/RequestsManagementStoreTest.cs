@@ -59,5 +59,66 @@ namespace Admin.Infrastructure.UnitTests.Repositories
         }
 
 
+        [Fact]
+        public async Task GetRequestUntactsAsync_ReturnsPagedResult()
+        {
+            // Arrange
+            //var hospKey = "YTk0YWVmZjUwYTc4YmRhYjRmNGUyNWNiMzFiZTY0ZjIwNDBlYmExYWU1NDkyOGU5ZWNmY2JmNWM1OGU2NDY4Mg==";   // 테스트 DB에 존재하는 병원 키
+            var pageSize = 10;
+            var pageNum = 1;
+            string fromDate = "";
+            string toDate = "2026-02-19";
+            int searchType = 1;
+            int searchDateType = 1;
+            string searchKeyword = "";
+            List<string> joinState = ["01,02,03"];
+            bool isExcel = true;
+            var token = CancellationToken.None;
+
+            // Act
+            var result = await _store.GetRequestUntactsAsync(pageSize, pageNum, searchType, searchDateType, fromDate, toDate, searchKeyword, joinState, isExcel, token);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.NotNull(result.Items);
+            Assert.True(result.TotalCount >= result.Items.Count); // 총 개수와 Items 비교
+            //Assert.True(result.Items.Count <= pageSize);   // 페이징 take 값 확인
+            
+
+            // 샘플 데이터 검증 (테스트 DB에 맞게 수정)
+            /*
+            if (result.Items.Count > 0)
+            {
+                var first = result.Items.First();
+                Assert.False(string.IsNullOrEmpty(first.RequestId)); // RequestId가 비어있지 않은지 확인
+            }*/
+        }
+
+
+        [Fact]
+        public async Task GetRequestUntactAsync_ReturnsPagedResult()
+        {
+            // Arrange
+            //var hospKey = "YTk0YWVmZjUwYTc4YmRhYjRmNGUyNWNiMzFiZTY0ZjIwNDBlYmExYWU1NDkyOGU5ZWNmY2JmNWM1OGU2NDY4Mg==";   // 테스트 DB에 존재하는 병원 키
+            int seq = 40;
+            string roolUrl = "ddd";
+            var token = CancellationToken.None;
+
+            // Act
+            var result = await _store.GetRequestUntactAsync(seq, roolUrl, token);
+
+            // Assert
+            Assert.NotNull(result);
+
+            // 샘플 데이터 검증 (테스트 DB에 맞게 수정)
+            /*
+            if (result.Items.Count > 0)
+            {
+                var first = result.Items.First();
+                Assert.False(string.IsNullOrEmpty(first.RequestId)); // RequestId가 비어있지 않은지 확인
+            }*/
+        }
+
+
     }
 }
