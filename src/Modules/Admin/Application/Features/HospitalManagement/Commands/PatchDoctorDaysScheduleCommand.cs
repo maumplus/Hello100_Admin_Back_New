@@ -1,8 +1,11 @@
 ﻿using Hello100Admin.BuildingBlocks.Common.Application;
 using Hello100Admin.BuildingBlocks.Common.Definition.Enums;
+using Hello100Admin.BuildingBlocks.Common.Errors;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Security;
 using Hello100Admin.Modules.Admin.Application.Common.Definitions.Enums;
+using Hello100Admin.Modules.Admin.Application.Common.Errors;
+using Hello100Admin.Modules.Admin.Application.Common.Extensions;
 using Hello100Admin.Modules.Admin.Domain.Entities;
 using Hello100Admin.Modules.Admin.Domain.Repositories;
 using MediatR;
@@ -137,6 +140,11 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
 
                 if (eghisDoctInfoList.Count > 0)
                 {
+                    var tempHash = new HashSet<string>();
+
+                    if (eghisDoctInfoList.Any(x => tempHash.Add(x.ClinicYmd) == false))
+                        throw new BizException(AdminErrorCode.DuplicateDateValue.ToError());
+
                     await _hospitalManagementRepository.UpdateDoctorInfoScheduleAsync(session, eghisDoctInfoList, token);
                 }
             },

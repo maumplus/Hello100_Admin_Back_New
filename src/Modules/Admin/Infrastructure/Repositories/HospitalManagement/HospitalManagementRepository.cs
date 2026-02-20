@@ -556,6 +556,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             return await db.ExecuteAsync(query, parameters, ct, _logger);
         }
 
+        // 트랜잭션 간 DROP/CREATE TABLE이 진행되면 암묵적 커밋 발생으로, Exception 발생 시 ROLLBACK이 되지 않음.
         public async Task<int> UpdateDoctorInfoScheduleAsync(DbSession db, List<EghisDoctInfoEntity> eghisDoctInfoList, CancellationToken ct)
         {
             var hospNo = eghisDoctInfoList[0].HospNo;
