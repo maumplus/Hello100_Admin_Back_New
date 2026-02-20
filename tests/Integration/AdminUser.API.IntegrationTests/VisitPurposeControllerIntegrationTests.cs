@@ -32,7 +32,7 @@ namespace AdminUser.API.IntegrationTests
         public async Task GetVisitPurposeDetail_ShouldReturnOk_WhenValidCredentials()
         {
             // Arrange
-            _client.AsMySuperAdmin("B81AFBD0", "대민테스트");
+            _client.AsMySuperAdmin("B81AFBD0", "대민테스트", "10350072", "MzNiMDI0OWI1MDA0MWU2YjcxNTE1YTQ2MDM0YWViYzVmYzY5ZGQ5YjY2M2I5ODBjODgwNDVhNDg3YTdkNzc4NA==");
 
             // Act
             var response = await _client.GetAsync($"/api/visit-purpose/visit-purposes/01");

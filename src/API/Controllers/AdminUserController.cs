@@ -62,4 +62,26 @@ public class AdminUserController : BaseController
 
         return result.ToActionResult(this);
     }
+
+    /// <summary>
+    /// [전체 관리자] 관리자관리 > 병원관리자목록 > 조회
+    /// </summary>
+    [HttpGet("hospital-admins")]
+    [ProducesResponseType(typeof(ApiResponse<ListResult<GetHospitalAdminListResult>>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetHospitalAdminListAsync([FromQuery] GetHospitalAdminListRequest req, CancellationToken cancellationToken = default)
+    {
+        _logger.LogInformation("GET api/admin-user/hospital-admins [{Aid}]", Aid);
+
+        var query = req.Adapt<GetHospitalAdminListQuery>();
+
+        var result = await _mediator.Send(query, cancellationToken);
+
+        return result.ToActionResult(this);
+    }
+
+    // [전체 관리자] 관리자관리 > 병원관리자목록 > 조회
+    // [전체 관리자] 관리자관리 > 병원관리자목록 > 상세정보 > 조회
+    // [전체 관리자] 관리자관리 > 병원관리자목록 > 상세정보 > 패스워드변경
+    // [전체 관리자] 관리자관리 > 병원관리자목록 > 상세정보 > QR다운로드
+    // [전체 관리자] 관리자관리 > 병원관리자목록 > 상세정보 > 맵핑삭제
 }

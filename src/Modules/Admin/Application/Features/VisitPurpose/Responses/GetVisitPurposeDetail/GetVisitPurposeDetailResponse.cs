@@ -16,6 +16,7 @@
         public string HospKey { get; set; } = default!;
         public string InpuiryUrl { get; set; } = default!;
         public int InpuiryIdx { get; set; }
+        public string PaperYn { get; set; } = default!;
         public string InpuirySkipYn { get; set; } = default!;
         public string Name { get; set; } = default!;
         public string ShowYn { get; set; } = default!;

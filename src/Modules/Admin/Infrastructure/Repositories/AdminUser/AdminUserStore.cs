@@ -65,6 +65,50 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.AdminUser
             return result;
         }
 
+        public async Task<ListResult<GetHospitalAdminListResult>> GetHospitalAdminListAsync(
+            DbSession db, int pageNo, int pageSize, int qrState, int searchType, string? searchKeyword, CancellationToken ct)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("QrState", qrState, DbType.Int32);
+            parameters.Add("Keyword", searchKeyword, DbType.String);
+            parameters.Add("Limit", pageSize, DbType.Int32);
+            parameters.Add("OffSet", (pageNo - 1) * pageSize, DbType.Int32);
+            StringBuilder sbCondi = new StringBuilder();
+
+            this.AppendConditionByQrState(sbCondi, qrState);
+
+            if (string.IsNullOrWhiteSpace(searchKeyword) == false)
+            {
+                this.AppendSearchKeywordConditionBySearchType(sbCondi, searchType);
+            }
+
+            #region == Query ==
+            StringBuilder sb = new StringBuilder();
+
+
+            sb.AppendLine($" SET @total_cnt:= (SELECT COUNT(*) FROM VM_HOSPITAL_QR_INFO a WHERE 1=1 {sbCondi.ToString()});   ");
+            sb.AppendLine(" SET @rownum:= (@total_cnt + 1) - @Offset;           ");
+
+            sb.AppendLine("  SELECT	@rownum:= @rownum -1 AS RowNum  ");
+            sb.AppendLine("  	,	a.*                             ");
+            sb.AppendLine("    FROM (SELECT * FROM VM_HOSPITAL_QR_INFO) a           ");
+            sb.AppendLine("   WHERE 1=1                             ");
+            sb.AppendLine($"    {sbCondi.ToString()}                ");
+            sb.AppendLine("	  LIMIT @Limit OFFSET @Offset;          ");
+            sb.AppendLine("	 SELECT @total_cnt;                     ");
+            #endregion
+
+            var multi = await db.QueryMultipleAsync(sb.ToString(), parameters, ct, _logger);
+
+            var result = new ListResult<GetHospitalAdminListResult>
+            {
+                Items = (await multi.ReadAsync<GetHospitalAdminListResult>()).ToList(),
+                TotalCount = Convert.ToInt32(await multi.ReadFirstAsync<long>())
+            };
+
+            return result;
+        }
+
         public async Task<AdminUserEntity?> GetByIdAsync(string accountId, CancellationToken cancellationToken = default)
         {
             try
@@ -169,6 +213,52 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.AdminUser
                 Approved = db.Approved ?? "1",
                 Enabled = db.Enabled ?? "1",
             };
+        }
+
+        private StringBuilder AppendConditionByQrState(StringBuilder sbCondi, int qrState)
+        {
+            switch (qrState)
+            {
+                case 1: // QrSearchState.Complete
+                    sbCondi.AppendLine(" AND IFNULL(a.hospNo,'') <> '' ");
+                    break;
+                case 2: // QrSearchState.After
+                    sbCondi.AppendLine(" AND a.QrCreateDt IS NOT NULL ");
+                    break;
+                case 3: // QrSearchState.Before
+                    sbCondi.AppendLine(" AND a.QrCreateDt IS NULL ");
+                    break;
+                case 4: // QrSearchState.AgencyCnt
+                    sbCondi.AppendLine(" AND a.Agency IS NOT NULL ");
+                    break;
+                case 5: // QrSearchState.AgencyNotCnt
+                    sbCondi.AppendLine(" AND a.Agency IS NULL ");
+                    break;
+                default:
+                    break;
+            }
+
+            return sbCondi;
+        }
+
+        private StringBuilder AppendSearchKeywordConditionBySearchType(StringBuilder sbCondi, int searchType)
+        {
+            switch (searchType)
+            {
+                case 1: // HospitalManagerSearchType.HospitalName
+                    sbCondi.AppendLine($" AND a.HospitalName LIKE CONCAT('%', @Keyword, '%') ");
+                    break;
+                case 2: // HospitalManagerSearchType.AId
+                    sbCondi.AppendLine($" AND a.AId LIKE CONCAT('%', @Keyword, '%') ");
+                    break;
+                case 3: // HospitalManagerSearchType.AgencyNm
+                    sbCondi.AppendLine($" AND a.AgencyNm LIKE CONCAT('%', @Keyword, '%') ");
+                    break;
+                default:
+                    break;
+            }
+
+            return sbCondi;
         }
     }
 }
