@@ -12,28 +12,23 @@ using Hello100Admin.Modules.Admin.Domain.Entities;
 using Hello100Admin.Modules.Admin.Domain.Repositories;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Commands
 {
-    public class PostDoctorUntactJoinCommand : IRequest<Result>
+    public record PostDoctorUntactJoinCommand : IRequest<Result>
     {
-        public string HospNo { get; set; }
-        public string EmplNo { get; set; }
-        public string DoctNo { get; set; }
-        public string DoctNoType { get; set; }
-        public string DoctNm { get; set; }
-        public string DoctBirthday { get; set; }
-        public string DoctTel { get; set; }
-        public string DoctIntro { get; set; }
-        public List<string> DoctHistoryList { get; set; }
-        public string ClinicTime { get; set; }
-        public string ClinicGuide { get; set; }
-        public List<FileUploadPayload>? Images { get; set; }
+        public string HospNo { get; init; } = default!;
+        public string EmplNo { get; init; } = default!;
+        public string DoctNo { get; init; } = default!;
+        public string DoctNoType { get; init; } = default!;
+        public string DoctNm { get; init; } = default!;
+        public string DoctBirthday { get; init; } = default!;
+        public string DoctTel { get; init; } = default!;
+        public string DoctIntro { get; init; } = default!;
+        public List<string> DoctHistoryList { get; init; } = default!;
+        public string? ClinicTime { get; init; }
+        public string? ClinicGuide { get; init; }
+        public List<FileUploadPayload>? Images { get; init; }
     }
 
     public class PostDoctorUntactJoinHandler : IRequestHandler<PostDoctorUntactJoinCommand, Result>

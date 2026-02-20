@@ -1,5 +1,4 @@
-﻿using DocumentFormat.OpenXml.EMMA;
-using Hello100Admin.BuildingBlocks.Common.Application;
+﻿using Hello100Admin.BuildingBlocks.Common.Application;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Security;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Hospital;
 using Hello100Admin.Modules.Admin.Application.Common.Definitions.Enums;
@@ -7,11 +6,6 @@ using Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Result
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Queries
 {
@@ -64,7 +58,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
                     ViewMinTime = doctorScheduleResult[0].ViewMinTime,
                     UntactJoinYn = doctorScheduleResult[0].UntactJoinYn,
                     DoctModifyYn = doctorScheduleResult[0].DoctModifyYn,
-                    ImageUrl = $"{_adminImageUrl}{doctorScheduleResult[0].DoctFilePath}"
+                    ImageUrl = !string.IsNullOrWhiteSpace(doctorScheduleResult[0].DoctFilePath) ? $"{_adminImageUrl}{doctorScheduleResult[0].DoctFilePath}" : ""
                 };
 
                 //주중스케줄 작성

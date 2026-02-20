@@ -56,7 +56,8 @@ namespace Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Queries.
                 KakaoSampleImageUrl = $"{_adminImageUrl}{_kakaoSampleImagePath}",
                 IsAlimtalkServiceApplied = requestInfo != null,
                 DoctNm = requestInfo?.DoctNm ?? string.Empty,
-                DoctTel = requestInfo?.DoctTel ?? string.Empty
+                DoctTel = requestInfo?.DoctTel ?? string.Empty,
+                ApplicationDate = requestInfo?.RegDateTimeOffset?.ToString("yyyy-MM-dd")
             };
 
             return Result.Success(response);

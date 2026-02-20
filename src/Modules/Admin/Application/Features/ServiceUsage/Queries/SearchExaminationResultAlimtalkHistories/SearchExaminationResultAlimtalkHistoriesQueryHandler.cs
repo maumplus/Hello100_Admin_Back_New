@@ -33,8 +33,6 @@ namespace Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Queries.
             _logger.LogInformation("Process SearchExaminationResultAlimtalkHistoriesQuery() started.");
             var result = await _serviceUsageStore.SearchExaminationResultAlimtalkHistoriesAsync(req, token);
 
-            var resultList = result.List;
-
             var kakaoBizRequest = new KakaoBizSendHistoryRequest
             {
                 HospNo = req.HospNo,
@@ -47,7 +45,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Queries.
 
             if (bizResult != null && bizResult.ResultCd == 0 && bizResult.ResultData?.ListCount > 0)
             {
-                var joinedItems = resultList.Join(
+                var joinedItems = result.List.Join(
                     bizResult.ResultData.List,
                     a => a.NotificationId?.ToUpper(),
                     b => b.HcResult?.ToUpper(),
@@ -70,22 +68,26 @@ namespace Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Queries.
 
             if (req.SendStatus == 1)
             {
-                resultList.RemoveAll(a => a.SendStatus != "발송성공");
+                result.List.RemoveAll(a => a.SendStatus != "발송성공");
             }
             else if (req.SendStatus == 2)
             {
-                resultList.RemoveAll(a => a.SendStatus != "발송실패");
+                result.List.RemoveAll(a => a.SendStatus != "발송실패");
             }
 
-            int totalSendCount = resultList.Count;
-            int kakaoCount = resultList.Count(a => a.SendType == "카카오톡");
+            int totalSendCount = result.List.Count;
+            int kakaoCount = result.List.Count(a => a.SendType == "카카오톡");
 
-            result.TotalPtntCount = resultList.Select(a => a.PtntName).Distinct().Count();
+            result.TotalPtntCount = result.List.Select(a => a.PtntName).Distinct().Count();
             result.TotalSendCount = totalSendCount;
-            result.SendSuccessCount = resultList.Count(a => a.SendStatus == "발송성공");
+            result.SendSuccessCount = result.List.Count(a => a.SendStatus == "발송성공");
             result.SendFailCount = kakaoCount - result.SendSuccessCount;
-            result.PushCount = resultList.Count(a => a.SendType == "App Push");
+            result.PushCount = result.List.Count(a => a.SendType == "App Push");
             result.KakaoCount = kakaoCount;
+
+            var skip = (req.PageNo - 1) * req.PageSize;
+
+            result.List = result.List.Skip(skip).Take(req.PageSize).ToList();
 
             var response = result.Adapt<SearchExaminationResultAlimtalkHistoriesResponse>();
 

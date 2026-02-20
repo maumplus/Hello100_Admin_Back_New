@@ -104,7 +104,7 @@ namespace Hello100Admin.API.Controllers
             {
                 FromDate = req.DateRangeType == "0" ? DateTime.Now.ToString("yyyy-MM-dd") : req.FromDate,
                 ToDate = req.DateRangeType == "0" ? DateTime.Now.ToString("yyyy-MM-dd") : req.ToDate,
-                HospNo = base.HospNo 
+                HospNo = base.HospNo
             };
 
             var result = await _mediator.Send(query, cancellationToken);

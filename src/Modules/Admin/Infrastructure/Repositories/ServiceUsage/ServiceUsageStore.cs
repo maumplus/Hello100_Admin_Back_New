@@ -612,7 +612,8 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.ServiceUsage
 
             var query = @"
                 SELECT doct_nm,
-                       doct_tel
+                       doct_tel,
+                       reg_dt
                   FROM hello100.tb_kakao_msg_join
                  WHERE hosp_no = @HospNo
 	               AND hosp_key = @HospKey
