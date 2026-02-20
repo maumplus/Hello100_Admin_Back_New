@@ -133,5 +133,33 @@ namespace AdminUser.API.IntegrationTests
             // Assert
             Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
         }
+
+        [Fact]
+        public async Task PatchDoctor_ShouldReturnOk_WhenValidCredentials()
+        {
+            // Arrange
+            _client.AsMySuperAdmin("B81AFBD0", "대민테스트");
+
+            var req = new
+            {
+                EmplNo = 1,
+                DoctNm = "테스트 의사명",
+                DeptCd = "01",
+                DeptNm = "테스트 진료과명",
+                ViewMinCntYn = "Y",
+                ViewMinCnt = "5",
+                ViewMinTimeYn = "Y",
+                ViewMinTime = "10"
+            };
+
+            // Act
+            var response = await _client.PatchAsJsonAsync($"/api/hospital-management/doctor", req);
+
+            // Body
+            var body = await response.Content.ReadAsStringAsync();
+
+            // Assert
+            Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+        }
     }
 }

@@ -11,6 +11,14 @@
         /// </summary>
         public required string DoctNm { get; set; }
         /// <summary>
+        /// 진료과코드
+        /// </summary>
+        public string? DeptCd { get; set; }
+        /// <summary>
+        /// 진료과명
+        /// </summary>
+        public string? DeptNm { get; set; }
+        /// <summary>
         /// 인원표시(최소) 사용여부
         /// </summary>
         public required string ViewMinCntYn { get; set; }

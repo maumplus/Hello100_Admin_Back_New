@@ -418,6 +418,8 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             parameters.Add("HospKey", eghisDoctInfo.HospKey, DbType.String);
             parameters.Add("EmplNo", eghisDoctInfo.EmplNo, DbType.String);
             parameters.Add("DoctNm", eghisDoctInfo.DoctNm, DbType.String);
+            parameters.Add("DeptCd", eghisDoctInfo.DeptCd, DbType.String);
+            parameters.Add("DeptNm", eghisDoctInfo.DeptNm, DbType.String);
             parameters.Add("ViewRole", eghisDoctInfo.ViewRole, DbType.Int32);
             parameters.Add("ViewMinCnt", eghisDoctInfo.ViewMinCnt, DbType.Int32);
             parameters.Add("ViewMinTime", eghisDoctInfo.ViewMinTime, DbType.Int32);
@@ -425,6 +427,8 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             var query = @"
                 UPDATE hello100_api.eghis_doct_info
                    SET doct_nm       = @DoctNm,
+                       dept_cd       = @DeptCd,
+                       dept_nm       = @DeptNm,
                        view_role     = @ViewRole,
                        view_min_cnt  = @ViewMinCnt,
                        view_min_time = @ViewMinTime

@@ -21,6 +21,8 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
         public string HospKey { get; set; } = default!;
         public string EmplNo { get; set; } = default!;
         public string DoctNm { get; set; } = default!;
+        public string? DeptCd { get; set; }
+        public string? DeptNm { get; set; }
         public string ViewMinCntYn { get; set; } = default!;
         public string? ViewMinCnt { get; set; }
         public string ViewMinTimeYn { get; set; } = default!;
@@ -89,6 +91,8 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
                 HospKey = request.HospKey,
                 EmplNo = request.EmplNo,
                 DoctNm = request.DoctNm,
+                DeptCd = request.DeptCd,
+                DeptNm = request.DeptNm,
                 ViewRole = viewRole,
                 ViewMinCnt = request.ViewMinCnt ?? "",
                 ViewMinTime = request.ViewMinTime ?? ""

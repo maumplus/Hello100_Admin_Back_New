@@ -43,7 +43,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetChartTypeList(GetChartTypeListQuery query)
         {
-            _logger.LogInformation("GET /api/account/chart-types/ [{Aid}]", Aid);
+            _logger.LogInformation("GET /api/account/chart-types [{Aid}]", Aid);
 
             var result = await _mediator.Send(query);
 
