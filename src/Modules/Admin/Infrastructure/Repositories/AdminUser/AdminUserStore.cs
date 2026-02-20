@@ -1,6 +1,11 @@
-﻿using Dapper;
+﻿using System.Data;
+using System.Text;
+using Dapper;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Dapper;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.AdminUser;
+using Hello100Admin.Modules.Admin.Application.Common.Models;
+using Hello100Admin.Modules.Admin.Application.Features.AdminUser.Results;
 using Hello100Admin.Modules.Admin.Domain.Entities;
 using Hello100Admin.Modules.Admin.Infrastructure.Persistence.DbModels.AdminUser;
 using Microsoft.Extensions.Logging;
@@ -16,6 +21,92 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.AdminUser
         {
             _connectionFactory = connectionFactory;
             _logger = logger;
+        }
+
+        public async Task<ListResult<GetAdminUsersResult>> GetAdminUsersAsync(DbSession db, int pageNo, int pageSize, CancellationToken ct)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("Limit", pageSize, DbType.Int32);
+            parameters.Add("OffSet", (pageNo - 1) * pageSize, DbType.Int32);
+
+            #region == Query ==
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine(" SET @total_count:= (SELECT COUNT(*) FROM tb_admin WHERE grade IN ('S', 'A') AND del_yn = 'N');");
+            sb.AppendLine(" SET @row_num:=@total_count + 1 - @OffSet;      ");
+            sb.AppendLine(" SELECT 	@row_num := @row_num - 1 AS RowNum     ");
+            sb.AppendLine("    ,    a.aid                      AS AId      ");
+            sb.AppendLine("    , 	a.acc_id                   AS AccId    ");
+            sb.AppendLine("    ,    a.acc_pwd                  AS AccPwd   ");
+            sb.AppendLine("    , 	a.hosp_no                  AS HospNo   ");
+            sb.AppendLine("    , 	a.grade                    AS Grade    ");
+            sb.AppendLine("    , 	b.cm_name                  AS GradeName");
+            sb.AppendLine("    , 	a.name                     AS Name     ");
+            sb.AppendLine("    , 	a.tel                      AS Tel      ");
+            sb.AppendLine("    , 	a.del_yn                   AS DelYn    ");
+            sb.AppendLine("    , 	CASE WHEN last_login_dt IS NULL THEN '' ELSE FROM_UNIXTIME(a.last_login_dt, '%Y-%m-%d %H:%i')  END AS LastLoginDt ");
+            sb.AppendLine("  FROM tb_admin a                               ");
+            sb.AppendLine("  LEFT JOIN tb_common b                         ");
+            sb.AppendLine("    ON b.cls_cd = '07' AND b.del_yn = 'N' AND a.grade = b.cm_cd");
+            sb.AppendLine(" WHERE a.grade IN ('S', 'A')                    ");
+            sb.AppendLine("   AND a.del_yn = 'N'                           ");
+            sb.AppendLine(" ORDER BY a.aid DESC	                           ");
+            sb.AppendLine(" LIMIT @OffSet, @Limit;                         ");
+            sb.AppendLine(" SELECT @total_count;                           ");
+            #endregion
+
+            var multi = await db.QueryMultipleAsync(sb.ToString(), parameters, ct, _logger);
+
+            var result = new ListResult<GetAdminUsersResult>
+            {
+                Items = (await multi.ReadAsync<GetAdminUsersResult>()).ToList(),
+                TotalCount = Convert.ToInt32(await multi.ReadFirstAsync<long>())
+            };
+
+            return result;
+        }
+
+        public async Task<ListResult<GetHospitalAdminListResult>> GetHospitalAdminListAsync(
+            DbSession db, int pageNo, int pageSize, int qrState, int searchType, string? searchKeyword, CancellationToken ct)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("QrState", qrState, DbType.Int32);
+            parameters.Add("Keyword", searchKeyword, DbType.String);
+            parameters.Add("Limit", pageSize, DbType.Int32);
+            parameters.Add("OffSet", (pageNo - 1) * pageSize, DbType.Int32);
+            StringBuilder sbCondi = new StringBuilder();
+
+            this.AppendConditionByQrState(sbCondi, qrState);
+
+            if (string.IsNullOrWhiteSpace(searchKeyword) == false)
+            {
+                this.AppendSearchKeywordConditionBySearchType(sbCondi, searchType);
+            }
+
+            #region == Query ==
+            StringBuilder sb = new StringBuilder();
+
+
+            sb.AppendLine($" SET @total_cnt:= (SELECT COUNT(*) FROM VM_HOSPITAL_QR_INFO a WHERE 1=1 {sbCondi.ToString()});   ");
+            sb.AppendLine(" SET @rownum:= (@total_cnt + 1) - @Offset;           ");
+
+            sb.AppendLine("  SELECT	@rownum:= @rownum -1 AS RowNum  ");
+            sb.AppendLine("  	,	a.*                             ");
+            sb.AppendLine("    FROM (SELECT * FROM VM_HOSPITAL_QR_INFO) a           ");
+            sb.AppendLine("   WHERE 1=1                             ");
+            sb.AppendLine($"    {sbCondi.ToString()}                ");
+            sb.AppendLine("	  LIMIT @Limit OFFSET @Offset;          ");
+            sb.AppendLine("	 SELECT @total_cnt;                     ");
+            #endregion
+
+            var multi = await db.QueryMultipleAsync(sb.ToString(), parameters, ct, _logger);
+
+            var result = new ListResult<GetHospitalAdminListResult>
+            {
+                Items = (await multi.ReadAsync<GetHospitalAdminListResult>()).ToList(),
+                TotalCount = Convert.ToInt32(await multi.ReadFirstAsync<long>())
+            };
+
+            return result;
         }
 
         public async Task<AdminUserEntity?> GetByIdAsync(string accountId, CancellationToken cancellationToken = default)
@@ -122,6 +213,52 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.AdminUser
                 Approved = db.Approved ?? "1",
                 Enabled = db.Enabled ?? "1",
             };
+        }
+
+        private StringBuilder AppendConditionByQrState(StringBuilder sbCondi, int qrState)
+        {
+            switch (qrState)
+            {
+                case 1: // QrSearchState.Complete
+                    sbCondi.AppendLine(" AND IFNULL(a.hospNo,'') <> '' ");
+                    break;
+                case 2: // QrSearchState.After
+                    sbCondi.AppendLine(" AND a.QrCreateDt IS NOT NULL ");
+                    break;
+                case 3: // QrSearchState.Before
+                    sbCondi.AppendLine(" AND a.QrCreateDt IS NULL ");
+                    break;
+                case 4: // QrSearchState.AgencyCnt
+                    sbCondi.AppendLine(" AND a.Agency IS NOT NULL ");
+                    break;
+                case 5: // QrSearchState.AgencyNotCnt
+                    sbCondi.AppendLine(" AND a.Agency IS NULL ");
+                    break;
+                default:
+                    break;
+            }
+
+            return sbCondi;
+        }
+
+        private StringBuilder AppendSearchKeywordConditionBySearchType(StringBuilder sbCondi, int searchType)
+        {
+            switch (searchType)
+            {
+                case 1: // HospitalManagerSearchType.HospitalName
+                    sbCondi.AppendLine($" AND a.HospitalName LIKE CONCAT('%', @Keyword, '%') ");
+                    break;
+                case 2: // HospitalManagerSearchType.AId
+                    sbCondi.AppendLine($" AND a.AId LIKE CONCAT('%', @Keyword, '%') ");
+                    break;
+                case 3: // HospitalManagerSearchType.AgencyNm
+                    sbCondi.AppendLine($" AND a.AgencyNm LIKE CONCAT('%', @Keyword, '%') ");
+                    break;
+                default:
+                    break;
+            }
+
+            return sbCondi;
         }
     }
 }

@@ -10,7 +10,6 @@ using Mapster;
 using Hello100Admin.Modules.Admin.Application.Common.Models;
 using System.Text;
 using Hello100Admin.Modules.Admin.Domain.Entities;
-using Hello100Admin.Modules.Admin.Application.Features.Keywords.Results;
 
 namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManagement
 {
@@ -769,8 +768,10 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
                        a.break_end_minute           AS BreakEndMinute,
                        a.hello100_role              AS Hello100Role,
                        a.view_role                  AS ViewRole,
-                       a.view_min_time              AS ViewMinTime,
+                       IF((a.view_role & 1) = 0, 'N', 'Y') AS ViewMinCntYn,
+                       IF((a.view_role & 2) = 0, 'N', 'Y') AS ViewMinTimeYn,
                        a.view_min_cnt               AS ViewMinCnt,
+                       a.view_min_time              AS ViewMinTime,
                        a.interval_time              AS IntervalTime,
                        a.message                    AS Message,
                        a.use_yn                     AS UseYn,
@@ -790,7 +791,9 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
                        a.untact_break_start_minute AS UntactBreakStartMinute,
                        a.untact_break_end_hour     AS UntactBreakEndHour,
                        a.untact_break_end_minute   AS UntactBreakEndMinute,
-                       CONCAT('/', ( SELECT file_path FROM tb_file_info tfi WHERE tfi.seq = b.doct_file_seq )) AS DoctFilePath
+                       ( SELECT z.file_path
+                           FROM tb_file_info z
+                         WHERE z.seq = b.doct_file_seq ) AS DoctFilePath
                  FROM hello100_api.eghis_doct_info a                                                              
                  LEFT JOIN hello100.tb_eghis_doct_info_file b
                    ON a.hosp_no = b.hosp_no AND a.hosp_key = b.hosp_key AND a.empl_no = b.empl_no 
@@ -803,6 +806,47 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             using var connection = CreateConnection();
 
             return (await connection.QueryAsync<GetDoctorScheduleResult>(sql, parameters)).ToList();
+        }
+
+        public async Task<TbEghisDoctUntactEntity?> GetDoctorUntactInfo(string hospNo, string emplNo, CancellationToken cancellationToken = default)
+        {
+            DynamicParameters parameters = new DynamicParameters();
+            parameters.Add("HospNo", hospNo, DbType.String);
+            parameters.Add("EmplNo", emplNo, DbType.String);
+
+            var sql = @"
+                SELECT hosp_no                                                 AS HospNo,
+                       hosp_key                                                AS HospKey,
+                       hosp_nm                                                 AS HospNm,
+                       empl_no                                                 AS EmplNo,
+                       update_dt                                               AS UpdateDt,
+                       hosp_tel                                                AS HospTel,
+                       post_cd                                                 AS PostCd,
+                       doct_no                                                 AS DoctNo,
+                       doct_no_type                                            AS DoctNoType,
+                       doct_license_file_seq                                   AS DoctLicenseFileSeq,
+                       doct_nm                                                 AS DoctNm,
+                       doct_birthday                                           AS DoctBirthday,
+                       doct_tel                                                AS DoctTel,
+                       doct_intro                                              AS DoctIntro,
+                       doct_file_seq                                           AS DoctFileSeq,
+                       doct_history                                            AS DoctHistory,
+                       clinic_time                                             AS ClinicTime,
+                       clinic_guide                                            AS ClinicGuide,
+                       account_info_file_seq                                   AS AccountInfoFileSeq,
+                       business_file_seq                                       AS BusinessFileSeq,
+                       join_state                                              AS JoinState,
+                       use_yn                                                  AS UseYn,
+                       DATE_FORMAT(FROM_UNIXTIME(reg_dt), '%Y-%m-%d %H:%i:%s') AS RegDt
+                  FROM hello100.tb_eghis_doct_untact
+                 WHERE hosp_no = @HospNo
+                   AND empl_no = @EmplNo
+                ORDER BY update_dt DESC;
+            ";
+
+            using var connection = CreateConnection();
+
+            return await connection.QueryFirstOrDefaultAsync<TbEghisDoctUntactEntity>(sql, parameters);
         }
 
         public async Task<EghisDoctRsrvInfoEntity?> GetEghisDoctRsrvInfo(string hospNo, string emplNo, int weekNum, string clinicYmd, CancellationToken cancellationToken = default)
@@ -991,7 +1035,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
                        a.result_cd                                AS ResultCd,
                        NULL                                       AS AllergyList,
                        DATE_FORMAT(a.reg_dt, '%Y-%m-%d %H:%i:%s') AS RegDate,
-                       DATE_FORMAT(a.msd_dt, '%Y-%m-%d %H:%i:%s') AS ModDate,
+                       DATE_FORMAT(a.mod_dt, '%Y-%m-%d %H:%i:%s') AS ModDate,
                        2                                          AS TransYn,
                        a.msg                                      AS Message
                   FROM hello100.tb_eghis_hosp_receipt_info a
@@ -1018,19 +1062,42 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             parameters.Add("@EmplNo", emplNo, DbType.String);
 
             var sql = $@"
-                SELECT hosp_no                                  AS HospNo,
-                       hosp_key                                 AS HospKey,
-                       empl_no                                  AS EmplNo,
-                       md_cd                                    AS MdCd,
-                       DATE_FORMAT(reg_dt, '%Y-%m-%d %H:%i:%s') AS RegDt
-                  FROM hello100_api.eghis_doct_info_md
-                 WHERE hosp_no = @HospNo
-                   AND empl_no = @EmplNo;
+                SELECT a.hosp_no                                  AS HospNo,
+                       a.hosp_key                                 AS HospKey,
+                       a.empl_no                                  AS EmplNo,
+                       a.md_cd                                    AS MdCd,
+                       b.cm_name                                  AS MdNm,
+                       DATE_FORMAT(a.reg_dt, '%Y-%m-%d %H:%i:%s') AS RegDt
+                  FROM hello100_api.eghis_doct_info_md a
+                  LEFT JOIN tb_common b
+                    ON b.cls_cd = '03' AND b.del_yn = 'N' AND b.cm_cd = a.md_cd
+                 WHERE a.hosp_no = @HospNo
+                   AND a.empl_no = @EmplNo;
             ";
 
             using var connection = CreateConnection();
 
             return (await connection.QueryAsync<EghisDoctInfoMdEntity>(sql, parameters)).ToList();
+        }
+
+        public async Task<EghisDoctInfoEntity?> GetDoctorInfoAsync(DbSession db, string hospNo, string emplNo, CancellationToken ct)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@HospNo", hospNo, DbType.String);
+            parameters.Add("@EmplNo", emplNo, DbType.String);
+
+            var query = @"
+                SELECT a.empl_no AS EmplNo,
+                       a.doct_no AS DoctNo,
+                       a.doct_nm AS DoctNm
+                  FROM hello100_api.eghis_doct_info a
+                 WHERE a.hosp_no = @HospNo
+                   AND a.empl_no = @EmplNo
+            ";
+
+            var result = await db.QueryFirstOrDefaultAsync<EghisDoctInfoEntity>(query, parameters, ct, _logger);
+
+            return result;
         }
     }
 }

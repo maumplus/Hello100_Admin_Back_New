@@ -7,9 +7,7 @@ using Hello100Admin.Modules.Admin.Application.Common.Errors;
 using Hello100Admin.Modules.Admin.Application.Common.Extensions;
 using Microsoft.Extensions.Logging;
 using System.Net.Http.Headers;
-using System.Net.Http;
 using System.Text;
-using System.Text.Json;
 
 namespace Hello100Admin.Modules.Admin.Infrastructure.External.Web.KakaoBiz
 {
@@ -41,7 +39,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.External.Web.KakaoBiz
 
                 // 응답 처리
                 string jsonResponse = await response.Content.ReadAsStringAsync();
-                var apiResultList = JsonSerializer.Deserialize<KakaoBizResult<KakaoMsgSendHistoryDataSet>>(jsonResponse);
+                var apiResultList = jsonResponse.FromJson<KakaoBizResult<KakaoMsgSendHistoryDataSet>>();
 
                 return apiResultList;
             }

@@ -1,20 +1,10 @@
-﻿using DocumentFormat.OpenXml.Spreadsheet;
-using Hello100Admin.BuildingBlocks.Common.Application;
+﻿using Hello100Admin.BuildingBlocks.Common.Application;
 using Hello100Admin.BuildingBlocks.Common.Definition.Enums;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
-using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Hospital;
-using Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Queries;
-using Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Results;
 using Hello100Admin.Modules.Admin.Domain.Entities;
 using Hello100Admin.Modules.Admin.Domain.Repositories;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Commands
 {
@@ -58,17 +48,11 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
 
             await _db.RunInTransactionAsync(DataSource.Hello100, async (session, token) =>
             {
-                await _hospitalRepository.RemoveEghisDoctRsrvAsync(session, eghisDoctRsrvInfoEntity, token);
+                await _hospitalRepository.RemoveEghisDoctRsrvAsync(session, eghisDoctRsrvInfoEntity, "RS", token);
 
                 var ridx = await _hospitalRepository.InsertEghisDoctRsrvAsync(session, eghisDoctRsrvInfoEntity, token);
 
-                foreach (var eghisDoctRsrvDetailInfoEntity in command.EghisDoctRsrvDetailInfoList)
-                {
-                    eghisDoctRsrvDetailInfoEntity.Ridx = ridx;
-                    eghisDoctRsrvDetailInfoEntity.ReceptType = "RS";
-                }
-
-                await _hospitalRepository.InsertEghisDoctRsrvDetailAsync(session, command.EghisDoctRsrvDetailInfoList, token);
+                await _hospitalRepository.InsertEghisDoctRsrvDetailAsync(session, command.EghisDoctRsrvDetailInfoList, ridx, "RS", token);
             },
             cancellationToken);
 

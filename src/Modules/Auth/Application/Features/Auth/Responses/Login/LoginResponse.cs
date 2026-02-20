@@ -34,6 +34,10 @@ public class HospitalInfo
     /// </summary>
     public string ChartType { get; set; } = null!;
     /// <summary>
+    /// 병원명
+    /// </summary>
+    public string HospName { get; set; } = null!;
+    /// <summary>
     /// 태블릿 수 (헬로데스크 사용)
     /// </summary>
     public int TabletCount { get; set; }

@@ -152,12 +152,12 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Hospitals
             var result = await db.ExecuteAsync(sb.ToString(), parameters, ct, _logger);
 
             if (result <= 0)
-                throw new BizException(AdminErrorCode.CreateHospitalFailed.ToError());
+                throw new BizException(AdminErrorCode.UpsertHospitalFailed.ToError());
 
             return result;
         }
 
-        public async Task<int> DeleteHospitalAsync(DbSession db, string hospNo, string hospKey, CancellationToken ct)
+        public async Task<int> DeleteHospitalAsync(DbSession db, string? hospNo, string hospKey, CancellationToken ct)
         {
             var parameters = new DynamicParameters();
             parameters.Add("HospNo", hospNo, DbType.String);
@@ -167,6 +167,8 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Hospitals
             StringBuilder sb = new StringBuilder();
             sb.AppendLine(" DELETE FROM tb_hospital_info");
             sb.AppendLine("  WHERE hosp_key = @HospKey ;");
+
+            // tb_hospital_medical_info 삭제도 필요할 것으로 보임
 
             if (string.IsNullOrWhiteSpace(hospNo) == false)
             {

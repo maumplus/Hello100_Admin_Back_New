@@ -36,6 +36,11 @@
         public bool IsAlimtalkServiceApplied = false;
 
         /// <summary>
+        /// 알림톡 발송 서비스 신청 날짜 (yyyy-MM-dd)
+        /// </summary>
+        public string? ApplicationDate { get; init; }
+
+        /// <summary>
         /// 알림톡 발송 서비스 신청(검사결과) 카카오 샘플 이미지 URL
         /// </summary>
         public string KakaoSampleImageUrl { get; init; } = default!;

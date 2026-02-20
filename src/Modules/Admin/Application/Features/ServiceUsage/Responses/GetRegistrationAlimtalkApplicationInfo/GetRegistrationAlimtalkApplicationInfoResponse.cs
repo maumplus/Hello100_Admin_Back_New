@@ -34,6 +34,10 @@
         /// 알림톡 발송 서비스 신청 여부
         /// </summary>
         public bool IsAlimtalkServiceApplied = false;
+        /// <summary>
+        /// 알림톡 발송 서비스 신청 날짜 (yyyy-MM-dd)
+        /// </summary>
+        public string? ApplicationDate { get; init; }
 
         /// <summary>
         /// 알림톡 발송 서비스 신청(진료접수) 카카오 샘플 이미지 URL

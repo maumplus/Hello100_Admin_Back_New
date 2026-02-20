@@ -12,6 +12,7 @@ namespace Hello100Admin.Modules.Admin.Domain.Entities
         public string HospKey { get; set; }
         public string EmplNo { get; set; }
         public string MdCd { get; set; }
+        public string MdNm { get; set; }
         public string RegDt { get; set; }
     }
 }

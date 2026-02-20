@@ -1,17 +1,31 @@
-﻿using Hello100Admin.Modules.Admin.Domain.Entities;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace Hello100Admin.API.Constracts.Admin.HospitalManagement
 {
-    public class PostDoctorUntactWeeksReservationRequest
+    public sealed record PostDoctorUntactWeeksReservationRequest
     {
         [JsonIgnore]
-        public string HospNo { get; set; }
-        public string EmplNo { get; set; }
-        public int WeekNum { get; set; }
-        public int UntactRsrvIntervalTime { get; set; }
+        public string? HospNo { get; init; }
+        public string EmplNo { get; init; }
+        public int WeekNum { get; init; }
+        public int UntactRsrvIntervalTime { get; init; }
         [JsonIgnore]
-        public int UntactRsrvIntervalCnt { get; set; } = 1;
-        public List<EghisDoctRsrvDetailInfoEntity> EghisDoctRsrvDetailInfoList { get; set; }
+        public int UntactRsrvIntervalCnt { get; init; } = 1;
+        public string UntactAvaStartTime { get; init; }
+        public string UntactAvaEndTime { get; init; }
+        public string UntactAvaUseYn { get; init; }
+        public List<PostDoctorUntactWeeksReservationRequestItem> EghisDoctRsrvDetailInfoList { get; init; }
+    }
+
+    public sealed record PostDoctorUntactWeeksReservationRequestItem
+    {
+        public int RsIdx { get; init; }
+        public int Ridx { get; init; }
+        public string StartTime { get; init; }
+        public string EndTime { get; init; }
+        public int RsrvCnt { get; init; }
+        public int ComCnt { get; init; }
+        public string? RegDt { get; init; }
+        public string ReceptType { get; init; }
     }
 }

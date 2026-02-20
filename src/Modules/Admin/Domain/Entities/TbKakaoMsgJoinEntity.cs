@@ -8,5 +8,7 @@
         public string DoctTel { get; set; } = default!;
         public string TmpType { get; set; } = "";
         public int RegDt { get; set; }
+        public DateTimeOffset? RegDateTimeOffset =>
+            RegDt > 0 ? DateTimeOffset.FromUnixTimeSeconds(RegDt) : null;
     }
 }

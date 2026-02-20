@@ -1,4 +1,5 @@
-﻿using Hello100Admin.API.Extensions;
+﻿using Hello100Admin.API.Constracts.Admin.Departments;
+using Hello100Admin.API.Extensions;
 using Hello100Admin.API.Infrastructure.Attributes;
 using Hello100Admin.BuildingBlocks.Common.Errors;
 using Hello100Admin.Modules.Admin.Application.Common.Models;
@@ -34,13 +35,13 @@ namespace Hello100Admin.API.Controllers
         /// [병원관리자] 병원정보관리 > 병원정보관리 > 전체 진료과목 조회
         /// [전체 관리자] 병원목록 > 병원목록 > 전체 진료과 조회
         /// </summary>
-        [HttpGet]
+        [HttpPost]
         [ProducesResponseType(typeof(ApiResponse<ListResult<GetDepartmentsResult>>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetDepartments(CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetDepartments(GetDepartmentsRequest request, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("GET /api/departments");
+            _logger.LogInformation("POST /api/departments");
 
-            var result = await _mediator.Send(new GetDepartmentsQuery(), cancellationToken);
+            var result = await _mediator.Send(new GetDepartmentsQuery() { HospKey = request.HospKey }, cancellationToken);
 
             return result.ToActionResult(this);
         }

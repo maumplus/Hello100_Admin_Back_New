@@ -32,7 +32,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
         public int BreakEndHour { get; set; }
         public int BreakEndMinute { get; set; }
         public int IntervalTime { get; set; }
-        public string Message { get; set; }
+        public string? Message { get; set; }
         public int Hello100Role { get; set; }
         public int Ridx { get; set; }
         public int ViewRole { get; set; }
@@ -45,6 +45,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
     {
         public string HospNo { get; set; }
         public string HospKey { get; set; }
+        public string EmplNo { get; set; }
         public string DoctNo { get; set; }
         public string DoctNm { get; set; }
         public string DeptCd { get; set; }
@@ -59,15 +60,18 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
     {
         private readonly ILogger<PatchDoctorWeeksScheduleCommandHandler> _logger;
         private readonly IHospitalManagementRepository _hospitalManagementRepository;
+        private readonly ICryptoService _cryptoService;
         private readonly IDbSessionRunner _db;
 
         public PatchDoctorWeeksScheduleCommandHandler(
             ILogger<PatchDoctorWeeksScheduleCommandHandler> logger,
             IHospitalManagementRepository hospitalManagementRepository,
+            ICryptoService cryptoService,
             IDbSessionRunner db)
         {
             _logger = logger;
             _hospitalManagementRepository = hospitalManagementRepository;
+            _cryptoService = cryptoService;
             _db = db;
         }
 
@@ -89,7 +93,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
 
                     if ((hello100Role & Hello100RoleType.Rsrv) == 0)
                     {
-                        await _hospitalManagementRepository.RemoveEghisDoctRsrvAsync(session, doctorSchedule.Ridx, token);
+                        await _hospitalManagementRepository.RemoveEghisDoctRsrvAsync(session, doctorSchedule.Ridx, "RS", token);
                     }
 
                     var eghisDoctInfoEntity = new EghisDoctInfoEntity()
@@ -97,7 +101,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
                         HospNo = doctorSchedule.HospNo,
                         HospKey = doctorSchedule.HospKey,
                         EmplNo = doctorSchedule.EmplNo,
-                        DoctNo = doctorSchedule.DoctNo,
+                        DoctNo = _cryptoService.EncryptWithNoVector(doctorSchedule.DoctNo),
                         DoctNm = doctorSchedule.DoctNm,
                         DeptCd = doctorSchedule.DeptCd,
                         DeptNm = doctorSchedule.DeptNm,

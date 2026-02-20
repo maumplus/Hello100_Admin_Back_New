@@ -14,7 +14,7 @@ namespace Hello100Admin.Modules.Admin.Domain.Entities
         public string EndTime { get; set; }
         public int RsrvCnt { get; set; }
         public int ComCnt { get; set; }
-        public string RegDt { get; set; }
+        public string? RegDt { get; set; }
         public string ReceptType { get; set; }
     }
 }

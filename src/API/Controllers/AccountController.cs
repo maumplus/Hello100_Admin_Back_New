@@ -38,14 +38,14 @@ namespace Hello100Admin.API.Controllers
         /// <summary>
         /// 차트구분 목록 API
         /// </summary>
-        [HttpPost("chart-types")]
+        [HttpGet("chart-types")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetChartTypeList(GetChartTypeListQuery query)
+        public async Task<IActionResult> GetChartTypeList(CancellationToken ct = default)
         {
-            _logger.LogInformation("GET /api/account/chart-types/ [{Aid}]", Aid);
+            _logger.LogInformation("GET /api/account/chart-types [{Aid}]", Aid);
 
-            var result = await _mediator.Send(query);
+            var result = await _mediator.Send(new GetChartTypeListQuery());
 
             return result.ToActionResult(this);
         }

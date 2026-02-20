@@ -19,6 +19,9 @@ using Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Queries.Sear
 using Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Queries.ExportExaminationResultAlimtalkHistoriesExcel;
 using Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.ReadModels.ExportExaminationResultAlimtalkHistoriesExcel;
 using Hello100Admin.Modules.Admin.Domain.Entities;
+using Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Results;
+using Hello100Admin.Modules.Admin.Application.Common.Models;
+using Hello100Admin.Modules.Admin.Application.Common.Definitions.Constants;
 
 namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.ServiceUsage
 {
@@ -600,7 +603,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.ServiceUsage
             }
         }
 
-        public async Task<TbKakaoMsgJoinEntity?> FindAlimtalkServiceApplicationAsync(DbSession db, string hospNo, string hospKey, string tmpType, CancellationToken ct = default)
+        public async Task<TbKakaoMsgJoinEntity?> FindAlimtalkServiceApplicationAsync(DbSession db, string hospNo, string hospKey, string tmpType, CancellationToken ct)
         {
             var parameters = new DynamicParameters();
             parameters.Add("HospNo", hospNo, DbType.String);
@@ -609,7 +612,8 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.ServiceUsage
 
             var query = @"
                 SELECT doct_nm,
-                       doct_tel
+                       doct_tel,
+                       reg_dt
                   FROM hello100.tb_kakao_msg_join
                  WHERE hosp_no = @HospNo
 	               AND hosp_key = @HospKey
@@ -617,6 +621,760 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.ServiceUsage
             ";
 
             var result = await db.QueryFirstOrDefaultAsync<TbKakaoMsgJoinEntity>(query, parameters, ct, _logger);
+
+            return result;
+        }
+
+        public async Task<List<GetHospitalServiceUsageStatusResultItemByServiceUnit>> GetServiceUnitReceptionStatusAsync(
+            DbSession db, string? fromDate, string? toDate, string? searchChartType, int searchType, string? searchKeyword, string qrCheckYn, 
+            string todayRegistrationYn, string appointmentYn, string telemedicineYn, string excludeTestHospitalsYn, CancellationToken ct)
+        {
+            var fromDt = string.IsNullOrWhiteSpace(fromDate) ? string.Empty : fromDate.Replace("-", "");
+            var toDt = string.IsNullOrWhiteSpace(toDate) ? string.Empty : toDate.Replace("-", "");
+
+            #region ParamSet
+            var chkGroup = new Dictionary<string, string>
+            {
+                { "'RC'", qrCheckYn },  //QR 접수 
+                { "'TR'", todayRegistrationYn },  //오늘 접수
+                { "'RS'", appointmentYn },  //진료 예약
+                { "'NR'", telemedicineYn }   //비대면 진료
+            };
+
+            List<string> serviceChkList = new List<string>();
+
+            foreach (var x in chkGroup)
+            {
+                if (x.Value == "Y")
+                {
+                    serviceChkList.Add(x.Key);
+                }
+            }
+
+            string inClause = "";
+
+            if (serviceChkList.Count > 0)
+            {
+                inClause = string.Join(", ", serviceChkList);
+            }
+            #endregion
+
+            StringBuilder sb = new StringBuilder();
+
+            sb.AppendLine("SELECT tc.cm_name               ReceptTypeNm,  ");
+            sb.AppendLine("       tc.cm_cd                 ReceptType,    ");
+            sb.AppendLine("       IFNULL(x.WaitingCount , 0) WaitingCount, ");
+            sb.AppendLine("       IFNULL(x.ReceptionCount , 0) ReceptionCount, ");
+            sb.AppendLine("       IFNULL(x.ReceptionFailedCount , 0) ReceptionFailedCount, ");
+            sb.AppendLine("       IFNULL(x.ReceptionCanceledCount , 0) ReceptionCanceledCount, ");
+            sb.AppendLine("       IFNULL(x.TreatmentCompletedCount , 0) TreatmentCompletedCount, ");
+            sb.AppendLine("       IFNULL(x.TotalReceptionCount, 0)         TotalReceptionCount            ");
+            sb.AppendLine("  FROM hello100.tb_common tc	                  ");
+            sb.AppendLine("  LEFT JOIN ( SELECT recept_type receptType,   ");
+            sb.AppendLine("                     SUM(CASE WHEN ptnt_state IN(3, 2) THEN cnt ELSE 0 END) WaitingCount, "); // 접수대기
+            sb.AppendLine("                     SUM(CASE WHEN ptnt_state =   1 THEN cnt ELSE 0 END) ReceptionCount, "); // 접수완료
+            sb.AppendLine("                     SUM(CASE WHEN ptnt_state =   8 THEN cnt ELSE 0 END) ReceptionCanceledCount, "); // 취소
+            sb.AppendLine("                     SUM(CASE WHEN ptnt_state =   7 THEN cnt ELSE 0 END) ReceptionFailedCount, "); // 실패
+            sb.AppendLine("                     SUM(CASE WHEN ptnt_state >=  9 THEN cnt ELSE 0 END) TreatmentCompletedCount, "); // 진료완료
+            sb.AppendLine("                     SUM(cnt)                                            TotalReceptionCount         "); // 총계
+            sb.AppendLine("                FROM ( SELECT tehri.recept_type,                                     ");
+            sb.AppendLine("                              tehri.ptnt_state,                                      ");
+            sb.AppendLine("                              COUNT(1) AS cnt                                        ");
+            sb.AppendLine("                         FROM hello100.tb_eghis_hosp_receipt_info tehri              ");
+            sb.AppendLine("                         INNER JOIN hello100.tb_eghis_hosp_info tehi                 ");
+            sb.AppendLine("                            ON tehri.hosp_no = tehi.hosp_no                          ");
+            sb.AppendLine("                         INNER JOIN hello100.tb_hospital_info thi                    ");
+            sb.AppendLine("                            ON tehi.hosp_key = thi.hosp_key                          ");
+
+            if (excludeTestHospitalsYn == "Y")
+            {
+                sb.AppendLine("                           AND thi.is_test = 0                                       ");
+            }
+
+            sb.AppendLine("                        WHERE 1 = 1                                                  ");
+
+            if (string.IsNullOrWhiteSpace(fromDt) == false)
+            {
+                sb.AppendLine("                          AND tehri.req_date BETWEEN '" + fromDt + "' AND '" + toDt + "'");
+            }
+
+            if (serviceChkList.Count > 0)
+            {
+                sb.AppendLine("                          AND tehri.recept_type IN (" + inClause + ")");
+            }
+
+            if (string.IsNullOrWhiteSpace(searchKeyword) == false)
+            {
+                // 병원명 검색
+                if (searchType == 1)
+                {
+                    sb.AppendLine("                          AND tehri.hosp_no IN ( SELECT hosp_no FROM hello100.vm_eghis_hospitals vh WHERE vh.name LIKE '%" + searchKeyword + "%' )");
+                }
+                else
+                {
+                    //요양기관 검색
+                    sb.AppendLine("                          AND tehri.hosp_no LIKE '%" + searchKeyword + "%'");
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(searchChartType) == false)
+            {
+                sb.AppendLine("                          AND tehi.chart_type = '" + searchChartType + "'");
+            }
+
+            sb.AppendLine("                       GROUP BY tehri.recept_type, tehri.ptnt_state ) x              ");
+            sb.AppendLine("                LEFT JOIN hello100.tb_common tc 	                                    ");
+            sb.AppendLine("                  ON tc.cls_cd = '16' AND tc.cm_cd = x.recept_type                   ");
+            sb.AppendLine("              GROUP BY recept_type ) x 	                                            ");
+            sb.AppendLine("    ON tc.cls_cd = '16' AND tc.cm_cd = x.receptType	                                ");
+            sb.AppendLine(" WHERE tc.cls_cd = '16'                                                              ");
+            sb.AppendLine("ORDER BY tc.cm_seq;                                                                  ");
+
+            var result = (await db.QueryAsync<GetHospitalServiceUsageStatusResultItemByServiceUnit>(sb.ToString(), ct: ct, logger: _logger)).ToList();
+
+            return result;
+        }
+
+        public async Task<ListResult<GetHospitalServiceUsageStatusResultItemByHospitalUnit>> GetHospitalUnitReceptionStatusAsync(
+            DbSession db, int pageNo, int pageSize, string? fromDate, string? toDate, string? searchChartType, int searchType, string? searchKeyword, string qrCheckYn,
+            string todayRegistrationYn, string appointmentYn, string telemedicineYn, string excludeTestHospitalsYn, CancellationToken ct)
+        {
+            var fromDt = string.IsNullOrWhiteSpace(fromDate) ? string.Empty : fromDate.Replace("-", "");
+            var toDt = string.IsNullOrWhiteSpace(toDate) ? string.Empty : toDate.Replace("-", "");
+
+            var parameters = new DynamicParameters();
+            parameters.Add("SearchKeyword", searchKeyword, DbType.String);
+            parameters.Add("Limit", pageSize, DbType.Int32);
+            parameters.Add("OffSet", (pageNo - 1) * pageSize, DbType.Int32);
+            parameters.Add("FromDt", fromDt, DbType.String);
+            parameters.Add("ToDt", toDt, DbType.String);
+
+            var chkGroup = new Dictionary<string, string>
+            {
+                { "'RC'", qrCheckYn },  //QR 접수 
+                { "'TR'", todayRegistrationYn },  //오늘 접수
+                { "'RS'", appointmentYn },  //진료 예약
+                { "'NR'", telemedicineYn }   //비대면 진료
+            };
+
+            List<string> serviceChkList = new List<string>();
+
+            foreach (var x in chkGroup)
+            {
+                if (x.Value == AdminBizConstant.StringYn.YES)
+                {
+                    serviceChkList.Add(x.Key);
+                }
+            }
+
+            string inClause = "";
+
+            if (serviceChkList.Count > 0)
+            {
+                inClause = string.Join(", ", serviceChkList);
+            }
+
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("SELECT cn.hosp_no AS HospNo,");
+            sb.AppendLine("       MAX(vh.name) AS HospName,");
+            sb.AppendLine("       SUM(CASE WHEN ptnt_state IN (3, 2) THEN cnt ELSE 0 END) AS WaitingCount, 	");
+            sb.AppendLine("       SUM(CASE WHEN ptnt_state =  1 THEN cnt ELSE 0 END) AS ReceptionCount, 	");
+            sb.AppendLine("       SUM(CASE WHEN ptnt_state =  8 THEN cnt ELSE 0 END) AS ReceptionCanceledCount, 	");
+            sb.AppendLine("       SUM(CASE WHEN ptnt_state =  7 THEN cnt ELSE 0 END) AS ReceptionFailedCount, 	");
+            sb.AppendLine("       SUM(CASE WHEN ptnt_state >= 9 THEN cnt ELSE 0 END) AS TreatmentCompletedCount  	");
+            sb.AppendLine("  FROM ( SELECT ti.hosp_no,                                                          ");
+            sb.AppendLine("                ti.recept_type,                                                      ");
+            sb.AppendLine("                ti.ptnt_state,                                                       ");
+            sb.AppendLine("                COUNT(1) cnt                                                         ");
+            sb.AppendLine("           FROM hello100.tb_eghis_hosp_receipt_info ti                               ");
+            sb.AppendLine("                         INNER JOIN hello100.tb_eghis_hosp_info tehi                 ");
+            sb.AppendLine("                            ON ti.hosp_no = tehi.hosp_no                             ");
+            sb.AppendLine("                         INNER JOIN hello100.tb_hospital_info thi                    ");
+            sb.AppendLine("                            ON tehi.hosp_key = thi.hosp_key                          ");
+
+            if (excludeTestHospitalsYn == AdminBizConstant.StringYn.YES)
+            {
+                sb.AppendLine("                           AND thi.is_test = 0                                       ");
+            }
+
+            sb.AppendLine("          WHERE 1 = 1");
+
+            if (string.IsNullOrWhiteSpace(fromDt) == false)
+            {
+                sb.AppendLine("            AND ti.req_date BETWEEN @FromDt AND @ToDt");
+            }
+
+            if (serviceChkList.Count > 0)
+            {
+                sb.AppendLine("            AND ti.recept_type in (" + inClause + ")");
+            }
+
+            if (string.IsNullOrWhiteSpace(searchKeyword) == false)
+            {
+                //병원명 검색
+                if (searchType == 1)
+                {
+                    sb.AppendLine("            AND ti.hosp_no IN ( SELECT hosp_no FROM hello100.vm_eghis_hospitals vh WHERE vh.name LIKE CONCAT('%', @SearchKeyword, '%') )");
+                }
+                else
+                {
+                    //요양기관 검색
+                    sb.AppendLine("            AND ti.hosp_no LIKE CONCAT('%', @SearchKeyword, '%')");
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(searchChartType) == false)
+            {
+                sb.AppendLine("                          AND tehi.chart_type = '" + searchChartType + "'");
+            }
+
+            sb.AppendLine("         GROUP BY ti.hosp_no, ti.recept_type, ti.ptnt_state");
+            sb.AppendLine("         ORDER BY ti.hosp_no ) cn                          ");
+            sb.AppendLine("  LEFT JOIN hello100.vm_eghis_hospitals vh                 ");
+            sb.AppendLine("    ON cn.hosp_no = vh.hosp_no  	                          ");
+            sb.AppendLine("GROUP BY HospNo                                            ");
+            sb.AppendLine("ORDER BY HospNo                                            ");
+            sb.AppendLine("LIMIT @OffSet, @Limit;                                     ");
+
+            var queryResult = (await db.QueryAsync<GetHospitalServiceUsageStatusResultItemByHospitalUnit>(sb.ToString(), parameters, ct, _logger)).ToList();
+
+            var result = new ListResult<GetHospitalServiceUsageStatusResultItemByHospitalUnit>();
+
+            result.Items = queryResult;
+            result.TotalCount = queryResult.Count;
+
+            return result;
+        }
+
+        // this.GetHospitalUnitReceptionStatusAsync() 과 pagenation 차이. 추후 병합 가능?
+        public async Task<List<GetHospitalServiceUsageStatusResultItemByHospitalUnit>> ExportHospitalUnitReceptionStatusExcelAsync(
+            DbSession db, string? fromDate, string? toDate, string? searchChartType, int searchType, string? searchKeyword, string qrCheckYn,
+            string todayRegistrationYn, string appointmentYn, string telemedicineYn, string excludeTestHospitalsYn, CancellationToken ct)
+        {
+            var fromDt = string.IsNullOrWhiteSpace(fromDate) ? string.Empty : fromDate.Replace("-", "");
+            var toDt = string.IsNullOrWhiteSpace(toDate) ? string.Empty : toDate.Replace("-", "");
+
+            var parameters = new DynamicParameters();
+            parameters.Add("SearchKeyword", searchKeyword, DbType.String);
+            parameters.Add("FromDt", fromDt, DbType.String);
+            parameters.Add("ToDt", toDt, DbType.String);
+
+            var chkGroup = new Dictionary<string, string>
+            {
+                { "'RC'", qrCheckYn },  //QR 접수 
+                { "'TR'", todayRegistrationYn },  //오늘 접수
+                { "'RS'", appointmentYn },  //진료 예약
+                { "'NR'", telemedicineYn }   //비대면 진료
+            };
+
+            List<string> serviceChkList = new List<string>();
+
+            foreach (var x in chkGroup)
+            {
+                if (x.Value == AdminBizConstant.StringYn.YES)
+                {
+                    serviceChkList.Add(x.Key);
+                }
+            }
+
+            string inClause = "";
+
+            if (serviceChkList.Count > 0)
+            {
+                inClause = string.Join(", ", serviceChkList);
+            }
+
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("SELECT cn.hosp_no AS HospNo,");
+            sb.AppendLine("       MAX(vh.name) AS HospName,");
+            sb.AppendLine("       SUM(CASE WHEN ptnt_state IN (3, 2) THEN cnt ELSE 0 END) AS WaitingCount, 	");
+            sb.AppendLine("       SUM(CASE WHEN ptnt_state =  1 THEN cnt ELSE 0 END) AS ReceptionCount, 	");
+            sb.AppendLine("       SUM(CASE WHEN ptnt_state =  8 THEN cnt ELSE 0 END) AS ReceptionCanceledCount, 	");
+            sb.AppendLine("       SUM(CASE WHEN ptnt_state =  7 THEN cnt ELSE 0 END) AS ReceptionFailedCount, 	");
+            sb.AppendLine("       SUM(CASE WHEN ptnt_state >= 9 THEN cnt ELSE 0 END) AS TreatmentCompletedCount  	");
+            sb.AppendLine("  FROM ( SELECT ti.hosp_no,                                                          ");
+            sb.AppendLine("                ti.recept_type,                                                      ");
+            sb.AppendLine("                ti.ptnt_state,                                                       ");
+            sb.AppendLine("                COUNT(1) cnt                                                         ");
+            sb.AppendLine("           FROM hello100.tb_eghis_hosp_receipt_info ti                               ");
+            sb.AppendLine("                         INNER JOIN hello100.tb_eghis_hosp_info tehi                 ");
+            sb.AppendLine("                            ON ti.hosp_no = tehi.hosp_no                             ");
+            sb.AppendLine("                         INNER JOIN hello100.tb_hospital_info thi                    ");
+            sb.AppendLine("                            ON tehi.hosp_key = thi.hosp_key                          ");
+
+            if (excludeTestHospitalsYn == AdminBizConstant.StringYn.YES)
+            {
+                sb.AppendLine("                           AND thi.is_test = 0                                       ");
+            }
+
+            sb.AppendLine("          WHERE 1 = 1");
+
+            if (string.IsNullOrWhiteSpace(fromDt) == false)
+            {
+                sb.AppendLine("            AND ti.req_date BETWEEN @FromDt AND @ToDt");
+            }
+
+            if (serviceChkList.Count > 0)
+            {
+                sb.AppendLine("            AND ti.recept_type in (" + inClause + ")");
+            }
+
+            if (string.IsNullOrWhiteSpace(searchKeyword) == false)
+            {
+                //병원명 검색
+                if (searchType == 1)
+                {
+                    sb.AppendLine("            AND ti.hosp_no IN ( SELECT hosp_no FROM hello100.vm_eghis_hospitals vh WHERE vh.name LIKE CONCAT('%', @SearchKeyword, '%'))");
+                }
+                else
+                {
+                    //요양기관 검색
+                    sb.AppendLine("            AND ti.hosp_no LIKE CONCAT('%', @SearchKeyword, '%')");
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(searchChartType) == false)
+            {
+                sb.AppendLine("                          AND tehi.chart_type = '" + searchChartType + "'");
+            }
+
+            sb.AppendLine("         GROUP BY ti.hosp_no, ti.recept_type, ti.ptnt_state");
+            sb.AppendLine("         ORDER BY ti.hosp_no ) cn                          ");
+            sb.AppendLine("  LEFT JOIN hello100.vm_eghis_hospitals vh                 ");
+            sb.AppendLine("    ON cn.hosp_no = vh.hosp_no  	                          ");
+            sb.AppendLine("GROUP BY HospNo                                            ");
+            sb.AppendLine("ORDER BY HospNo                                            ");
+
+            var result = (await db.QueryAsync<GetHospitalServiceUsageStatusResultItemByHospitalUnit>(sb.ToString(), parameters, ct, _logger)).ToList();
+
+            return result;
+        }
+
+        public async Task<ExportHello100ReceptionStatusExcelResult> ExportHello100ReceptionStatusExcelAsync(
+            DbSession db, string fromDate, string toDate, CancellationToken ct)
+        {
+            var fromDt = fromDate.Replace("-", "");
+            var toDt = toDate.Replace("-", "");
+
+            DateTime fromDtToDateTime = DateTime.ParseExact(fromDt, "yyyyMMdd", null);
+
+            StringBuilder sb = new StringBuilder();
+
+            sb.AppendLine("SELECT a.hosp_no                                                 AS HospNo,                 ");
+            sb.AppendLine("       MAX(c.name)                                               AS HospName,               ");
+            sb.AppendLine("       COUNT(1)                                                  AS TotalCount,                 ");
+            sb.AppendLine("       SUM(IF(a.ptnt_state = 3, 1, 0))                           AS ReservationWaitingCount,    ");
+            sb.AppendLine("       SUM(IF(a.ptnt_state = 2, 1, 0))                           AS WaitingCount,               ");
+            sb.AppendLine("       SUM(IF(a.ptnt_state = 1, 1, 0))                           AS ReceptionCount,             ");
+            sb.AppendLine("       SUM(IF(a.ptnt_state = 8, 1, 0))                           AS CanceledCount,              ");
+            sb.AppendLine("       SUM(IF(a.ptnt_state >= 9, 1, 0))                          AS CompletedCount,             ");
+            sb.AppendLine("       SUM(IF(a.ptnt_state = 7, 1, 0))                           AS FailedCount,                ");
+            sb.AppendLine("       SUM(IF(a.recept_type = 'RC' AND a.ptnt_state = 3, 1, 0))  AS QrReservationWaitingCount,  ");
+            sb.AppendLine("       SUM(IF(a.recept_type = 'RC' AND a.ptnt_state = 2, 1, 0))  AS QrWaitingCount,             ");
+            sb.AppendLine("       SUM(IF(a.recept_type = 'RC' AND a.ptnt_state = 1, 1, 0))  AS QrReceptionCount,           ");
+            sb.AppendLine("       SUM(IF(a.recept_type = 'RC' AND a.ptnt_state = 8, 1, 0))  AS QrCanceledCount,            ");
+            sb.AppendLine("       SUM(IF(a.recept_type = 'RC' AND a.ptnt_state >= 9, 1, 0)) AS QrCompletedCount,           ");
+            sb.AppendLine("       SUM(IF(a.recept_type = 'TR' AND a.ptnt_state = 3, 1, 0))  AS TodayReservationWaitingCount,");
+            sb.AppendLine("       SUM(IF(a.recept_type = 'TR' AND a.ptnt_state = 2, 1, 0))  AS TodayWaitingCount,          ");
+            sb.AppendLine("       SUM(IF(a.recept_type = 'TR' AND a.ptnt_state = 1, 1, 0))  AS TodayReceptionCount,        ");
+            sb.AppendLine("       SUM(IF(a.recept_type = 'TR' AND a.ptnt_state = 8, 1, 0))  AS TodayCanceledCount,         ");
+            sb.AppendLine("       SUM(IF(a.recept_type = 'TR' AND a.ptnt_state >= 9, 1, 0)) AS TodayCompletedCount,        ");
+            sb.AppendLine("       SUM(IF(a.recept_type = 'RS' AND a.ptnt_state = 3, 1, 0))  AS ReservationReservationWaitingCount,");
+            sb.AppendLine("       SUM(IF(a.recept_type = 'RS' AND a.ptnt_state = 2, 1, 0))  AS ReservationWaitingCountByType,");
+            sb.AppendLine("       SUM(IF(a.recept_type = 'RS' AND a.ptnt_state = 1, 1, 0))  AS ReservationReceptionCount,  ");
+            sb.AppendLine("       SUM(IF(a.recept_type = 'RS' AND a.ptnt_state = 8, 1, 0))  AS ReservationCanceledCount,   ");
+            sb.AppendLine("       SUM(IF(a.recept_type = 'RS' AND a.ptnt_state >= 9, 1, 0)) AS ReservationCompletedCount,  ");
+            sb.AppendLine("       SUM(IF(a.recept_type = 'NR' AND a.ptnt_state = 3, 1, 0))  AS NonFaceToFaceReservationWaitingCount,");
+            sb.AppendLine("       SUM(IF(a.recept_type = 'NR' AND a.ptnt_state = 2, 1, 0))  AS NonFaceToFaceWaitingCount,  ");
+            sb.AppendLine("       SUM(IF(a.recept_type = 'NR' AND a.ptnt_state = 1, 1, 0))  AS NonFaceToFaceReceptionCount,");
+            sb.AppendLine("       SUM(IF(a.recept_type = 'NR' AND a.ptnt_state = 8, 1, 0))  AS NonFaceToFaceCanceledCount, ");
+            sb.AppendLine("       SUM(IF(a.recept_type = 'NR' AND a.ptnt_state >= 9, 1, 0)) AS NonFaceToFaceCompletedCount ");
+            sb.AppendLine("  FROM tb_eghis_hosp_receipt_info a                                                       ");
+            sb.AppendLine("  LEFT JOIN tb_eghis_hosp_info b                                                          ");
+            sb.AppendLine("    ON a.hosp_no = b.hosp_no                                                              ");
+            sb.AppendLine("  LEFT JOIN tb_hospital_info c                                                            ");
+            sb.AppendLine("    ON b.hosp_key = c.hosp_key                                                            ");
+            sb.AppendLine(" WHERE DATE_FORMAT(FROM_UNIXTIME(a.reg_dt), '%Y%m%d%H%i%s') BETWEEN '" + fromDtToDateTime.AddDays(-1).ToString("yyyyMMdd") + "090000' AND '" + fromDt + "085959'");
+            sb.AppendLine("   AND NOT a.hosp_no LIKE '103500__'                                                      ");
+            sb.AppendLine("GROUP BY a.hosp_no;                                                                       ");
+
+            sb.AppendLine("SELECT a.hosp_no                                                 AS HospNo,                 ");
+            sb.AppendLine("       MAX(c.name)                                               AS HospName,               ");
+            sb.AppendLine("       COUNT(1)                                                  AS TotalCount,                 ");
+            sb.AppendLine("       SUM(IF(a.ptnt_state = 3, 1, 0))                           AS ReservationWaitingCount,    ");
+            sb.AppendLine("       SUM(IF(a.ptnt_state = 2, 1, 0))                           AS WaitingCount,               ");
+            sb.AppendLine("       SUM(IF(a.ptnt_state = 1, 1, 0))                           AS ReceptionCount,             ");
+            sb.AppendLine("       SUM(IF(a.ptnt_state = 8, 1, 0))                           AS CanceledCount,              ");
+            sb.AppendLine("       SUM(IF(a.ptnt_state >= 9, 1, 0))                          AS CompletedCount,             ");
+            sb.AppendLine("       SUM(IF(a.ptnt_state = 7, 1, 0))                           AS FailedCount,                ");
+            sb.AppendLine("       SUM(IF(a.recept_type = 'RC' AND a.ptnt_state = 3, 1, 0))  AS QrReservationWaitingCount,  ");
+            sb.AppendLine("       SUM(IF(a.recept_type = 'RC' AND a.ptnt_state = 2, 1, 0))  AS QrWaitingCount,             ");
+            sb.AppendLine("       SUM(IF(a.recept_type = 'RC' AND a.ptnt_state = 1, 1, 0))  AS QrReceptionCount,           ");
+            sb.AppendLine("       SUM(IF(a.recept_type = 'RC' AND a.ptnt_state = 8, 1, 0))  AS QrCanceledCount,            ");
+            sb.AppendLine("       SUM(IF(a.recept_type = 'RC' AND a.ptnt_state >= 9, 1, 0)) AS QrCompletedCount,           ");
+            sb.AppendLine("       SUM(IF(a.recept_type = 'TR' AND a.ptnt_state = 3, 1, 0))  AS TodayReservationWaitingCount,");
+            sb.AppendLine("       SUM(IF(a.recept_type = 'TR' AND a.ptnt_state = 2, 1, 0))  AS TodayWaitingCount,          ");
+            sb.AppendLine("       SUM(IF(a.recept_type = 'TR' AND a.ptnt_state = 1, 1, 0))  AS TodayReceptionCount,        ");
+            sb.AppendLine("       SUM(IF(a.recept_type = 'TR' AND a.ptnt_state = 8, 1, 0))  AS TodayCanceledCount,         ");
+            sb.AppendLine("       SUM(IF(a.recept_type = 'TR' AND a.ptnt_state >= 9, 1, 0)) AS TodayCompletedCount,        ");
+            sb.AppendLine("       SUM(IF(a.recept_type = 'RS' AND a.ptnt_state = 3, 1, 0))  AS ReservationReservationWaitingCount,");
+            sb.AppendLine("       SUM(IF(a.recept_type = 'RS' AND a.ptnt_state = 2, 1, 0))  AS ReservationWaitingCountByType,");
+            sb.AppendLine("       SUM(IF(a.recept_type = 'RS' AND a.ptnt_state = 1, 1, 0))  AS ReservationReceptionCount,  ");
+            sb.AppendLine("       SUM(IF(a.recept_type = 'RS' AND a.ptnt_state = 8, 1, 0))  AS ReservationCanceledCount,   ");
+            sb.AppendLine("       SUM(IF(a.recept_type = 'RS' AND a.ptnt_state >= 9, 1, 0)) AS ReservationCompletedCount,  ");
+            sb.AppendLine("       SUM(IF(a.recept_type = 'NR' AND a.ptnt_state = 3, 1, 0))  AS NonFaceToFaceReservationWaitingCount,");
+            sb.AppendLine("       SUM(IF(a.recept_type = 'NR' AND a.ptnt_state = 2, 1, 0))  AS NonFaceToFaceWaitingCount,  ");
+            sb.AppendLine("       SUM(IF(a.recept_type = 'NR' AND a.ptnt_state = 1, 1, 0))  AS NonFaceToFaceReceptionCount,");
+            sb.AppendLine("       SUM(IF(a.recept_type = 'NR' AND a.ptnt_state = 8, 1, 0))  AS NonFaceToFaceCanceledCount, ");
+            sb.AppendLine("       SUM(IF(a.recept_type = 'NR' AND a.ptnt_state >= 9, 1, 0)) AS NonFaceToFaceCompletedCount ");
+            sb.AppendLine("  FROM tb_eghis_hosp_receipt_info a                                                       ");
+            sb.AppendLine("  LEFT JOIN tb_eghis_hosp_info b                                                          ");
+            sb.AppendLine("    ON a.hosp_no = b.hosp_no                                                              ");
+            sb.AppendLine("  LEFT JOIN tb_hospital_info c                                                            ");
+            sb.AppendLine("    ON b.hosp_key = c.hosp_key                                                            ");
+            sb.AppendLine(" WHERE DATE_FORMAT(FROM_UNIXTIME(a.reg_dt), '%Y%m%d%H%i%s') BETWEEN '" + fromDt + "090000' AND '" + toDt + "235959'");
+            sb.AppendLine("   AND NOT a.hosp_no LIKE '103500__'                                                      ");
+            sb.AppendLine("GROUP BY a.hosp_no;                                                                       ");
+
+            var multi = await db.QueryMultipleAsync(sb.ToString(), ct: ct, logger: _logger);
+
+            var result = new ExportHello100ReceptionStatusExcelResult();
+
+            result.YesterdayItems = (await multi.ReadAsync<ExportHello100ReceptionStatusExcelResultItem>()).ToList();
+            result.PeriodItems = (await multi.ReadAsync<ExportHello100ReceptionStatusExcelResultItem>()).ToList();
+
+            return result;
+        }
+
+        public async Task<GetUntactMedicalUsageStatusResult> GetUntactMedicalUsageStatusAsync(
+            DbSession db, int pageNo, int pageSize, string fromDate, string toDate, int searchDateType, int searchType, string? searchKeyword,
+            List<string> searchStateTypes, List<string> searchPaymentTypes, CancellationToken ct)
+        {
+            var fromDt = fromDate.Replace("-", "");
+            var toDt = toDate.Replace("-", "");
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@SearchKeyword", searchKeyword ?? string.Empty, DbType.String);
+            parameters.Add("@Limit", pageSize, DbType.Int32);
+            parameters.Add("@OffSet", (pageNo - 1) * pageSize, DbType.Int32);
+            parameters.Add("@FromDt", fromDt, DbType.String);
+            parameters.Add("@ToDt", toDt, DbType.String);
+            parameters.Add("@NameKey", "dcc2b29aaa9f271d", DbType.String);
+            parameters.Add("@PhoneKey", "08a0d3a6ec32e85e", DbType.String);
+
+            #region QUERY **********
+            StringBuilder sb = new StringBuilder();
+
+            var conditions = new List<string>();
+
+            // 기본 조건
+            conditions.Add(" tehri.recept_type = 'NR'");
+
+            // 당일, 기간
+            if (searchDateType == 0)
+            {
+                conditions.Add(" tehri.req_date = DATE_FORMAT(CURDATE(), '%Y%m%d')	");
+            }
+            else if (!string.IsNullOrEmpty(fromDt))
+            {
+                conditions.Add(" tehri.req_date BETWEEN @FromDt AND @ToDt 	");
+            }
+
+            // 검색어
+            if (!string.IsNullOrEmpty(searchKeyword))
+            {
+                // req.SearchType, 1:병원명, 2:요양기관번호, 3:회원명, 4:전화번호
+                switch (searchType)
+                {
+                    case 1: conditions.Add(" thi.name like concat('%', @SearchKeyword , '%')"); break;
+                    case 2: conditions.Add(" tehri.hosp_no like concat('%', @SearchKeyword , '%')"); break;
+                    case 3: conditions.Add(@" CONVERT(AES_DECRYPT(FROM_BASE64(tm.name), @NameKey, '\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0') USING utf8mb4) like concat('%', @SearchKeyword , '%')"); break;
+                    case 4: conditions.Add(" nkp.ordr_idxx like concat('%', @SearchKeyword , '%')"); break;
+                }
+            }
+
+            // req.SearchStateTypes 선택한 값에 따라 ptntState 구분
+            // total : 전체
+            // recept : 접수(예약)완료 = 1
+            // end : 진료완료 = 9, 11, 12, 13, 14, 15
+            // cancel : 접수(예약)취소 = 7, 8
+
+            var conditionMap = new Dictionary<string, List<int>>
+                    {
+                        { "recept", new List<int> { 1 } },
+                        { "end", new List<int> { 9, 11, 12, 13, 14, 15 } },
+                        { "cancel", new List<int> { 7, 8 } }
+                    };
+
+            var combinedConditions = new List<int>();
+
+            if (searchStateTypes is { Count: > 0 })
+            {
+                foreach (var state in searchStateTypes)
+                {
+                    if (state == "total") break;
+                    else if (conditionMap.TryGetValue(state, out List<int>? values))
+                    {
+                        if (values != null)
+                        {
+                            combinedConditions.AddRange(values);
+                        }
+                    }
+                }
+            }
+            var distinctConditions = combinedConditions.Distinct().OrderBy(x => x).ToList();
+
+            if (distinctConditions.Any())
+            {
+                // 'con in (1,2,4,5)'와 같은 형식의 문자열 생성
+                conditions.Add($" tehri.ptnt_state IN ({string.Join(",", distinctConditions)})");
+            }
+
+            // req.SearchPaymentypes 선택한 값에 따라 res_cd 구분
+            // total : 전체
+            // success : 0000
+            // fail : 0000 외
+            if (searchPaymentTypes is { Count: > 0})
+            {
+                foreach (var payment in searchPaymentTypes)
+                {
+                    if (payment == "total") break;
+                    else
+                    {
+                        switch (payment)
+                        {
+                            case "success": conditions.Add($" nkp.res_cd = '0000'"); break;
+                            case "fail": conditions.Add($" (nkp.res_cd <> '0000' or nkp.res_cd is null)"); break;
+                        }
+                    }
+                }
+            }
+
+            sb.AppendLine("SET block_encryption_mode = 'aes-128-cbc';");
+
+            sb.AppendLine("select count(1) as TotalCount");
+            sb.AppendLine("       , count(case when tehri.ptnt_state = 1 then 1 end) as TotalRsrv");
+            sb.AppendLine("       , count(case when tehri.ptnt_state >= 9 then 1 end) as TotalClinicEnd");
+            sb.AppendLine("       , count(case when tehri.ptnt_state in (7,8) then 1 end) as TotalClinicCancel");
+            sb.AppendLine("       , count(case when nkp.res_cd = '0000' then 1 end) as TotalPaymentSuccess");
+            sb.AppendLine("       , count(case when nkp.res_cd <> '0000' or nkp.res_cd is null then 1 end) as TotalPaymentFail");
+            sb.AppendLine("       , sum(nkp.amount) as TotalSumAmt");
+            sb.AppendLine("  from tb_eghis_hosp_receipt_info tehri ");
+            sb.AppendLine("       inner join tb_eghis_hosp_info tehi on tehri.hosp_no = tehi.hosp_no ");
+            sb.AppendLine("       inner join tb_hospital_info thi on thi.hosp_key = tehi.hosp_key");
+            sb.AppendLine("       inner join tb_member tm on tm.mid = tehri.mid");
+            sb.AppendLine("       left join hello100_api.nhn_kcp_payment nkp on nkp.hosp_no = tehri.hosp_no and nkp.recept_no = tehri.recept_no");
+
+            if (conditions.Any())
+            {
+                sb.AppendLine(" where");
+                sb.AppendLine(string.Join($"{Environment.NewLine}   and ", conditions));
+            }
+
+            sb.AppendLine(";");
+
+            sb.AppendLine("select row_number() over(order by tehri.req_date desc, tehri.req_time desc, nkp.payment_id desc) as RowNum");
+            sb.AppendLine("       , tehri.req_date as ReqDate");
+            sb.AppendLine("       , TIME_FORMAT(LPAD(tehri.req_time, 6, '0'), '%H:%i:%s') as ReqTime");
+            sb.AppendLine("       , tehri.recept_no as ReceptNo");
+            sb.AppendLine("       , tehri.serial_no as serialNo");
+            sb.AppendLine("       , tehri.hosp_no as hospNo");
+            sb.AppendLine("       , thi.name as HospName");
+            sb.AppendLine("       , edi.doct_nm as DoctorName");
+            sb.AppendLine("       , tehri.uid");
+            sb.AppendLine("       , tehri.mid");
+            sb.AppendLine(@"       , CONVERT(AES_DECRYPT(FROM_BASE64(tm.name), @NameKey, '\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0') USING utf8mb4) as PtntName");
+            sb.AppendLine(@"       , CONVERT(AES_DECRYPT(FROM_BASE64(tm.phone), @PhoneKey, '\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0') USING utf8mb4) as phoneNumber");
+            sb.AppendLine("       , '' as ReceptType");
+            sb.AppendLine("       , tc.cm_name as PtntState");
+            sb.AppendLine("       , nkp.amount as PaymentAmt");
+            sb.AppendLine("       , if(nkp.res_cd = '0000', '결제성공', '결제실패') as PaymentStatus");
+            sb.AppendLine("       , nkp.ordr_idxx as OrdrIdxx");
+            sb.AppendLine("       , nkp.card_name as CardName");
+            sb.AppendLine("       , ifnull(cnt, 0) as FaxCount");
+            sb.AppendLine("  from tb_eghis_hosp_receipt_info tehri ");
+            sb.AppendLine("       inner join tb_eghis_hosp_info tehi on tehri.hosp_no = tehi.hosp_no");
+            sb.AppendLine("       inner join tb_hospital_info thi on thi.hosp_key = tehi.hosp_key");
+            sb.AppendLine("       inner join tb_member tm on tm.mid = tehri.mid");
+            sb.AppendLine("       inner join tb_common tc on tc.cls_cd = 26 and  tc.cm_cd = tehri.ptnt_state");
+            sb.AppendLine("       left join");
+            sb.AppendLine("       	(select hosp_no, empl_no, doct_nm");
+            sb.AppendLine("       	   from hello100_api.eghis_doct_info group by hosp_no, empl_no, doct_nm) edi on edi.hosp_no = tehri.hosp_no and edi.empl_no = tehri.empl_no ");
+            sb.AppendLine("       left join hello100_api.nhn_kcp_payment nkp on nkp.hosp_no = tehri.hosp_no and nkp.recept_no = tehri.recept_no");
+            sb.AppendLine("       left join");
+            sb.AppendLine("        (select fax.hosp_no, fax.recept_no, count(1) cnt");
+            sb.AppendLine("           from tb_fax_request fax");
+            sb.AppendLine("          where fax.tr_sendstat = '2'");
+            sb.AppendLine("            and fax.tr_rsltstat = '0'");
+            sb.AppendLine("          group by fax.hosp_no, fax.recept_no ) fax on fax.hosp_no = tehri.hosp_no and fax.recept_no = tehri.recept_no");
+
+            if (conditions.Any())
+            {
+                sb.AppendLine(" where");
+                sb.AppendLine(string.Join($"{Environment.NewLine}   and ", conditions));
+            }
+
+            sb.AppendLine(" LIMIT @OffSet, @Limit;");
+            #endregion
+
+            var multi = await db.QueryMultipleAsync(sb.ToString(), parameters, ct, _logger);
+
+            var result = await multi.ReadFirstAsync<GetUntactMedicalUsageStatusResult>();
+            result.UsageStatusItems = (await multi.ReadAsync<GetUntactMedicalUsageStatusResultItem>()).ToList();
+
+            return result;
+        }
+
+        public async Task<List<ExportUntactMedicalUsageStatusExcelResult>> ExportUntactMedicalUsageStatusExcelAsync(
+            DbSession db, string fromDate, string toDate, int searchDateType, int searchType, string? searchKeyword,
+            List<string> searchStateTypes, List<string> searchPaymentTypes, CancellationToken ct)
+        {
+            var fromDt = fromDate.Replace("-", "");
+            var toDt = toDate.Replace("-", "");
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@SearchKeyword", searchKeyword ?? string.Empty, DbType.String);
+            parameters.Add("@FromDt", fromDt, DbType.String);
+            parameters.Add("@ToDt", toDt, DbType.String);
+            parameters.Add("@NameKey", "dcc2b29aaa9f271d", DbType.String);
+            parameters.Add("@PhoneKey", "08a0d3a6ec32e85e", DbType.String);
+
+            #region QUERY **********
+            StringBuilder sb = new StringBuilder();
+
+            var conditions = new List<string>();
+
+            // 기본 조건
+            conditions.Add(" tehri.recept_type = 'NR'");
+
+            // 당일, 기간
+            if (searchDateType == 0)
+            {
+                conditions.Add(" tehri.req_date = DATE_FORMAT(CURDATE(), '%Y%m%d')	");
+            }
+            else if (!string.IsNullOrEmpty(fromDt))
+            {
+                conditions.Add(" tehri.req_date BETWEEN @FromDt AND @ToDt 	");
+            }
+
+            // 검색어
+            if (!string.IsNullOrEmpty(searchKeyword))
+            {
+                // req.SearchType, 1:병원명, 2:요양기관번호, 3:회원명, 4:전화번호
+                switch (searchType)
+                {
+                    case 1: conditions.Add(" thi.name like concat('%', @SearchKeyword , '%')"); break;
+                    case 2: conditions.Add(" tehri.hosp_no like concat('%', @SearchKeyword , '%')"); break;
+                    case 3: conditions.Add(@" CONVERT(AES_DECRYPT(FROM_BASE64(tm.name), @NameKey, '\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0') USING utf8mb4) like concat('%', @SearchKeyword , '%')"); break;
+                    case 4: conditions.Add(" nkp.ordr_idxx like concat('%', @SearchKeyword , '%')"); break;
+                }
+            }
+
+            // req.SearchStateTypes 선택한 값에 따라 ptntState 구분
+            // total : 전체
+            // recept : 접수(예약)완료 = 1
+            // end : 진료완료 = 9, 11, 12, 13, 14, 15
+            // cancel : 접수(예약)취소 = 7, 8
+
+            var conditionMap = new Dictionary<string, List<int>>
+                    {
+                        { "recept", new List<int> { 1 } },
+                        { "end", new List<int> { 9, 11, 12, 13, 14, 15 } },
+                        { "cancel", new List<int> { 7, 8 } }
+                    };
+
+            var combinedConditions = new List<int>();
+
+            if (searchStateTypes is { Count: > 0})
+            {
+                foreach (var state in searchStateTypes)
+                {
+                    if (state == "total") break;
+                    else if (conditionMap.TryGetValue(state, out List<int>? values))
+                    {
+                        if (values != null)
+                        {
+                            combinedConditions.AddRange(values);
+                        }
+                    }
+                }
+            }
+            var distinctConditions = combinedConditions.Distinct().OrderBy(x => x).ToList();
+
+            if (distinctConditions.Any())
+            {
+                // 'con in (1,2,4,5)'와 같은 형식의 문자열 생성
+                conditions.Add($" tehri.ptnt_state IN ({string.Join(",", distinctConditions)})");
+            }
+
+            // req.SearchPaymentypes 선택한 값에 따라 res_cd 구분
+            // total : 전체
+            // success : 0000
+            // fail : 0000 외
+            if (searchPaymentTypes is { Count: > 0})
+            {
+                foreach (var payment in searchPaymentTypes)
+                {
+                    if (payment == "total") break;
+                    else
+                    {
+                        switch (payment)
+                        {
+                            case "success": conditions.Add($" nkp.res_cd = '0000'"); break;
+                            case "fail": conditions.Add($" (nkp.res_cd <> '0000' or nkp.res_cd is null)"); break;
+                        }
+                    }
+                }
+            }
+
+            sb.AppendLine("SET block_encryption_mode = 'aes-128-cbc';");
+
+            sb.AppendLine("select row_number() over(order by tehri.req_date desc, tehri.req_time desc, nkp.payment_id desc) as RowNum");
+            sb.AppendLine("       , tehri.req_date as ReqDate");
+            sb.AppendLine("       , TIME_FORMAT(LPAD(tehri.req_time, 6, '0'), '%H:%i:%s') as ReqTime");
+            sb.AppendLine("       , tehri.recept_no as ReceptNo");
+            sb.AppendLine("       , tehri.serial_no as serialNo");
+            sb.AppendLine("       , tehri.hosp_no as hospNo");
+            sb.AppendLine("       , thi.name as HospName");
+            sb.AppendLine("       , edi.doct_nm as DoctorName");
+            sb.AppendLine("       , tehri.uid");
+            sb.AppendLine("       , tehri.mid");
+            sb.AppendLine(@"       , CONVERT(AES_DECRYPT(FROM_BASE64(tm.name), @NameKey, '\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0') USING utf8mb4) as PtntName");
+            sb.AppendLine(@"       , CONVERT(AES_DECRYPT(FROM_BASE64(tm.phone), @PhoneKey, '\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0') USING utf8mb4) as phoneNumber");
+            sb.AppendLine("       , '' as ReceptType");
+            sb.AppendLine("       , tc.cm_name as PtntState");
+            sb.AppendLine("       , nkp.amount as PaymentAmt");
+            sb.AppendLine("       , if(nkp.res_cd = '0000', '결제성공', '결제실패') as PaymentStatus");
+            sb.AppendLine("       , nkp.ordr_idxx as OrdrIdxx");
+            sb.AppendLine("       , nkp.card_name as CardName");
+            sb.AppendLine("       , ifnull(cnt, 0) as FaxCount");
+            sb.AppendLine("  from tb_eghis_hosp_receipt_info tehri ");
+            sb.AppendLine("       inner join tb_eghis_hosp_info tehi on tehri.hosp_no = tehi.hosp_no");
+            sb.AppendLine("       inner join tb_hospital_info thi on thi.hosp_key = tehi.hosp_key");
+            sb.AppendLine("       inner join tb_member tm on tm.mid = tehri.mid");
+            sb.AppendLine("       inner join tb_common tc on tc.cls_cd = 26 and  tc.cm_cd = tehri.ptnt_state");
+            sb.AppendLine("       left join");
+            sb.AppendLine("       	(select hosp_no, empl_no, doct_nm");
+            sb.AppendLine("       	   from hello100_api.eghis_doct_info group by hosp_no, empl_no, doct_nm) edi on edi.hosp_no = tehri.hosp_no and edi.empl_no = tehri.empl_no ");
+            sb.AppendLine("       left join hello100_api.nhn_kcp_payment nkp on nkp.hosp_no = tehri.hosp_no and nkp.recept_no = tehri.recept_no");
+         
+            sb.AppendLine("       left join");
+            sb.AppendLine("        (select fax.hosp_no, fax.recept_no, count(1) cnt");
+            sb.AppendLine("           from tb_fax_request fax");
+            sb.AppendLine("          where fax.tr_sendstat = '2'");
+            sb.AppendLine("            and fax.tr_rsltstat = '0'");
+            sb.AppendLine("          group by fax.hosp_no, fax.recept_no ) fax on fax.hosp_no = tehri.hosp_no and fax.recept_no = tehri.recept_no");
+
+            if (conditions.Any())
+            {
+                sb.AppendLine(" where");
+                sb.AppendLine(string.Join($"{Environment.NewLine}   and ", conditions));
+            }
+            #endregion
+
+            var multi = await db.QueryMultipleAsync(sb.ToString(), parameters, ct, _logger);
+
+            var result = (await multi.ReadAsync<ExportUntactMedicalUsageStatusExcelResult>()).ToList();
 
             return result;
         }
