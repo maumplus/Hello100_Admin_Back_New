@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Hello100Admin.Modules.Admin.Application.Features.Account.Commands;
 using Hello100Admin.Modules.Admin.Application.Features.Account.Queries;
 using Hello100Admin.API.Infrastructure.Attributes;
+using Hello100Admin.API.Constracts.Admin.Account;
+using Mapster;
 
 namespace Hello100Admin.API.Controllers
 {
@@ -56,9 +58,11 @@ namespace Hello100Admin.API.Controllers
         [HttpPost("set-hosp-no")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> SetHospNo(SetHospNoCommand command)
+        public async Task<IActionResult> SetHospNo(SetHospNoRequest req)
         {
             _logger.LogInformation("GET /api/account/set-hosp-no/ [{Aid}]", Aid);
+
+            var command = req.Adapt<SetHospNoCommand>() with { Aid = base.Aid };
 
             var result = await _mediator.Send(command);
 

@@ -102,5 +102,7 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Errors
         NotFoundDoctorInfo = 4046,
         [Description("내원목적 정보를 찾지 못하였습니다. 확인 후 다시 시도해주세요.")]
         NotFoundVisitPurpose = 4047,
+        [Description("지정 날짜는 중복값을 포함할 수 없습니다. 확인 후 다시 시도해주세요.")]
+        DuplicateDateValue = 4048,
     }
 }
