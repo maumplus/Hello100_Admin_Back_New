@@ -877,7 +877,8 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             return await db.ExecuteScalarAsync<int>(query, parameters, ct, _logger);
         }
 
-        public async Task<int> InsertEghisDoctRsrvDetailAsync(DbSession db, List<EghisDoctRsrvDetailInfoEntity> eghisDoctRsrvDetailInfoList, CancellationToken ct)
+        public async Task<int> InsertEghisDoctRsrvDetailAsync(
+            DbSession db, List<EghisDoctRsrvDetailInfoEntity> eghisDoctRsrvDetailInfoList, int rIdx, string receptType, CancellationToken ct)
         {
             DynamicParameters parameters = new DynamicParameters();
 
@@ -887,12 +888,12 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             {
                 var eghisDoctRsrvDetailInfoEntity = eghisDoctRsrvDetailInfoList[i];
 
-                parameters.Add($"Ridx{i}", eghisDoctRsrvDetailInfoEntity.Ridx, DbType.String);
+                parameters.Add($"Ridx{i}", rIdx, DbType.String);
                 parameters.Add($"StartTime{i}", eghisDoctRsrvDetailInfoEntity.StartTime, DbType.String);
                 parameters.Add($"EndTime{i}", eghisDoctRsrvDetailInfoEntity.EndTime, DbType.String);
                 parameters.Add($"RsrvCnt{i}", eghisDoctRsrvDetailInfoEntity.RsrvCnt, DbType.Int32);
                 parameters.Add($"ComCnt{i}", eghisDoctRsrvDetailInfoEntity.ComCnt, DbType.Int32);
-                parameters.Add($"ReceptType{i}", eghisDoctRsrvDetailInfoEntity.ReceptType, DbType.Int32);
+                parameters.Add($"ReceptType{i}", receptType, DbType.Int32);
 
                 if (!string.IsNullOrEmpty(values))
                 {

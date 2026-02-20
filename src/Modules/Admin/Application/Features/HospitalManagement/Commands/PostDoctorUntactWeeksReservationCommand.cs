@@ -1,34 +1,37 @@
-﻿using DocumentFormat.OpenXml.Spreadsheet;
-using Hello100Admin.BuildingBlocks.Common.Application;
+﻿using Hello100Admin.BuildingBlocks.Common.Application;
 using Hello100Admin.BuildingBlocks.Common.Definition.Enums;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
-using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Hospital;
-using Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Queries;
-using Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Results;
 using Hello100Admin.Modules.Admin.Domain.Entities;
 using Hello100Admin.Modules.Admin.Domain.Repositories;
+using Mapster;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Commands
 {
-    public class PostDoctorUntactWeeksReservationCommand : IRequest<Result>
+    public record PostDoctorUntactWeeksReservationCommand : IRequest<Result>
     {
-        public string HospNo { get; set; }
-        public string EmplNo { get; set; }
-        public int WeekNum { get; set; }
-        public int UntactRsrvIntervalTime { get; set; }
-        public int UntactRsrvIntervalCnt { get; set; }
-        public string UntactAvaStartTime { get; set; }
-        public string UntactAvaEndTime { get; set; }
-        public string UntactAvaUseYn { get; set; }
-        public List<EghisDoctRsrvDetailInfoEntity> EghisDoctRsrvDetailInfoList { get; set; }
+        public string HospNo { get; init; }
+        public string EmplNo { get; init; }
+        public int WeekNum { get; init; }
+        public int UntactRsrvIntervalTime { get; init; }
+        public int UntactRsrvIntervalCnt { get; init; }
+        public string UntactAvaStartTime { get; init; }
+        public string UntactAvaEndTime { get; init; }
+        public string UntactAvaUseYn { get; init; }
+        public List<PostDoctorUntactWeeksReservationCommandItem> EghisDoctRsrvDetailInfoList { get; init; }
+    }
+
+    public record PostDoctorUntactWeeksReservationCommandItem
+    {
+        public int RsIdx { get; init; }
+        public int Ridx { get; init; }
+        public string StartTime { get; init; }
+        public string EndTime { get; init; }
+        public int RsrvCnt { get; init; }
+        public int ComCnt { get; init; }
+        public string? RegDt { get; init; }
+        public string ReceptType { get; init; }
     }
 
     public class PostDoctorUntactWeeksReservationCommandHandler : IRequestHandler<PostDoctorUntactWeeksReservationCommand, Result>
@@ -47,7 +50,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
             _db = db;
         }
 
-        public async Task<Result> Handle(PostDoctorUntactWeeksReservationCommand command, CancellationToken cancellationToken)
+        public async Task<Result> Handle(PostDoctorUntactWeeksReservationCommand command, CancellationToken ct)
         {
             var eghisDoctRsrvInfoEntity = new EghisDoctRsrvInfoEntity()
             {
@@ -57,10 +60,18 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
                 WeekNum = command.WeekNum,
                 UntactRsrvIntervalTime = command.UntactRsrvIntervalTime,
                 UntactRsrvIntervalCnt = command.UntactRsrvIntervalCnt,
-                UntactAvaStartTime = command.UntactAvaStartTime,
-                UntactAvaEndTime = command.UntactAvaEndTime,
+                UntactAvaStartTime = RemoveColon(command.UntactAvaStartTime),
+                UntactAvaEndTime = RemoveColon(command.UntactAvaEndTime),
                 UntactAvaUseYn = command.UntactAvaUseYn
             };
+
+            var eghisDoctRsrvDetailInfoEntity = command.EghisDoctRsrvDetailInfoList.Adapt<List<EghisDoctRsrvDetailInfoEntity>>();
+
+            foreach (var item in eghisDoctRsrvDetailInfoEntity)
+            {
+                item.StartTime = this.RemoveColon(item.StartTime);
+                item.EndTime = this.RemoveColon(item.EndTime);
+            }
 
             await _db.RunInTransactionAsync(DataSource.Hello100, async (session, token) =>
             {
@@ -68,17 +79,14 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
 
                 var ridx = await _hospitalRepository.InsertEghisDoctUntactRsrvAsync(session, eghisDoctRsrvInfoEntity, token);
 
-                foreach (var eghisDoctRsrvDetailInfoEntity in command.EghisDoctRsrvDetailInfoList)
-                {
-                    eghisDoctRsrvDetailInfoEntity.Ridx = ridx;
-                    eghisDoctRsrvDetailInfoEntity.ReceptType = "NR";
-                }
-
-                await _hospitalRepository.InsertEghisDoctRsrvDetailAsync(session, command.EghisDoctRsrvDetailInfoList, token);
+                await _hospitalRepository.InsertEghisDoctRsrvDetailAsync(session, eghisDoctRsrvDetailInfoEntity, ridx, "NR", token);
             },
-            cancellationToken);
+            ct);
 
             return Result.Success();
         }
+
+        private string RemoveColon(string? value)
+            => string.IsNullOrWhiteSpace(value) ? string.Empty : value.Replace(":", "");
     }
 }

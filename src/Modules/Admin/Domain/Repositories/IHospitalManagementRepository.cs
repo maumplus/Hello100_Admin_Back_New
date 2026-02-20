@@ -86,7 +86,7 @@ namespace Hello100Admin.Modules.Admin.Domain.Repositories
         public Task<int> UpdateDoctorInfoUntactScheduleAsync(DbSession db, List<EghisDoctInfoEntity> eghisDoctInfoList, CancellationToken ct);
         public Task<int> InsertEghisDoctRsrvAsync(DbSession db, EghisDoctRsrvInfoEntity eghisDoctRsrvInfoEntity, CancellationToken ct);
         public Task<int> InsertEghisDoctUntactRsrvAsync(DbSession db, EghisDoctRsrvInfoEntity eghisDoctRsrvInfoEntity, CancellationToken ct);
-        public Task<int> InsertEghisDoctRsrvDetailAsync(DbSession db, List<EghisDoctRsrvDetailInfoEntity> eghisDoctRsrvDetailInfoList, CancellationToken ct);
+        public Task<int> InsertEghisDoctRsrvDetailAsync(DbSession db, List<EghisDoctRsrvDetailInfoEntity> eghisDoctRsrvDetailInfoList, int rIdx, string receptType, CancellationToken ct);
         public Task<int> RemoveEghisDoctInfoMdAsync(DbSession db, EghisDoctInfoMdEntity eghisDoctInfoMdEntity, CancellationToken ct);
         public Task<int> InsertEghisDoctInfoMdAsync(DbSession db, EghisDoctInfoMdEntity eghisDoctInfoMdEntity, CancellationToken ct);
         public Task<int> InsertEghisDoctUntactJoinAsync(DbSession db, TbEghisDoctUntactJoinEntity tbEghisDoctUntactJoinEntity, CancellationToken ct);

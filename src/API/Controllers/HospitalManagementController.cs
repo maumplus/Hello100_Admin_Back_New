@@ -642,22 +642,11 @@ namespace Hello100Admin.API.Controllers
         [HttpPatch("doctor/untact-weeks-schedule/reservation")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> PostDoctorUntactWeeksScheduleReservation(PostDoctorUntactWeeksReservationRequest request, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> PostDoctorUntactWeeksScheduleReservation(PostDoctorUntactWeeksReservationRequest req, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("PATCH /api/hospital-management/doctor/untact-weeks-schedule/reservation");
 
-            var command = new PostDoctorUntactWeeksReservationCommand()
-            {
-                HospNo = base.HospNo,
-                EmplNo = request.EmplNo,
-                WeekNum = request.WeekNum,
-                UntactRsrvIntervalTime = request.UntactRsrvIntervalTime,
-                UntactRsrvIntervalCnt = request.UntactRsrvIntervalCnt,
-                UntactAvaStartTime = request.UntactAvaStartTime,
-                UntactAvaEndTime = request.UntactAvaEndTime,
-                UntactAvaUseYn = request.UntactAvaUseYn,
-                EghisDoctRsrvDetailInfoList = request.EghisDoctRsrvDetailInfoList
-            };
+            var command = req.Adapt<PostDoctorUntactWeeksReservationCommand>() with { HospNo = base.HospNo };
 
             var result = await _mediator.Send(command, cancellationToken);
 

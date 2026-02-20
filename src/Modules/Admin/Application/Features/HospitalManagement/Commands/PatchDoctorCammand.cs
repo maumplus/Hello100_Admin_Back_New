@@ -11,26 +11,20 @@ using Hello100Admin.Modules.Admin.Application.Common.Models;
 using Hello100Admin.Modules.Admin.Domain.Entities;
 using Hello100Admin.Modules.Admin.Domain.Repositories;
 using MediatR;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Commands
 {
     public record PatchDoctorCammand : IQuery<Result>
     {
-        public string HospNo { get; set; }
-        public string HospKey { get; set; }
-        public string EmplNo { get; set; }
-        public string DoctNm { get; set; }
-        public string ViewMinCntYn { get; set; }
-        public string ViewMinCnt { get; set; }
-        public string ViewMinTimeYn { get; set; }
-        public string ViewMinTime { get; set; }
+        public string HospNo { get; set; } = default!;
+        public string HospKey { get; set; } = default!;
+        public string EmplNo { get; set; } = default!;
+        public string DoctNm { get; set; } = default!;
+        public string ViewMinCntYn { get; set; } = default!;
+        public string? ViewMinCnt { get; set; }
+        public string ViewMinTimeYn { get; set; } = default!;
+        public string? ViewMinTime { get; set; }
         public FileUploadPayload? Image { get; set; }
     }
 
@@ -96,8 +90,8 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
                 EmplNo = request.EmplNo,
                 DoctNm = request.DoctNm,
                 ViewRole = viewRole,
-                ViewMinCnt = request.ViewMinCnt,
-                ViewMinTime = request.ViewMinTime
+                ViewMinCnt = request.ViewMinCnt ?? "",
+                ViewMinTime = request.ViewMinTime ?? ""
             };
 
             await _db.RunInTransactionAsync(DataSource.Hello100, async (session, token) =>

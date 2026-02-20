@@ -62,13 +62,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
 
                 var ridx = await _hospitalRepository.InsertEghisDoctRsrvAsync(session, eghisDoctRsrvInfoEntity, token);
 
-                foreach (var eghisDoctRsrvDetailInfoEntity in command.EghisDoctRsrvDetailInfoList)
-                {
-                    eghisDoctRsrvDetailInfoEntity.Ridx = ridx;
-                    eghisDoctRsrvDetailInfoEntity.ReceptType = "RS";
-                }
-
-                await _hospitalRepository.InsertEghisDoctRsrvDetailAsync(session, command.EghisDoctRsrvDetailInfoList, token);
+                await _hospitalRepository.InsertEghisDoctRsrvDetailAsync(session, command.EghisDoctRsrvDetailInfoList, ridx, "RS", token);
             },
             cancellationToken);
 
