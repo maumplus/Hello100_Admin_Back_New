@@ -5,6 +5,7 @@ using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Dapper;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.AdminUser;
 using Hello100Admin.Modules.Admin.Application.Common.Models;
+using Hello100Admin.Modules.Admin.Application.Common.ReadModels;
 using Hello100Admin.Modules.Admin.Application.Features.AdminUser.Results;
 using Hello100Admin.Modules.Admin.Domain.Entities;
 using Hello100Admin.Modules.Admin.Infrastructure.Persistence.DbModels.AdminUser;
@@ -107,6 +108,54 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.AdminUser
             };
 
             return result;
+        }
+
+        public async Task<VmHospitalQrInfoEntity?> GetHospitalAdminDetailWithQrInfoAsync(DbSession db, string aId, CancellationToken ct)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("AId", aId, DbType.String);
+
+            #region == Query ==
+            StringBuilder sb = new StringBuilder();
+
+            sb.AppendLine("  SELECT	a.*                             ");
+            sb.AppendLine("    FROM VM_HOSPITAL_QR_INFO a           ");
+            sb.AppendLine("   WHERE a.aid = @AId                    ");
+            #endregion
+
+            var result = await db.QueryFirstOrDefaultAsync<VmHospitalQrInfoEntity>(sb.ToString(), parameters, ct, _logger);
+
+            return result;
+        }
+
+        public async Task<GetAdminInfoReadModel?> GetAdminByAidAsync(DbSession db, string aid, CancellationToken cancellationToken)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("Aid", aid, DbType.String);
+
+            var sql = @"
+                SELECT a.aid                                                                AS AId,
+                       a.acc_id                                                             AS AccId,
+                       a.acc_pwd                                                            AS AccPwd,
+                       a.hosp_no                                                            AS HospNo,
+                       b.hosp_key                                                           AS HospKey,
+                       a.grade                                                              AS Grade,
+                       a.name                                                               AS Name,
+                       a.tel                                                                AS Tel,
+                       a.email                                                              AS Email,
+                       a.use_2fa                                                            AS Use2fa,
+                       a.account_locked                                                     AS AccountLocked,
+                       a.login_fail_count                                                   AS LoginFailCount,
+                       a.access_token                                                       AS AccessToken,
+                       a.refresh_token                                                      AS RefreshToken
+                  FROM tb_admin a
+                  LEFT JOIN tb_eghis_hosp_info b
+                         ON a.hosp_no = b.hosp_no
+                 WHERE a.aid = @Aid
+                   AND a.del_yn = 'N'
+                 LIMIT 1";
+
+            return await db.QueryFirstOrDefaultAsync<GetAdminInfoReadModel>(sql, parameters);
         }
 
         public async Task<AdminUserEntity?> GetByIdAsync(string accountId, CancellationToken cancellationToken = default)

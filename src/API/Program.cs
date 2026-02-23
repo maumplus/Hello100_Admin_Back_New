@@ -184,7 +184,7 @@ var cryptoService = app.Services.GetRequiredService<ICryptoService>();
 EncryptedData.Configure(cryptoService);
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+//if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
