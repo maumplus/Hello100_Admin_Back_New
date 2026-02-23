@@ -1,5 +1,6 @@
 ﻿using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 using Hello100Admin.Modules.Admin.Application.Common.Models;
+using Hello100Admin.Modules.Admin.Application.Common.ReadModels;
 using Hello100Admin.Modules.Admin.Application.Features.AdminUser.Results;
 using Hello100Admin.Modules.Admin.Domain.Entities;
 
@@ -30,6 +31,15 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistenc
         /// <returns></returns>
         public Task<ListResult<GetHospitalAdminListResult>> GetHospitalAdminListAsync(
             DbSession db, int pageNo, int pageSize, int qrState, int searchType, string? searchKeyword, CancellationToken ct);
+        
+        /// <summary>
+        /// 관리자 사용자 조회
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="aid"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public Task<GetAdminInfoReadModel?> GetAdminByAidAsync(DbSession db, string aid, CancellationToken cancellationToken);
 
         /// <summary>
         /// 관리자 사용자 조회 (가볍게)
@@ -54,5 +64,14 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistenc
             int pageSize,
             bool includeDeleted = false,
             CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// 병원 관리자 상세 정보 조회 (QR 정보 포함)
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="aId"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        public Task<VmHospitalQrInfoEntity?> GetHospitalAdminDetailWithQrInfoAsync(DbSession db, string aId, CancellationToken ct);
     }
 }

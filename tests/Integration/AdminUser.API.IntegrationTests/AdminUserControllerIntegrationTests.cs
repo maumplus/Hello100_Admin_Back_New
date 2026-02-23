@@ -1,6 +1,5 @@
 ﻿using Hello100Admin.Integration.Shared;
 using Microsoft.AspNetCore.WebUtilities;
-using Org.BouncyCastle.Ocsp;
 using System.Net.Http.Json;
 
 namespace AdminUser.API.IntegrationTests
@@ -71,6 +70,51 @@ namespace AdminUser.API.IntegrationTests
 
             // Act
             var response = await _client.GetAsync(url);
+
+            // Body
+            var body = await response.Content.ReadAsStringAsync();
+
+            // Assert
+            Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task GetHospitalAdminDetailAsync_ShouldReturnOk_WhenValidCredentials()
+        {
+            // Arrange
+            _client.AsMySuperAdmin("B81AFBD0", "대민테스트");
+
+            var req = new
+            {
+                AId = "6DCBDB04",
+            };
+
+            // Act
+            var response = await _client.PostAsJsonAsync($"api/admin-user/hospital-admins/detail", req);
+
+            // Body
+            var body = await response.Content.ReadAsStringAsync();
+
+            // Assert
+            Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task DeleteHospitalAdminMappingAsync_ShouldReturnOk_WhenValidCredentials()
+        {
+            // Arrange
+            _client.AsMySuperAdmin("B81AFBD0", "대민테스트");
+
+            var query = new Dictionary<string, string?>
+            {
+                ["HospitalAId"] = "6DCBE0E2",
+                ["AccPwd"] = "qwer1234",
+            };
+
+            var url = QueryHelpers.AddQueryString("/api/admin-user/hospital-admins/mapping", query);
+
+            // Act
+            var response = await _client.DeleteAsync(url);
 
             // Body
             var body = await response.Content.ReadAsStringAsync();
