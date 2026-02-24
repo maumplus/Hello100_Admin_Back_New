@@ -37,7 +37,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Account
             string query = @"
                 UPDATE tb_admin
                    SET hosp_no = @HospNo
-                 WHERE aid = @Aid;
+                 WHERE aid = @AId;
             ";
 
             return await db.ExecuteAsync(query, parameters, cancellationToken);

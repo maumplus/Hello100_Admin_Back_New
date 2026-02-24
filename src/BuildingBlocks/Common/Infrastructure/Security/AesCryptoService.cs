@@ -394,4 +394,26 @@ public class AesCryptoService : ICryptoService
         return Encoding.UTF8.GetString(ms.ToArray());
     }
 
+    private static int Get36Index(char val)
+    {
+        if (val <= '9')
+            return val - '0';
+        else
+            return val - 'a' + 10;
+    }
+
+    public double Convert36To10(string str)
+    {
+        double ret = 0;
+        int len = str.Length - 1;
+
+        str = str.ToLower();
+
+        for (int i = 0; i <= len; i++)
+        {
+            ret += Get36Index(System.Char.Parse(str.Substring(i, 1))) * (Math.Pow(36, (len - i)));
+        }
+
+        return ret;
+    }
 }

@@ -1,12 +1,10 @@
 ﻿using Dapper;
-using Hello100Admin.BuildingBlocks.Common.Definition.Enums;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Dapper;
 using System.Data;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Hospital;
 using Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Results;
 using Microsoft.Extensions.Logging;
-using Mapster;
 using Hello100Admin.Modules.Admin.Application.Common.Models;
 using System.Text;
 using Hello100Admin.Modules.Admin.Domain.Entities;
@@ -32,105 +30,101 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             return conn;
         }
 
-        public async Task<(List<GetHospitalResult>, int)> GetHospitalListAsync(string chartType, HospitalListSearchType searchType, string keyword, int pageNo, int pageSize, CancellationToken cancellationToken = default)
+        public async Task<ListResult<GetHospitalsUsingHello100ServiceResult>> GetHospitalsUsingHello100ServiceAsync(DbSession db, int pageNo, int pageSize, string? searchChartType, int searchType, string? searchKeyword, CancellationToken cancellationToken)
         {
-            try
+            var parameters = new DynamicParameters();
+            parameters.Add("@ChartType", searchChartType ?? "", DbType.String);
+            parameters.Add("@Keyword", searchKeyword ?? "", DbType.String);
+            parameters.Add("@Limit", pageSize, DbType.String);
+            parameters.Add("@OffSet", (pageNo -1) * pageSize, DbType.String);
+
+            string condi = "";
+            string condi2 = "";
+
+            if (searchType == 1) // 병원명
+                condi = $"WHERE name LIKE CONCAT('%', @Keyword, '%') AND del_yn = 'N'";
+            else if (searchType == 2) // 요양기관번호
+                condi = $"WHERE hosp_no LIKE CONCAT('%', @Keyword, '%') AND del_yn = 'N'";
+
+            if (string.IsNullOrWhiteSpace(searchChartType) == false)
             {
-                _logger.LogInformation("Getting Hospital List by ChartType: {ChartType}, SearchType: {SearchType}, Keyword: {Keyword}, PageNo: {PageNo}, PageSize: {PageSize}", chartType, searchType, keyword, pageNo, pageSize);
-
-                var parameters = new DynamicParameters();
-                parameters.Add("@ChartType", chartType, DbType.String);
-                parameters.Add("@Keyword", keyword, DbType.String);
-                parameters.Add("@PageNo", pageNo, DbType.String);
-                parameters.Add("@PageSize", pageSize, DbType.String);
-
-                var sql = @$"
-                    SELECT COUNT(*) OVER()         AS TotalCount,
-                           a.hosp_key              AS HospKey,
-                           a.hosp_no               AS HospNo,
-                           a.business_no           AS BusinessNo,
-                           a.name                  AS Name,
-                           a.hosp_cls_cd           AS HospClsCd,
-                           a.addr                  AS Addr,
-                           a.post_cd               AS PostCd,
-                           a.tel                   AS Tel,
-                           a.site                  AS Site,
-                           a.lat                   AS Lat,
-                           a.lng                   AS Lng,
-                           a.closing_yn            AS ClosingYn,
-                           a.del_yn                AS DelYn,
-                           a.descrption            AS Descrption,
-                           a.reg_dt                AS RegDt,
-                           a.chart_type            AS ChartType,
-                           a.is_test               AS IsTest,
-                           a.md_cd                 AS MdCd,
-                           a.main_md_cd            AS MainMdCd,
-                           a.kiosk_cnt             AS KioskCnt,
-                           a.tablet_cnt            AS TabletCnt,
-                           a.request_appr_yn       AS RequestApprYn
-                      FROM ( SELECT b.hosp_key              AS hosp_key,
-                                    a.hosp_no               AS hosp_no,
-                                    a.business_no           AS business_no,
-                                    b.name                  AS name,
-                                    b.hosp_cls_cd           AS hosp_cls_cd,
-                                    b.addr                  AS addr,
-                                    b.post_cd               AS post_cd,
-                                    b.tel                   AS tel,
-                                    b.site                  AS site,
-                                    b.lat                   AS lat,
-                                    b.lng                   AS lng,
-                                    a.closing_yn            AS closing_yn,
-                                    a.del_yn                AS del_yn,
-                                    a.`desc`                AS descrption,
-                                    FROM_UNIXTIME(a.reg_dt) AS reg_dt,
-                                    a.chart_type            AS chart_type,
-                                    b.is_test               AS is_test,
-                                    ( SELECT GROUP_CONCAT(z.md_cd SEPARATOR ',')
-                                        FROM tb_hospital_medical_info z 
-                                       WHERE a.hosp_key = z.hosp_key ) AS md_cd,
-                                    ( SELECT MAX(z.md_cd)
-                                        FROM tb_hospital_medical_info z 
-                                       WHERE main_yn = 'Y'
-                                         AND a.hosp_key = z.hosp_key ) AS main_md_cd,
-                                    ( SELECT COUNT(1)
-                                        FROM tb_eghis_hosp_device_settings_info z
-                                       WHERE a.hosp_no = z.hosp_no
-                                         AND z.device_type = 1
-                                         AND z.use_yn = 'Y' ) AS kiosk_cnt,
-                                    ( SELECT COUNT(1)
-                                        FROM tb_eghis_hosp_device_settings_info z
-                                       WHERE a.hosp_no = z.hosp_no
-                                         AND z.device_type = 2
-                                         AND z.use_yn = 'Y' ) AS tablet_cnt,
-                                    ( SELECT COUNT(1)
-                                        FROM tb_eghis_hosp_approval_info z
-                                       WHERE z.appr_type = 'HI'
-                                         AND z.appr_yn = 'N'
-                                         AND a.hosp_key = z.hosp_key) AS request_appr_yn
-                               FROM tb_eghis_hosp_info a
-                              INNER JOIN tb_hospital_info b
-                                 ON a.hosp_key = b.hosp_key
-                              WHERE a.del_yn = 'N' ) a
-                     WHERE a.{searchType.ToString()} LIKE CONCAT('%', @Keyword, '%')
-                       AND a.chart_type LIKE @ChartType
-                    ORDER BY a.reg_dt DESC
-                    LIMIT @PageNo, @PageSize;
-                ";
-
-                using var connection = CreateConnection();
-
-                var hospitalList = await connection.QueryAsync(sql, parameters);
-
-                var result = hospitalList.Adapt<List<GetHospitalResult>>();
-                int totalCount = hospitalList.Count() > 0 ? (int)hospitalList.First().TotalCount : 0;
-
-                return (result, totalCount);
+                condi2 = $"  AND chart_type = @ChartType";
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error Getting Hospital List by ChartType: {ChartType}, SearchType: {SearchType}, Keyword: {Keyword}, Offset: {PageNo}, Limit: {PageSize}", chartType, searchType, keyword, pageNo, pageSize);
-                throw;
-            }
+
+            #region == Query ==
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"SET @total_cnt:= ( SELECT COUNT(1)                                                       ");
+            sb.AppendLine($"                     FROM ( SELECT a.hosp_key AS hosp_key,                               ");
+            sb.AppendLine($"                                   IFNULL(b.hosp_no, '') AS hosp_no,                     ");
+            sb.AppendLine($"                                   a.name AS name,                                       ");
+            sb.AppendLine($"                                   a.addr AS addr,                                       ");
+            sb.AppendLine($"                                   SUBSTRING_INDEX(a.addr, ' ', 1) AS addrView,          ");
+            sb.AppendLine($"                                   a.tel AS tel,                                         ");
+            sb.AppendLine($"                                   IFNULL(b.closing_yn, 'Y') AS closing_yn,              ");
+            sb.AppendLine($"                                   IFNULL(b.del_yn, 'Y') AS del_yn,                      ");
+            sb.AppendLine($"                                   IFNULL(b.reg_dt, 0) AS reg_dt,                        ");
+            sb.AppendLine($"                                   IFNULL(b.chart_type, '') AS chart_type,               ");
+            sb.AppendLine($"                                   ( SELECT COUNT(1)                                     ");
+            sb.AppendLine($"                                       FROM hello100.tb_eghis_hosp_device_settings_info z");
+            sb.AppendLine($"                                      WHERE z.hosp_no = b.hosp_no                        ");
+            sb.AppendLine($"                                        AND z.device_type = 2                            ");
+            sb.AppendLine($"                                        AND z.use_yn = 'Y' ) AS desk_cnt,                ");
+            sb.AppendLine($"                                   ( SELECT COUNT(1)                                     ");
+            sb.AppendLine($"                                       FROM hello100.tb_eghis_hosp_device_settings_info z");
+            sb.AppendLine($"                                      WHERE z.hosp_no = b.hosp_no                        ");
+            sb.AppendLine($"                                        AND z.device_type = 1                            ");
+            sb.AppendLine($"                                        AND z.use_yn = 'Y' ) AS kiosk_cnt                ");
+            sb.AppendLine($"                              FROM hello100.tb_eghis_hosp_info b                         ");
+            sb.AppendLine($"                              JOIN hello100.tb_hospital_info a                           ");
+            sb.AppendLine($"                                ON a.hosp_key = b.hosp_key AND b.del_yn = 'N'            ");
+            sb.AppendLine($"                            ORDER BY b.reg_dt DESC ) a                                   ");
+            sb.AppendLine($"                    {condi}                                                              ");
+            sb.AppendLine($"                    {condi2} );                                                          ");
+            sb.AppendLine($"SET @rownum:= (@total_cnt + 1) - @OffSet;                                              ");
+            sb.AppendLine($"  SELECT @rownum:= @rownum - 1 AS RowNum,                                              ");
+            sb.AppendLine($"         hosp_key              AS HospKey,                                             ");
+            sb.AppendLine($"	     hosp_no               AS HospNo,                                              ");
+            sb.AppendLine($"	     name                  AS Name,                                                ");
+            sb.AppendLine($"	     desk_cnt              AS DeskCnt,                                             ");
+            sb.AppendLine($"	     kiosk_cnt             AS KioskCnt                                             ");
+            sb.AppendLine($"    FROM ( SELECT a.hosp_key AS hosp_key,                                              ");
+            sb.AppendLine($"                  IFNULL(b.hosp_no, '') AS hosp_no,                                    ");
+            sb.AppendLine($"                  a.name AS name,                                                      ");
+            sb.AppendLine($"                  a.addr AS addr,                                                      ");
+            sb.AppendLine($"                  SUBSTRING_INDEX(a.addr, ' ', 1) AS addrView,                         ");
+            sb.AppendLine($"                  a.tel AS tel,                                                        ");
+            sb.AppendLine($"                  IFNULL(b.closing_yn, 'Y') AS closing_yn,                             ");
+            sb.AppendLine($"                  IFNULL(b.del_yn, 'Y') AS del_yn,                                     ");
+            sb.AppendLine($"                  IFNULL(b.reg_dt, 0) AS reg_dt,                                       ");
+            sb.AppendLine($"                  IFNULL(b.chart_type, '') AS chart_type,                              ");
+            sb.AppendLine($"                  ( SELECT COUNT(1)                                                    ");
+            sb.AppendLine($"                      FROM hello100.tb_eghis_hosp_device_settings_info z               ");
+            sb.AppendLine($"                     WHERE z.hosp_no = b.hosp_no                                       ");
+            sb.AppendLine($"                       AND z.device_type = 2                                           ");
+            sb.AppendLine($"                       AND z.use_yn = 'Y' ) AS desk_cnt,                               ");
+            sb.AppendLine($"                  ( SELECT COUNT(1)                                                    ");
+            sb.AppendLine($"                      FROM hello100.tb_eghis_hosp_device_settings_info z               ");
+            sb.AppendLine($"                     WHERE z.hosp_no = b.hosp_no                                       ");
+            sb.AppendLine($"                       AND z.device_type = 1                                           ");
+            sb.AppendLine($"                       AND z.use_yn = 'Y' ) AS kiosk_cnt                               ");
+            sb.AppendLine($"             FROM hello100.tb_eghis_hosp_info b                                        ");
+            sb.AppendLine($"             JOIN hello100.tb_hospital_info a                                          ");
+            sb.AppendLine($"               ON a.hosp_key = b.hosp_key AND b.del_yn = 'N'                           ");
+            sb.AppendLine($"           ORDER BY b.reg_dt DESC ) a                                                  ");
+            sb.AppendLine($" {condi}                                                                               ");
+            sb.AppendLine($" {condi2}                                                                              ");
+            sb.AppendLine($"ORDER BY reg_dt DESC                                                                   ");
+            sb.AppendLine($"   LIMIT @OffSet, @Limit;                                                              ");
+            sb.AppendLine($"SELECT @total_cnt;                                                                     ");
+            #endregion
+
+            var queryResult = await db.QueryMultipleAsync(sb.ToString(), parameters);
+
+            var result = new ListResult<GetHospitalsUsingHello100ServiceResult>();
+            result.Items = (await queryResult.ReadAsync<GetHospitalsUsingHello100ServiceResult>()).ToList();
+            result.TotalCount = Convert.ToInt32(await queryResult.ReadFirstOrDefaultAsync<long>());
+
+            return result;
         }
 
         public async Task<GetHospitalResult?> GetHospitalAsync(string hospNo, CancellationToken cancellationToken = default)

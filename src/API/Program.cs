@@ -18,6 +18,7 @@ using Hello100Admin.Modules.Admin.Application.Features.AdminUser.Queries.GetAdmi
 using Hello100Admin.Modules.Admin.Application.Features.Member.Queries.GetMember;
 using Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.Login;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
+using Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.SsoLogin;
 
 // Dapper snake_case <-> PascalCase 자동 매핑 설정
 Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
@@ -147,6 +148,7 @@ builder.Services.AddMediatR(cfg =>
 builder.Services.AddTransient(typeof(MediatR.IPipelineBehavior<,>), typeof(Hello100Admin.BuildingBlocks.Common.Behaviors.ValidationBehavior<,>));
 
 // FluentValidation Validator 자동 등록 (어셈블리 스캔)
+builder.Services.AddValidatorsFromAssemblyContaining<SsoLoginCommandValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<GetMemberQueryValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateSellerCommandValidator>(); // Add Seller
 
@@ -184,7 +186,7 @@ var cryptoService = app.Services.GetRequiredService<ICryptoService>();
 EncryptedData.Configure(cryptoService);
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+//if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();

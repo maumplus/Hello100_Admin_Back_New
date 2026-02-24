@@ -19,6 +19,7 @@ using Hello100Admin.Modules.Auth.Application.Features.Auth.Responses.Refresh;
 using Hello100Admin.Modules.Auth.Application.Features.Auth.Responses.GetUser;
 using Hello100Admin.API.Constracts.Auth;
 using Mapster;
+using Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.SsoLogin;
 
 namespace Hello100Admin.API.Controllers;
 
@@ -177,7 +178,29 @@ public class AuthController : BaseController
         // 제네릭 ToActionResult 경로로 통일하여 성공/실패를 중앙에서 처리합니다.
         return result.ToActionResult(this);
     }
-    
+
+    /// <summary>
+    /// SSO 로그인
+    /// </summary>
+    [HttpPost("sso-login")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(ApiResponse<LoginResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> SsoLogin(SsoLoginRequest request, CancellationToken ct)
+    {
+        _logger.LogInformation("External Login Id: {Id} from IP: {IpAddress}", request.Id, base.ClientIpAddress);
+
+        var command = request.Adapt<SsoLoginCommand>() with
+        {
+            UserAgent = base.UserAgent,
+            IpAddress = base.ClientIpAddress
+        };
+
+        var result = await _mediator.Send(command, ct);
+
+        return result.ToActionResult(this);
+    }
+
     /// <summary>
     /// 현재 사용자 정보 조회
     /// </summary>

@@ -102,11 +102,15 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Errors
         NotFoundDoctorInfo = 4046,
         [Description("내원목적 정보를 찾지 못하였습니다. 확인 후 다시 시도해주세요.")]
         NotFoundVisitPurpose = 4047,
+        [Description("지정 날짜는 중복값을 포함할 수 없습니다. 확인 후 다시 시도해주세요.")]
+        DuplicateDateValue = 4048,
+        [Description("증상/검진 키워드 항목은 6개까지만 선택이 가능합니다. 확인 후 다시 시도해주세요.")]
+        KeywordSelectionLimitExceeded = 4049,
         [Description("신청상태 갱신에 실패하였습니다. 확인 후 다시 시도해주세요.")]
-        UpdateRequestUntact = 4048,
+        UpdateRequestUntact = 4050,
         [Description("요청사항 정보 조회에 실패하였습니다. 확인 후 다시 시도해주세요.")]
-        NotFoundRequestBug = 4049,
+        NotFoundRequestBug = 4051,
         [Description("비대면진료 신청 정보 조회에 실패하였습니다. 확인 후 다시 시도해주세요.")]
-        NotFoundRequestUntact = 4050,
+        NotFoundRequestUntact = 4052,
     }
 }

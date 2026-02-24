@@ -52,14 +52,6 @@ namespace Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Queries
         public ExportUntactMedicalUsageStatusExcelQueryValidator()
         {
             RuleFor(x => x.SearchType).NotNull().GreaterThan(0).WithMessage("검색 유형은 필수이며 0보다 커야 합니다.");
-            RuleFor(x => x.SearchStateTypes)
-                .NotEmpty().WithMessage("검색 상태 유형은 최소 하나 이상 선택해야 합니다.")
-                .Must(types => types.All(t => new[] { "total", "recept", "end", "cancel" }.Contains(t)))
-                .WithMessage("검색 상태 유형은 'total', 'recept', 'end', 'cancel' 중 하나여야 합니다.");
-            RuleFor(x => x.SearchPaymentTypes)
-                .NotEmpty().WithMessage("검색 결제 유형은 최소 하나 이상 선택해야 합니다.")
-                .Must(types => types.All(t => new[] { "total", "success", "fail" }.Contains(t)))
-                .WithMessage("검색 결제 유형은 'total', 'success', 'fail' 중 하나여야 합니다.");
             RuleFor(x => x.FromDate)
                 .Must(x => !string.IsNullOrWhiteSpace(x))
                 .WithMessage("조회 시작일은 필수입니다.");

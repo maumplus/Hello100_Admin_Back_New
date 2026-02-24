@@ -13,5 +13,11 @@
             public const string GeneralAdmin = "A";
             public const string HospitalAdmin = "C";
         }
+
+        public class ChartTypes
+        {
+            public const string EghisChart = "E";
+            public const string NixChart = "N";
+        }
     }
 }

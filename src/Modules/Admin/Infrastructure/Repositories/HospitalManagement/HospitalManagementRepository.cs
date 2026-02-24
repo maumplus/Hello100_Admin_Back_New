@@ -10,12 +10,6 @@ using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Dapper;
 using System.Text;
 using Hello100Admin.Modules.Admin.Domain.Entities;
 using Hello100Admin.Modules.Admin.Application.Common.Definitions.Enums;
-using DocumentFormat.OpenXml.Spreadsheet;
-using Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Results;
-using DocumentFormat.OpenXml.Wordprocessing;
-using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
-using Org.BouncyCastle.Ocsp;
-using Renci.SshNet;
 
 namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManagement
 {
@@ -31,6 +25,144 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             _logger = logger;
         }
         #endregion
+
+        public async Task<int> UpsertAdmHospitalAsync
+            (DbSession db, string hospNm, string hospNo, string hospKey, string? tel, string? description, string chartType, string? businessNo, string? businessLevel, string? mainMdCd,
+            List<TbEghisHospMedicalTimeNewEntity> clinicTimesNewEntity, List<TbHospitalMedicalInfoEntity> deptCodesEntity, 
+            List<TbEghisHospKeywordInfoEntity> keywordsEntity, List<TbImageInfoEntity> imagesEntity, CancellationToken ct)
+        {
+            DynamicParameters parameters = new DynamicParameters();
+            parameters.Add("HospNo", hospNo, DbType.String);
+            parameters.Add("HospKey", hospKey, DbType.String);
+            parameters.Add("Description", description, DbType.String);
+            parameters.Add("Name", hospNm.Trim(), DbType.String);
+            parameters.Add("Tel", tel == null ? "" : tel.Trim(), DbType.String);
+            parameters.Add("EncKey", "d3fa7fa7873c38097b31feb7bcd1c017ff222aee", DbType.String);
+            parameters.Add("BusinessNo", businessNo, DbType.String);
+            parameters.Add("BusinessLevel", businessLevel, DbType.String);
+            parameters.Add("ChartType", chartType, DbType.String);
+
+            #region [요청사항으로 저장]
+            StringBuilder sbKeywords = new StringBuilder();
+            StringBuilder sbDeptCodes = new StringBuilder();
+            StringBuilder sbImages = new StringBuilder();
+
+            keywordsEntity.ForEach(x =>
+            {
+                sbKeywords.AppendLine($",({x.MasterSeq},{x.DetailSeq}, @HospKey,@HospNo,'{x.TagNm}', 'N', UNIX_TIMESTAMP(NOW())) ");
+            });
+
+            imagesEntity.ForEach(x =>
+            {
+                sbImages.AppendLine($",(func_HMACSHA256( @EncKey, CONCAT('hospital', @HospKey)), '{x.Url}', 'N', UNIX_TIMESTAMP(NOW())) ");
+            });
+
+            deptCodesEntity.ForEach(x =>
+            {
+                sbDeptCodes.AppendLine($",('{x.MdCd}', @HospKey, UNIX_TIMESTAMP(NOW()))");
+            });
+
+            #endregion
+
+            #region == Query ==
+            StringBuilder sb = new StringBuilder();
+
+            // 진료시간 저장
+            if (clinicTimesNewEntity != null)
+            {
+                clinicTimesNewEntity.ForEach(x =>
+                {
+                    sb.AppendLine(" DELETE FROM  hello100.tb_eghis_hosp_medical_time_new where hosp_no = @HospNo and week_num = " + x.WeekNum + "; ");
+                    sb.AppendLine(" INSERT INTO hello100.tb_eghis_hosp_medical_time_new  ");
+                    sb.AppendLine(" (hosp_key, hosp_no, week_num, start_hour, start_minute, end_hour, end_minute, break_start_hour, break_start_minute, break_end_hour, break_end_minute, use_yn, reg_dt)  ");
+                    sb.AppendLine(" values (@HospKey,@HospNo, " + x.WeekNum + ", " + x.StartHour + ", " + x.StartMinute + ", " + x.EndHour + ", " + x.EndMinute + ", " + x.BreakStartHour + ", " + x.BreakStartMinute + ", " + x.BreakEndHour + "," + x.BreakEndMinute + ", '" + x.UseYn + "',UNIX_TIMESTAMP(NOW()));  ");
+                });
+            }
+
+            // 홍보키워드 저장
+            if (!string.IsNullOrEmpty(sbKeywords.ToString()))
+            {
+                sb.AppendLine("  DELETE FROM tb_eghis_hosp_keyword_info    ");
+                sb.AppendLine("	  WHERE hosp_key = @HospKey   ;             ");
+
+                sb.AppendLine("  INSERT INTO tb_eghis_hosp_keyword_info    ");
+                sb.AppendLine("	     (master_seq, detail_seq, hosp_key, hosp_no, tag_nm, del_yn, reg_dt) ");
+                sb.AppendLine("	 values                                     ");
+                sb.AppendLine(sbKeywords.ToString().Substring(1, sbKeywords.ToString().Length - 2) + ";");
+            }
+            else
+            {
+                sb.AppendLine("  UPDATE tb_eghis_hosp_keyword_info         ");
+                sb.AppendLine("	    SET del_yn = 'Y'                        ");
+                sb.AppendLine("	  WHERE hosp_key = @HospKey   ;             ");
+            }
+
+            // 진료과 저장
+            if (!string.IsNullOrEmpty(sbDeptCodes.ToString()))
+            {
+                sb.AppendLine("  DELETE FROM tb_hospital_medical_info       ");
+                sb.AppendLine("	  WHERE hosp_key = @HospKey   ;             ");
+
+                sb.AppendLine("  INSERT INTO tb_hospital_medical_info    ");
+                sb.AppendLine("	     (md_cd, hosp_key, reg_dt)");
+                sb.AppendLine("	 values                                     ");
+                sb.AppendLine(sbDeptCodes.ToString().Substring(1, sbDeptCodes.ToString().Length - 2) + ";");
+            }
+
+            // 병원이미지 저장
+            if (!string.IsNullOrEmpty(sbImages.ToString()))
+            {
+                sb.AppendLine("  DELETE FROM tb_image_info      ");
+                sb.AppendLine("	  WHERE img_key = func_HMACSHA256( @EncKey, CONCAT('hospital', @HospKey))   ;  ");
+
+                sb.AppendLine(" INSERT INTO tb_image_info	    ");
+                sb.AppendLine(" 	(	img_key                 ");
+                sb.AppendLine(" 	,	url                     ");
+                sb.AppendLine(" 	,	del_yn	                ");
+                sb.AppendLine(" 	,	reg_dt                  ");
+                sb.AppendLine(" 	)                           ");
+                sb.AppendLine("   VALUES                        ");
+                sb.AppendLine(sbImages.ToString().Substring(1, sbImages.ToString().Length - 2) + ";");
+            }
+            else
+            {
+                sb.AppendLine("  UPDATE tb_image_info                       ");
+                sb.AppendLine("	    SET del_yn = 'Y'                        ");
+                sb.AppendLine("	  WHERE img_key = func_HMACSHA256( @EncKey, CONCAT('hospital', @HospKey))   ;  ");
+            }
+
+            //심평원 병원정보 수정
+            sb.AppendLine("  UPDATE tb_hospital_info   ");
+            sb.AppendLine("	    SET name   = @Name     ");
+            sb.AppendLine("	    ,   tel    = @Tel      ");
+            sb.AppendLine("	  WHERE hosp_key = @HospKey; ");
+
+            //이지스 병원정보 수정
+            sb.AppendLine("	 UPDATE tb_eghis_hosp_info          ");
+            sb.AppendLine("	    SET `desc` = @Description        ");
+            sb.AppendLine("	    ,   business_no = @BusinessNo   ");
+            sb.AppendLine("	    ,   business_level = @BusinessLevel   ");
+            sb.AppendLine("	    ,   chart_type = @ChartType ");
+            sb.AppendLine("	   WHERE hosp_key = @HospKey;         ");
+
+            //대표 진료과 설정
+            sb.AppendLine("  UPDATE tb_hospital_medical_info	    ");
+            sb.AppendLine(" 	SET	main_yn     = 'N'                  ");
+            sb.AppendLine("   WHERE hosp_key = '" + hospKey + "';              ");
+
+            sb.AppendLine("  UPDATE tb_hospital_medical_info	    ");
+            sb.AppendLine(" 	SET	main_yn     = 'Y'                  ");
+            sb.AppendLine("   WHERE hosp_key = '" + hospKey + "' and md_cd='" + mainMdCd + "';              ");
+
+            #endregion
+
+            var result = await db.ExecuteAsync(sb.ToString(), parameters, ct, _logger);
+
+            if (result <= 0)
+                throw new BizException(AdminErrorCode.UpsertHospitalFailed.ToError());
+
+            return result;
+        }
 
         public async Task<int> UpsertHospitalAsync(
             DbSession db, string aId, string hospKey, string apprType, string reqJson, List<string> imageUrls, CancellationToken ct)
@@ -89,7 +221,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             return result;
         }
 
-        public async Task<int> UpsertAdmHospitalAsync
+        public async Task<int> UpsertAdmMyHospitalAsync
             (DbSession db, string aId, int apprId, string hospNo, string hospKey, string? description, string? businessNo, string? businessLevel, string? mainMdCd,
             List<TbEghisHospMedicalTimeEntity> clinicTimesEntity, List<TbEghisHospMedicalTimeNewEntity> clinicTimesNewEntity, 
             List<TbHospitalMedicalInfoEntity> deptCodesEntity, List<TbEghisHospKeywordInfoEntity> keywordsEntity, List<TbImageInfoEntity> imagesEntity, CancellationToken ct)
@@ -109,7 +241,6 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             StringBuilder sbKeywords = new StringBuilder();
             StringBuilder sbDeptCodes = new StringBuilder();
             StringBuilder sbImages = new StringBuilder();
-            StringBuilder sbTimesNew = new StringBuilder();
 
             clinicTimesEntity.ForEach(x =>
             {
@@ -556,6 +687,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             return await db.ExecuteAsync(query, parameters, ct, _logger);
         }
 
+        // 트랜잭션 간 DROP/CREATE TABLE이 진행되면 암묵적 커밋 발생으로, Exception 발생 시 ROLLBACK이 되지 않음.
         public async Task<int> UpdateDoctorInfoScheduleAsync(DbSession db, List<EghisDoctInfoEntity> eghisDoctInfoList, CancellationToken ct)
         {
             var hospNo = eghisDoctInfoList[0].HospNo;

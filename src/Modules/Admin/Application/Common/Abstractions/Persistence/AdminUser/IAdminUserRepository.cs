@@ -1,4 +1,5 @@
-﻿using Hello100Admin.Modules.Admin.Domain.Entities;
+﻿using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
+using Hello100Admin.Modules.Admin.Domain.Entities;
 
 namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.AdminUser
 {
@@ -16,5 +17,16 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistenc
         /// <param name="encPwd"></param>
         /// <returns></returns>
         public Task<int> UpdatePassword(string aId, string encPwd);
+
+        /// <summary>
+        /// 관리자-병원 매핑 삭제
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="aId"></param>
+        /// <param name="hospNo"></param>
+        /// <param name="hospKey"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        public Task<int> DeleteHospitalAdminMappingAsync(DbSession db, string aId, string? hospNo, string? hospKey, CancellationToken ct);
     }
 }

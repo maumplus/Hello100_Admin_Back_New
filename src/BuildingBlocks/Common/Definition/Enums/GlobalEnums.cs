@@ -40,23 +40,12 @@
     public enum AccountHospitalListSearchType
     {
         /// <summary>
-        /// 1: 병원명 검색
-        /// </summary>
-        name = 0
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public enum HospitalListSearchType
-    {
-        /// <summary>
-        /// 1: 병원명 검색
+        /// 0: 병원명 검색
         /// </summary>
         name = 0,
         /// <summary>
-        /// 2: 요양기관번호 검색
+        /// 1: 병원 대표번호 검색
         /// </summary>
-        hosp_no = 1
+        tel = 1
     }
 }

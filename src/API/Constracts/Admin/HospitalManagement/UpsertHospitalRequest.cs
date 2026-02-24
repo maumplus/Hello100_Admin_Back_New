@@ -1,6 +1,76 @@
 ﻿namespace Hello100Admin.API.Constracts.Admin.HospitalManagement
 {
+    /// <summary>
+    /// [전체관리자] 병원 정보 수정 요청 정보
+    /// </summary>
     public record UpsertHospitalRequest
+    {
+        /// <summary>
+        /// 병원명
+        /// </summary>
+        public required string HospNm { get; init; }
+        /// <summary>
+        /// 요양기관번호
+        /// </summary>
+        public required string HospNo { get; init; }
+        /// <summary>
+        /// 요양기관 키
+        /// </summary>
+        public required string HospKey { get; init; }
+        /// <summary>
+        /// 사업자등록번호
+        /// </summary>
+        public string? BusinessNo { get; init; }
+        /// <summary>
+        /// 사업자 구분
+        /// </summary>
+        public string? BusinessLevel { get; init; }
+        /// <summary>
+        /// 대표번호
+        /// </summary>
+        public string? Tel { get; init; }
+        /// <summary>
+        /// 상세정보
+        /// </summary>
+        public string? Description { get; init; }
+        /// <summary>
+        /// 대표 진료과
+        /// </summary>
+        public string? MainMdCd { get; init; }
+        /// <summary>
+        /// 차트타입 [E: 이지스전자차트, N: 닉스펜차트]
+        /// </summary>
+        public required string ChartType { get; init; }
+        /// <summary>
+        /// 병원운영시간
+        /// </summary>
+        public List<MedicalTimeBase>? ClinicTimes { get; init; }
+        /// <summary>
+        /// 진료시간
+        /// </summary>
+        public List<MedicalTimeBaseNew>? ClinicTimesNew { get; init; }
+        /// <summary>
+        /// 진료과목
+        /// </summary>
+        public List<MedicalInfoBase>? DeptCodes { get; init; }
+        /// <summary>
+        /// 증상/검진 키워드
+        /// </summary>
+        public List<HashTagInfoBase>? Keywords { get; init; }
+        /// <summary>
+        /// 기존 이미지정보
+        /// </summary>
+        public List<ImageInfoBase>? ImgFiles { get; init; }
+        /// <summary>
+        /// 신규 이미지 목록
+        /// </summary>
+        public List<IFormFile>? NewImages { get; init; }
+    }
+
+    /// <summary>
+    /// [병원관리자] 병원 정보 수정 요청 정보
+    /// </summary>
+    public record UpsertMyHospitalRequest
     {
         /// <summary>
         /// 사업자등록번호
