@@ -41,4 +41,10 @@ public static class DateTimeExtensions
     {
         return new DateTime(date.Year, date.Month, DateTime.DaysInMonth(date.Year, date.Month), 23, 59, 59, 999, date.Kind);
     }
+
+    public static DateTime ToKoreaTime(this DateTime time)
+    {
+        var localInfo = TimeZoneInfo.FindSystemTimeZoneById("Korea Standard Time");
+        return TimeZoneInfo.ConvertTime(time, TimeZoneInfo.Local, localInfo);
+    }
 }

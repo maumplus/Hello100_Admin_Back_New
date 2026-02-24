@@ -62,4 +62,6 @@ public enum GlobalErrorCode
     ExpiredVerificationCode = 1024,
     [Description("입력한 비밀번호가 올바르지 않습니다.")]
     PasswordAuthFailed = 1025,
+    [Description("대상 병원의 차트구분과 다릅니다.")]
+    NotSameChartType = 1026
 }
