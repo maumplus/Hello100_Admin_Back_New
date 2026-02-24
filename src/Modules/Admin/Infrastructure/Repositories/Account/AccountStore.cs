@@ -39,6 +39,19 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Account
             parameters.Add("@PageNo", pageNo, DbType.String);
             parameters.Add("@PageSize", pageSize, DbType.String);
 
+            var whereStr = string.Empty;
+
+            switch (searchType)
+            {
+                case AccountHospitalListSearchType.name:
+                case AccountHospitalListSearchType.tel:
+                    {
+                        whereStr = $"WHERE a.{searchType.ToString()} LIKE CONCAT('%', @Keyword, '%')";
+
+                        break;
+                    }
+            }
+
             var sql = @$"
                 SELECT COUNT(*) OVER()         AS TotalCount,
                        a.hosp_key              AS HospKey,
@@ -69,7 +82,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Account
                            LEFT JOIN tb_eghis_hosp_info a
                              ON a.hosp_key = b.hosp_key
                           WHERE IFNULL(a.hosp_no, '') = '' ) a
-                 WHERE a.{searchType.ToString()} LIKE CONCAT('%', @Keyword, '%')
+                 {whereStr}
                 ORDER BY a.reg_dt DESC
                 LIMIT @PageNo, @PageSize;
             ";
