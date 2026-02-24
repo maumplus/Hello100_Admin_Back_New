@@ -110,6 +110,49 @@ namespace Hello100Admin.Modules.Auth.Infrastructure.Repositories
             }
         }
 
+        public async Task<AdminModel?> GetAdminByHospNoAsync(string hospNo, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                _logger.LogInformation("Getting Admin by HospNo: {HospNo}", hospNo);
+
+                var parameters = new DynamicParameters();
+                parameters.Add("HospNo", hospNo, DbType.String);
+
+                var sql = @"
+                    SELECT a.aid                                                                AS AId,
+                           a.acc_id                                                             AS AccId,
+                           a.acc_pwd                                                            AS AccPwd,
+                           a.hosp_no                                                            AS HospNo,
+                           b.hosp_key                                                           AS HospKey,
+                           a.grade                                                              AS Grade,
+                           a.name                                                               AS Name,
+                           a.tel                                                                AS Tel,
+                           a.email                                                              AS Email,
+                           DATE_FORMAT(FROM_UNIXTIME(a.last_login_dt), '%Y-%m-%d %H:%i:%s')     AS LastLoginDt,
+                           a.use_2fa                                                            AS Use2fa,
+                           a.account_locked                                                     AS AccountLocked,
+                           a.login_fail_count                                                   AS LoginFailCount,
+                           a.access_token                                                       AS AccessToken,
+                           a.refresh_token                                                      AS RefresgToken
+                      FROM tb_admin a
+                      LEFT JOIN tb_eghis_hosp_info b
+                             ON a.hosp_no = b.hosp_no
+                     WHERE a.hosp_no = @HospNo
+                       AND a.del_yn = 'N'
+                    LIMIT 1";
+
+                using var connection = _connectionFactory.CreateConnection();
+
+                return await connection.QueryFirstOrDefaultAsync<AdminModel>(sql, parameters);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting Admin by HospNo: {HospNo}", hospNo);
+                throw;
+            }
+        }
+
         public async Task<AppAuthNumberInfoEntity?> GetAppAuthNumberInfoAsync(int authId, CancellationToken cancellationToken = default)
         {
             try

@@ -128,4 +128,5 @@ public interface ICryptoService
     /// <param name="cipherText"></param>
     /// <returns></returns>
     public string DecryptFromBase64WithDesEcbPkcs7(string cipherText);
+    public double Convert36To10(string str);
 }
