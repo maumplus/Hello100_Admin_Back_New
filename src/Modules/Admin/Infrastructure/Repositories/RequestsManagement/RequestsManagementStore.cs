@@ -114,7 +114,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.RequestsManage
             }
         }
 
-        public async Task<GetRequestBugResult?> GetRequestBugAsync(long hpId, CancellationToken token)
+        public async Task<GetRequestBugResult> GetRequestBugAsync(long hpId, CancellationToken token)
         {
             try
             {
@@ -162,6 +162,9 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.RequestsManage
 
                 using var connection = _connection.CreateConnection();
                 var result = await connection.QueryFirstOrDefaultAsync<GetRequestBugResult>(sql, parameters);
+
+                if (result == null)
+                    throw new BizException(AdminErrorCode.NotFoundRequestBug.ToError());
 
                 return result;
             }
@@ -254,12 +257,6 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.RequestsManage
                 var sql = listSql + countTemplate.RawSql;
                 #endregion
 
-                System.Diagnostics.Debug.WriteLine("Executing SQL:\n" + sql);
-                foreach (var paramName in parameters.ParameterNames)
-                {
-                    System.Diagnostics.Debug.WriteLine($"Parameter {paramName} = {parameters.Get<object>(paramName)}");
-                }
-
                 using var connection = _connection.CreateConnection();
                 var multi = await connection.QueryMultipleAsync(sql, parameters);
 
@@ -282,7 +279,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.RequestsManage
 
         }
 
-        public async Task<GetRequestUntactResult?> GetRequestUntactAsync(int seq, string rootUrl, CancellationToken token)
+        public async Task<GetRequestUntactResult> GetRequestUntactAsync(int seq, string rootUrl, CancellationToken token)
         {
             try
             {
@@ -338,6 +335,9 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.RequestsManage
 
                 using var connection = _connection.CreateConnection();
                 var result = await connection.QueryFirstOrDefaultAsync<GetRequestUntactResult>(sql, parameters);
+
+                if (result == null)
+                    throw new BizException(AdminErrorCode.NotFoundRequestUntact.ToError());
 
                 return result;
             }

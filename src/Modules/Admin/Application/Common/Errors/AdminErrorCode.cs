@@ -104,5 +104,9 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Errors
         NotFoundVisitPurpose = 4047,
         [Description("신청상태 갱신에 실패하였습니다. 확인 후 다시 시도해주세요.")]
         UpdateRequestUntact = 4048,
+        [Description("요청사항 정보 조회에 실패하였습니다. 확인 후 다시 시도해주세요.")]
+        NotFoundRequestBug = 4049,
+        [Description("비대면진료 신청 정보 조회에 실패하였습니다. 확인 후 다시 시도해주세요.")]
+        NotFoundRequestUntact = 4050,
     }
 }

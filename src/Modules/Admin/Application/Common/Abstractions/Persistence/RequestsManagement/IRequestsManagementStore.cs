@@ -9,12 +9,12 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistenc
 
         public Task<ListResult<GetRequestBugsResult>> GetRequestBugsAsync(int pageSize, int pageNum, bool apprYn, CancellationToken token);
 
-        public Task<GetRequestBugResult?> GetRequestBugAsync(long hpId, CancellationToken token);
+        public Task<GetRequestBugResult> GetRequestBugAsync(long hpId, CancellationToken token);
 
         public Task<ListResult<GetRequestUntactsResult>> GetRequestUntactsAsync(
             int pageSize, int pageNum, int searchType, int searchDateType, string? fromDate, string? toDate, string? searchKeyword, List<string> joinState, bool isExcel, CancellationToken token);
 
-        public Task<GetRequestUntactResult?> GetRequestUntactAsync(int seq, string rootUrl, CancellationToken token);
+        public Task<GetRequestUntactResult> GetRequestUntactAsync(int seq, string rootUrl, CancellationToken token);
         #endregion
     }
 }

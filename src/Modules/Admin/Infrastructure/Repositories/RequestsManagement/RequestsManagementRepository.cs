@@ -91,12 +91,6 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.RequestsManage
                 ";
             }
 
-            System.Diagnostics.Debug.WriteLine("Executing SQL:\n" + query);
-            foreach (var paramName in parameters.ParameterNames)
-            {
-                System.Diagnostics.Debug.WriteLine($"Parameter {paramName} = {parameters.Get<object>(paramName)}");
-            }
-
             var result = await db.ExecuteAsync(query, parameters, ct, _logger);
 
             if (result <= 0)

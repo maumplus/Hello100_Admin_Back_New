@@ -79,6 +79,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.RequestsManagement.Re
         public int RowNum { get; set; }
         public string HospNo { get; set; } = default!;
         public string HospNm { get; set; } = default!;
+        public string HospKey { get; set; } = default!;
         public string DoctNm { get; set; } = default!;
         public string DoctTel { get; set; } = default!;
         public string RegDt { get; set; } = default!;

@@ -13,6 +13,8 @@ using Hello100Admin.Modules.Admin.Application.Features.Advertisement.Queries;
 using Hello100Admin.API.Constracts.Admin.Advertisement;
 using Hello100Admin.API.Constracts.Admin.RequestsManagement;
 using Hello100Admin.Modules.Admin.Application.Features.Advertisement.Commands;
+using Hello100Admin.Modules.Admin.Application.Common.Exports;
+using Hello100Admin.Modules.Admin.Application.Features.Hospitals.Queries;
 
 namespace Hello100Admin.API.Controllers
 {
@@ -26,14 +28,16 @@ namespace Hello100Admin.API.Controllers
         #region FIELD AREA ****************************************
         private readonly ILogger<RequestsManagementController> _logger;
         private readonly IMediator _mediator;
+        private readonly string _adminImageUrl;
         #endregion
 
 
         #region CONSTRUCTOR AREA ***********************************
-        public RequestsManagementController(IMediator mediator, ILogger<RequestsManagementController> logger)
+        public RequestsManagementController(IConfiguration config, IMediator mediator, ILogger<RequestsManagementController> logger)
         {
             _logger = logger;
             _mediator = mediator;
+            _adminImageUrl = config["AdminImageUrl"] ?? string.Empty;
         }
         #endregion
 
@@ -70,6 +74,70 @@ namespace Hello100Admin.API.Controllers
             {
                 HpId = hpId,
                 ApprAid = req.ApprAId
+            };
+
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        [HttpGet("untacts")]
+        [ProducesResponseType(typeof(ApiResponse<ListResult<GetRequestUntactsResult>>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetRequestUntacts([FromQuery] GetRequestUntactsRequest req, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("GET api/requests-management/untacts [{Aid}]", Aid);
+
+            var query = req.Adapt<GetRequestUntactsQuery>();
+
+            var result = await _mediator.Send(query, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [전체 관리자] 병원목록 > 병원목록 > 엑셀출력
+        /// </summary>
+        [HttpGet("untacts/export/excel")]
+        [ProducesResponseType(typeof(ExcelFile), StatusCodes.Status200OK)]
+        public async Task<IActionResult> ExportRequestUntactsExcel([FromQuery] GetRequestUntactsRequest req, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("GET /api/requests-management/untacts/export/excel [{Aid}]", Aid);
+
+            var query = req.Adapt<ExportRequestUntactsExcelQuery>();
+
+            var result = await _mediator.Send(query, cancellationToken);
+
+            if (result.ErrorInfo != null)
+                return result.ToActionResult(this);
+
+            var file = result?.Data!;
+            return File(file.Content, file.ContentType, file.FileName);
+        }
+
+        [HttpGet("Untacts/{seq}")]
+        [ProducesResponseType(typeof(ApiResponse<GetRequestUntactResult>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetRequestUntact(int seq, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("GET api/requests-management/bugs/{seq} [{Aid}]", seq, Aid);
+
+            var rootUrl = _adminImageUrl;
+
+            var result = await _mediator.Send(new GetRequestUntactQuery(seq, rootUrl), cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        [HttpPatch("Untacts/{seq}")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        public async Task<IActionResult> UpdateRequestUntact(int seq, UpdateRequestUntactRequest req, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("PATCH api/requests-management/untact/{seq} [{Aid}]", seq, Aid);
+
+            var command = req.Adapt<UpdateRequestUntactCommand>() with
+            {
+                Seq = seq,
+                JoinState = req.JoinState,
+                ReturnReason = req.ReturnReason
             };
 
             var result = await _mediator.Send(command, cancellationToken);

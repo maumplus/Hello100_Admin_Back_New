@@ -40,6 +40,6 @@
         /// <summary>
         /// 처리상태 [신청: 01, 승인: 02, 반려: 03]
         /// </summary>
-        public List<string>? JoinState { get; set; }
+        public List<string> JoinState { get; set; } = null!;
     }
 }

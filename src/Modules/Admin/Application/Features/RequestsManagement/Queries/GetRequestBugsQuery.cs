@@ -40,7 +40,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.RequestsManagement.Qu
 
         public async Task<Result<ListResult<GetRequestBugsResult>>> Handle(GetRequestBugsQuery req, CancellationToken ct)
         {
-            _logger.LogInformation("Handling GetRequestBugsQuery");
+            _logger.LogInformation("Handling GetRequestBugsQuery started.");
 
             var requestBugsList = await _requestsManagementStore.GetRequestBugsAsync(req.PageSize, req.PageNo, req.ApprYn, ct);
 
