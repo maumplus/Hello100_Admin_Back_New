@@ -7,7 +7,6 @@ using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Ho
 using Hello100Admin.Modules.Admin.Application.Common.Errors;
 using Hello100Admin.Modules.Admin.Application.Common.Extensions;
 using Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Results;
-using Mapster;
 using MediatR;
 using Microsoft.Extensions.Logging;
 

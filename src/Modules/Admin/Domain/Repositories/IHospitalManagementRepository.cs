@@ -1,15 +1,36 @@
-﻿using Dapper;
-using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
-using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Dapper;
+﻿using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 using Hello100Admin.Modules.Admin.Domain.Entities;
-using System.Data;
 
 namespace Hello100Admin.Modules.Admin.Domain.Repositories
 {
     public interface IHospitalManagementRepository
     {
         /// <summary>
-        /// 병원 정보 등록/수정
+        /// [전체 관리자] 병원 정보 등록/수정
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="hospNm"></param>
+        /// <param name="hospNo"></param>
+        /// <param name="hospKey"></param>
+        /// <param name="tel"></param>
+        /// <param name="description"></param>
+        /// <param name="chartType"></param>
+        /// <param name="businessNo"></param>
+        /// <param name="businessLevel"></param>
+        /// <param name="mainMdCd"></param>
+        /// <param name="clinicTimesNewEntity"></param>
+        /// <param name="deptCodesEntity"></param>
+        /// <param name="keywordsEntity"></param>
+        /// <param name="imagesEntity"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        public Task<int> UpsertAdmHospitalAsync
+            (DbSession db, string hospNm, string hospNo, string hospKey, string? tel, string? description, string chartType, string? businessNo, string? businessLevel, string? mainMdCd,
+            List<TbEghisHospMedicalTimeNewEntity> clinicTimesNewEntity, List<TbHospitalMedicalInfoEntity> deptCodesEntity,
+            List<TbEghisHospKeywordInfoEntity> keywordsEntity, List<TbImageInfoEntity> imagesEntity, CancellationToken ct);
+
+        /// <summary>
+        /// [병원 관리자] 병원 정보 등록/수정 승인 요청
         /// </summary>
         /// <param name="db"></param>
         /// <param name="aId"></param>
@@ -22,9 +43,8 @@ namespace Hello100Admin.Modules.Admin.Domain.Repositories
         public Task<int> UpsertHospitalAsync(
             DbSession db, string aId, string hospKey, string apprType, string reqJson, List<string> imageUrls, CancellationToken ct);
 
-
         /// <summary>
-        /// 병원 정보(승인) 등록/수정
+        /// [병원 관리자] 병원 정보 등록/수정(승인 포함)
         /// </summary>
         /// <param name="db"></param>
         /// <param name="aId"></param>
@@ -42,7 +62,7 @@ namespace Hello100Admin.Modules.Admin.Domain.Repositories
         /// <param name="imagesEntity"></param>
         /// <param name="ct"></param>
         /// <returns></returns>
-        public Task<int> UpsertAdmHospitalAsync
+        public Task<int> UpsertAdmMyHospitalAsync
             (DbSession db, string aId, int apprId, string hospNo, string hospKey, string? description, string? businessNo, string? businessLevel, string? mainMdCd,
             List<TbEghisHospMedicalTimeEntity> clinicTimesEntity, List<TbEghisHospMedicalTimeNewEntity> clinicTimesNewEntity,
             List<TbHospitalMedicalInfoEntity> deptCodesEntity, List<TbEghisHospKeywordInfoEntity> keywordsEntity, List<TbImageInfoEntity> imagesEntity, CancellationToken ct);

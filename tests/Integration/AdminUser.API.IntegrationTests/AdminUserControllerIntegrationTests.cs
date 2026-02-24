@@ -14,6 +14,33 @@ namespace AdminUser.API.IntegrationTests
         }
 
         [Fact]
+        public async Task GetHospitalsUsingHello100ServiceAsync_ShouldReturnOk_WhenValidCredentials()
+        {
+            // Arrange
+            _client.AsMySuperAdmin("B81AFBD0", "대민테스트");
+
+            var query = new Dictionary<string, string?>
+            {
+                ["PageNo"] = "1",
+                ["PageSize"] = "10",
+                ["SearchChartType"] = "",
+                ["SearchType"] = "1"
+                //["SearchKeyword"] = "",
+            };
+
+            var url = QueryHelpers.AddQueryString("/api/hospital-management/hospitals/hello100-service", query);
+
+            // Act
+            var response = await _client.GetAsync(url);
+
+            // Body
+            var body = await response.Content.ReadAsStringAsync();
+
+            // Assert
+            Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Fact]
         public async Task UpdatePassword_ShouldReturnOk_WhenValidCredentials()
         {
             // Arrange

@@ -63,7 +63,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.AdminUser.Queries
             response.QrUrl = BuildQueryString(_qrCodeApiUrl, queryDic);
             response.IsCompanyIp = CheckIpAddress(req.IpAddress);
 
-            return Result.Success(new GetHospitalAdminDetailResult());
+            return Result.Success(response);
         }
 
         private IDictionary<string, string> ToQueryDictionary<T>(T obj)

@@ -1,5 +1,4 @@
-﻿using Hello100Admin.BuildingBlocks.Common.Definition.Enums;
-using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
+﻿using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 using Hello100Admin.Modules.Admin.Application.Common.Models;
 using Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Results;
 using Hello100Admin.Modules.Admin.Domain.Entities;
@@ -8,7 +7,18 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistenc
 {
     public interface IHospitalManagementStore
     {
-        Task<(List<GetHospitalResult>, int)> GetHospitalListAsync(string chartType, HospitalListSearchType searchType, string keyword, int pageNo, int pageSize, CancellationToken cancellationToken = default);
+        /// <summary>
+        /// 병원정보관리 > 병원 목록 조회
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="pageNo"></param>
+        /// <param name="pageSize"></param>
+        /// <param name="searchChartType"></param>
+        /// <param name="searchType"></param>
+        /// <param name="searchKeyword"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public Task<ListResult<GetHospitalsUsingHello100ServiceResult>> GetHospitalsUsingHello100ServiceAsync(DbSession db, int pageNo, int pageSize, string? searchChartType, int searchType, string? searchKeyword, CancellationToken cancellationToken);
         /// <summary>
         /// 병원정보관리 > 병원 상세정보 조회
         /// </summary>

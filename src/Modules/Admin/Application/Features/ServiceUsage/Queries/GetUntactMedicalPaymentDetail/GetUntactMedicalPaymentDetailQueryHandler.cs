@@ -1,4 +1,5 @@
-﻿using Hello100Admin.BuildingBlocks.Common.Application;
+﻿using System.Globalization;
+using Hello100Admin.BuildingBlocks.Common.Application;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.ServiceUsage;
 using Hello100Admin.Modules.Admin.Application.Common.Errors;
 using Hello100Admin.Modules.Admin.Application.Common.Extensions;
@@ -27,6 +28,18 @@ namespace Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Queries.
 
             if (paymentDetail == null)
                 return Result.Success<GetUntactMedicalPaymentDetailResponse>().WithError(AdminErrorCode.NotFoundUntactMedicalPayment.ToError());
+
+            paymentDetail.CardNo = paymentDetail.CardNo?.Length == 16 ? $"{paymentDetail.CardNo[..4]}-****-****-{paymentDetail.CardNo[12..16]}" : paymentDetail.CardNo;
+
+            var tempAppTime = "-";
+
+            if (!string.IsNullOrEmpty(paymentDetail.AppTime) &&
+                DateTime.TryParseExact(paymentDetail.AppTime, "yyyyMMdd", null, DateTimeStyles.None, out var dt))
+            {
+                tempAppTime = dt.ToString("yyyy.MM.dd");
+            }
+
+            paymentDetail.AppTime = tempAppTime;
 
             var result = paymentDetail.Adapt<GetUntactMedicalPaymentDetailResponse>();
 

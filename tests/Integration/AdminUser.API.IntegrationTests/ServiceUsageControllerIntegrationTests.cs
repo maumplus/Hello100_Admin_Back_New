@@ -49,7 +49,7 @@ namespace AdminUser.API.IntegrationTests
             //{
             //    PaymentId = 150,
             //};
-            string paymentId = "150";
+            string paymentId = "444";
 
             _client.AsSuperAdmin("B81AFBD0", "대민테스트");
 
@@ -328,17 +328,17 @@ namespace AdminUser.API.IntegrationTests
                 ToDate = "2026-02-19",
                 SearchDateType = "0",
                 SearchKeyword = "",
-                SearchStateTypes = new[] { "end" },
-                SearchPaymentTypes = new[] { "fail" }
+                SearchStateTypes = new[] { "total, recept, end, cancel" },
+                SearchPaymentTypes = new[] { "success" }
             };
 
             var query = new Dictionary<string, string?>
             {
                 ["PageNo"] = "1",
-                ["PageSize"] = "20",
-                ["FromDate"] = "2026-02-19",
-                ["ToDate"] = "2026-02-19",
-                ["SearchDateType"] = "0",
+                ["PageSize"] = "10",
+                ["FromDate"] = "2026-01-25",
+                ["ToDate"] = "2026-02-24",
+                ["SearchDateType"] = "1",
                 ["SearchType"] = "1",
                 ["SearchKeyword"] = "",
                 ["SearchStateTypes"] = req.SearchStateTypes.ToJson().ToString(),
