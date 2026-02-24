@@ -84,7 +84,7 @@ public class AdminUserController : BaseController
     /// [전체 관리자] 관리자관리 > 병원관리자목록 > 상세정보 > 조회
     /// </summary>
     [HttpPost("hospital-admins/detail")]
-    [ProducesResponseType(typeof(ApiResponse<ListResult<GetHospitalAdminListResult>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<GetHospitalAdminDetailResult>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetHospitalAdminDetailAsync(GetHospitalAdminDetailRequest req, CancellationToken ct = default)
     {
         _logger.LogInformation("POST api/admin-user/hospital-admins/detail [{Aid}]", Aid);

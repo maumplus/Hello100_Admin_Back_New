@@ -14,15 +14,15 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
     /// </summary>
     public record UpsertHello100SettingCommand : IQuery<Result>
     {
-        public string HospNo { get; set; }
-        public string HospKey { get; set; }
-        public int NoticeId { get; set; }
-        public int StId { get; set; }
-        public int Role { get; set; }
-        public int AwaitRole { get; set; }
-        public string ReceptEndTime { get; set; }
-        public string Notice { get; set; }
-        public int ExamPushSet { get; set; }
+        public string HospNo { get; init; } = default!;
+        public string HospKey { get; init; } = default!;
+        public int NoticeId { get; init; }
+        public int StId { get; init; }
+        public int Role { get; init; }
+        public int AwaitRole { get; init; }
+        public string? ReceptEndTime { get; init; }
+        public string? Notice { get; init; }
+        public int ExamPushSet { get; init; }
     }
 
     public class UpsertHello100SettingCommandValidator :AbstractValidator<UpsertHello100SettingCommand>
@@ -54,7 +54,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
         {
             _logger.LogInformation("Handling UpsertHello100SettingCommand HospNo:{HospNo}", req.HospNo);
 
-            req.ReceptEndTime = !string.IsNullOrEmpty(req.ReceptEndTime) ? Convert.ToDateTime(req.ReceptEndTime).ToString("HHmm") : string.Empty;
+            var receptEndTime = !string.IsNullOrEmpty(req.ReceptEndTime) ? Convert.ToDateTime(req.ReceptEndTime).ToString("HHmm") : string.Empty;
 
             var settingEntity = new TbEghisHospSettingsInfoEntity
             {
@@ -62,7 +62,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
                 StId = req.StId,
                 Role = req.Role,
                 AwaitRole = req.AwaitRole,
-                ReceptEndTime = req.ReceptEndTime,
+                ReceptEndTime = receptEndTime,
                 ExamPushSet = req.ExamPushSet
             };
 
@@ -70,7 +70,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
             {
                 NotiId = req.NoticeId,
                 HospKey = req.HospKey,
-                Content = req.Notice
+                Content = req.Notice ?? ""
             };
 
             await _db.RunAsync(DataSource.Hello100, 

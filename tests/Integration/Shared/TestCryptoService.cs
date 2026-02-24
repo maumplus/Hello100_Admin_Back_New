@@ -132,4 +132,7 @@ public class TestCryptoService : ICryptoService
     {
         return Encrypt(plaintext);
     }
+
+    public double Convert36To10(string str)
+        => Convert.ToInt64(str, 36);
 }

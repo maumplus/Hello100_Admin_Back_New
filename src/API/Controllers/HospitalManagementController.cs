@@ -38,43 +38,103 @@ namespace Hello100Admin.API.Controllers
             _logger = logger;
         }
 
+        #region ACTION METHOD AREA ****************************************
+        #region 전체 관리자 *******************************************
         /// <summary>
         /// [전체관리자] 병원정보관리 > 병원정보관리 > 서비스이용병원목록 조회
         /// </summary>
-        [HttpGet("hospitals")]
+        [HttpGet("hospitals/hello100-service")]
         [ProducesResponseType(typeof(ApiResponse<GetHospitalResult>), StatusCodes.Status200OK)]
-        [Obsolete("전체 관리자 기능은 미완성(조회 조건 없음)입니다.")]
-        public async Task<IActionResult> GetHospitalList(CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetHospitalsUsingHello100ServiceAsync([FromQuery]GetHospitalsUsingHello100ServiceRequest req, CancellationToken cancellationToken = default)
         {
-            /*var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            if (userId == null)
-            {
-                return Unauthorized();
-            }*/
+            _logger.LogInformation("GET /api/hospital-management/hospitals/hello100-service");
 
-            _logger.LogInformation("GET /api/hospital-management/hospitals");
-
-            var query = new GetHospitalListQuery()
-            {
-                ChartType = "%",
-                SearchType = 0,
-                Keyword = "",
-                PageNo = 0,
-                PageSize = 100
-            };
+            var query = req.Adapt<GetHospitalsUsingHello100ServiceQuery>();
 
             var result = await _mediator.Send(query, cancellationToken);
 
-            // 중앙화된 매퍼로 Result -> IActionResult 변환
             return result.ToActionResult(this);
         }
 
+        /// <summary>
+        /// [전체 관리자] 병원정보관리 > 병원정보관리 > 서비스이용병원목록 > Hello100설정 > 조회
+        /// </summary>
+        [HttpGet("admin/hello100-setting")]
+        [ProducesResponseType(typeof(ApiResponse<GetHello100SettingResult>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetHello100SettingAsync(GetHello100SettingRequest req, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("GET /api/hospital-management/admin/hello100-setting");
+
+            var result = await _mediator.Send(new GetHello100SettingQuery(req.HospNo, req.HospKey), cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [전체 관리자] 병원정보관리 > 병원정보관리 > 서비스이용병원목록 > Hello100설정 > 저장
+        /// </summary>
+        [HttpPost("admin/hello100-setting")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> UpsertHello100SettingAsync(UpsertHello100SettingRequest req, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("POST /api/hospital-management/admin/hello100-setting");
+
+            var command = req.Adapt<UpsertHello100SettingCommand>() with
+            {
+                Role = this.SetRole(req.Roles)
+            };
+
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [전체 관리자] 병원정보관리 > 병원정보관리 > 서비스이용병원목록 > 상세정보 > 조회
+        /// </summary>
+        [HttpPost("admin/hospital/detail")]
+        [ProducesResponseType(typeof(ApiResponse<GetHospitalResult>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetHospitalAsync(GetHospitalRequest req, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("POST /api/hospital-management/admin/hospital/detail");
+
+            var result = await _mediator.Send(new GetHospitalQuery(req.HospNo), cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [전체 관리자] 병원정보관리 > 병원정보관리 > 서비스이용병원목록 > 상세정보 > 저장
+        /// </summary>
+        [HttpPost("admin/hospital")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UpsertHospitalAsync([FromForm] UpsertHospitalRequest req, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("POST /api/hospital-management/admin/hospital");
+
+            var payloads = this.GetImagePayload(req.NewImages);
+
+            var command = req.Adapt<UpsertHospitalCommand>() with
+            {
+                NewImages = payloads
+            };
+
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+        #endregion
+
+        #region 병원 관리자 ********************************************
         /// <summary>
         /// [병원관리자] 병원정보관리 > 병원정보관리 > 조회
         /// </summary>
         [HttpGet("hospital")]
         [ProducesResponseType(typeof(ApiResponse<GetHospitalResult>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetHospital(CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetMyHospital(CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("GET /api/hospital-management/hospital");
 
@@ -89,13 +149,13 @@ namespace Hello100Admin.API.Controllers
         [HttpPost("hospital")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         [Consumes("multipart/form-data")]
-        public async Task<IActionResult> UpsertHospital([FromForm] UpsertHospitalRequest req, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> UpsertMyHospital([FromForm] UpsertMyHospitalRequest req, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("POST /api/hospital-management/hospital");
 
             var payloads = this.GetImagePayload(req.NewImages);
 
-            var command = req.Adapt<UpsertHospitalCommand>() with
+            var command = req.Adapt<UpsertMyHospitalCommand>() with
             {
                 AId = base.Aid,
                 HospNo = base.HospNo,
@@ -114,7 +174,7 @@ namespace Hello100Admin.API.Controllers
         [HttpGet("hello100-setting")]
         [ProducesResponseType(typeof(ApiResponse<GetHello100SettingResult>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetHello100Setting(CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetMyHello100Setting(CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("GET /api/hospital-management/hello100-setting");
 
@@ -129,7 +189,7 @@ namespace Hello100Admin.API.Controllers
         [HttpPost("hello100-setting")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> UpsertHello100Setting(UpsertHello100SettingRequest req, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> UpsertMyHello100Setting(UpsertMyHello100SettingRequest req, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("POST /api/hospital-management/hello100-setting");
 
@@ -750,7 +810,8 @@ namespace Hello100Admin.API.Controllers
 
             return result.ToActionResult(this);
         }
-
+        #endregion
+        #endregion
         #region INTERNAL METHOD AREA ********************************************
         private List<FileUploadPayload>? GetImagePayload(List<IFormFile>? images)
         {

@@ -104,5 +104,7 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Errors
         NotFoundVisitPurpose = 4047,
         [Description("지정 날짜는 중복값을 포함할 수 없습니다. 확인 후 다시 시도해주세요.")]
         DuplicateDateValue = 4048,
+        [Description("증상/검진 키워드 항목은 6개까지만 선택이 가능합니다. 확인 후 다시 시도해주세요.")]
+        KeywordSelectionLimitExceeded = 4049,
     }
 }

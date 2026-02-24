@@ -48,19 +48,4 @@
         /// </summary>
         tel = 1
     }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public enum HospitalListSearchType
-    {
-        /// <summary>
-        /// 0: 병원명 검색
-        /// </summary>
-        name = 0,
-        /// <summary>
-        /// 1: 요양기관번호 검색
-        /// </summary>
-        hosp_no = 1
-    }
 }
