@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Hello100Admin.Modules.Admin.Application.Common.Models;
 using System.Text;
 using Hello100Admin.Modules.Admin.Domain.Entities;
+using Hello100Admin.Modules.Admin.Application.Common.ReadModels;
 
 namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManagement
 {
@@ -1090,6 +1091,53 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             ";
 
             var result = await db.QueryFirstOrDefaultAsync<EghisDoctInfoEntity>(query, parameters, ct, _logger);
+
+            return result;
+        }
+
+        public async Task<List<GetSymptomExamKeywordsResult>> GetSymptomExamKeywordsAsync(DbSession db, CancellationToken ct)
+        {
+            var query = @"
+                SELECT master_seq                                           AS MasterSeq,
+                       master_name                                          AS MasterName,
+                       detail_use_yn                                        AS DetailUseYn,
+                       show_yn                                              AS ShowYn,
+                       sort_no                                              AS SortNo,
+                       search_cnt                                           AS SearchCnt,
+                       ( SELECT COUNT(*) 
+                           FROM hello100.tb_keyword_detail dt 
+                          WHERE tkm.master_seq = dt.master_seq )            AS DetailCnt,
+                       DATE_FORMAT(FROM_UNIXTIME(reg_dt), '%Y-%m-%d %H:%i') AS RegDt
+                  FROM hello100.tb_keyword_master tkm
+                 ORDER BY sort_no asc
+            ";
+
+            var result = (await db.QueryAsync<GetSymptomExamKeywordsResult>(query, ct: ct, logger: _logger)).ToList();
+
+            return result;
+        }
+
+        public async Task<List<GetKeywordMasterInfoReadModel>> GetSymptomExamKeywordDetailAsync(DbSession db, int masterSeq, CancellationToken ct)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("MasterSeq", masterSeq, DbType.Int32);
+
+            var query = @"
+                SELECT tkm.master_seq                                           AS MasterSeq,
+                       tkm.master_name                                          AS MasterName,
+                       tkd.detail_seq                                           AS DetailSeq,
+                       tkd.detail_name                                          AS DetailName,
+                       tkm.detail_use_yn                                        AS DetailUseYn,
+                       tkm.show_yn                                              AS ShowYn,
+                       tkd.sort_no                                              AS SortNo,
+                       tkd.search_cnt                                           AS SearchCnt
+                  FROM hello100.tb_keyword_master tkm 
+                  LEFT JOIN hello100.tb_keyword_detail tkd 
+                         ON tkm.master_seq  = tkd.master_seq
+                 WHERE tkm.master_seq = @MasterSeq
+            ";
+
+            var result = (await db.QueryAsync<GetKeywordMasterInfoReadModel>(query, parameters, ct, _logger)).ToList();
 
             return result;
         }

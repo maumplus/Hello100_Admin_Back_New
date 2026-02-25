@@ -112,5 +112,7 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Errors
         NotFoundRequestBug = 4051,
         [Description("비대면진료 신청 정보 조회에 실패하였습니다. 확인 후 다시 시도해주세요.")]
         NotFoundRequestUntact = 4052,
+        [Description("상세 키워드 정보를 찾지 못하였습니다. 관리자에게 문의해주세요.")]
+        NotFoundKeywordDetail = 4053,
     }
 }

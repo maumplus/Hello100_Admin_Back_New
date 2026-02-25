@@ -1167,5 +1167,109 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
 
             return await db.ExecuteAsync(query, parameters, ct, _logger);
         }
+
+        public async Task<int> BulkUpdateSymptomExamKeywordsAsync(DbSession db, List<TbKeywordMasterEntity> keywordEntities, CancellationToken ct)
+        {
+            #region == Query ==
+            StringBuilder sb = new StringBuilder();
+            keywordEntities.ForEach(x =>
+            {
+                sb.AppendLine("  update	");
+                sb.AppendLine("      hello100.tb_keyword_master 	");
+                sb.AppendLine("  set	");
+                sb.AppendLine("      sort_no =" + x.SortNo + ", 	");
+                sb.AppendLine("      show_yn='" + x.ShowYn + "' 	");
+                sb.AppendLine("  where	");
+                sb.AppendLine("      master_seq = " + x.MasterSeq + ";	");
+            });
+            #endregion
+
+            var result = await db.ExecuteAsync(sb.ToString(), ct: ct, logger: _logger);
+
+            return result;
+        }
+
+        public async Task<int> CreateSymptomExamKeywordAsync(DbSession db, string materName, string showYn, string detailUseYn, List<string> detailNames, CancellationToken ct)
+        {
+            #region == Query ==
+            StringBuilder sb = new StringBuilder();
+
+            sb.AppendLine(" SET @master_seq:=(select case when count(*) = 0 then 0 else max(master_seq) + 1 end from hello100.tb_keyword_master); ");
+            sb.AppendLine(" SET @sort_no:=(select case when count(*) = 0 then 0 else max(sort_no) + 1 end from hello100.tb_keyword_master); ");
+
+            sb.AppendLine("  INSERT INTO hello100.tb_keyword_master 	");
+            sb.AppendLine("  (master_seq, master_name, detail_use_yn, show_yn, sort_no, search_cnt, mod_dt, reg_dt) 	");
+            sb.AppendLine("  VALUES(@master_seq, '" + materName + "', '" + detailUseYn + "', '" + showYn + "', @sort_no, 0, 0, unix_timestamp(now())); 	");
+
+            int i = 1;
+            detailNames.ForEach(x =>
+            {
+                sb.AppendLine("  INSERT INTO hello100.tb_keyword_detail	");
+                sb.AppendLine("  (master_seq, detail_name, sort_no, search_cnt)	");
+                sb.AppendLine("  VALUES(@master_seq, '" + x + "'," + i + " , 0);	");
+                i++;
+            });
+            #endregion
+
+            var result = await db.ExecuteAsync(sb.ToString(), ct: ct, logger: _logger);
+
+            return result;
+        }
+
+        public async Task<int> UpdateSymptomExamKeywordAsync(DbSession db, TbKeywordMasterEntity keywordMaster, List<TbKeywordDetailEntity> detailEntities, CancellationToken ct)
+        {
+            var masterSeq = keywordMaster.MasterSeq;
+
+            DynamicParameters parameters = new DynamicParameters();
+            parameters.Add("MasterSeq", keywordMaster.MasterSeq, DbType.Int32);
+            parameters.Add("MasterName", keywordMaster.MasterName, DbType.String);
+            parameters.Add("ShowYn", keywordMaster.ShowYn, DbType.String);
+            parameters.Add("DetailUseYn", keywordMaster.DetailUseYn, DbType.String);
+
+            #region == Query ==
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("  update	");
+            sb.AppendLine("      hello100.tb_keyword_master 	");
+            sb.AppendLine("  set	");
+            sb.AppendLine("      show_yn=@ShowYn,	");
+            sb.AppendLine("      master_name=@MasterName,	");
+            sb.AppendLine("      detail_use_yn=@DetailUseYn	");
+            sb.AppendLine("  where	");
+            sb.AppendLine("      master_seq = @MasterSeq;	");
+
+            //DetailSeq 화면에서 삭제 된것 처리
+            var sbDetailList = new StringBuilder()
+                .AppendLine(" (")
+                .AppendLine($" {string.Join(", ", detailEntities.Select(x => x.DetailSeq))}")
+                .AppendLine(" );");
+
+            sb.AppendLine(" DELETE FROM tb_keyword_detail WHERE master_seq = @MasterSeq AND detail_seq NOT IN " + sbDetailList.ToString() + " ");
+
+            //keyword_detail 업데이트 및 인서트
+            detailEntities.ForEach(x =>
+            {
+                if (x.DetailSeq != 0)
+                {
+                    sb.AppendLine("  update	");
+                    sb.AppendLine("  tb_keyword_detail 	");
+                    sb.AppendLine("  set	");
+                    sb.AppendLine("  detail_name='" + x.DetailName + "'	");
+                    sb.AppendLine("  where	");
+                    sb.AppendLine("  master_seq=@MasterSeq  and	");
+                    sb.AppendLine("  detail_seq =" + x.DetailSeq + "; 	");
+                }
+                else
+                {
+                    sb.AppendLine("  INSERT INTO hello100.tb_keyword_detail	");
+                    sb.AppendLine("  (master_seq, detail_name, sort_no, search_cnt)	");
+                    sb.AppendLine("  VALUES(@MasterSeq, '" + x.DetailName + "', (select max(sort_no)+1 from tb_keyword_detail tkd where tkd.master_seq=@MasterSeq) , 0);	");
+                }
+            });
+            #endregion
+
+            var result = await db.ExecuteAsync(sb.ToString(), parameters, ct, _logger);
+
+            return result;
+        }
     }
 }

@@ -2,6 +2,7 @@
 using Hello100Admin.API.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Hello100Admin.BuildingBlocks.Common.Errors;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Extensions;
 using Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Results;
 using Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Queries;
 using Hello100Admin.API.Constracts.Admin.HospitalManagement;
@@ -15,6 +16,7 @@ using System.Text.Encodings.Web;
 using Hello100Admin.Modules.Admin.Domain.Entities;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.External;
 using Hello100Admin.API.Constracts.Admin.Common;
+using Hello100Admin.BuildingBlocks.Common.Application;
 
 namespace Hello100Admin.API.Controllers
 {
@@ -66,7 +68,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetHello100SettingAsync(HospRequest req, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("GET /api/hospital-management/admin/hello100-setting");
+            _logger.LogInformation("GET /api/hospital-management/admin/hello100-setting [{AId}]", Aid);
 
             var result = await _mediator.Send(new GetHello100SettingQuery(req.HospNo, req.HospKey), cancellationToken);
 
@@ -81,7 +83,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> UpsertHello100SettingAsync(UpsertHello100SettingRequest req, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("POST /api/hospital-management/admin/hello100-setting");
+            _logger.LogInformation("POST /api/hospital-management/admin/hello100-setting [{AId}]", Aid);
 
             var command = req.Adapt<UpsertHello100SettingCommand>() with
             {
@@ -102,7 +104,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse<GetHospitalResult>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetHospitalAsync(HospNoRequest req, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("POST /api/hospital-management/admin/hospital/detail");
+            _logger.LogInformation("POST /api/hospital-management/admin/hospital/detail [{AId}]", Aid);
 
             var result = await _mediator.Send(new GetHospitalQuery(req.HospNo), cancellationToken);
 
@@ -117,7 +119,7 @@ namespace Hello100Admin.API.Controllers
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> UpsertHospitalAsync([FromForm] UpsertHospitalRequest req, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("POST /api/hospital-management/admin/hospital");
+            _logger.LogInformation("POST /api/hospital-management/admin/hospital [{AId}]", Aid);
 
             var payloads = this.GetImagePayload(req.NewImages);
 
@@ -131,6 +133,85 @@ namespace Hello100Admin.API.Controllers
             return result.ToActionResult(this);
         }
         #endregion
+
+        /// <summary>
+        /// [전체 관리자] 병원정보관리 > 병원정보관리 > 증상/검진 키워드 관리 > 조회
+        /// </summary>
+        [HttpGet("hospitals/keywords")]
+        [ProducesResponseType(typeof(ApiResponse<List<GetSymptomExamKeywordsResult>>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetSymptomExamKeywordsAsync(CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("GET /api/hospital-management/hospitals/keywords [{AId}]", Aid);
+
+            var result = await _mediator.Send(new GetSymptomExamKeywordsQuery(), cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [전체 관리자] 병원정보관리 > 병원정보관리 > 증상/검진 키워드 관리 > 목록편집 > 저장
+        /// </summary>
+        [HttpPut("hospitals/keywords/bulk")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        public async Task<IActionResult> BulkUpdateSymptomExamKeywordsAsync(List<BulkUpdateSymptomExamKeywordsRequest> req, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("PUT /api/hospital-management/hospitals/keywords/bulk [{AId}]", Aid);
+
+            if (req != null && req.Count <= 0)
+                return Result.Success(GlobalErrorCode.EmptyRequestBody.ToError()).ToActionResult(this);
+
+            var tempList = req.Adapt<List<BulkUpdateSymptomExamKeywordsCommandItem>>();
+
+            var result = await _mediator.Send(new BulkUpdateSymptomExamKeywordsCommand(tempList), cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [전체 관리자] 병원정보관리 > 병원정보관리 > 증상/검진 키워드 관리 > 신규등록 > 저장
+        /// </summary>
+        [HttpPost("hospitals/keywords")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        public async Task<IActionResult> CreateSymptomExamKeywordAsync(CreateSymptomExamKeywordRequest req, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("POST /api/hospital-management/hospitals/keywords [{AId}]", Aid);
+
+            var command = req.Adapt<CreateSymptomExamKeywordCommand>();
+
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [전체 관리자] 병원정보관리 > 병원정보관리 > 증상/검진 키워드 관리 > 편집 > 조회
+        /// </summary>
+        [HttpGet("hospitals/keywords/{masterSeq}")]
+        [ProducesResponseType(typeof(ApiResponse<GetSymptomExamKeywordDetailResult>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetSymptomExamKeywordDetailAsync(int masterSeq, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("GET /api/hospital-management/hospitals/keywords/{masterSeq} [{AId}]", masterSeq, Aid);
+
+            var result = await _mediator.Send(new GetSymptomExamKeywordDetailQuery(masterSeq), cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [전체 관리자] 병원정보관리 > 병원정보관리 > 증상/검진 키워드 관리 > 편집 > 저장
+        /// </summary>
+        [HttpPatch("hospitals/keywords/{masterSeq}")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        public async Task<IActionResult> UpdateSymptomExamKeywordAsync(int masterSeq, UpdateSymptomExamKeywordRequest req, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("PATCH /api/hospital-management/hospitals/keywords/{masterSeq} [{AId}]", masterSeq, Aid);
+
+            var command = req.Adapt<UpdateSymptomExamKeywordCommand>() with { MasterSeq = masterSeq };
+
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
         #endregion
 
         #region 병원 관리자 ********************************************

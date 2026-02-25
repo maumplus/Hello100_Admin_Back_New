@@ -110,5 +110,36 @@ namespace Hello100Admin.Modules.Admin.Domain.Repositories
         public Task<int> RemoveEghisDoctInfoMdAsync(DbSession db, EghisDoctInfoMdEntity eghisDoctInfoMdEntity, CancellationToken ct);
         public Task<int> InsertEghisDoctInfoMdAsync(DbSession db, EghisDoctInfoMdEntity eghisDoctInfoMdEntity, CancellationToken ct);
         public Task<int> InsertEghisDoctUntactJoinAsync(DbSession db, TbEghisDoctUntactJoinEntity tbEghisDoctUntactJoinEntity, CancellationToken ct);
+
+        /// <summary>
+        /// [전체 관리자] 증상/검진 키워드 정렬순서/노출여부 일괄 업데이트
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="keywordEntities"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        public Task<int> BulkUpdateSymptomExamKeywordsAsync(DbSession db, List<TbKeywordMasterEntity> keywordEntities, CancellationToken ct);
+
+        /// <summary>
+        /// [전체 관리자] 증상/검진 키워드 등록
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="materName"></param>
+        /// <param name="showYn"></param>
+        /// <param name="detailUseYn"></param>
+        /// <param name="detailNames"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        public Task<int> CreateSymptomExamKeywordAsync(DbSession db, string materName, string showYn, string detailUseYn, List<string> detailNames, CancellationToken ct);
+
+        /// <summary>
+        /// [전체 관리자] 증상/검진 키워드 수정
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="keywordMaster"></param>
+        /// <param name="detailEntities"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        public Task<int> UpdateSymptomExamKeywordAsync(DbSession db, TbKeywordMasterEntity keywordMaster, List<TbKeywordDetailEntity> detailEntities, CancellationToken ct);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 using Hello100Admin.Modules.Admin.Application.Common.Models;
+using Hello100Admin.Modules.Admin.Application.Common.ReadModels;
 using Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Results;
 using Hello100Admin.Modules.Admin.Domain.Entities;
 
@@ -132,5 +133,22 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistenc
         /// <param name="ct"></param>
         /// <returns></returns>
         public Task<EghisDoctInfoEntity?> GetDoctorInfoAsync(DbSession db, string hospNo, string emplNo, CancellationToken ct);
+
+        /// <summary>
+        /// 증상/검진 키워드 조회
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        public Task<List<GetSymptomExamKeywordsResult>> GetSymptomExamKeywordsAsync(DbSession db, CancellationToken ct);
+
+        /// <summary>
+        /// 증상/검진 키워드 상세 조회
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="masterSeq"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        public Task<List<GetKeywordMasterInfoReadModel>> GetSymptomExamKeywordDetailAsync(DbSession db, int masterSeq, CancellationToken ct);
     }
 }
