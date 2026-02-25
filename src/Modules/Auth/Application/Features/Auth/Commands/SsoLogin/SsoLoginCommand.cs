@@ -22,7 +22,7 @@ namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.SsoLogin
 {
     public record SsoLoginCommand : IRequest<Result<LoginResponse>>
     {
-        public required string ChartType { get; set; }
+        public string? ChartType { get; set; }
         public required string Id { get; set; }
         public required string Key { get; set; }
         public string? UserAgent { get; init; } = default!;
