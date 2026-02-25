@@ -223,29 +223,59 @@ namespace Hello100Admin.Modules.Auth.Infrastructure.Repositories
                            z.tel                                           AS Tel,
                            z.closing_yn                                    AS ClosingYn,
                            z.del_yn                                        AS DelYn,
-                           z.`Desc`                                        AS Descrption,
+                           z.descrption                                    AS Descrption,
                            z.md_cd                                         AS MdCd,
-                           ( SELECT COUNT(*) 
-                               FROM tb_eghis_hosp_device_settings_info 
-                              WHERE hosp_no = z.hosp_no 
-                                AND device_type = 1 
-                                AND use_yn = 'Y' )                         AS KioskCount,
-                           ( SELECT COUNT(*) 
-                               FROM tb_eghis_hosp_device_settings_info 
-                              WHERE hosp_no = z.hosp_no 
-                                AND device_type = 2 
-                                AND use_yn = 'Y' )                         AS TabletCount,
+                           z.kiosk_cnt                                     AS KioskCount,
+                           z.tablet_cnt                                    AS TabletCount,
                            z.chart_type                                    AS ChartType
-                      FROM VM_HOSPITAL_DETAIL z
-                     WHERE hosp_no = @HospNo
+                      FROM ( SELECT b.hosp_key              AS hosp_key,
+                                    a.hosp_no               AS hosp_no,
+                                    a.business_no           AS business_no,
+                                    a.business_level        AS business_level,
+                                    b.name                  AS name,
+                                    b.hosp_cls_cd           AS hosp_cls_cd,
+                                    b.addr                  AS addr,
+                                    b.post_cd               AS post_cd,
+                                    b.tel                   AS tel,
+                                    b.site                  AS site,
+                                    b.lat                   AS lat,
+                                    b.lng                   AS lng,
+                                    a.closing_yn            AS closing_yn,
+                                    a.del_yn                AS del_yn,
+                                    a.`desc`                AS descrption,
+                                    FROM_UNIXTIME(a.reg_dt) AS reg_dt,
+                                    a.chart_type            AS chart_type,
+                                    b.is_test               AS is_test,
+                                    ( SELECT GROUP_CONCAT(z.md_cd SEPARATOR ',')
+                                        FROM tb_hospital_medical_info z 
+                                       WHERE a.hosp_key = z.hosp_key ) AS md_cd,
+                                    ( SELECT MAX(z.md_cd)
+                                        FROM tb_hospital_medical_info z 
+                                       WHERE main_yn = 'Y'
+                                         AND a.hosp_key = z.hosp_key ) AS main_md_cd,
+                                    ( SELECT COUNT(1)
+                                        FROM tb_eghis_hosp_device_settings_info z
+                                       WHERE a.hosp_no = z.hosp_no
+                                         AND z.device_type = 1
+                                         AND z.use_yn = 'Y' ) AS kiosk_cnt,
+                                    ( SELECT COUNT(1)
+                                        FROM tb_eghis_hosp_device_settings_info z
+                                       WHERE a.hosp_no = z.hosp_no
+                                         AND z.device_type = 2
+                                         AND z.use_yn = 'Y' ) AS tablet_cnt,
+                                    ( SELECT COUNT(1)
+                                        FROM tb_eghis_hosp_approval_info z
+                                       WHERE z.appr_type = 'HI'
+                                         AND z.appr_yn = 'N'
+                                         AND a.hosp_key = z.hosp_key) AS request_appr_yn
+                               FROM tb_eghis_hosp_info a
+                              INNER JOIN tb_hospital_info b
+                                 ON a.hosp_key = b.hosp_key
+                              WHERE a.hosp_no = @HospNo
+                                AND a.del_yn = 'N' ) z
                 ";
 
-            var result = await db.QueryFirstOrDefaultAsync<CurrentHospitalInfo>(query, parameters);
-
-            if (result == null)
-                throw new BizException(AuthErrorCode.NotFoundHospital.ToError());
-
-            return result;
+            return await db.QueryFirstOrDefaultAsync<CurrentHospitalInfo>(query, parameters);
         }
     }
 }
