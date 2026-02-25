@@ -30,6 +30,7 @@ public class GetMemberQueryHandlerTests
         public string DecryptParameter(string encryptedText) => encryptedText;
         public string EncryptToBase64WithDesEcbPkcs7(string plaintext) => plaintext;
         public string DecryptFromBase64WithDesEcbPkcs7(string plaintext) => plaintext;
+        public double Convert36To10(string str) => double.Parse(str);
     }
 
     [Fact]

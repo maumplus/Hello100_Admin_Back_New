@@ -35,6 +35,186 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.VisitPurpose
         #endregion
 
         #region IVISITPURPOSEREPOSITORY IMPLEMENTS METHOD AREA **************************************
+        public async Task<int> CreateVisitPurposeAsync(
+            DbSession db, string hospKey, int? inquiryIdx, string name, string showYn, int role, List<string>? details, CancellationToken ct)
+        {
+            DynamicParameters parameters = new DynamicParameters();
+            parameters.Add("ParentCd", "0", DbType.String);
+            parameters.Add("HospKey", hospKey, DbType.String);
+            parameters.Add("InpuiryUrl", _paperCheckUrl, DbType.String);
+            parameters.Add("InpuiryIdx", inquiryIdx ?? -1, DbType.Int32);
+            parameters.Add("InpuirySkipYn", "Y", DbType.String);
+            parameters.Add("Name", name, DbType.String);
+            parameters.Add("ShowYn", showYn, DbType.String);
+            parameters.Add("SortNo", 0, DbType.Int16);
+            parameters.Add("DelYn", "N", DbType.String);
+            parameters.Add("Role", role, DbType.Int16);
+
+            StringBuilder sbCondi = new StringBuilder();
+            var i = 0;
+            details?.ForEach(x =>
+            {
+                if (!string.IsNullOrEmpty(x))
+                {
+                    i++;
+                    sbCondi.AppendLine(",   (   func_vp_cd_generator(@vp_cd, @HospKey)");
+                    sbCondi.AppendLine(" 	,	@vp_cd                      ");
+                    sbCondi.AppendLine(" 	,	@HospKey                    ");
+                    sbCondi.AppendLine(" 	,	''                          ");
+                    sbCondi.AppendLine($" 	,	'{x}'                       ");
+                    sbCondi.AppendLine(" 	,	@ShowYn                     ");
+                    sbCondi.AppendLine(" 	,	@Role                       ");
+                    sbCondi.AppendLine($" 	,	0                           ");
+                    sbCondi.AppendLine(" 	,	'N'                         ");
+                    sbCondi.AppendLine(" 	,	UNIX_TIMESTAMP(NOW())	    ");
+                    sbCondi.AppendLine(" 	)                               ");
+                }
+            });
+
+            #region == Query ==
+            StringBuilder sb = new StringBuilder();
+            // 이지스병원내원목적정보 (최상위 부모 추가)
+            sb.AppendLine(" SET @vp_cd:=func_vp_cd_generator('0', @HospKey) ;");
+            sb.AppendLine(" INSERT INTO tb_eghis_hosp_visit_purpose_info ");
+            sb.AppendLine("     (   vp_cd                   ");
+            sb.AppendLine("     ,   parent_cd               ");
+            sb.AppendLine("     ,   hosp_key                ");
+            sb.AppendLine("     ,   inpuiry_url             ");
+            sb.AppendLine("     ,   inpuiry_idx             ");
+            sb.AppendLine("     ,   inpuiry_skip_yn         ");
+            sb.AppendLine("     ,   name                    ");
+            sb.AppendLine("     ,   show_yn                 ");
+            sb.AppendLine("     ,   role                    ");
+            sb.AppendLine("     ,   sort_no                 ");
+            sb.AppendLine("     ,   del_yn                  ");
+            sb.AppendLine("     ,   reg_dt                  ");
+            sb.AppendLine(" 	)	                        ");
+            sb.AppendLine(" 	VALUES	                    ");
+            sb.AppendLine(" 	(   @vp_cd                  ");
+            sb.AppendLine(" 	,	@ParentCd      	        ");
+            sb.AppendLine(" 	,	@HospKey                ");
+            sb.AppendLine(" 	,	@InpuiryUrl             ");
+            sb.AppendLine(" 	,	@InpuiryIdx             ");
+            sb.AppendLine(" 	,	@InpuirySkipYn          ");
+            sb.AppendLine(" 	,	@Name                   ");
+            sb.AppendLine(" 	,	@ShowYn                 ");
+            sb.AppendLine(" 	,	@Role                   ");
+            sb.AppendLine(" 	,	(SELECT IFNULL(MAX(z.sort_no),0) + 1 ");
+            sb.AppendLine("            FROM tb_eghis_hosp_visit_purpose_info z ");
+            sb.AppendLine("           WHERE z.hosp_key = @HospKey ");
+            sb.AppendLine("             AND z.del_yn = 'N') ");
+            sb.AppendLine(" 	,	@DelYn                  ");
+            sb.AppendLine(" 	,	UNIX_TIMESTAMP(NOW())	");
+            sb.AppendLine(" 	);                          ");
+
+            if (!string.IsNullOrEmpty(sbCondi.ToString()))
+            {
+                // 이지스병원내원목적정보 (자식(상세 항목) 추가)
+                sb.AppendLine(" INSERT INTO tb_eghis_hosp_visit_purpose_info ");
+                sb.AppendLine("     (   vp_cd                   ");
+                sb.AppendLine("     ,   parent_cd               ");
+                sb.AppendLine("     ,   hosp_key                ");
+                sb.AppendLine("     ,   inpuiry_url             ");
+                sb.AppendLine("     ,   name                    ");
+                sb.AppendLine("     ,   show_yn                 ");
+                sb.AppendLine("     ,   role                    ");
+                sb.AppendLine("     ,   sort_no                 ");
+                sb.AppendLine("     ,   del_yn                  ");
+                sb.AppendLine("     ,   reg_dt                  ");
+                sb.AppendLine(" 	)	                        ");
+                sb.AppendLine(" 	VALUES	                    ");
+                sb.AppendLine(sbCondi.ToString().Substring(1, sbCondi.ToString().Length - 2) + ";");
+            }
+            #endregion
+
+            var result = await db.ExecuteAsync(sb.ToString(), parameters, ct, _logger);
+
+            if (result <= 0)
+                throw new BizException(AdminErrorCode.VisitPurposeCreateFailed.ToError());
+
+            return result;
+        }
+
+        public async Task<int> UpdateVisitPurposeForNonNhisHealthScreeningAsync(
+            DbSession db, string vpCd, string hospKey, int? inquiryIdx, string name, string showYn, string detailYn, int role, List<string>? details, CancellationToken ct)
+        {
+            DynamicParameters parameters = new DynamicParameters();
+            parameters.Add("VpCd", vpCd, DbType.String);
+            parameters.Add("HospKey", hospKey, DbType.String);
+            parameters.Add("InpuiryUrl", _paperCheckUrl, DbType.String);
+            parameters.Add("InpuiryIdx", inquiryIdx ?? -1, DbType.Int32);
+            parameters.Add("InpuirySkipYn", "Y", DbType.String);
+            parameters.Add("Name", name, DbType.String);
+            parameters.Add("ShowYn", showYn, DbType.String);
+            parameters.Add("Role", role, DbType.Int16);
+
+            StringBuilder sbCondi = new StringBuilder();
+            var i = 0;
+            details?.ForEach(x =>
+            {
+                if (!string.IsNullOrEmpty(x))
+                {
+                    i++;
+                    sbCondi.AppendLine(",   (   func_vp_cd_generator(@VpCd, @HospKey) ");
+                    sbCondi.AppendLine(" 	,	@VpCd                       ");
+                    sbCondi.AppendLine(" 	,	@HospKey                    ");
+                    sbCondi.AppendLine(" 	,	''                          ");
+                    sbCondi.AppendLine($" 	,	'{x}'                       ");
+                    sbCondi.AppendLine(" 	,	@ShowYn                     ");
+                    sbCondi.AppendLine(" 	,	@Role                       ");
+                    sbCondi.AppendLine($" 	,	{i}                         ");
+                    sbCondi.AppendLine(" 	,	'N'                         ");
+                    sbCondi.AppendLine(" 	,	UNIX_TIMESTAMP(NOW())	    ");
+                    sbCondi.AppendLine(" 	)                               ");
+                }
+            });
+
+            #region == Query ==
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("  UPDATE tb_eghis_hosp_visit_purpose_info");
+            sb.AppendLine("     SET inpuiry_url     = @InpuiryUrl     ");
+            sb.AppendLine("     ,   inpuiry_idx     = @InpuiryIdx     ");
+            sb.AppendLine("     ,   inpuiry_skip_yn = @InpuirySkipYn  ");
+            sb.AppendLine("     ,   name            = @Name           ");
+            sb.AppendLine("     ,   show_yn         = @ShowYn         ");
+            sb.AppendLine("     ,   role            = @Role           ");
+            sb.AppendLine("   WHERE vp_cd           = @VpCd           ");
+            sb.AppendLine(" 	AND	hosp_key       =  @HospKey    ;   ");
+
+            if (!string.IsNullOrEmpty(sbCondi.ToString()) || detailYn == "Y")
+            {
+                sb.AppendLine("  DELETE FROM tb_eghis_hosp_visit_purpose_info");
+                sb.AppendLine("   WHERE parent_cd  = @VpCd           ");
+                sb.AppendLine(" 	AND	hosp_key   = @HospKey   ;    ");
+
+                if (detailYn == "Y")
+                {
+                    sb.AppendLine(" INSERT INTO tb_eghis_hosp_visit_purpose_info ");
+                    sb.AppendLine("     (   vp_cd                   ");
+                    sb.AppendLine("     ,   parent_cd               ");
+                    sb.AppendLine("     ,   hosp_key                ");
+                    sb.AppendLine("     ,   inpuiry_url             ");
+                    sb.AppendLine("     ,   name                    ");
+                    sb.AppendLine("     ,   show_yn                 ");
+                    sb.AppendLine("     ,   role                    ");
+                    sb.AppendLine("     ,   sort_no                 ");
+                    sb.AppendLine("     ,   del_yn                  ");
+                    sb.AppendLine("     ,   reg_dt                  ");
+                    sb.AppendLine(" 	)	                        ");
+                    sb.AppendLine(" 	VALUES	                    ");
+                    sb.AppendLine(sbCondi.ToString().Substring(1, sbCondi.ToString().Length - 2) + ";");
+                }
+            }
+            #endregion
+
+            var result = await db.ExecuteAsync(sb.ToString(), parameters, ct, _logger);
+
+            if (result <= 0)
+                throw new BizException(AdminErrorCode.VisitPurposeUpdateFailed.ToError());
+
+            return result;
+        }
+
         public async Task<int> BulkUpdateVisitPurposesAsync(BulkUpdateVisitPurposesCommand req, CancellationToken cancellationToken)
         {
             try
@@ -120,7 +300,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.VisitPurpose
             }
         }
 
-        public async Task<int> CreateVisitPurposeAsync(DbSession db, CreateVisitPurposeCommand req, int apprId, CancellationToken ct)
+        public async Task<int> CreateMyVisitPurposeAsync(DbSession db, CreateMyVisitPurposeCommand req, int apprId, CancellationToken ct)
         {
             try
             {
@@ -301,7 +481,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.VisitPurpose
             }
         }
 
-        public async Task<int> UpdateVisitPurposeForNonNhisHealthScreeningAsync(DbSession db, UpdateVisitPurposeForNonNhisHealthScreeningCommand req, int apprId, CancellationToken ct)
+        public async Task<int> UpdateMyVisitPurposeForNonNhisHealthScreeningAsync(DbSession db, UpdateMyVisitPurposeForNonNhisHealthScreeningCommand req, int apprId, CancellationToken ct)
         {
             try
             {

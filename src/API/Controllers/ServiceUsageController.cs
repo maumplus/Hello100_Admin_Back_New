@@ -96,7 +96,7 @@ namespace Hello100Admin.API.Controllers
         /// </summary>
         [HttpPost("examination-results/alimtalk/histories/search")]
         [ProducesResponseType(typeof(ApiResponse<SearchExaminationResultAlimtalkHistoriesResponse>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> SearchExaminationResultAlimtalkHistories(SearchExaminationResultAlimtalkHistoriesRequest req, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> SearchMyExaminationResultAlimtalkHistories(SearchMyExaminationResultAlimtalkHistoriesRequest req, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("POST /api/service-usage/examination-results/alimtalk/histories/search [{Aid}]", Aid);
             
@@ -117,7 +117,7 @@ namespace Hello100Admin.API.Controllers
         /// </summary>
         [HttpPost("examination-results/alimtalk/histories/export/excel")]
         [ProducesResponseType(typeof(ExcelFile), StatusCodes.Status200OK)]
-        public async Task<IActionResult> ExportExaminationResultAlimtalkHistoriesExcel(ExportExaminationResultAlimtalkHistoriesExcelRequest req, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> ExportMyExaminationResultAlimtalkHistoriesExcel(ExportMyExaminationResultAlimtalkHistoriesExcelRequest req, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("POST /api/service-usage/examination-results/alimtalk/histories/export/excel [{Aid}]", Aid);
 
@@ -292,6 +292,52 @@ namespace Hello100Admin.API.Controllers
             var file = result?.Data!;
             return File(file.Content, file.ContentType, file.FileName);
         }
+
+        #region [병원정보관리] 서비스이용병원목록 > 진단검사 발송내역 > 보기
+        /// <summary>
+        /// [전체 관리자] 병원정보관리 > 병원정보관리 > 서비스이용병원목록 > 진단검사발송내역 > 조회
+        /// </summary>
+        [HttpPost("admin/examination-results/alimtalk/histories/search")]
+        [ProducesResponseType(typeof(ApiResponse<SearchExaminationResultAlimtalkHistoriesResponse>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> SearchExaminationResultAlimtalkHistories(SearchExaminationResultAlimtalkHistoriesRequest req, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("POST /api/service-usage/admin/examination-results/alimtalk/histories/search [{Aid}]", Aid);
+
+            var query = req.Adapt<SearchExaminationResultAlimtalkHistoriesQuery>() with
+            {
+                FromDate = req.DateRangeType == "0" ? DateTime.Now.ToString("yyyy-MM-dd") : req.FromDate,
+                ToDate = req.DateRangeType == "0" ? DateTime.Now.ToString("yyyy-MM-dd") : req.ToDate,
+            };
+
+            var result = await _mediator.Send(query, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [전체 관리자] 병원정보관리 > 병원정보관리 > 서비스이용병원목록 > 진단검사발송내역 > Excel 출력
+        /// </summary>
+        [HttpPost("admin/examination-results/alimtalk/histories/export/excel")]
+        [ProducesResponseType(typeof(ExcelFile), StatusCodes.Status200OK)]
+        public async Task<IActionResult> ExportExaminationResultAlimtalkHistoriesExcel(ExportExaminationResultAlimtalkHistoriesExcelRequest req, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("POST /api/service-usage/admin/examination-results/alimtalk/histories/export/excel [{Aid}]", Aid);
+
+            var query = req.Adapt<ExportExaminationResultAlimtalkHistoriesExcelQuery>() with
+            {
+                FromDate = req.DateRangeType == "0" ? DateTime.Now.ToString("yyyy-MM-dd") : req.FromDate,
+                ToDate = req.DateRangeType == "0" ? DateTime.Now.ToString("yyyy-MM-dd") : req.ToDate,
+            };
+
+            var result = await _mediator.Send(query, cancellationToken);
+
+            if (result.ErrorInfo != null)
+                return result.ToActionResult(this);
+
+            var file = result?.Data!;
+            return File(file.Content, file.ContentType, file.FileName);
+        }
+        #endregion
         #endregion
     }
 }

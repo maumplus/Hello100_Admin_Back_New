@@ -14,6 +14,7 @@ using System.Text.Json;
 using System.Text.Encodings.Web;
 using Hello100Admin.Modules.Admin.Domain.Entities;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.External;
+using Hello100Admin.API.Constracts.Admin.Common;
 
 namespace Hello100Admin.API.Controllers
 {
@@ -56,13 +57,14 @@ namespace Hello100Admin.API.Controllers
             return result.ToActionResult(this);
         }
 
+        #region [병원정보관리] 서비스이용병원목록 > Hello100 설정 > 보기
         /// <summary>
         /// [전체 관리자] 병원정보관리 > 병원정보관리 > 서비스이용병원목록 > Hello100설정 > 조회
         /// </summary>
-        [HttpGet("admin/hello100-setting")]
+        [HttpPost("admin/hello100-setting/detail")]
         [ProducesResponseType(typeof(ApiResponse<GetHello100SettingResult>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetHello100SettingAsync(GetHello100SettingRequest req, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetHello100SettingAsync(HospRequest req, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("GET /api/hospital-management/admin/hello100-setting");
 
@@ -90,13 +92,15 @@ namespace Hello100Admin.API.Controllers
 
             return result.ToActionResult(this);
         }
+        #endregion
 
+        #region [병원정보관리] 서비스이용병원목록 > 상세정보 > 보기
         /// <summary>
         /// [전체 관리자] 병원정보관리 > 병원정보관리 > 서비스이용병원목록 > 상세정보 > 조회
         /// </summary>
         [HttpPost("admin/hospital/detail")]
         [ProducesResponseType(typeof(ApiResponse<GetHospitalResult>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetHospitalAsync(GetHospitalRequest req, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetHospitalAsync(HospNoRequest req, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("POST /api/hospital-management/admin/hospital/detail");
 
@@ -126,6 +130,7 @@ namespace Hello100Admin.API.Controllers
 
             return result.ToActionResult(this);
         }
+        #endregion
         #endregion
 
         #region 병원 관리자 ********************************************

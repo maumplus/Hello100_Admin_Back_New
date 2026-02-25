@@ -1,4 +1,5 @@
-﻿using Hello100Admin.API.Constracts.Admin.VisitPurpose;
+﻿using Hello100Admin.API.Constracts.Admin.Common;
+using Hello100Admin.API.Constracts.Admin.VisitPurpose;
 using Hello100Admin.API.Extensions;
 using Hello100Admin.API.Infrastructure.Attributes;
 using Hello100Admin.BuildingBlocks.Common.Application;
@@ -41,14 +42,196 @@ namespace Hello100Admin.API.Controllers
             _mediator = mediator;
         }
 
+        #region 전체 관리자 서비스 *********************************************
+        #region [병원정보관리] 서비스이용병원목록 > 내원목적 > 보기
+        /// <summary>
+        /// [전체 관리자] 병원정보관리 > 병원정보관리 > 서비스이용병원목록 > 내원목적 > 조회
+        /// </summary>
+        [HttpPost("admin/visit-purposes")]
+        [ProducesResponseType(typeof(ApiResponse<GetVisitPurposesResponse>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetVisitPurposes(HospKeyRequest req, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("POST /api/visit-purpose/admin/visit-purposes [{Aid}]", Aid);
+
+            var result = await _mediator.Send(new GetVisitPurposesQuery(req.HospKey), cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [전체 관리자] 병원정보관리 > 병원정보관리 > 서비스이용병원목록 > 내원목적 > 내원목적편집 조회
+        /// </summary>
+        [HttpPost("admin/visit-purposes/{vpCd}")]
+        [ProducesResponseType(typeof(ApiResponse<GetVisitPurposeDetailResponse>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetVisitPurposeDetail(string vpCd, HospRequest req, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("POST /api/visit-purpose/admin/visit-purposes/{vpCd} [{Aid}]", vpCd, Aid);
+
+            var result = await _mediator.Send(new GetVisitPurposeDetailQuery(vpCd, req.HospKey, req.HospNo), cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [전체 관리자] 병원정보관리 > 병원정보관리 > 서비스이용병원목록 > 내원목적 > 목록편집 > 저장
+        /// </summary>
+        [HttpPut("admin/visit-purposes/bulk")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        public async Task<IActionResult> BulkUpdateVisitPurposes(BulkUpdateVisitPurposesRequest req, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("PUT /api/visit-purpose/visit-purposes/bulk [{Aid}]", Aid);
+
+            if (req != null && req.VisitPurposes.Count <= 0)
+                return Result.Success(GlobalErrorCode.EmptyRequestBody.ToError()).ToActionResult(this);
+
+            var tempList = req!.VisitPurposes.Adapt<List<BulkUpdateVisitPurposeCommandItem>>();
+
+            var command = new BulkUpdateVisitPurposesCommand()
+            {
+                HospKey = req.HospKey,
+                Items = tempList
+            };
+
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [전체 관리자] 병원정보관리 > 병원정보관리 > 서비스이용병원목록 > 내원목적 > 신규등록 > 등록
+        /// </summary>
+        [HttpPost("admin/visit-purposes/add")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        public async Task<IActionResult> CreateVisitPurpose(CreateVisitPurposeRequest req, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("POST /api/visit-purpose/admin/visit-purposes/add [{Aid}]", Aid);
+
+            var command = req.Adapt<CreateVisitPurposeCommand>() with
+            {
+                InpuiryUrl = "https://paper.hello100.kr/papercheck/index/", // default
+                InpuiryIdx = req.InquiryIdx,
+                Role = this.SetRole(req.Roles)
+            };
+
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [전체 관리자] 병원정보관리 > 병원정보관리 > 서비스이용병원목록 > 내원목적 > 내원목적편집 > 저장 (공단 검진)
+        /// National Health Insurance Service (국민건강보험공단), Health Screening (건강 검진) 
+        /// </summary>
+        [HttpPut("admin/visit-purposes/nhis-health-screening")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        public async Task<IActionResult> UpdateVisitPurposeForNhisHealthScreening(UpdateVisitPurposeForNhisHealthScreeningRequest req, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("PUT /api/visit-purpose/admin/visit-purposes/nhis-health-screening [{Aid}]", Aid);
+
+            var command = req.Adapt<UpdateVisitPurposeForNhisHealthScreeningCommand>() with
+            {
+                Role = this.SetRole(req.Roles),
+            };
+
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [전체 관리자] 병원정보관리 > 병원정보관리 > 서비스이용병원목록 > 내원목적 > 내원목적편집 > 저장 (공단 검진 외 나머지)
+        /// National Health Insurance Service (국민건강보험공단), Health Screening (건강 검진) 
+        /// </summary>
+        /// <param name="req"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        [HttpPut("admin/visit-purposes/non-nhis-health-screening")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        public async Task<IActionResult> UpdateVisitPurposeForNonNhisHealthScreening(UpdateVisitPurposeForNonNhisHealthScreeningRequest req, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("PUT /api/visit-purpose/admin/visit-purposes/non-nhis-health-screening [{Aid}]", Aid);
+
+            // Request 체크 필요
+            var command = req.Adapt<UpdateVisitPurposeForNonNhisHealthScreeningCommand>() with
+            {
+                InpuiryUrl = "https://paper.hello100.kr/papercheck/index/",
+                InpuiryIdx = req.InquiryIdx,
+                InpuirySkipYn = null, // 이거 맞음?
+                DelYn = "N", // 이거 맞음?
+                Role = this.SetRole(req.Roles)
+            };
+
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [전체 관리자] 병원정보관리 > 병원정보관리 > 서비스이용병원목록 > 내원목적 > 내원목적편집(공단검진 제외) 또는 신규등록 시 문진표 조회
+        /// </summary>
+        [HttpPost("admin/visit-purposes/questionnaires")]
+        [ProducesResponseType(typeof(ApiResponse<ListResult<GetQuestionnairesResult>>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetQuestionnaires(HospKeyRequest req, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("POST /api/visit-purpose/visit-purposes/questionnaires [{Aid}]", Aid);
+
+            var result = await _mediator.Send(new GetQuestionnairesQuery(string.Empty, req.HospKey), cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+        #endregion
+
+        #region [병원정보관리] 서비스이용병원목록 > 제증명문서 > 보기
+        /// <summary>
+        /// [전체 관리자] 병원정보관리 > 병원정보관리 > 서비스이용병원목록 > 제증명문서 > 조회
+        /// </summary>
+        [HttpPost("admin/certificates")]
+        [ProducesResponseType(typeof(ApiResponse<GetCertificatesResponse>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetCertificates(HospKeyRequest req, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("POST /api/visit-purpose/admin/certificates [{Aid}]", Aid);
+
+            var result = await _mediator.Send(new GetCertificatesQuery(req.HospKey), cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [전체 관리자] 병원정보관리 > 병원정보관리 > 서비스이용병원목록 > 제증명문서 > 목록편집 > 저장
+        /// </summary>
+        [HttpPut("admin/certificates/bulk")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        public async Task<IActionResult> BulkUpdateCertificates(BulkUpdateCertificatesRequest req, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("PUT /api/visit-purpose/certificates/bulk [{Aid}]", Aid);
+
+            if (req != null && req.Certificates.Count <= 0)
+                return Result.Success(GlobalErrorCode.EmptyRequestBody.ToError()).ToActionResult(this);
+
+            var tempList = req!.Certificates.Adapt<List<BulkUpdateCertificatesCommandItem>>();
+
+            var command = new BulkUpdateCertificatesCommand()
+            {
+                HospKey = req.HospKey,
+                Items = tempList
+            };
+
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+        #endregion
+        #endregion
+
+        #region 병원 관리자 서비스 *********************************************
         /// <summary>
         /// 내원목적관리 조회
         /// </summary>
         [HttpGet("visit-purposes")]
         [ProducesResponseType(typeof(ApiResponse<GetVisitPurposesResponse>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetVisitPurposes(CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetMyVisitPurposes(CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("GET /api/visitpurpose/visit-purposes [{Aid}]", Aid);
+            _logger.LogInformation("GET /api/visit-purpose/visit-purposes [{Aid}]", Aid);
             
             var result = await _mediator.Send(new GetVisitPurposesQuery(base.HospKey), cancellationToken);
 
@@ -60,9 +243,9 @@ namespace Hello100Admin.API.Controllers
         /// </summary>
         [HttpGet("visit-purposes/{vpCd}")]
         [ProducesResponseType(typeof(ApiResponse<GetVisitPurposeDetailResponse>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetVisitPurposeDetail(string vpCd, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetMyVisitPurposeDetail(string vpCd, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("GET /api/visitpurpose/visit-purposes/{vpCd} [{Aid}]", vpCd, Aid);
+            _logger.LogInformation("GET /api/visit-purpose/visit-purposes/{vpCd} [{Aid}]", vpCd, Aid);
             
             var result = await _mediator.Send(new GetVisitPurposeDetailQuery(vpCd, base.HospKey, base.HospNo), cancellationToken);
 
@@ -74,9 +257,9 @@ namespace Hello100Admin.API.Controllers
         /// </summary>
         [HttpPut("visit-purposes/bulk")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
-        public async Task<IActionResult> BulkUpdateVisitPurposes(List<BulkUpdateVisitPurposesRequest> req, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> BulkUpdateMyVisitPurposes(List<BulkUpdateMyVisitPurposesRequest> req, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("PUT /api/visitpurpose/visit-purposes/bulk [{Aid}]", Aid);
+            _logger.LogInformation("PUT /api/visit-purpose/visit-purposes/bulk [{Aid}]", Aid);
 
             if (req != null && req.Count <= 0)
                 return Result.Success(GlobalErrorCode.EmptyRequestBody.ToError()).ToActionResult(this);
@@ -99,11 +282,11 @@ namespace Hello100Admin.API.Controllers
         /// </summary>
         [HttpPost("visit-purposes/add")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
-        public async Task<IActionResult> CreateVisitPurpose(CreateVisitPurposeRequest req, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> CreateMyVisitPurpose(CreateMyVisitPurposeRequest req, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("POST /api/visitpurpose/visit-purposes/add [{Aid}]", Aid);
+            _logger.LogInformation("POST /api/visit-purpose/visit-purposes/add [{Aid}]", Aid);
 
-            var command = req.Adapt<CreateVisitPurposeCommand>() with
+            var command = req.Adapt<CreateMyVisitPurposeCommand>() with
             {
                 HospNo = base.HospNo,
                 AId = base.Aid,
@@ -126,9 +309,9 @@ namespace Hello100Admin.API.Controllers
         /// </summary>
         [HttpPut("visit-purposes/nhis-health-screening")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
-        public async Task<IActionResult> UpdateVisitPurposeForNhisHealthScreening(UpdateVisitPurposeForNhisHealthScreeningRequest req, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> UpdateMyVisitPurposeForNhisHealthScreening(UpdateMyVisitPurposeForNhisHealthScreeningRequest req, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("PUT /api/visitpurpose/visit-purposes/nhis-health-screening [{Aid}]", Aid);
+            _logger.LogInformation("PUT /api/visit-purpose/visit-purposes/nhis-health-screening [{Aid}]", Aid);
 
             var command = req.Adapt<UpdateVisitPurposeForNhisHealthScreeningCommand>() with
             {
@@ -150,12 +333,12 @@ namespace Hello100Admin.API.Controllers
         /// <returns></returns>
         [HttpPut("visit-purposes/non-nhis-health-screening")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
-        public async Task<IActionResult> UpdateVisitPurposeForNonNhisHealthScreening(UpdateVisitPurposeForNonNhisHealthScreeningRequest req, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> UpdateMyVisitPurposeForNonNhisHealthScreening(UpdateMyVisitPurposeForNonNhisHealthScreeningRequest req, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("PUT /api/visitpurpose/visit-purposes/non-nhis-health-screening [{Aid}]", Aid);
+            _logger.LogInformation("PUT /api/visit-purpose/visit-purposes/non-nhis-health-screening [{Aid}]", Aid);
 
             // Request 체크 필요
-            var command = req.Adapt<UpdateVisitPurposeForNonNhisHealthScreeningCommand>() with
+            var command = req.Adapt<UpdateMyVisitPurposeForNonNhisHealthScreeningCommand>() with
             {
                 HospNo = base.HospNo,
                 AId = base.Aid,
@@ -175,14 +358,11 @@ namespace Hello100Admin.API.Controllers
         /// <summary>
         /// 내원목적관리 > 내원목적편집 > 삭제 (공단 검진 외 나머지)
         /// </summary>
-        /// <param name="req"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
         [HttpPatch("visit-purposes/{vpCd}")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> DeleteVisitPurpose(string vpCd, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("PATCH /api/visitpurpose/visit-purposes/{vpCd} [{Aid}]", vpCd, Aid);
+            _logger.LogInformation("PATCH /api/visit-purpose/visit-purposes/{vpCd} [{Aid}]", vpCd, Aid);
 
             var command = new DeleteVisitPurposeCommand()
             {
@@ -196,15 +376,15 @@ namespace Hello100Admin.API.Controllers
         }
 
         /// <summary>
-        /// 내원목적관리 > 내원목적편집(공단검진 제외), 신규등록 시 문진표 조회
+        /// 내원목적관리 > 내원목적편집(공단검진 제외) 또는 신규등록 시 문진표 조회
         /// </summary>
-        [HttpPatch("visit-purposes/questionnaires")]
+        [HttpGet("visit-purposes/questionnaires")]
         [ProducesResponseType(typeof(ApiResponse<ListResult<GetQuestionnairesResult>>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetQuestionnaires(CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetMyQuestionnaires(CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("PATCH /api/visitpurpose/visit-purposes/questionnaires [{Aid}]", Aid);
+            _logger.LogInformation("GET /api/visit-purpose/visit-purposes/questionnaires [{Aid}]", Aid);
 
-            var result = await _mediator.Send(new GetQuestionnairesQuery(base.HospNo), cancellationToken);
+            var result = await _mediator.Send(new GetQuestionnairesQuery(base.HospNo, base.HospKey), cancellationToken);
 
             return result.ToActionResult(this);
         }
@@ -214,9 +394,9 @@ namespace Hello100Admin.API.Controllers
         /// </summary>
         [HttpGet("certificates")]
         [ProducesResponseType(typeof(ApiResponse<GetCertificatesResponse>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetCertificates(CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetMyCertificates(CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("GET /api/visitpurpose/certificates [{Aid}]", Aid);
+            _logger.LogInformation("GET /api/visit-purpose/certificates [{Aid}]", Aid);
             
             var result = await _mediator.Send(new GetCertificatesQuery(base.HospKey), cancellationToken);
 
@@ -228,9 +408,9 @@ namespace Hello100Admin.API.Controllers
         /// </summary>
         [HttpPut("certificates/bulk")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
-        public async Task<IActionResult> BulkUpdateCertificates(List<BulkUpdateCertificatesRequest> req, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> BulkMyUpdateCertificates(List<BulkUpdateMyCertificatesRequest> req, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("PUT /api/visitpurpose/certificates/bulk [{Aid}]", Aid);
+            _logger.LogInformation("PUT /api/visit-purpose/certificates/bulk [{Aid}]", Aid);
 
             if (req != null && req.Count <= 0)
                 return Result.Success(GlobalErrorCode.EmptyRequestBody.ToError()).ToActionResult(this);
@@ -247,6 +427,7 @@ namespace Hello100Admin.API.Controllers
 
             return result.ToActionResult(this);
         }
+        #endregion
 
         #region INTERNAL METHOD AREA ********************************************
         private int SetRole(List<int>? roleList)
