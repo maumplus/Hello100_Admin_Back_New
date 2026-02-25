@@ -9,7 +9,7 @@ namespace Hello100Admin.API.Constracts.Auth
         /// E: 이지스차트\
         /// N: 닉스차트
         /// </summary>
-        public required string ChartType { get; set; }
+        public string? ChartType { get; set; }
         /// <summary>
         /// 요양기관번호
         /// </summary>
