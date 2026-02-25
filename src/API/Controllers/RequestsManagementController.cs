@@ -42,6 +42,9 @@ namespace Hello100Admin.API.Controllers
         #endregion
 
         #region ACTION METHOD AREA *******************************
+        /// <summary>
+        /// [전체관리자 > 요청사항관리] 잘못된정보 수정요청 > 리스트 조회
+        /// </summary>
         [HttpGet("bugs")]
         [ProducesResponseType(typeof(ApiResponse<ListResult<GetRequestBugsResult>>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetRequestBugs(int pageNo, int pageSize, bool apprYn, CancellationToken cancellationToken = default)
@@ -53,6 +56,9 @@ namespace Hello100Admin.API.Controllers
             return result.ToActionResult(this);
         }
 
+        /// <summary>
+        /// [전체관리자 > 요청사항관리] 잘못된정보 수정요청 > 상세 조회
+        /// </summary>
         [HttpGet("bugs/{hpId}")]
         [ProducesResponseType(typeof(ApiResponse<GetRequestBugResult>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetRequestBug(int hpId, CancellationToken cancellationToken = default)
@@ -64,6 +70,9 @@ namespace Hello100Admin.API.Controllers
             return result.ToActionResult(this);
         }
 
+        /// <summary>
+        /// [전체관리자 > 요청사항관리] 잘못된정보 수정요청 > 관리자확인 업데이트
+        /// </summary>
         [HttpPatch("bugs/{hpId}")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> UpdateRequestBug(int hpId, UpdateRequestBugRequest req, CancellationToken cancellationToken = default)
@@ -81,6 +90,9 @@ namespace Hello100Admin.API.Controllers
             return result.ToActionResult(this);
         }
 
+        /// <summary>
+        /// [전체관리자 > 요청사항관리] 비대면진료 신청목록 > 리스트 조회
+        /// </summary>
         [HttpGet("untacts")]
         [ProducesResponseType(typeof(ApiResponse<ListResult<GetRequestUntactsResult>>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetRequestUntacts([FromQuery] GetRequestUntactsRequest req, CancellationToken cancellationToken = default)
@@ -95,7 +107,7 @@ namespace Hello100Admin.API.Controllers
         }
 
         /// <summary>
-        /// [전체 관리자] 병원목록 > 병원목록 > 엑셀출력
+        /// [전체관리자 > 요청사항관리] 비대면진료 신청목록 > 엑셀출력
         /// </summary>
         [HttpGet("untacts/export/excel")]
         [ProducesResponseType(typeof(ExcelFile), StatusCodes.Status200OK)]
@@ -114,6 +126,9 @@ namespace Hello100Admin.API.Controllers
             return File(file.Content, file.ContentType, file.FileName);
         }
 
+        /// <summary>
+        /// [전체관리자 > 요청사항관리] 비대면진료 신청목록 > 상세 조회
+        /// </summary>
         [HttpGet("Untacts/{seq}")]
         [ProducesResponseType(typeof(ApiResponse<GetRequestUntactResult>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetRequestUntact(int seq, CancellationToken cancellationToken = default)
@@ -127,6 +142,9 @@ namespace Hello100Admin.API.Controllers
             return result.ToActionResult(this);
         }
 
+        /// <summary>
+        /// [전체관리자 > 요청사항관리] 비대면진료 신청목록 > 승인/반려 업데이트
+        /// </summary>
         [HttpPatch("Untacts/{seq}")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> UpdateRequestUntact(int seq, UpdateRequestUntactRequest req, CancellationToken cancellationToken = default)
