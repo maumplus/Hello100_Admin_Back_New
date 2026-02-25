@@ -192,5 +192,77 @@ namespace AdminUser.API.IntegrationTests
             // Assert
             Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
         }
+
+        [Fact]
+        public async Task GetSymptomExamKeywordsAsync_ShouldReturnOk_WhenValidCredentials()
+        {
+            _client.AsSuperAdmin("B81AFBD0", "대민테스트");
+
+            var response = await _client.GetAsync("/api/hospital-management/hospitals/keywords");
+            var body = await response.Content.ReadAsStringAsync();
+
+            var bodyKor = body.FromJson<ApiResponse>();
+
+            Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task CreateSymptomExamKeywordAsync_ShouldReturnOk_WhenValidCredentials()
+        {
+            _client.AsSuperAdmin("B81AFBD0", "대민테스트");
+
+            var req = new
+            {
+                MasterName = "테스트 대표 키워드명",
+                ShowYn = "Y",
+                DetailUseYn = "Y",
+                DetailNames = new List<string> { "테스트 상세 키워드명1", "테스트 상세 키워드명2" }
+            };
+
+            var response = await _client.PostAsJsonAsync("/api/hospital-management/hospitals/keywords", req);
+            var body = await response.Content.ReadAsStringAsync();
+
+            var bodyKor = body.FromJson<ApiResponse>();
+
+            Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task GetSymptomExamKeywordDetailAsync_ShouldReturnOk_WhenValidCredentials()
+        {
+            _client.AsSuperAdmin("B81AFBD0", "대민테스트");
+
+            var response = await _client.GetAsync("/api/hospital-management/hospitals/keywords/25");
+            var body = await response.Content.ReadAsStringAsync();
+
+            var bodyKor = body.FromJson<ApiResponse>();
+
+            Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task UpdateSymptomExamKeywordAsync_ShouldReturnOk_WhenValidCredentials()
+        {
+            _client.AsSuperAdmin("B81AFBD0", "대민테스트");
+
+            var req = new
+            {
+                MasterName = "테스트 대표 키워드명 수정 완료",
+                ShowYn = "Y",
+                DetailUseYn = "Y",
+                DetailKeywordItems = new List<object>
+                {
+                    new { DetailSeq = 78, DetailName = "테스트 상세 키워드명1 완료" }
+                    //new { DetailSeq = 0, DetailName = "테스트 상세 키워드명3 신규" }
+                }
+            };
+
+            var response = await _client.PatchAsJsonAsync("/api/hospital-management/hospitals/keywords/25", req);
+            var body = await response.Content.ReadAsStringAsync();
+
+            var bodyKor = body.FromJson<ApiResponse>();
+
+            Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+        }
     }
 }

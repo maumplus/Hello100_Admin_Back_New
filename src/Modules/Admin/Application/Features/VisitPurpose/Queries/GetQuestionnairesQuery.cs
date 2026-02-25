@@ -24,8 +24,8 @@ namespace Hello100Admin.Modules.Admin.Application.Features.VisitPurpose.Queries
     {
         public GetQuestionnairesQueryValidator()
         {
-            RuleFor(x => x.HospNo)
-                .Must(x => !string.IsNullOrWhiteSpace(x)).WithMessage("요양기관번호는 필수입니다.");
+            //RuleFor(x => x.HospNo)
+            //    .Must(x => !string.IsNullOrWhiteSpace(x)).WithMessage("요양기관번호는 필수입니다.");
         }
     }
 
