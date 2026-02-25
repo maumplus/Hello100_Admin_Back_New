@@ -1,6 +1,4 @@
-﻿using System.Text.Encodings.Web;
-using System.Text.Json;
-using Hello100Admin.BuildingBlocks.Common.Application;
+﻿using Hello100Admin.BuildingBlocks.Common.Application;
 using Hello100Admin.BuildingBlocks.Common.Definition.Enums;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Security;
@@ -34,6 +32,41 @@ namespace Hello100Admin.Modules.Admin.Application.Features.VisitPurpose.Commands
         {
             _logger.LogInformation("Process CreateVisitPurposeCommandHandler started.");
 
+            await _db.RunAsync(DataSource.Hello100,
+                (session, token) => _visitPurposeRepository.CreateVisitPurposeAsync(session, req.HospKey, req.InpuiryIdx, req.Name, req.ShowYn, req.Role, req.Details, token),
+            ct);
+
+            // 현재 운영에서 정상 동작하지 않는 것으로 확인되어 해당 내용 삭제
+            // "hello desk update perpose" 라는 PUSH 알림 전송하는 기능
+            //if (hospInfo.TabletCnt > 0)
+            //    await SendPushDeviceUpdate(userInfo.HospKey, userInfo.HospNo, "purpose");
+
+            return Result.Success();
+        }
+    }
+
+    public class CreateMyVisitPurposeCommandHandler : IRequestHandler<CreateMyVisitPurposeCommand, Result>
+    {
+        private readonly ILogger<CreateMyVisitPurposeCommandHandler> _logger;
+        private readonly IVisitPurposeRepository _visitPurposeRepository;
+        private readonly ICryptoService _cryptoService;
+        private readonly IDbSessionRunner _db;
+
+        public CreateMyVisitPurposeCommandHandler(ILogger<CreateMyVisitPurposeCommandHandler> logger,
+                                                IVisitPurposeRepository visitPurposeRepository,
+                                                ICryptoService cryptoService,
+                                                IDbSessionRunner db)
+        {
+            _logger = logger;
+            _visitPurposeRepository = visitPurposeRepository;
+            _cryptoService = cryptoService;
+            _db = db;
+        }
+
+        public async Task<Result> Handle(CreateMyVisitPurposeCommand req, CancellationToken ct)
+        {
+            _logger.LogInformation("Process CreateMyVisitPurposeCommandHandler started.");
+
             var data = new CreateVisitPurposeParams();
 
             data.Purpose = req.Adapt<CreateVisitPurposeBizParams>();
@@ -59,7 +92,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.VisitPurpose.Commands
                     var createdApprId = await _visitPurposeRepository.CreateVisitPurposeApprovalAsync(session, req.HospKey, "HR", data.ToJsonForStorage(), req.AId, token);
 
                     // 이지스병원내원목적정보 테이블에 저장
-                    await _visitPurposeRepository.CreateVisitPurposeAsync(session, req, createdApprId, token);
+                    await _visitPurposeRepository.CreateMyVisitPurposeAsync(session, req, createdApprId, token);
                 },
             ct);
 

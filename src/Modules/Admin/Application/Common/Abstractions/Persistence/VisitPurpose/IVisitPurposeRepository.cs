@@ -9,6 +9,38 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistenc
     public interface IVisitPurposeRepository
     {
         /// <summary>
+        /// [전체 관리자] 내원목적 생성
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="hospKey"></param>
+        /// <param name="inquiryIdx"></param>
+        /// <param name="name"></param>
+        /// <param name="showYn"></param>
+        /// <param name="role"></param>
+        /// <param name="details"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        public Task<int> CreateVisitPurposeAsync(
+            DbSession db, string hospKey, int? inquiryIdx, string name, string showYn, int role, List<string>? details, CancellationToken ct);
+
+        /// <summary>
+        /// [전체 관리자] 국민건강보험공단 건강검진 외 나머지 내원목적 업데이트
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="vpCd"></param>
+        /// <param name="hospKey"></param>
+        /// <param name="inquiryIdx"></param>
+        /// <param name="name"></param>
+        /// <param name="showYn"></param>
+        /// <param name="detailYn"></param>
+        /// <param name="role"></param>
+        /// <param name="details"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        public Task<int> UpdateVisitPurposeForNonNhisHealthScreeningAsync(
+            DbSession db, string vpCd, string hospKey, int? inquiryIdx, string name, string showYn, string detailYn, int role, List<string>? details, CancellationToken ct);
+
+        /// <summary>
         /// 내원 목적 목록 편집
         /// </summary>
         /// <param name="req"></param>
@@ -31,7 +63,7 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistenc
         /// <param name="apprId"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public Task<int> CreateVisitPurposeAsync(DbSession db, CreateVisitPurposeCommand req, int apprId, CancellationToken cancellationToken);
+        public Task<int> CreateMyVisitPurposeAsync(DbSession db, CreateMyVisitPurposeCommand req, int apprId, CancellationToken cancellationToken);
 
 
         /// <summary>
@@ -52,7 +84,7 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistenc
         /// <param name="apprId"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public Task<int> UpdateVisitPurposeForNonNhisHealthScreeningAsync(DbSession db, UpdateVisitPurposeForNonNhisHealthScreeningCommand req, int apprId, CancellationToken cancellationToken);
+        public Task<int> UpdateMyVisitPurposeForNonNhisHealthScreeningAsync(DbSession db, UpdateMyVisitPurposeForNonNhisHealthScreeningCommand req, int apprId, CancellationToken cancellationToken);
 
 
         /// <summary>
