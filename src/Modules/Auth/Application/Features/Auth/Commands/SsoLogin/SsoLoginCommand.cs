@@ -22,7 +22,7 @@ namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.SsoLogin
 {
     public record SsoLoginCommand : IRequest<Result<LoginResponse>>
     {
-        public required string ChartType { get; set; }
+        public string? ChartType { get; set; }
         public required string Id { get; set; }
         public required string Key { get; set; }
         public string? UserAgent { get; init; } = default!;
@@ -34,7 +34,7 @@ namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.SsoLogin
         public SsoLoginCommandValidator()
         {
             RuleFor(x => x.ChartType)
-                .Must(x => new string[] { ChartTypes.EghisChart, ChartTypes .NixChart }.Contains(x)).WithMessage("차트구분이 유효하지 않습니다.");
+                .Must(x => string.IsNullOrWhiteSpace(x) || new string[] { ChartTypes.EghisChart, ChartTypes .NixChart }.Contains(x)).WithMessage("차트구분이 유효하지 않습니다.");
             RuleFor(x => x.Id)
                 .Must(x => !string.IsNullOrWhiteSpace(x)).WithMessage("요양기관번호는 필수입니다.");
             RuleFor(x => x.Key)
@@ -135,7 +135,7 @@ namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.SsoLogin
 
                 if (hospInfo != null)
                 {
-                    if (request.ChartType != hospInfo.ChartType)
+                    if (!string.IsNullOrEmpty(request.ChartType) && request.ChartType != hospInfo.ChartType)
                     {
                         return Result.Success<LoginResponse>().WithError(GlobalErrorCode.NotSameChartType.ToError());
                     }
