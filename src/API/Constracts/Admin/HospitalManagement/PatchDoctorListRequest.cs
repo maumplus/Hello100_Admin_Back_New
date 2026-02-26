@@ -8,7 +8,12 @@
 
     public class PatchDoctorListRequest
     {
-        public string HospNo { get; set; }
+        public required string HospNo { get; set; }
+        public List<PatchDoctorInfo> DoctorList { get; set; }
+    }
+
+    public class PatchMyDoctorListRequest
+    {
         public List<PatchDoctorInfo> DoctorList { get; set; }
     }
 }
