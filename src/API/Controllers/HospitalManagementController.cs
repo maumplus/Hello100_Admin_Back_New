@@ -43,6 +43,7 @@ namespace Hello100Admin.API.Controllers
 
         #region ACTION METHOD AREA ****************************************
         #region 전체 관리자 *******************************************
+        #region [병원정보관리] 서비스이용병원목록
         /// <summary>
         /// [전체관리자] 병원정보관리 > 병원정보관리 > 서비스이용병원목록 조회
         /// </summary>
@@ -58,6 +59,493 @@ namespace Hello100Admin.API.Controllers
 
             return result.ToActionResult(this);
         }
+        #endregion
+
+        #region [병원정보관리] 서비스이용병원목록 > 의료진 설정 > 보기
+        /// <summary>
+        /// [전체관리자] 병원정보관리 > 병원정보관리 > 의료진 설정 > 의료진 목록 API
+        /// </summary>
+        [HttpPost("admin/doctors")]
+        [ProducesResponseType(typeof(List<GetDoctorListResult>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetDoctorList(HospNoRequest request, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("POST /api/hospital-management/admin/doctors");
+
+            var query = new GetDoctorListQuery()
+            {
+                HospNo = request.HospNo
+            };
+            var result = await _mediator.Send(query, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [전체관리자] 병원정보관리 > 병원정보관리 > 의료진 설정 > 의료진 목록 수정 API
+        /// </summary>
+        [HttpPatch("admin/doctors")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> PatchDoctorList(PatchDoctorListRequest request, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("PATCH /api/hospital-management/admin/doctors");
+
+            List<Modules.Admin.Application.Features.HospitalManagement.Commands.PatchDoctorInfo> doctorList = new List<Modules.Admin.Application.Features.HospitalManagement.Commands.PatchDoctorInfo>();
+
+            foreach (var doctorInfo in request.DoctorList)
+            {
+                doctorList.Add(new Modules.Admin.Application.Features.HospitalManagement.Commands.PatchDoctorInfo()
+                {
+                    HospNo = request.HospNo,
+                    EmplNo = doctorInfo.EmplNo,
+                    FrontViewRole = doctorInfo.FrontViewRole
+                });
+            }
+
+            var query = new PatchDoctorListCommand()
+            {
+                HospNo = request.HospNo,
+                DoctorList = doctorList
+            };
+            var result = await _mediator.Send(query, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [전체관리자] 병원정보관리 > 병원정보관리 > 의료진 설정 > 의료진 상세 API
+        /// </summary>
+        [HttpPost("admin/doctor")]
+        [ProducesResponseType(typeof(GetDoctorResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetDoctor(GetDoctorRequest request, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("POST /api/hospital-management/admin/doctors");
+
+            var query = new GetDoctorQuery()
+            {
+                HospNo = request.HospNo,
+                EmplNo = request.EmplNo
+            };
+            var result = await _mediator.Send(query, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [전체관리자] 병원정보관리 > 병원정보관리 > 의료진 설정 > 의료진 수정 API
+        /// </summary>
+        [HttpPatch("admin/doctor")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> PatchDoctor([FromForm] PatchDoctorRequest request, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("PATCH /api/hospital-management/admin/doctor");
+
+            List<IFormFile> images = new List<IFormFile>();
+
+            if (request.Image != null)
+            {
+                images.Add(request.Image);
+            }
+
+            var payloads = this.GetImagePayload(images);
+
+            var command = request.Adapt<PatchDoctorCammand>() with
+            {
+                Image = payloads == null || payloads.Count == 0 ? null : payloads[0]
+            };
+
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [전체관리자] 병원정보관리 > 병원정보관리 > 의료진 설정 > 비대면 의료진 상세 API
+        /// </summary>
+        [HttpPost("admin/doctor-untact")]
+        [ProducesResponseType(typeof(GetDoctorUntactResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetDoctorUntact(GetDoctorRequest request, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("POST /api/hospital-management/admin/doctor-untact");
+
+            var query = new GetDoctorUntactQuery()
+            {
+                HospNo = request.HospNo,
+                EmplNo = request.EmplNo
+            };
+
+            var result = await _mediator.Send(query, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [전체관리자] 병원정보관리 > 병원정보관리 > 의료진 설정 > 비대면 의료진 수정 API
+        /// </summary>
+        [HttpPatch("admin/doctor-untact")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> PatchDoctorUntact(PatchDoctorUntactRequest request, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("PATCH /api/hospital-management/admin/doctor-untact");
+
+            var command = request.Adapt<PatchDoctorUntactCammand>() with
+            {
+                HospNo = request.HospNo,
+                EmplNo = request.EmplNo,
+                DoctIntro = request.DoctIntro,
+                ClinicGuide = request.ClinicGuide,
+                DoctHistoryList = request.DoctHistoryList
+            };
+
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [전체관리자] 병원정보관리 > 병원정보관리 > 의료진 설정 > 주간 스케쥴 수정 API
+        /// </summary>
+        [HttpPatch("admin/doctor/weeks-schedule")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> PatchDoctorWeeksSchedule(PatchDoctorWeeksScheduleRequest request, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("PATCH /api/hospital-management/admin/doctor/weeks-schedule");
+
+            var command = new PatchDoctorWeeksScheduleCommand()
+            {
+                HospNo = request.HospNo,
+                HospKey = request.HospKey,
+                EmplNo = request.EmplNo,
+                DoctNo = request.DoctNo,
+                DoctNm = request.DoctNm,
+                DeptCd = request.DeptCd,
+                DeptNm = request.DeptNm,
+                ViewRole = request.ViewRole,
+                ViewMinTime = request.ViewMinTime,
+                ViewMinCnt = request.ViewMinCnt,
+                DoctorScheduleList = new List<Modules.Admin.Application.Features.HospitalManagement.Commands.PatchDoctorWeeksScheduleInfo>()
+            };
+
+            foreach (var info in request.DoctorScheduleList)
+            {
+                var doctorScheduleInfo = info.Adapt<Modules.Admin.Application.Features.HospitalManagement.Commands.PatchDoctorWeeksScheduleInfo>() with
+                {
+                    HospNo = request.HospNo,
+                    HospKey = request.HospKey,
+                    EmplNo = request.EmplNo,
+                    DoctNo = request.DoctNo,
+                    DoctNm = request.DoctNm,
+                    DeptCd = request.DeptCd,
+                    DeptNm = request.DeptNm,
+                    ViewRole = request.ViewRole,
+                    ViewMinTime = request.ViewMinTime,
+                    ViewMinCnt = request.ViewMinCnt
+                };
+
+                command.DoctorScheduleList.Add(doctorScheduleInfo);
+            }
+
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [전체관리자] 병원정보관리 > 병원정보관리 > 의료진 설정 > 지정 스케쥴 수정 API
+        /// </summary>
+        [HttpPatch("admin/doctor/days-schedule")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> PatchDoctorDaysSchedule(PatchDoctorDaysScheduleRequest request, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("PATCH /api/hospital-management/admin/doctor/days-schedule");
+
+            var command = new PatchDoctorDaysScheduleCommand()
+            {
+                HospNo = request.HospNo,
+                HospKey = request.HospKey,
+                EmplNo = request.EmplNo,
+                DoctNo = request.DoctNo,
+                DoctNm = request.DoctNm,
+                DeptCd = request.DeptCd,
+                DeptNm = request.DeptNm,
+                ViewRole = request.ViewRole,
+                ViewMinTime = request.ViewMinTime,
+                ViewMinCnt = request.ViewMinCnt,
+                DoctorScheduleList = new List<Modules.Admin.Application.Features.HospitalManagement.Commands.PatchDoctorDaysScheduleInfo>()
+            };
+
+            foreach (var info in request.DoctorScheduleList)
+            {
+                var doctorScheduleInfo = info.Adapt<Modules.Admin.Application.Features.HospitalManagement.Commands.PatchDoctorDaysScheduleInfo>() with
+                {
+                    HospNo = request.HospNo,
+                    HospKey = request.HospKey,
+                    EmplNo = request.EmplNo,
+                    DoctNo = request.DoctNo,
+                    DoctNm = request.DoctNm,
+                    DeptCd = request.DeptCd,
+                    DeptNm = request.DeptNm,
+                    ViewRole = request.ViewRole,
+                    ViewMinTime = request.ViewMinTime,
+                    ViewMinCnt = request.ViewMinCnt
+                };
+
+                command.DoctorScheduleList.Add(doctorScheduleInfo);
+            }
+
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [전체관리자] 병원정보관리 > 병원정보관리 > 의료진 설정 > 비대면 스케쥴 수정 API
+        /// </summary>
+        [HttpPatch("admin/doctor/untact-weeks-schedule")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> PatchDoctorUntactWeeksSchedule(PatchDoctorUntactWeeksScheduleRequest request, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("PATCH /api/hospital-management/admin/doctor/untact-weeks-schedule");
+
+            var command = new PatchDoctorUntactWeeksScheduleCommand()
+            {
+                HospNo = request.HospNo,
+                HospKey = request.HospKey,
+                EmplNo = request.EmplNo,
+                DoctNo = request.DoctNo,
+                DoctNm = request.DoctNm,
+                DeptCd = request.DeptCd,
+                DeptNm = request.DeptNm,
+                ViewRole = request.ViewRole,
+                ViewMinTime = request.ViewMinTime,
+                ViewMinCnt = request.ViewMinCnt,
+                DoctorScheduleList = new List<Modules.Admin.Application.Features.HospitalManagement.Commands.PatchDoctorUntactWeeksScheduleInfo>()
+            };
+
+            foreach (var info in request.DoctorScheduleList)
+            {
+                var doctorScheduleInfo = info.Adapt<Modules.Admin.Application.Features.HospitalManagement.Commands.PatchDoctorUntactWeeksScheduleInfo>() with
+                {
+                    HospNo = request.HospNo,
+                    HospKey = request.HospKey,
+                    EmplNo = request.EmplNo,
+                    DoctNo = request.DoctNo,
+                    DoctNm = request.DoctNm,
+                    DeptCd = request.DeptCd,
+                    DeptNm = request.DeptNm,
+                    ViewRole = request.ViewRole,
+                    ViewMinTime = request.ViewMinTime,
+                    ViewMinCnt = request.ViewMinCnt
+                };
+
+                command.DoctorScheduleList.Add(doctorScheduleInfo);
+            }
+
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [전체관리자] 병원정보관리 > 병원정보관리 > 의료진 설정 > 주간 스케쥴 관리 > 예약 정보 API
+        /// </summary>
+        [HttpPost("admin/doctor/weeks-schedule/reservation")]
+        [ProducesResponseType(typeof(GetDoctorWeeksReservationListResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetDoctorWeeksReservationList(GetDoctorWeeksReservationListRequest request, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("POST /api/hospital-management/admin/doctor/weeks-schedule/reservation");
+
+            var command = new GetDoctorWeeksReservationListQuery()
+            {
+                HospNo = request.HospNo,
+                EmplNo = request.EmplNo,
+                WeekNum = request.WeekNum,
+                ReCalculateYn = request.ReCalculateYn,
+                StartTime = request.StartTime,
+                EndTime = request.EndTime,
+                BreakStartTime = request.BreakStartTime,
+                BreakEndTime = request.BreakEndTime,
+                RsrvIntervalTime = request.RsrvIntervalTime,
+                RsrvIntervalCnt = request.RsrvIntervalCnt
+            };
+
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [전체관리자] 병원정보관리 > 병원정보관리 > 의료진 설정 > 지정 스케쥴 관리 > 예약 정보 API
+        /// </summary>
+        [HttpPost("admin/doctor/days-schedule/reservation")]
+        [ProducesResponseType(typeof(GetDoctorDaysReservationListResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetDoctorDaysReservationList(GetDoctorDaysReservationListRequest request, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("POST /api/hospital-management/admin/doctor/days-schedule/reservation");
+
+            var command = new GetDoctorDaysReservationListQuery()
+            {
+                HospNo = request.HospNo,
+                EmplNo = request.EmplNo,
+                ClinicYmd = request.ClinicYmd,
+                ReCalculateYn = request.ReCalculateYn,
+                StartTime = request.StartTime,
+                EndTime = request.EndTime,
+                BreakStartTime = request.BreakStartTime,
+                BreakEndTime = request.BreakEndTime,
+                RsrvIntervalTime = request.RsrvIntervalTime,
+                RsrvIntervalCnt = request.RsrvIntervalCnt
+            };
+
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [전체관리자] 병원정보관리 > 병원정보관리 > 의료진 설정 > 비대면 스케쥴 관리 > 예약 정보 API
+        /// </summary>
+        [HttpPost("admin/doctor/untact-weeks-schedule/reservation")]
+        [ProducesResponseType(typeof(GetDoctorUntactWeeksReservationListResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetDoctorUntactWeeksScheduleReservation(GetDoctorUntactWeeksReservationListRequest request, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("POST /api/hospital-management/admin/doctor/untact-weeks-schedule/reservation");
+
+            var command = new GetDoctorUntactWeeksReservationListQuery()
+            {
+                HospNo = request.HospNo,
+                EmplNo = request.EmplNo,
+                WeekNum = request.WeekNum,
+                ReCalculateYn = request.ReCalculateYn,
+                UntactStartTime = request.UntactStartTime,
+                UntactEndTime = request.UntactEndTime,
+                UntactBreakStartTime = request.UntactBreakStartTime,
+                UntactBreakEndTime = request.UntactBreakEndTime,
+                UntactRsrvIntervalTime = request.UntactRsrvIntervalTime,
+                UntactRsrvIntervalCnt = request.UntactRsrvIntervalCnt
+            };
+
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [전체관리자] 병원정보관리 > 병원정보관리 > 의료진 설정 > 주간 스케쥴 관리 > 예약 저장 API
+        /// </summary>
+        [HttpPatch("admin/doctor/weeks-schedule/reservation")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> PostDoctorWeeksReservation(PostDoctorWeeksReservationRequest request, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("PATCH /api/hospital-management/admin/doctor/weeks-schedule/reservation");
+
+            var command = new PostDoctorWeeksReservationCommand()
+            {
+                HospNo = request.HospNo,
+                EmplNo = request.EmplNo,
+                WeekNum = request.WeekNum,
+                RsrvIntervalTime = request.RsrvIntervalTime,
+                RsrvIntervalCnt = request.RsrvIntervalCnt,
+                EghisDoctRsrvDetailInfoList = request.EghisDoctRsrvDetailInfoList
+            };
+
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [전체관리자] 병원정보관리 > 병원정보관리 > 의료진 설정 > 지정 스케쥴 관리 > 예약 저장 API
+        /// </summary>
+        [HttpPatch("admin/doctor/days-schedule/reservation")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> PostDoctorDaysReservation(PostDoctorDaysReservationRequest request, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("PATCH /api/hospital-management/admin/doctor/days-schedule/reservation");
+
+            var command = new PostDoctorDaysReservationCommand()
+            {
+                HospNo = request.HospNo,
+                EmplNo = request.EmplNo,
+                ClinicYmd = request.ClinicYmd,
+                RsrvIntervalTime = request.RsrvIntervalTime,
+                RsrvIntervalCnt = request.RsrvIntervalCnt,
+                EghisDoctRsrvDetailInfoList = request.EghisDoctRsrvDetailInfoList
+            };
+
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [전체관리자] 병원정보관리 > 병원정보관리 > 의료진관리 > 비대면 스케쥴 관리 > 예약 저장 API
+        /// </summary>
+        [HttpPatch("admin/doctor/untact-weeks-schedule/reservation")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> PostDoctorUntactWeeksScheduleReservation(PostDoctorUntactWeeksReservationRequest request, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("PATCH /api/hospital-management/admin/doctor/untact-weeks-schedule/reservation");
+
+            var command = request.Adapt<PostDoctorUntactWeeksReservationCommand>() with
+            {
+                HospNo = request.HospNo
+            };
+
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+
+        /// <summary>
+        /// [전체관리자] 병원정보관리 > 병원정보관리 > 의료진 설정 > 의료진 진료 과목 설정 저장 API
+        /// </summary>
+        [HttpPost("admin/doctor/medical")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> PostDoctorMedical(PostDoctorMedicalRequest request, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("POST /api/hospital-management/admin/doctor/medical");
+
+            var eghisDoctInfoMdList = new List<EghisDoctInfoMdEntity>();
+
+            foreach (var mdCd in request.MdCdList)
+            {
+                var eghisDoctInfoMdEntity = new EghisDoctInfoMdEntity()
+                {
+                    MdCd = mdCd
+                };
+
+                eghisDoctInfoMdList.Add(eghisDoctInfoMdEntity);
+            }
+
+            var command = new PostDoctorMedicalCommand()
+            {
+                HospNo = request.HospNo,
+                HospKey = request.HospKey,
+                EmplNo = request.EmplNo,
+                EghisDoctInfoMdList = eghisDoctInfoMdList
+            };
+
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return result.ToActionResult(this);
+        }
+        #endregion
 
         #region [병원정보관리] 서비스이용병원목록 > Hello100 설정 > 보기
         /// <summary>
@@ -351,13 +839,13 @@ namespace Hello100Admin.API.Controllers
         [HttpGet("doctors")]
         [ProducesResponseType(typeof(List<GetDoctorListResult>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetDoctorList(CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetMyDoctorList(CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("GET /api/hospital-management/doctors");
 
             var query = new GetDoctorListQuery()
             {
-                HospNo = HospNo
+                HospNo = base.HospNo
             };
             var result = await _mediator.Send(query, cancellationToken);
 
@@ -370,7 +858,7 @@ namespace Hello100Admin.API.Controllers
         [HttpPatch("doctors")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> PatchDoctorList(PatchDoctorListRequest request, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> PatchMyDoctorList(PatchMyDoctorListRequest request, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("PATCH /api/hospital-management/doctors");
 
@@ -402,13 +890,13 @@ namespace Hello100Admin.API.Controllers
         [HttpGet("doctor/{emplNo}")]
         [ProducesResponseType(typeof(GetDoctorResult), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetDoctor(string emplNo, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetMyDoctor(string emplNo, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("GET /api/hospital-management/doctors");
 
             var query = new GetDoctorQuery()
             {
-                HospNo = HospNo,
+                HospNo = base.HospNo,
                 EmplNo = emplNo
             };
             var result = await _mediator.Send(query, cancellationToken);
@@ -422,7 +910,7 @@ namespace Hello100Admin.API.Controllers
         [HttpPatch("doctor")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> PatchDoctor([FromForm] PatchDoctorRequest request, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> PatchMyDoctor([FromForm] PatchMyDoctorRequest request, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("PATCH /api/hospital-management/doctor");
 
@@ -453,7 +941,7 @@ namespace Hello100Admin.API.Controllers
         [HttpGet("doctor-untact/{emplNo}")]
         [ProducesResponseType(typeof(GetDoctorUntactResult), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetDoctorUntact(string emplNo, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetMyDoctorUntact(string emplNo, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("GET /api/hospital-management/doctor-untact");
 
@@ -474,7 +962,7 @@ namespace Hello100Admin.API.Controllers
         [HttpPatch("doctor-untact")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> PatchDoctorUntact(PatchDoctorUntactRequest request, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> PatchMyDoctorUntact(PatchMyDoctorUntactRequest request, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("PATCH /api/hospital-management/doctor-untact");
 
@@ -498,7 +986,7 @@ namespace Hello100Admin.API.Controllers
         [HttpPatch("doctor/weeks-schedule")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> PatchDoctorWeeksSchedule(PatchDoctorWeeksScheduleRequest request, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> PatchMyDoctorWeeksSchedule(PatchMyDoctorWeeksScheduleRequest request, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("PATCH /api/hospital-management/doctor/weeks-schedule");
 
@@ -547,7 +1035,7 @@ namespace Hello100Admin.API.Controllers
         [HttpPatch("doctor/days-schedule")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> PatchDoctorDaysSchedule(PatchDoctorDaysScheduleRequest request, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> PatchMyDoctorDaysSchedule(PatchMyDoctorDaysScheduleRequest request, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("PATCH /api/hospital-management/doctor/days-schedule");
 
@@ -596,7 +1084,7 @@ namespace Hello100Admin.API.Controllers
         [HttpPatch("doctor/untact-weeks-schedule")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> PatchDoctorUntactWeeksSchedule(PatchDoctorUntactWeeksScheduleRequest request, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> PatchMyDoctorUntactWeeksSchedule(PatchMyDoctorUntactWeeksScheduleRequest request, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("PATCH /api/hospital-management/doctor/untact-weeks-schedule");
 
@@ -645,7 +1133,7 @@ namespace Hello100Admin.API.Controllers
         [HttpPost("doctor/weeks-schedule/reservation")]
         [ProducesResponseType(typeof(GetDoctorWeeksReservationListResult), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetDoctorWeeksReservationList(GetDoctorWeeksReservationListRequest request, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetMyDoctorWeeksReservationList(GetMyDoctorWeeksReservationListRequest request, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("POST /api/hospital-management/doctor/weeks-schedule/reservation");
 
@@ -674,7 +1162,7 @@ namespace Hello100Admin.API.Controllers
         [HttpPost("doctor/days-schedule/reservation")]
         [ProducesResponseType(typeof(GetDoctorDaysReservationListResult), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetDoctorDaysReservationList(GetDoctorDaysReservationListRequest request, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetMyDoctorDaysReservationList(GetMyDoctorDaysReservationListRequest request, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("POST /api/hospital-management/doctor/days-schedule/reservation");
 
@@ -703,7 +1191,7 @@ namespace Hello100Admin.API.Controllers
         [HttpPost("doctor/untact-weeks-schedule/reservation")]
         [ProducesResponseType(typeof(GetDoctorUntactWeeksReservationListResult), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetDoctorUntactWeeksScheduleReservation(GetDoctorUntactWeeksReservationListRequest request, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetMyDoctorUntactWeeksScheduleReservation(GetMyDoctorUntactWeeksReservationListRequest request, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("POST /api/hospital-management/doctor/untact-weeks-schedule/reservation");
 
@@ -732,7 +1220,7 @@ namespace Hello100Admin.API.Controllers
         [HttpPatch("doctor/weeks-schedule/reservation")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> PostDoctorWeeksReservation(PostDoctorWeeksReservationRequest request, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> PostMyDoctorWeeksReservation(PostMyDoctorWeeksReservationRequest request, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("PATCH /api/hospital-management/doctor/weeks-schedule/reservation");
 
@@ -757,7 +1245,7 @@ namespace Hello100Admin.API.Controllers
         [HttpPatch("doctor/days-schedule/reservation")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> PostDoctorDaysReservation(PostDoctorDaysReservationRequest request, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> PostMyDoctorDaysReservation(PostMyDoctorDaysReservationRequest request, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("PATCH /api/hospital-management/doctor/days-schedule/reservation");
 
@@ -782,7 +1270,7 @@ namespace Hello100Admin.API.Controllers
         [HttpPatch("doctor/untact-weeks-schedule/reservation")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> PostDoctorUntactWeeksScheduleReservation(PostDoctorUntactWeeksReservationRequest req, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> PostMyDoctorUntactWeeksScheduleReservation(PostMyDoctorUntactWeeksReservationRequest req, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("PATCH /api/hospital-management/doctor/untact-weeks-schedule/reservation");
 
@@ -799,7 +1287,7 @@ namespace Hello100Admin.API.Controllers
         [HttpPost("doctor/medical")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> PostDoctorMedical(PostDoctorMedicalRequest request, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> PostMyDoctorMedical(PostMyDoctorMedicalRequest request, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("POST /api/hospital-management/doctor/medical");
 

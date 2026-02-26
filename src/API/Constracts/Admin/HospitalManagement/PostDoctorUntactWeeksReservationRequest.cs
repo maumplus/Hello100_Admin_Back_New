@@ -4,9 +4,21 @@ namespace Hello100Admin.API.Constracts.Admin.HospitalManagement
 {
     public sealed record PostDoctorUntactWeeksReservationRequest
     {
+        public required string HospNo { get; init; }
+        public required string EmplNo { get; init; }
+        public int WeekNum { get; init; }
+        public int UntactRsrvIntervalTime { get; init; }
         [JsonIgnore]
-        public string? HospNo { get; init; }
-        public string EmplNo { get; init; }
+        public int UntactRsrvIntervalCnt { get; init; } = 1;
+        public string UntactAvaStartTime { get; init; }
+        public string UntactAvaEndTime { get; init; }
+        public string UntactAvaUseYn { get; init; }
+        public List<PostDoctorUntactWeeksReservationRequestItem> EghisDoctRsrvDetailInfoList { get; init; }
+    }
+
+    public sealed record PostMyDoctorUntactWeeksReservationRequest
+    {
+        public required string EmplNo { get; init; }
         public int WeekNum { get; init; }
         public int UntactRsrvIntervalTime { get; init; }
         [JsonIgnore]
