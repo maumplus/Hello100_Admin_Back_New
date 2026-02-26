@@ -7,14 +7,9 @@ using Hello100Admin.Modules.Admin.Application.Common.Models;
 using Hello100Admin.Modules.Admin.Application.Features.RequestsManagement.Commands;
 using Hello100Admin.Modules.Admin.Application.Features.RequestsManagement.Queries;
 using Hello100Admin.Modules.Admin.Application.Features.RequestsManagement.Results;
-using Hello100Admin.Modules.Admin.Application.Features.HospitalUser.Queries;
 using Mapster;
-using Hello100Admin.Modules.Admin.Application.Features.Advertisement.Queries;
-using Hello100Admin.API.Constracts.Admin.Advertisement;
 using Hello100Admin.API.Constracts.Admin.RequestsManagement;
-using Hello100Admin.Modules.Admin.Application.Features.Advertisement.Commands;
 using Hello100Admin.Modules.Admin.Application.Common.Exports;
-using Hello100Admin.Modules.Admin.Application.Features.Hospitals.Queries;
 
 namespace Hello100Admin.API.Controllers
 {
@@ -133,7 +128,7 @@ namespace Hello100Admin.API.Controllers
         [ProducesResponseType(typeof(ApiResponse<GetRequestUntactResult>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetRequestUntact(int seq, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("GET api/requests-management/bugs/{seq} [{Aid}]", seq, Aid);
+            _logger.LogInformation("GET api/requests-management/Untacts/{seq} [{Aid}]", seq, Aid);
 
             var rootUrl = _adminImageUrl;
 

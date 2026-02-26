@@ -37,6 +37,7 @@ using Hello100Admin.Modules.Admin.Infrastructure.Repositories.Hospitals;
 using Hello100Admin.Modules.Admin.Infrastructure.Repositories.Departments;
 using Hello100Admin.Modules.Admin.Infrastructure.Repositories.Keywords;
 using Hello100Admin.Modules.Admin.Infrastructure.Repositories.RequestsManagement;
+using Hello100Admin.Modules.Admin.Infrastructure.Repositories.Asset;
 
 namespace Hello100Admin.Modules.Admin.Infrastructure;
 
@@ -81,6 +82,7 @@ public static class DependencyInjection
         services.AddScoped<IExcelExporter, ClosedXmlExcelExporter>();
         services.AddScoped<IRequestsManagementStore, RequestsManagementStore>();
         services.AddScoped<IRequestsManagementRepository, RequestsManagementRepository>();
+        services.AddScoped<IAssetStore, AssetStore>();
         services.AddSingleton<IHasher, Sha256Hasher>();
 
         var kakaoBizUrl = configuration.GetSection("KakaoBizUrl").Value;
