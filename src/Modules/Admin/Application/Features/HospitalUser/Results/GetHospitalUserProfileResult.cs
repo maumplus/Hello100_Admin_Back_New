@@ -40,6 +40,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalUser.Results
 
     public sealed class GetHospitalUserProfileResultServiceUsageItem
     {
+        public int RowNum { get; set; } = default!;
         public string ReqDate { get; set; } = default!;
         public int SerialNo { get; set; }
         public string Name { get; set; } = default!;
