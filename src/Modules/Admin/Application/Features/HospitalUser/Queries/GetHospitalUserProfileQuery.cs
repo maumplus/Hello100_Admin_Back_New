@@ -1,8 +1,8 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Globalization;
+using System.Text.RegularExpressions;
 using FluentValidation;
 using Hello100Admin.BuildingBlocks.Common.Application;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Security;
-using Hello100Admin.BuildingBlocks.Common.Infrastructure.Serialization;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence;
 using Hello100Admin.Modules.Admin.Application.Features.HospitalUser.Results;
 using MediatR;
@@ -68,6 +68,26 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalUser.Queries
                     family.MemberNm = _cryptoService.DecryptWithNoVector(family.MemberNm, CryptoKeyType.Email);
                     family.BirthDay = birthYear + birthMonth + birthDate;
                     family.Sex = _cryptoService.DecryptWithNoVector(family.Sex, CryptoKeyType.Mobile);
+                }
+            }
+            #endregion
+
+            #region SET SERVICE USAGE
+            if (serviceUsageList.Count > 0)
+            {
+                var rownum = serviceUsageList.Count;
+
+                foreach (var serviceUsage in serviceUsageList)
+                {
+                    serviceUsage.RowNum = rownum--;
+
+                    if (!string.IsNullOrWhiteSpace(serviceUsage.ReqDate) &&
+                        DateTime.TryParseExact(serviceUsage.ReqDate, "yyyyMMdd", null, DateTimeStyles.None, out var reqDt))
+                    {
+                        serviceUsage.ReqDate = reqDt.ToString("yyyy.MM.dd");
+                    }
+
+                    serviceUsage.Name = string.IsNullOrWhiteSpace(serviceUsage.Name) ? "" : $"{serviceUsage.Name[0]}{new string('*', serviceUsage.Name.Length - 1)}";
                 }
             }
             #endregion
