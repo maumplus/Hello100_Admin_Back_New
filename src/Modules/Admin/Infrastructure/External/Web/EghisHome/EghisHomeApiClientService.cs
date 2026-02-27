@@ -23,9 +23,10 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.External.Web.EghisHome
             {
                 _logger.LogInformation("Process SendAsync() started.");
 
-                string requestUrl = $"{_client.BaseAddress}/hello100/kakao/join/{hospNo}/{chartType}?TmpType={tmpType}";
+                string requestUrl = $"{_client.BaseAddress}hello100/kakao/join/{hospNo}/{chartType}?TmpType={tmpType}";
 
                 HttpResponseMessage response = await _client.GetAsync(requestUrl);
+
                 response.EnsureSuccessStatusCode();
             }
             catch (Exception e)
