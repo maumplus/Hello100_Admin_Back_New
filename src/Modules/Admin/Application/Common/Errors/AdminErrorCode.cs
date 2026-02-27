@@ -118,5 +118,11 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Errors
         AtLeastOneQrReceptionVisitPurposeRequired = 4054,
         [Description("진료 예약이 활성화된 병원입니다. 최소 1개 이상의 내원 목적에 진료 예약을 설정해야 합니다.")]
         AtLeastOneAppointmentVisitPurposeRequired = 4055,
+        [Description("병원 정보에 우편번호가 없습니다. 관리자에게 문의해주세요.")]
+        NotFoundHospitalPostCd = 4056,
+        [Description("병원 정보에 주소가 없습니다. 관리자에게 문의해주세요.")]
+        NotFoundHospitalAddr = 4057,
+        [Description("병원 정보에 대표번호가 없습니다. 관리자에게 문의해주세요.")]
+        NotFoundHospitalTel = 4058
     }
 }
