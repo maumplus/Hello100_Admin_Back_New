@@ -87,28 +87,30 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
 
             mapped.HospNm = hospNm;
             mapped.InfoTxt = infoTxt;
+            mapped.SetJson = setJson ?? new TabletRo();
 
-            mapped.SetJson = new TabletRo
-            {
-                ReceptYn = setJson?.ReceptYn ?? "N",
-                NewReceiveYn = setJson?.NewReceiveYn ?? "N",
-                AddrYn = setJson?.AddrYn ?? "N",
-                DetailYn = setJson?.DetailYn ?? "N",
-                DeptYn = setJson?.DeptYn ?? "N",
-                DeptBreakYn = setJson?.DeptBreakYn ?? "N",
-                WaitTimeYn = setJson?.WaitTimeYn ?? "N",
-                ViewMinTime = setJson?.ViewMinTime ?? "",
-                PrtBarcodeYn = setJson?.PrtBarcodeYn ?? "",
-                PtntInputType = setJson?.PtntInputType ?? 0,
-                PayYn = setJson?.PayYn ?? "Y",
-                SimplePayYn = setJson?.SimplePayYn ?? "Y",
-                ReceiveMainSelect = setJson?.ReceiveMainSelect ?? "D",
-                PopupYn = setJson?.PopupYn ?? "Y",
-                DefaultDeptCD = setJson?.DefaultDeptCD ?? "",
-                DefaultEmplNo = setJson?.DefaultEmplNo ?? "",
-                receiptState = setJson?.receiptState ?? "W",
-                QrReceiptYn = setJson?.QrReceiptYn ?? "N"
-            };
+            //mapped.SetJson = new TabletRo
+            //{
+            //    ReceptYn = setJson?.ReceptYn ?? "N",
+            //    NewReceiveYn = setJson?.NewReceiveYn ?? "N",
+            //    AddrYn = setJson?.AddrYn ?? "N",
+            //    DetailYn = setJson?.DetailYn ?? "N",
+            //    DeptYn = setJson?.DeptYn ?? "N",
+            //    DeptBreakYn = setJson?.DeptBreakYn ?? "N",
+            //    WaitTimeYn = setJson?.WaitTimeYn ?? "N",
+            //    ViewMinTime = setJson?.ViewMinTime ?? "",
+            //    PrtBarcodeYn = setJson?.PrtBarcodeYn ?? "",
+            //    PtntInputType = setJson?.PtntInputType ?? 0,
+            //    PayYn = setJson?.PayYn ?? "Y",
+            //    SimplePayYn = setJson?.SimplePayYn ?? "Y",
+            //    ReceiveMainSelect = setJson?.ReceiveMainSelect ?? "D",
+            //    PopupYn = setJson?.PopupYn ?? "Y",
+            //    DefaultDeptCD = setJson?.DefaultDeptCD ?? "",
+            //    DefaultEmplNo = setJson?.DefaultEmplNo ?? "",
+            //    receiptState = setJson?.receiptState ?? "W",
+            //    QrReceiptYn = setJson?.QrReceiptYn ?? "N",
+            //    PurposeYn = setJson?.PurposeYn ?? "Y"
+            //};
 
             result.DeviceData = mapped;
 
