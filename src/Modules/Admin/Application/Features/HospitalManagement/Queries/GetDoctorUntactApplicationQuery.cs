@@ -58,7 +58,24 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
             var hospInfo = await _hospitalInfoProvider.GetHospitalInfoByHospNoAsync(req.HospNo, ct);
 
             if (hospInfo == null)
+            {
                 return Result.Success<GetDoctorUntactApplicationResult>().WithError(AdminErrorCode.NotFoundCurrentHospital.ToError());
+            }
+
+            if (string.IsNullOrEmpty(hospInfo.PostCd))
+            {
+                return Result.Success<GetDoctorUntactApplicationResult>().WithError(AdminErrorCode.NotFoundHospitalPostCd.ToError());
+            }
+
+            if (string.IsNullOrEmpty(hospInfo.Addr))
+            {
+                return Result.Success<GetDoctorUntactApplicationResult>().WithError(AdminErrorCode.NotFoundHospitalAddr.ToError());
+            }
+
+            if (string.IsNullOrEmpty(hospInfo.Tel))
+            {
+                return Result.Success<GetDoctorUntactApplicationResult>().WithError(AdminErrorCode.NotFoundHospitalTel.ToError());
+            }
 
             var licenseTypes = await _accountStore.GetCommonList("23", ct);
 
