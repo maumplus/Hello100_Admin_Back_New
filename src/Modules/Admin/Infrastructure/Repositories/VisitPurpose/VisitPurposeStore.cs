@@ -14,6 +14,7 @@ using Hello100Admin.Modules.Admin.Application.Features.VisitPurpose.ReadModels.G
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Dapper;
 using Hello100Admin.Modules.Admin.Application.Common.Models;
 using Hello100Admin.Modules.Admin.Application.Features.VisitPurpose.Results;
+using Hello100Admin.Modules.Admin.Domain.Entities;
 
 namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.VisitPurpose
 {
@@ -251,6 +252,47 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.VisitPurpose
 
             result.Items = (await multi.ReadAsync<GetQuestionnairesResult>()).ToList();
             result.TotalCount = await multi.ReadSingleAsync<int>();
+
+            return result;
+        }
+
+        public async Task<TbEghisHospSettingsInfoEntity?> GetHospRoleByHospKeyAsync(DbSession db, string hospKey, CancellationToken ct)
+        {
+
+            var parameters = new DynamicParameters();
+            parameters.Add("HospKey", hospKey, DbType.String);
+
+            var query = @"
+                SELECT z.role Role
+                  FROM tb_eghis_hosp_settings_info z 
+                 WHERE z.hosp_key = @HospKey
+            ";
+
+            var result = await db.QueryFirstOrDefaultAsync<TbEghisHospSettingsInfoEntity>(query, parameters, ct, _logger);
+
+            return result;
+        }
+
+        public async Task<List<TbEghisHospVisitPurposeInfoEntity>> GetVisitPurposeByVpCdAsync(DbSession db, string hospKey, CancellationToken ct)
+        {
+
+            var parameters = new DynamicParameters();
+            parameters.Add("HospKey", hospKey, DbType.String);
+
+            var query = $@"
+                SELECT tehvpi.vp_cd           AS VpCd,
+                       tehvpi.name            AS Name,
+                       tehvpi.show_yn         AS ShowYn,
+                       tehvpi.role            AS Role
+                  FROM tb_eghis_hosp_visit_purpose_info tehvpi
+                 INNER JOIN tb_eghis_hosp_info tehi
+                         ON tehi.hosp_key = tehvpi.hosp_key
+                 WHERE tehvpi.hosp_key = @HospKey
+                   AND tehvpi.parent_cd = '0'
+                   AND tehvpi.del_yn = 'N'
+            ";
+
+            var result = (await db.QueryAsync<TbEghisHospVisitPurposeInfoEntity>(query, parameters, ct, _logger)).ToList();
 
             return result;
         }

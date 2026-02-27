@@ -1386,6 +1386,7 @@ namespace Hello100Admin.API.Controllers
         }
         #endregion
         #endregion
+
         #region INTERNAL METHOD AREA ********************************************
         private List<FileUploadPayload>? GetImagePayload(List<IFormFile>? images)
         {

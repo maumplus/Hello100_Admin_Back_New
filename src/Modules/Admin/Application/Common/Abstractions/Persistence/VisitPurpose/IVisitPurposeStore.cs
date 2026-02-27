@@ -5,6 +5,7 @@ using Hello100Admin.Modules.Admin.Application.Features.VisitPurpose.ReadModels.G
 using Hello100Admin.Modules.Admin.Application.Features.VisitPurpose.ReadModels.GetVisitPurposeDetail;
 using Hello100Admin.Modules.Admin.Application.Features.VisitPurpose.ReadModels.GetVisitPurposes;
 using Hello100Admin.Modules.Admin.Application.Features.VisitPurpose.Results;
+using Hello100Admin.Modules.Admin.Domain.Entities;
 
 namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.VisitPurpose
 {
@@ -42,5 +43,23 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistenc
         /// <param name="ct"></param>
         /// <returns></returns>
         public Task<ListResult<GetQuestionnairesResult>> GetQuestionnairesAsync(DbSession db, string hospNo, CancellationToken ct);
+
+        /// <summary>
+        /// 역할 목록 조회 (해당 병원의 Role 설정과 내원목적 전체의 Role 비교를 위함)
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="hospKey"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        public Task<TbEghisHospSettingsInfoEntity?> GetHospRoleByHospKeyAsync(DbSession db, string hospKey, CancellationToken ct);
+
+        /// <summary>
+        /// 내원목적 전체 조회 (병원 Role과 비교하기 위함)
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="hospKey"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        public Task<List<TbEghisHospVisitPurposeInfoEntity>> GetVisitPurposeByVpCdAsync(DbSession db, string hospKey, CancellationToken ct);
     }
 }

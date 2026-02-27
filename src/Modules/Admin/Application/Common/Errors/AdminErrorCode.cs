@@ -114,5 +114,9 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Errors
         NotFoundRequestUntact = 4052,
         [Description("상세 키워드 정보를 찾지 못하였습니다. 관리자에게 문의해주세요.")]
         NotFoundKeywordDetail = 4053,
+        [Description("QR/당일 접수가 활성화된 병원입니다. 최소 1개 이상의 내원 목적에 QR/당일 접수를 설정해야 합니다.")]
+        AtLeastOneQrReceptionVisitPurposeRequired = 4054,
+        [Description("진료 예약이 활성화된 병원입니다. 최소 1개 이상의 내원 목적에 진료 예약을 설정해야 합니다.s")]
+        AtLeastOneAppointmentVisitPurposeRequired = 4055,
     }
 }
