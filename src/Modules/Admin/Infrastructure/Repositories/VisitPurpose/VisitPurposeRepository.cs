@@ -438,6 +438,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.VisitPurpose
                 //상세내역 업데이트
                 sb.AppendLine(" UPDATE tb_eghis_hosp_visit_purpose_info");
                 sb.AppendLine("    SET show_yn = 'N'        ");
+                sb.AppendLine("    ,    role = @Role");
                 sb.AppendLine("  WHERE parent_cd = '01'     ");
                 sb.AppendLine("    AND hosp_key = @HospKey; ");
 
