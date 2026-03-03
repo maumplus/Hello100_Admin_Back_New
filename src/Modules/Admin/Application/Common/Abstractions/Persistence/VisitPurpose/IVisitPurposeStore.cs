@@ -60,6 +60,6 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistenc
         /// <param name="hospKey"></param>
         /// <param name="ct"></param>
         /// <returns></returns>
-        public Task<List<TbEghisHospVisitPurposeInfoEntity>> GetVisitPurposeByVpCdAsync(DbSession db, string hospKey, CancellationToken ct);
+        public Task<List<TbEghisHospVisitPurposeInfoEntity>> GetVisitPurposeByHospKeyAsync(DbSession db, string hospKey, CancellationToken ct);
     }
 }

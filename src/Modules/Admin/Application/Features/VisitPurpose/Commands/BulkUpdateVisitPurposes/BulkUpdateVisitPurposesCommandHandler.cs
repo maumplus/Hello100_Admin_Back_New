@@ -47,7 +47,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.VisitPurpose.Commands
 
             // 해당 병원 내원목적 리스트의 Role과 병원 자체의 Role을 비교해서, 하나의 Row라도 일치하는지 체크 필요. (하나도 일치하지 않으면, 앱에서 노출이 안되는 상황이 발생할 수 있기 때문)
             var visitPurposes = await _db.RunAsync(DataSource.Hello100,
-                (session, token) => _visitPurposeStore.GetVisitPurposeByVpCdAsync(session, req.HospKey, ct),
+                (session, token) => _visitPurposeStore.GetVisitPurposeByHospKeyAsync(session, req.HospKey, token),
             ct);
 
             var yCodes = showYItems.Select(x => x.VpCd).ToHashSet();
