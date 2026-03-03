@@ -98,7 +98,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.Asset.Queries
 
             var exportExcel = UsageList.Items.ToList();
 
-            if (exportExcel.Count > 0)
+            if (exportExcel.Count >= 0)
             {
                 var columns = new List<ExcelColumn<GetUsageListResult>>
                 {
@@ -127,7 +127,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.Asset.Queries
                 return Result.Success(new ExcelFile(content, $"헬로데스크_사용이력_{DateTime.Now.ToString("yyyyMMdd")}.xlsx", GlobalConstant.ContentTypes.Xlsx));
             }
 
-            return Result.Success(new ExcelFile()).WithError(GlobalErrorCode.NoDataForExcelExport.ToError());
+            return Result.Success<ExcelFile>().WithError(GlobalErrorCode.NoDataForExcelExport.ToError());
         }
     }
 

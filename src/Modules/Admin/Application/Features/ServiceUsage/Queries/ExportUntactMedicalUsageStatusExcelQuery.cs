@@ -90,7 +90,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Queries
                     req.SearchPaymentTypes, token),
             ct);
 
-            if (historyData.Count > 0)
+            if (historyData.Count >= 0)
             {
                 var dtos = historyData.Adapt<List<ExportUntactMedicalUsageStatusExcelResult>>();
 
@@ -114,7 +114,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Queries
                 return Result.Success(new ExcelFile(content, $"비대면진료현황_{DateTime.Now:yyyyMMdd}.xlsx", GlobalConstant.ContentTypes.Xlsx));
             }
 
-            return Result.Success(new ExcelFile()).WithError(GlobalErrorCode.NoDataForExcelExport.ToError());
+            return Result.Success<ExcelFile>().WithError(GlobalErrorCode.NoDataForExcelExport.ToError());
         }
     }
 }

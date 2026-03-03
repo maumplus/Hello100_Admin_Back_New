@@ -85,10 +85,11 @@ namespace Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Queries.
                 {
                     resultList.RemoveAll(a => a.SendStatus != "발송실패");
                 }
+            }
 
-                if (resultList.Count > 0)
-                {
-                    var columns = new List<ExcelColumn<GetExaminationResultAlimtalkHistoryForExportReadModel>>
+            if (resultList.Count >= 0)
+            {
+                var columns = new List<ExcelColumn<GetExaminationResultAlimtalkHistoryForExportReadModel>>
                     {
                         new("No", x => x.RowNum),
                         new("환자명", x => x.PtntName),
@@ -99,12 +100,11 @@ namespace Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Queries.
                         new("발송방식", x => x.SendType),
                     };
 
-                    var content = _excelExporter.Export(resultList, "진단검사결과 알림톡 발송 내역", "진단검사결과 알림톡 발송 내역", columns);
-                    return Result.Success(new ExcelFile(content, $"진단검사결과 알림톡 발송 내역_{DateTime.Now.ToString("yyyyMMdd")}.xlsx", GlobalConstant.ContentTypes.Xlsx));
-                }
+                var content = _excelExporter.Export(resultList, "진단검사결과 알림톡 발송 내역", "진단검사결과 알림톡 발송 내역", columns);
+                return Result.Success(new ExcelFile(content, $"진단검사결과 알림톡 발송 내역_{DateTime.Now.ToString("yyyyMMdd")}.xlsx", GlobalConstant.ContentTypes.Xlsx));
             }
 
-            return Result.Success(new ExcelFile()).WithError(GlobalErrorCode.NoDataForExcelExport.ToError());
+            return Result.Success<ExcelFile>().WithError(GlobalErrorCode.NoDataForExcelExport.ToError());
         }
     }
 }

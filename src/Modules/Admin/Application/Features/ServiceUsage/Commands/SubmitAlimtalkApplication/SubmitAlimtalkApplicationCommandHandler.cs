@@ -50,6 +50,8 @@ namespace Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Commands
             catch (Exception)
             {
                 // 요청 실패 시, 알림톡 발송 서비스 신청 정보 삭제
+                // [이슈] 이미 INSERT 돼있는 상태에서 동일 시점 해당 Table의 Read가 발생할 경우 유령 데이터 발생 가능성
+                // hello100.tb_kakao_msg_join status(1: Completed[신청완료], 2: Processing[진행중] 3: Failed[실패] 4: Cancelled[취소]) column 추가?
                 await _db.RunAsync(DataSource.Hello100,
                     (session, token) => _serviceUsageRepository.DeleteAlimtalkApplicationAsync(session, command.HospNo, command.HospKey, command.TmpType, token),
                 ct);

@@ -42,7 +42,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.Hospitals.Queries
                 (session, token) => _hospitalsStore.ExportHospitalsExcelAsync(session, req.SearchType, req.SearchKeyword, token),
             ct);
 
-            if (historyData.Count > 0)
+            if (historyData.Count >= 0)
             {
                 var dtos = historyData.Adapt<List<ExportHospitalsExcelResult>>();
 
@@ -65,7 +65,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.Hospitals.Queries
                 return Result.Success(new ExcelFile(content, $"병원목록_{DateTime.Now.ToString("yyyyMMdd")}.xlsx", GlobalConstant.ContentTypes.Xlsx));
             }
 
-            return Result.Success(new ExcelFile()).WithError(GlobalErrorCode.NoDataForExcelExport.ToError());
+            return Result.Success<ExcelFile>().WithError(GlobalErrorCode.NoDataForExcelExport.ToError());
         }
     }
 }
