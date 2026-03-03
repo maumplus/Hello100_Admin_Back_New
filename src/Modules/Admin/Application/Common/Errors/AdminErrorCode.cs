@@ -123,6 +123,8 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Errors
         [Description("병원 정보에 주소가 없습니다. 관리자에게 문의해주세요.")]
         NotFoundHospitalAddr = 4057,
         [Description("병원 정보에 대표번호가 없습니다. 관리자에게 문의해주세요.")]
-        NotFoundHospitalTel = 4058
+        NotFoundHospitalTel = 4058,
+        [Description("알림톡 신청 처리 중 오류가 발생하였으며, 신청 내역 삭제에 실패했습니다. 복구를 위해 관리자에게 문의해 주세요.")]
+        AlimTalkRequestCleanupFailed = 4059
     }
 }

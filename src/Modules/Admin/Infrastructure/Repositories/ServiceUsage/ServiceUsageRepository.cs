@@ -6,6 +6,9 @@ using Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Commands.Sub
 using Hello100Admin.BuildingBlocks.Common.Errors;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Extensions;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Dapper;
+using Hello100Admin.Modules.Admin.Application.Common.Errors;
+using Hello100Admin.Modules.Admin.Application.Common.Extensions;
 
 namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.ServiceUsage
 {
@@ -58,6 +61,34 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.ServiceUsage
                 _logger.LogError("SubmitAlimtalkApplicationAsync {Exception}", e);
                 throw new BizException(GlobalErrorCode.DataInsertError.ToError());
             }
+        }
+
+        public async Task<int> DeleteAlimtalkApplicationAsync(DbSession db, string hospNo, string hospKey, string tmpType, CancellationToken cancellationToken)
+        {
+            DynamicParameters parameters = new DynamicParameters();
+            parameters.Add("HospNo", hospNo, DbType.String);
+            parameters.Add("HospKey", hospKey, DbType.String);
+            parameters.Add("TmpType", tmpType, DbType.String);
+
+            var sql = @"
+                DELETE FROM hello100.tb_kakao_msg_join
+                      WHERE hosp_no  = @HospNo
+                        AND hosp_key = @HospKey
+                        AND tmp_type = @TmpType
+            ";
+
+            int result = 0;
+
+            try
+            {
+                result = await db.ExecuteAsync(sql, parameters);
+            }
+            catch (Exception)
+            {
+                throw new BizException(AdminErrorCode.AlimTalkRequestCleanupFailed.ToError());
+            }
+
+            return result;
         }
         #endregion
     }
