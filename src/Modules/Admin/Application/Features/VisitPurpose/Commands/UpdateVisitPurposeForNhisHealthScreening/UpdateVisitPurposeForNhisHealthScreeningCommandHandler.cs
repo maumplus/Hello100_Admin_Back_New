@@ -32,16 +32,26 @@ namespace Hello100Admin.Modules.Admin.Application.Features.VisitPurpose.Commands
         {
             _logger.LogInformation("Process UpdateVisitPurposeForNhisHealthScreeningCommandHandler started. HospKey: {HospKey}", req.HospKey);
 
+            var visitPurposes = await _db.RunAsync(DataSource.Hello100,
+                (session, token) => _visitPurposeStore.GetVisitPurposeByHospKeyAsync(session, req.HospKey, token),
+            ct);
+
+            // 공단검진은 무조건 VpCd "01"
+            var purpose = visitPurposes.FirstOrDefault(x => x.VpCd == "01");
+
+            if (purpose != null)
+            {
+                purpose.ShowYn = req.ShowYn;
+                purpose.Role = req.Role;
+            }
+
+            #region VALIDATE *************************************
             if (req.ShowYn == "N")
             {
-                var visitPurpose = await _visitPurposeStore.GetVisitPurposesAsync(req.HospKey, ct);
+                int purposeViewCount = visitPurposes.Count(x => x.ShowYn == "Y");
 
-                int purposeViewCount = visitPurpose.DetailList.Count(x => x.ShowYn == "Y");
-
-                if (purposeViewCount == 1)
-                {
+                if (purposeViewCount <= 0)
                     return Result.Success().WithError(AdminErrorCode.VisitPurposeExposureRequired.ToError());
-                }
             }
 
             // 병원 자체 모바일접수 체크 항목에 따라, 각 하나씩은 무조건 노출이 필요함.
@@ -51,20 +61,6 @@ namespace Hello100Admin.Modules.Admin.Application.Features.VisitPurpose.Commands
 
             if (hospRole == null)
                 return Result.Success().WithError(AdminErrorCode.NotFoundHospital.ToError());
-
-            // 해당 병원 내원목적 리스트의 Role과 병원 자체의 Role을 비교해서, 하나의 Row라도 일치하는지 체크 필요. (하나도 일치하지 않으면, 앱에서 노출이 안되는 상황이 발생할 수 있기 때문)
-            var visitPurposes = await _db.RunAsync(DataSource.Hello100,
-                (session, token) => _visitPurposeStore.GetVisitPurposeByVpCdAsync(session, req.HospKey, ct),
-            ct);
-
-            // 공단검진은 무조건 VpCd "01"
-            var purpose = visitPurposes.FirstOrDefault(x => x.VpCd == "01");
-
-            if (purpose != null) 
-            {
-                purpose.ShowYn = req.ShowYn;
-                purpose.Role = req.Role;
-            }
 
             var yCodes = visitPurposes.Where(x => x.ShowYn == "Y").Select(x => x.VpCd).ToHashSet();
 
@@ -79,6 +75,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.VisitPurpose.Commands
 
             if (reserveRequired && !hasReservePurpose)
                 return Result.Success().WithError(AdminErrorCode.AtLeastOneAppointmentVisitPurposeRequired.ToError());
+            #endregion
 
             await _visitPurposeRepository.UpdateVisitPurposeForNhisHealthScreeningAsync(req.HospKey, req.ShowYn, req.Role, req.DetailShowYn, ct);
 

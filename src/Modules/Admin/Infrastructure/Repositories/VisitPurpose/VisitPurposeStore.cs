@@ -273,12 +273,13 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.VisitPurpose
             return result;
         }
 
-        public async Task<List<TbEghisHospVisitPurposeInfoEntity>> GetVisitPurposeByVpCdAsync(DbSession db, string hospKey, CancellationToken ct)
+        public async Task<List<TbEghisHospVisitPurposeInfoEntity>> GetVisitPurposeByHospKeyAsync(DbSession db, string hospKey, CancellationToken ct)
         {
 
             var parameters = new DynamicParameters();
             parameters.Add("HospKey", hospKey, DbType.String);
 
+            // 닉스 차트의 경우에는 공단 검진이 없는 듯...?
             var query = $@"
                 SELECT tehvpi.vp_cd           AS VpCd,
                        tehvpi.name            AS Name,
@@ -290,6 +291,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.VisitPurpose
                  WHERE tehvpi.hosp_key = @HospKey
                    AND tehvpi.parent_cd = '0'
                    AND tehvpi.del_yn = 'N'
+                   AND (tehi.chart_type <> 'N' OR tehvpi.vp_cd <> '01')
             ";
 
             var result = (await db.QueryAsync<TbEghisHospVisitPurposeInfoEntity>(query, parameters, ct, _logger)).ToList();
