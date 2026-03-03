@@ -50,7 +50,7 @@ public enum GlobalErrorCode
     EmptyCryptoPlainText = 1018,
     [Description("요청에 유효하지 않거나 지원되지 않는 파라미터 값이 포함되어 있습니다. 확인 후 다시 시도해주세요.")]
     InvalidInputParameter = 1019,
-    [Description("데이터 쓰기 중 에러가 발생하였습니다. 확인 후 다시 시도해주세요.")]
+    [Description("데이터 쓰기 중 에러가 발생하였습니다. 동일한 문제가 계속해서 발생할 경우 관리자에게 문의해주세요.")]
     DataWriteFailed = 1020,
     [Description("인증코드가 유효하지 않습니다. 확인 후 다시 시도해주세요.")]
     InvalidVerificationCode = 1021,
