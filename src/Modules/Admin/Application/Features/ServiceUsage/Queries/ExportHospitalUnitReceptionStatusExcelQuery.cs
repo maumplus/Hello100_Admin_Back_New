@@ -87,7 +87,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Queries
                     req.TodayRegistrationYn, req.AppointmentYn, req.TelemedicineYn, req.ExcludeTestHospitalsYn, token),
             ct);
 
-            if (historyData.Count > 0)
+            if (historyData.Count >= 0)
             {
                 var dtos = historyData.Adapt<List<GetHospitalServiceUsageStatusResultItemByHospitalUnit>>();
 
@@ -106,7 +106,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Queries
                 return Result.Success(new ExcelFile(content, $"병원별서비스이용현황(하단)_{DateTime.Now:yyyyMMdd}.xlsx", GlobalConstant.ContentTypes.Xlsx));
             }
 
-            return Result.Success(new ExcelFile()).WithError(GlobalErrorCode.NoDataForExcelExport.ToError());
+            return Result.Success<ExcelFile>().WithError(GlobalErrorCode.NoDataForExcelExport.ToError());
         }
     }
 }

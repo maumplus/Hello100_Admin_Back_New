@@ -33,7 +33,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Queries.
             _logger.LogInformation("Process ExportUntactMedicalHistoriesExcelQueryHandler() started.");
             var historyData = await _serviceUsageStore.GetUntactMedicalHistoryForExportAsync(req, token);
 
-            if (historyData.Count > 0)
+            if (historyData.Count >= 0)
             {
                 var dtos = historyData.Adapt<List<GetUntactMedicalHistoryForExportReadModel>>();
 
@@ -52,7 +52,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Queries.
                 return Result.Success(new ExcelFile(content, $"비대면진료내역_{DateTime.Now.ToString("yyyyMMdd")}.xlsx", GlobalConstant.ContentTypes.Xlsx));
             }
 
-            return Result.Success(new ExcelFile()).WithError(GlobalErrorCode.NoDataForExcelExport.ToError());
+            return Result.Success<ExcelFile>().WithError(GlobalErrorCode.NoDataForExcelExport.ToError());
         }
     }
 }
