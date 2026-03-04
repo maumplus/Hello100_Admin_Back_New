@@ -260,17 +260,19 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Advertisement
 
             sb.AppendLine(" SET @oldSortNo:= (SELECT IFNULL(sort_no, 9999) FROM tb_ad_info WHERE ad_id = @AdId and ad_type= @AdType ); ");
 
-            sb.AppendLine("  UPDATE tb_ad_info                              ");
-            sb.AppendLine("     SET sort_no = sort_no -1                    ");
-            sb.AppendLine("   WHERE ad_id <> @AdId                          ");
-            sb.AppendLine("     AND sort_no BETWEEN @oldSortNo AND @SortNo  ");
-            sb.AppendLine("     AND @oldSortNo < @SortNo ;                 ");
+            sb.AppendLine("  UPDATE tb_ad_info              ");
+            sb.AppendLine("     SET sort_no = sort_no -1    ");
+            sb.AppendLine("   WHERE ad_id <> @AdId          ");
+            sb.AppendLine("     AND @oldSortNo < @SortNo    ");
+            sb.AppendLine("     AND sort_no > @oldSortNo    ");
+            sb.AppendLine("     AND sort_no <= @SortNo ;    ");
 
-            sb.AppendLine("  UPDATE tb_ad_info                              ");
-            sb.AppendLine("     SET sort_no = sort_no +1                    ");
-            sb.AppendLine("   WHERE ad_id <> @AdId                          ");
-            sb.AppendLine("     AND sort_no BETWEEN @oldSortNo AND @SortNo  ");
-            sb.AppendLine("     AND @oldSortNo > @SortNo ;                 ");
+            sb.AppendLine("  UPDATE tb_ad_info              ");
+            sb.AppendLine("     SET sort_no = sort_no +1    ");
+            sb.AppendLine("   WHERE ad_id <> @AdId          ");
+            sb.AppendLine("     AND @oldSortNo > @SortNo    ");
+            sb.AppendLine("     AND sort_no >= @SortNo      ");
+            sb.AppendLine("     AND sort_no < @oldSortNo ;  ");
 
             sb.AppendLine("  UPDATE tb_ad_info              ");
             sb.AppendLine(" 	SET	show_yn	    = @ShowYn	");
@@ -280,7 +282,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Advertisement
             sb.AppendLine(" 	,	end_dt      = @EndDt    ");
             sb.AppendLine("     ,   sort_no     = @SortNo   ");
             sb.AppendLine("     ,   send_type   = @SendType ");
-            sb.AppendLine("     ,   url2   = @Url2 ");
+            sb.AppendLine("     ,   url2   = @Url2          ");
             sb.AppendLine("   WHERE ad_id = @AdId;          ");
 
             if (string.IsNullOrWhiteSpace(imageInfo.Url) == false)
