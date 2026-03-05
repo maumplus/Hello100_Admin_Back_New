@@ -2,7 +2,6 @@
 using Hello100Admin.BuildingBlocks.Common.Application;
 using Hello100Admin.BuildingBlocks.Common.Definition.Enums;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
-using Hello100Admin.BuildingBlocks.Common.Infrastructure.Serialization;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.AdminUser;
 using Hello100Admin.Modules.Admin.Application.Common.Models;
 using Hello100Admin.Modules.Admin.Application.Features.AdminUser.Results;
@@ -45,8 +44,6 @@ namespace Hello100Admin.Modules.Admin.Application.Features.AdminUser.Queries
             var response = await _db.RunAsync(DataSource.Hello100,
                 (session, token) => _adminUserStore.GetAdminUsersAsync(session, req.PageNo, req.PageSize, token),
             ct);
-
-            var test = response.ToJsonForStorage();
 
             return Result.Success(response);
         }

@@ -2,7 +2,6 @@
 using Hello100Admin.BuildingBlocks.Common.Application;
 using Hello100Admin.BuildingBlocks.Common.Definition.Enums;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
-using Hello100Admin.BuildingBlocks.Common.Infrastructure.Serialization;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.ServiceUsage;
 using Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Results;
 using MediatR;
@@ -120,8 +119,6 @@ namespace Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Queries
                 StatusByServiceUnit = statusByServiceUnit,
                 StatusByHospitalUnit = statusByHospitalUnit
             };
-
-            var test = result.ToJsonForStorage();
 
             return Result.Success(result);
         }
