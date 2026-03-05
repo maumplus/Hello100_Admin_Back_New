@@ -106,8 +106,6 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
 
             result.DeviceData = mapped;
 
-            var test = result.ToJsonForStorage();
-
             return Result.Success(result);
         }
     }

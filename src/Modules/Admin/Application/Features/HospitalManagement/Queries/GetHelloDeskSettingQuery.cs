@@ -1,7 +1,4 @@
-﻿using DocumentFormat.OpenXml.EMMA;
-using DocumentFormat.OpenXml.Spreadsheet;
-using DocumentFormat.OpenXml.Wordprocessing;
-using FluentValidation;
+﻿using FluentValidation;
 using Hello100Admin.BuildingBlocks.Common.Application;
 using Hello100Admin.BuildingBlocks.Common.Definition.Enums;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
@@ -128,8 +125,6 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Qu
             // 신환접수를 N으로 했을때 초기화면이 기본이 되지 않고 휴대폰으로 되도록 변경
             if (result.DeviceData.SetJson.NewReceiveYn == "N" && result.DeviceData.SetJson.ReceiveMainSelect == "D")
                 result.DeviceData.SetJson.ReceiveMainSelect = "P";
-
-            var test = result.ToJsonForStorage();
 
             return Result.Success(result);
         }
