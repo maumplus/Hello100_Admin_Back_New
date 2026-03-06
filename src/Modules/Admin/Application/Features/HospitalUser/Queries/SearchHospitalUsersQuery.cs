@@ -1,7 +1,8 @@
 ﻿using FluentValidation;
 using Hello100Admin.BuildingBlocks.Common.Application;
+using Hello100Admin.BuildingBlocks.Common.Definition.Enums;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Security;
-using Hello100Admin.BuildingBlocks.Common.Infrastructure.Serialization;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence;
 using Hello100Admin.Modules.Admin.Application.Common.Models;
 using Hello100Admin.Modules.Admin.Application.Features.HospitalUser.Results;
@@ -58,23 +59,28 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalUser.Queries
         private readonly ILogger<SearchHospitalUsersQueryHandler> _logger;
         private readonly IHospitalUserStore _hospitalUserStore;
         private readonly ICryptoService _cryptoService;
+        private readonly IDbSessionRunner _db;
 
         public SearchHospitalUsersQueryHandler(
             IHospitalUserStore hospitalUserStore,
             ILogger<SearchHospitalUsersQueryHandler> logger,
-            ICryptoService cryptoService)
+            ICryptoService cryptoService,
+            IDbSessionRunner db)
         {
             _hospitalUserStore = hospitalUserStore;
             _logger = logger;
             _cryptoService = cryptoService;
+            _db = db;
         }
 
         public async Task<Result<ListResult<SearchHospitalUsersResult>>> Handle(SearchHospitalUsersQuery req, CancellationToken ct)
         {
             _logger.LogInformation("SearchHospitalUsersQueryHandler started.");
 
-            var response = await _hospitalUserStore.SearchHospitalUsersAsync(
-                req.PageNo, req.PageSize, req.FromDate, req.ToDate, req.KeywordSearchType, req.SearchKeyword, ct);
+            var response = await _db.RunAsync(DataSource.Hello100,
+                (session, token) => _hospitalUserStore.SearchHospitalUsersAsync(
+                    session, req.PageNo, req.PageSize, req.FromDate, req.ToDate, req.KeywordSearchType, req.SearchKeyword, token),
+            ct);
 
             foreach (var item in response.Items)
             {
@@ -89,20 +95,18 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalUser.Queries
                 item.Email = item.Email == "null" ? "" : item.Email;
             }
 
-            response.Items.OrderByDescending(x => x.RegDt).ToList();
-
-            var startRowNum = response.TotalCount > 0 ? response.TotalCount - ((req.PageNo - 1) * req.PageSize) : 0;
+            int rowNum = response.TotalCount - ((req.PageNo - 1) * req.PageSize);
 
             foreach (var item in response.Items)
             {
-                item.RowNum = startRowNum--;
-                item.LoginTypeName = GetLoginTYpeName(item.LoginType);
+                item.RowNum = rowNum--;
+                item.LoginTypeName = GetLoginTypeName(item.LoginType);
             }
 
             return Result.Success(response);
         }
 
-        private string GetLoginTYpeName(string loginType)
+        private string GetLoginTypeName(string loginType)
         {
             var loginTypeName = string.Empty;
 

@@ -196,6 +196,19 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
             RuleFor(x => x.HospKey).Must(x => !string.IsNullOrWhiteSpace(x)).WithMessage("요양기관 키는 필수입니다.");
             RuleFor(x => x.HospNm).Must(x => !string.IsNullOrWhiteSpace(x)).WithMessage("병원명은 필수입니다.");
             RuleFor(x => x.ChartType).Must(x => !string.IsNullOrWhiteSpace(x)).WithMessage("차트정보는 필수입니다.");
+            RuleFor(x => x.DeptCodes).NotEmpty().WithMessage("진료 과목은 선택은 필수입니다.");
+            RuleFor(x => x.Keywords).NotEmpty().WithMessage("증상/검진 키워드 항목 선택은 필수입니다.");
+        }
+    }
+
+    public class UpsertMyHospitalCommandValidator : AbstractValidator<UpsertMyHospitalCommand>
+    {
+        public UpsertMyHospitalCommandValidator()
+        {
+            RuleFor(x => x.HospNo).Must(x => !string.IsNullOrWhiteSpace(x)).WithMessage("요양기관번호는 필수입니다.");
+            RuleFor(x => x.HospKey).Must(x => !string.IsNullOrWhiteSpace(x)).WithMessage("요양기관 키는 필수입니다.");
+            RuleFor(x => x.DeptCodes).NotEmpty().WithMessage("진료 과목은 선택은 필수입니다.");
+            RuleFor(x => x.Keywords).NotEmpty().WithMessage("증상/검진 키워드 항목 선택은 필수입니다.");
         }
     }
 
@@ -280,10 +293,10 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
                 s.HospKey = req.HospKey;
             });
 
-            var clinicTimesNewEntity = bizReq.ClinicTimesNew.Adapt<List<TbEghisHospMedicalTimeNewEntity>>();
-            var deptCodesEntity = bizReq.DeptCodes.Adapt<List<TbHospitalMedicalInfoEntity>>();
-            var keywordsEntity = bizReq.Keywords.Adapt<List<TbEghisHospKeywordInfoEntity>>();
-            var imagesEntity = images.Adapt<List<TbImageInfoEntity>>();
+            var clinicTimesNewEntity = bizReq.ClinicTimesNew.Adapt<List<TbEghisHospMedicalTimeNewEntity>>() ?? new List<TbEghisHospMedicalTimeNewEntity>();
+            var deptCodesEntity = bizReq.DeptCodes.Adapt<List<TbHospitalMedicalInfoEntity>>() ?? new List<TbHospitalMedicalInfoEntity>();
+            var keywordsEntity = bizReq.Keywords.Adapt<List<TbEghisHospKeywordInfoEntity>>() ?? new List<TbEghisHospKeywordInfoEntity>();
+            var imagesEntity = images.Adapt<List<TbImageInfoEntity>>() ?? new List<TbImageInfoEntity>();
 
             // Update Database
             await _db.RunInTransactionAsync(DataSource.Hello100, 
@@ -410,7 +423,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
         public async Task<Result> Handle(UpsertMyHospitalCommand req, CancellationToken ct)
         {
             _logger.LogInformation("Handling UpsertMyHospitalCommand HospNo:[{HospNo}]", req.HospNo);
-
+            
             if (req.Keywords is { Count: > 6 })
                 return Result.Success().WithError(AdminErrorCode.KeywordSelectionLimitExceeded.ToError());
 
@@ -462,11 +475,11 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
 
             var bizReqJson = bizReq.ToJsonForStorage();
 
-            var clinicTimesEntity = bizReq.ClinicTimes.Adapt<List<TbEghisHospMedicalTimeEntity>>();
-            var clinicTimesNewEntity = bizReq.ClinicTimesNew.Adapt<List<TbEghisHospMedicalTimeNewEntity>>();
-            var deptCodesEntity = bizReq.DeptCodes.Adapt<List<TbHospitalMedicalInfoEntity>>();
-            var keywordsEntity = bizReq.Keywords.Adapt<List<TbEghisHospKeywordInfoEntity>>();
-            var imagesEntity = images.Adapt<List<TbImageInfoEntity>>();
+            var clinicTimesEntity = bizReq.ClinicTimes.Adapt<List<TbEghisHospMedicalTimeEntity>>() ?? new List<TbEghisHospMedicalTimeEntity>();
+            var clinicTimesNewEntity = bizReq.ClinicTimesNew.Adapt<List<TbEghisHospMedicalTimeNewEntity>>() ?? new List<TbEghisHospMedicalTimeNewEntity>();
+            var deptCodesEntity = bizReq.DeptCodes.Adapt<List<TbHospitalMedicalInfoEntity>>() ?? new List<TbHospitalMedicalInfoEntity>();
+            var keywordsEntity = bizReq.Keywords.Adapt<List<TbEghisHospKeywordInfoEntity>>() ?? new List<TbEghisHospKeywordInfoEntity>();
+            var imagesEntity = images.Adapt<List<TbImageInfoEntity>>() ?? new List<TbImageInfoEntity>();
 
             // Update Database
             await _db.RunInTransactionAsync(DataSource.Hello100, async (session, token) =>
