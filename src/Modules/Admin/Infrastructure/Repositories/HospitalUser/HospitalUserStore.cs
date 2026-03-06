@@ -3,6 +3,7 @@ using Hello100Admin.BuildingBlocks.Common.Errors;
 using System.Data;
 using System.Text;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Dapper;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence;
 using Microsoft.Extensions.Logging;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Extensions;
@@ -30,54 +31,85 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalUser
 
         #region IHOSPITALUSERSTORE IMPLEMENTS METHOD AREA **************************************
         public async Task<ListResult<SearchHospitalUsersResult>> SearchHospitalUsersAsync(
-            int pageNo, int pageSize, string? fromDt, string? toDt, int keywordSearchType, string? searchKeyword, CancellationToken token)
+            DbSession db, int pageNo, int pageSize, string? fromDt, string? toDt, int keywordSearchType, string? searchKeyword, CancellationToken token)
         {
-            try
-            {
-                _logger.LogInformation("SearchHospitalUsersAsync() Started");
+            var fromDate = string.IsNullOrEmpty(fromDt) ? null : Convert.ToDateTime(fromDt).ToString("yyyyMMdd");
+            var toDate = string.IsNullOrEmpty(toDt) ? null : Convert.ToDateTime(toDt).ToString("yyyyMMdd");
 
-                var fromDate = string.IsNullOrEmpty(fromDt) ? null : Convert.ToDateTime(fromDt).ToString("yyyyMMdd");
-                var toDate = string.IsNullOrEmpty(toDt) ? null : Convert.ToDateTime(toDt).ToString("yyyyMMdd");
+            var parameters = new DynamicParameters();
+            parameters.Add("SearchKeyword", searchKeyword ?? string.Empty, DbType.String);
+            parameters.Add("PageSize", pageSize, DbType.Int32);
+            parameters.Add("OffSet", (pageNo - 1) * pageSize, DbType.Int32);
+            parameters.Add("FromDt", fromDate, DbType.String);
+            parameters.Add("ToDt", toDate, DbType.String);
 
-                var parameters = new DynamicParameters();
-                parameters.Add("SearchKeyword", searchKeyword ?? string.Empty, DbType.String);
-                parameters.Add("Limit", pageSize * pageNo, DbType.Int32);
-                parameters.Add("OffSet", (pageNo - 1) * pageSize, DbType.Int32);
-                parameters.Add("FromDt", fromDate, DbType.String);
-                parameters.Add("ToDt", toDate, DbType.String);
-
-                #region == Query ==
-                StringBuilder sb = new StringBuilder();
+            #region == Query ==
+            StringBuilder sb = new StringBuilder();
                
+            sb.AppendLine("SET block_encryption_mode = 'aes-128-cbc';");
+
+            sb.AppendLine("                    SELECT A.uid AS UId,");
+            sb.AppendLine("                           B.mid AS MId,");
+            sb.AppendLine("                           B.name AS Name,");
+            sb.AppendLine("                           A.sns_id AS SnsId,");
+            sb.AppendLine("                           A.email AS Email,");
+            sb.AppendLine("                           A.pwd AS Pwd,");
+            sb.AppendLine("                           B.phone AS Phone,");
+            sb.AppendLine("                           B.birthday AS BirthDay,");
+            sb.AppendLine("                           B.sex AS Sex,");
+            sb.AppendLine("                           IFNULL(B.photo, '') AS photo,");
+            sb.AppendLine("                           B.userYn AS UserYn,");
+            sb.AppendLine("                           A.login_type AS LoginType,");
+            sb.AppendLine("                           DATE_FORMAT(FROM_UNIXTIME(A.reg_dt), '%Y-%m-%d %H:%i:%s') AS RegDt,");
+            sb.AppendLine("                           ( SELECT DATE_FORMAT(FROM_UNIXTIME(auth_dt), '%Y-%m-%d %H:%i:%s')");
+            sb.AppendLine("                               FROM tb_self_auth_log");
+            sb.AppendLine("                              WHERE said = A.said ) AS AuthDt");
+            sb.AppendLine("                      FROM tb_user A");
+            sb.AppendLine("                     INNER JOIN tb_member B ");
+            sb.AppendLine("                             ON A.uid = B.uid ");
+            sb.AppendLine("                            AND B.userYn = 'Y'");
+            sb.AppendLine("                     WHERE A.del_yn = 'N'");
+
+            if (string.IsNullOrWhiteSpace(searchKeyword) == false)
+            {
                 if (keywordSearchType == 1) // 1: MemberSearchType.Name
-                    sb.AppendLine($"CALL uSP_USER_SEARCH_GET_INFO_NEW(@SearchKeyword,'','','dcc2b29aaa9f271d','08a0d3a6ec32e85e',{(fromDate == null ? "null" : "@FromDt")}, {(toDate == null ? "null" : "@ToDt")}, @OffSet,@Limit);");
+                    sb.AppendLine(@"AND IFNULL(CONVERT(AES_DECRYPT(FROM_BASE64(B.name), 'dcc2b29aaa9f271d','\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0') USING utf8), '') LIKE CONCAT('%', @SearchKeyword, '%')");
                 else if (keywordSearchType == 2) // 2: MemberSearchType.Email
-                    sb.AppendLine($"CALL uSP_USER_SEARCH_GET_INFO_NEW('',@SearchKeyword,'','dcc2b29aaa9f271d','08a0d3a6ec32e85e',{(fromDate == null ? "null" : "@FromDt")}, {(toDate == null ? "null" : "@ToDt")}, @OffSet,@Limit);");
+                    sb.AppendLine(@"AND IFNULL(CONVERT(AES_DECRYPT(FROM_BASE64(A.email), 'dcc2b29aaa9f271d','\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0') USING utf8), '') LIKE CONCAT('%', @SearchKeyword, '%')");
                 else if (keywordSearchType == 3) // 3: MemberSearchType.Phone
-                    sb.AppendLine($"CALL uSP_USER_SEARCH_GET_INFO_NEW('','',@SearchKeyword,'dcc2b29aaa9f271d','08a0d3a6ec32e85e',{(fromDate == null ? "null" : "@FromDt")}, {(toDate == null ? "null" : "@ToDt")}, @OffSet,@Limit);");
+                    sb.AppendLine(@"AND IFNULL(CONVERT(AES_DECRYPT(FROM_BASE64(B.phone), '08a0d3a6ec32e85e','\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0') USING utf8), '') LIKE CONCAT('%', @SearchKeyword, '%')");
                 else
                     throw new BizException(GlobalErrorCode.InvalidInputParameter.ToError());
-                #endregion
-
-                using var connection = _connection.CreateConnection();
-                var multi = await connection.QueryMultipleAsync(sb.ToString(), parameters);
-
-                var queryList = (await multi.ReadAsync<SearchHospitalUsersResult>()).ToList();
-                var totalCount = await multi.ReadSingleAsync<int>();
-
-                var result = new ListResult<SearchHospitalUsersResult>
-                {
-                    Items = queryList,
-                    TotalCount = totalCount
-                };
-
-                return result;
             }
-            catch (Exception e)
+
+            if (string.IsNullOrWhiteSpace(fromDt) == false)
+                sb.AppendLine("AND DATE_FORMAT(FROM_UNIXTIME(A.reg_dt), '%Y%m%d') BETWEEN @FromDt AND @ToDt");
+
+            sb.AppendLine("ORDER BY A.reg_dt DESC, B.name ASC");
+            sb.AppendLine("LIMIT @PageSize OFFSET @Offset;");
+
+            sb.AppendLine("SET block_encryption_mode = 'aes-128-ecb';");
+
+            sb.AppendLine("                    SELECT COUNT(1) AS TotalCount");
+            sb.AppendLine("                      FROM tb_user A");
+            sb.AppendLine("                     INNER JOIN tb_member B ");
+            sb.AppendLine("                             ON A.uid = B.uid ");
+            sb.AppendLine("                            AND B.userYn = 'Y'");
+            sb.AppendLine("                     WHERE A.del_yn = 'N'");
+            #endregion
+
+            var multi = await db.QueryMultipleAsync(sb.ToString(), parameters);
+
+            var users = (await multi.ReadAsync<SearchHospitalUsersResult>()).ToList();
+            var totalCount = Convert.ToInt32(await multi.ReadSingleAsync<long>());
+
+            var result = new ListResult<SearchHospitalUsersResult>
             {
-                _logger.LogError(e, "SearchHospitalUsersAsync() Error");
-                throw new BizException(GlobalErrorCode.DataQueryError.ToError());
-            }
+                Items = users,
+                TotalCount = totalCount
+            };
+
+            return result;
         }
 
         public async Task<GetHospitalUserProfileResult> GetHospitalUserProfileAsync(string userId, CancellationToken token)

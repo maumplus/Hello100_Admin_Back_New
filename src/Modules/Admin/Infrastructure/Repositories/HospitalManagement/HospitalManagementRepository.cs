@@ -47,17 +47,17 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             StringBuilder sbDeptCodes = new StringBuilder();
             StringBuilder sbImages = new StringBuilder();
 
-            keywordsEntity.ForEach(x =>
+            keywordsEntity?.ForEach(x =>
             {
                 sbKeywords.AppendLine($",({x.MasterSeq},{x.DetailSeq}, @HospKey,@HospNo,'{x.TagNm}', 'N', UNIX_TIMESTAMP(NOW())) ");
             });
 
-            imagesEntity.ForEach(x =>
+            imagesEntity?.ForEach(x =>
             {
                 sbImages.AppendLine($",(func_HMACSHA256( @EncKey, CONCAT('hospital', @HospKey)), '{x.Url}', 'N', UNIX_TIMESTAMP(NOW())) ");
             });
 
-            deptCodesEntity.ForEach(x =>
+            deptCodesEntity?.ForEach(x =>
             {
                 sbDeptCodes.AppendLine($",('{x.MdCd}', @HospKey, UNIX_TIMESTAMP(NOW()))");
             });
@@ -242,24 +242,23 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             StringBuilder sbDeptCodes = new StringBuilder();
             StringBuilder sbImages = new StringBuilder();
 
-            clinicTimesEntity.ForEach(x =>
+            clinicTimesEntity?.ForEach(x =>
             {
                 sbTimes.AppendLine($",(@HospKey,'','{x.MtNm}', 'N', UNIX_TIMESTAMP(NOW())) ");
             });
 
-            keywordsEntity.ForEach(x =>
+            keywordsEntity?.ForEach(x =>
             {
                 sbKeywords.AppendLine($",({x.MasterSeq},{x.DetailSeq}, @HospKey,@HospNo,'{x.TagNm}', 'N', UNIX_TIMESTAMP(NOW())) ");
             });
-            imagesEntity.ForEach(x =>
+            imagesEntity?.ForEach(x =>
             {
                 sbImages.AppendLine($",(func_HMACSHA256( @EncKey, CONCAT('hospital', @HospKey)), '{x.Url}', 'N', UNIX_TIMESTAMP(NOW())) ");
             });
-            deptCodesEntity.ForEach(x =>
+            deptCodesEntity?.ForEach(x =>
             {
                 sbDeptCodes.AppendLine($",('{x.MdCd}', @HospKey, UNIX_TIMESTAMP(NOW()))");
             });
-
             #endregion
 
             #region == Query ==

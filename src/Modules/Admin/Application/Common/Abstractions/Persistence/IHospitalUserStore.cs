@@ -1,4 +1,5 @@
-﻿using Hello100Admin.Modules.Admin.Application.Common.Models;
+﻿using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
+using Hello100Admin.Modules.Admin.Application.Common.Models;
 using Hello100Admin.Modules.Admin.Application.Features.HospitalUser.Results;
 
 namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence
@@ -17,7 +18,7 @@ namespace Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistenc
         /// <param name="token"></param>
         /// <returns></returns>
         public Task<ListResult<SearchHospitalUsersResult>> SearchHospitalUsersAsync(
-            int pageNo, int pageSize, string? fromDt, string? toDt, int keywordSearchType, string? searchKeyword, CancellationToken token);
+            DbSession db, int pageNo, int pageSize, string? fromDt, string? toDt, int keywordSearchType, string? searchKeyword, CancellationToken token);
 
         /// <summary>
         /// [전체관리자] 회원목록 > 상세 조회 (사용자 상세 정보)
