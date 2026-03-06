@@ -88,14 +88,31 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalUser
             sb.AppendLine("ORDER BY A.reg_dt DESC, B.name ASC");
             sb.AppendLine("LIMIT @PageSize OFFSET @Offset;");
 
-            sb.AppendLine("SET block_encryption_mode = 'aes-128-ecb';");
-
             sb.AppendLine("                    SELECT COUNT(1) AS TotalCount");
             sb.AppendLine("                      FROM tb_user A");
             sb.AppendLine("                     INNER JOIN tb_member B ");
             sb.AppendLine("                             ON A.uid = B.uid ");
             sb.AppendLine("                            AND B.userYn = 'Y'");
             sb.AppendLine("                     WHERE A.del_yn = 'N'");
+
+            if (string.IsNullOrWhiteSpace(searchKeyword) == false)
+            {
+                if (keywordSearchType == 1) // 1: MemberSearchType.Name
+                    sb.AppendLine(@"AND IFNULL(CONVERT(AES_DECRYPT(FROM_BASE64(B.name), 'dcc2b29aaa9f271d','\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0') USING utf8), '') LIKE CONCAT('%', @SearchKeyword, '%')");
+                else if (keywordSearchType == 2) // 2: MemberSearchType.Email
+                    sb.AppendLine(@"AND IFNULL(CONVERT(AES_DECRYPT(FROM_BASE64(A.email), 'dcc2b29aaa9f271d','\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0') USING utf8), '') LIKE CONCAT('%', @SearchKeyword, '%')");
+                else if (keywordSearchType == 3) // 3: MemberSearchType.Phone
+                    sb.AppendLine(@"AND IFNULL(CONVERT(AES_DECRYPT(FROM_BASE64(B.phone), '08a0d3a6ec32e85e','\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0') USING utf8), '') LIKE CONCAT('%', @SearchKeyword, '%')");
+                else
+                    throw new BizException(GlobalErrorCode.InvalidInputParameter.ToError());
+            }
+
+            if (string.IsNullOrWhiteSpace(fromDt) == false)
+                sb.AppendLine("AND DATE_FORMAT(FROM_UNIXTIME(A.reg_dt), '%Y%m%d') BETWEEN @FromDt AND @ToDt");
+
+            sb.AppendLine(";");
+
+            sb.AppendLine("SET block_encryption_mode = 'aes-128-ecb';");
             #endregion
 
             var multi = await db.QueryMultipleAsync(sb.ToString(), parameters);
