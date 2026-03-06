@@ -613,6 +613,7 @@ namespace Hello100Admin.API.Controllers
 
             var command = req.Adapt<UpsertHospitalCommand>() with
             {
+                Description = req.Descrption,
                 NewImages = payloads
             };
 
