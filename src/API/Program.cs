@@ -189,7 +189,12 @@ EncryptedData.Configure(cryptoService);
 //if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "API V1");
+        c.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.None);
+        c.DefaultModelsExpandDepth(-1); // Models 영역 숨김
+    });
 
     // ✅ Stoplight Elements
     app.UseStoplight();

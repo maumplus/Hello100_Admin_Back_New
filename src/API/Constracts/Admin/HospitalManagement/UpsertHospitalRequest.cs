@@ -32,7 +32,7 @@
         /// <summary>
         /// 상세정보
         /// </summary>
-        public string? Description { get; init; }
+        public string? Descrption { get; init; }
         /// <summary>
         /// 대표 진료과
         /// </summary>
