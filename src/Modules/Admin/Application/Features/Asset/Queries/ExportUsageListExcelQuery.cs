@@ -94,7 +94,7 @@ namespace Hello100Admin.Modules.Admin.Application.Features.Asset.Queries
             _logger.LogInformation("Handling ExportUsageListExcelQuery started.");
 
             var UsageList = await _assetStore.GetUsageListAsync(
-                req.PageSize, req.PageNo, req.SearchType, req.SearchDateType, req.FromDate, req.ToDate, req.FromDay, req.ToDay, req.SearchKeyword, false, ct);
+                req.PageSize, req.PageNo, req.SearchType, req.SearchDateType, req.FromDate, req.ToDate, req.FromDay, req.ToDay, req.SearchKeyword, true, ct);
 
             var exportExcel = UsageList.Items.ToList();
 
