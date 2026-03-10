@@ -36,8 +36,8 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Account
 
             var parameters = new DynamicParameters();
             parameters.Add("@Keyword", keyword, DbType.String);
-            parameters.Add("@PageNo", pageNo, DbType.String);
-            parameters.Add("@PageSize", pageSize, DbType.String);
+            parameters.Add("@Limit", pageSize, DbType.String);
+            parameters.Add("@OffSet", (pageNo - 1) * pageSize, DbType.String);
 
             var whereStr = string.Empty;
 
@@ -84,7 +84,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Account
                           WHERE IFNULL(a.hosp_no, '') = '' ) a
                  {whereStr}
                 ORDER BY a.reg_dt DESC
-                LIMIT @PageNo, @PageSize;
+                LIMIT @OffSet, @Limit;
             ";
 
             using var connection = CreateConnection();
