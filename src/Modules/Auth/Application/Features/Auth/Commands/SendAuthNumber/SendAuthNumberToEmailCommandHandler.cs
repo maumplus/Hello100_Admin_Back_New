@@ -26,6 +26,7 @@ namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.SendAuth
         private readonly string _eghisSmtpPort;
         private readonly string _eghisEmailAccount;
         private readonly string _eghisEmailPassword;
+        private readonly string _adminImageUrl;
 
         public SendAuthNumberToEmailCommandHandler(ILogger<SendAuthNumberToEmailCommandHandler> logger, IAuthRepository authRepository, IHasher sha256Hasher, IConfiguration config)
         {
@@ -38,6 +39,7 @@ namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.SendAuth
             _eghisSmtpPort = _config["EghisSmtp:port"] ?? string.Empty;
             _eghisEmailAccount = _config["EghisSmtp:Account"] ?? string.Empty;
             _eghisEmailPassword = _config["EghisSmtp:Password"] ?? string.Empty;
+            _adminImageUrl = config["AdminImageUrl"] ?? string.Empty;
         }
 
         private int MakeRandom(int length)
@@ -121,7 +123,7 @@ namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.SendAuth
                         ""
                       >
                         <div class=""text-center my-4"">
-                          <img src=""https://r-admin.hello100.kr/Content/img/login_logo.png"" alt=""Hello100 Logo"" style=""max-width: 100%"" />
+                          <img src=""{_adminImageUrl}Content/img/login_logo.png"" alt=""Hello100 Logo"" style=""max-width: 100%"" />
                         </div>
                       </div>
                       <p
