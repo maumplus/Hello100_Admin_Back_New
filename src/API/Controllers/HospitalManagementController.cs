@@ -222,13 +222,6 @@ namespace Hello100Admin.API.Controllers
                 HospNo = request.HospNo,
                 HospKey = request.HospKey,
                 EmplNo = request.EmplNo,
-                DoctNo = request.DoctNo,
-                DoctNm = request.DoctNm,
-                DeptCd = request.DeptCd,
-                DeptNm = request.DeptNm,
-                ViewRole = request.ViewRole,
-                ViewMinTime = request.ViewMinTime,
-                ViewMinCnt = request.ViewMinCnt,
                 DoctorScheduleList = new List<Modules.Admin.Application.Features.HospitalManagement.Commands.PatchDoctorWeeksScheduleInfo>()
             };
 
@@ -238,14 +231,7 @@ namespace Hello100Admin.API.Controllers
                 {
                     HospNo = request.HospNo,
                     HospKey = request.HospKey,
-                    EmplNo = request.EmplNo,
-                    DoctNo = request.DoctNo,
-                    DoctNm = request.DoctNm,
-                    DeptCd = request.DeptCd,
-                    DeptNm = request.DeptNm,
-                    ViewRole = request.ViewRole,
-                    ViewMinTime = request.ViewMinTime,
-                    ViewMinCnt = request.ViewMinCnt
+                    EmplNo = request.EmplNo
                 };
 
                 command.DoctorScheduleList.Add(doctorScheduleInfo);
@@ -271,13 +257,6 @@ namespace Hello100Admin.API.Controllers
                 HospNo = request.HospNo,
                 HospKey = request.HospKey,
                 EmplNo = request.EmplNo,
-                DoctNo = request.DoctNo,
-                DoctNm = request.DoctNm,
-                DeptCd = request.DeptCd,
-                DeptNm = request.DeptNm,
-                ViewRole = request.ViewRole,
-                ViewMinTime = request.ViewMinTime,
-                ViewMinCnt = request.ViewMinCnt,
                 DoctorScheduleList = new List<Modules.Admin.Application.Features.HospitalManagement.Commands.PatchDoctorDaysScheduleInfo>()
             };
 
@@ -287,14 +266,7 @@ namespace Hello100Admin.API.Controllers
                 {
                     HospNo = request.HospNo,
                     HospKey = request.HospKey,
-                    EmplNo = request.EmplNo,
-                    DoctNo = request.DoctNo,
-                    DoctNm = request.DoctNm,
-                    DeptCd = request.DeptCd,
-                    DeptNm = request.DeptNm,
-                    ViewRole = request.ViewRole,
-                    ViewMinTime = request.ViewMinTime,
-                    ViewMinCnt = request.ViewMinCnt
+                    EmplNo = request.EmplNo
                 };
 
                 command.DoctorScheduleList.Add(doctorScheduleInfo);
@@ -320,13 +292,6 @@ namespace Hello100Admin.API.Controllers
                 HospNo = request.HospNo,
                 HospKey = request.HospKey,
                 EmplNo = request.EmplNo,
-                DoctNo = request.DoctNo,
-                DoctNm = request.DoctNm,
-                DeptCd = request.DeptCd,
-                DeptNm = request.DeptNm,
-                ViewRole = request.ViewRole,
-                ViewMinTime = request.ViewMinTime,
-                ViewMinCnt = request.ViewMinCnt,
                 DoctorScheduleList = new List<Modules.Admin.Application.Features.HospitalManagement.Commands.PatchDoctorUntactWeeksScheduleInfo>()
             };
 
@@ -336,14 +301,7 @@ namespace Hello100Admin.API.Controllers
                 {
                     HospNo = request.HospNo,
                     HospKey = request.HospKey,
-                    EmplNo = request.EmplNo,
-                    DoctNo = request.DoctNo,
-                    DoctNm = request.DoctNm,
-                    DeptCd = request.DeptCd,
-                    DeptNm = request.DeptNm,
-                    ViewRole = request.ViewRole,
-                    ViewMinTime = request.ViewMinTime,
-                    ViewMinCnt = request.ViewMinCnt
+                    EmplNo = request.EmplNo
                 };
 
                 command.DoctorScheduleList.Add(doctorScheduleInfo);
@@ -996,13 +954,6 @@ namespace Hello100Admin.API.Controllers
                 HospNo = base.HospNo,
                 HospKey = base.HospKey,
                 EmplNo = request.EmplNo,
-                DoctNo = request.DoctNo,
-                DoctNm = request.DoctNm,
-                DeptCd = request.DeptCd,
-                DeptNm = request.DeptNm,
-                ViewRole = request.ViewRole,
-                ViewMinTime = request.ViewMinTime,
-                ViewMinCnt = request.ViewMinCnt,
                 DoctorScheduleList = new List<Modules.Admin.Application.Features.HospitalManagement.Commands.PatchDoctorWeeksScheduleInfo>()
             };
 
@@ -1012,14 +963,7 @@ namespace Hello100Admin.API.Controllers
                 {
                     HospNo = base.HospNo,
                     HospKey = base.HospKey,
-                    EmplNo = request.EmplNo,
-                    DoctNo = request.DoctNo,
-                    DoctNm = request.DoctNm,
-                    DeptCd = request.DeptCd,
-                    DeptNm = request.DeptNm,
-                    ViewRole = request.ViewRole,
-                    ViewMinTime = request.ViewMinTime,
-                    ViewMinCnt = request.ViewMinCnt
+                    EmplNo = request.EmplNo
                 };
 
                 command.DoctorScheduleList.Add(doctorScheduleInfo);
@@ -1045,13 +989,6 @@ namespace Hello100Admin.API.Controllers
                 HospNo = base.HospNo,
                 HospKey = base.HospKey,
                 EmplNo = request.EmplNo,
-                DoctNo = request.DoctNo,
-                DoctNm = request.DoctNm,
-                DeptCd = request.DeptCd,
-                DeptNm = request.DeptNm,
-                ViewRole = request.ViewRole,
-                ViewMinTime = request.ViewMinTime,
-                ViewMinCnt = request.ViewMinCnt,
                 DoctorScheduleList = new List<Modules.Admin.Application.Features.HospitalManagement.Commands.PatchDoctorDaysScheduleInfo>()
             };
 
@@ -1061,14 +998,7 @@ namespace Hello100Admin.API.Controllers
                 {
                     HospNo = base.HospNo,
                     HospKey = base.HospKey,
-                    EmplNo = request.EmplNo,
-                    DoctNo = request.DoctNo,
-                    DoctNm = request.DoctNm,
-                    DeptCd = request.DeptCd,
-                    DeptNm = request.DeptNm,
-                    ViewRole = request.ViewRole,
-                    ViewMinTime = request.ViewMinTime,
-                    ViewMinCnt = request.ViewMinCnt
+                    EmplNo = request.EmplNo
                 };
 
                 command.DoctorScheduleList.Add(doctorScheduleInfo);
@@ -1094,13 +1024,6 @@ namespace Hello100Admin.API.Controllers
                 HospNo = base.HospNo,
                 HospKey = base.HospKey,
                 EmplNo = request.EmplNo,
-                DoctNo = request.DoctNo,
-                DoctNm = request.DoctNm,
-                DeptCd = request.DeptCd,
-                DeptNm = request.DeptNm,
-                ViewRole = request.ViewRole,
-                ViewMinTime = request.ViewMinTime,
-                ViewMinCnt = request.ViewMinCnt,
                 DoctorScheduleList = new List<Modules.Admin.Application.Features.HospitalManagement.Commands.PatchDoctorUntactWeeksScheduleInfo>()
             };
 
@@ -1110,14 +1033,7 @@ namespace Hello100Admin.API.Controllers
                 {
                     HospNo = base.HospNo,
                     HospKey = base.HospKey,
-                    EmplNo = request.EmplNo,
-                    DoctNo = request.DoctNo,
-                    DoctNm = request.DoctNm,
-                    DeptCd = request.DeptCd,
-                    DeptNm = request.DeptNm,
-                    ViewRole = request.ViewRole,
-                    ViewMinTime = request.ViewMinTime,
-                    ViewMinCnt = request.ViewMinCnt
+                    EmplNo = request.EmplNo
                 };
 
                 command.DoctorScheduleList.Add(doctorScheduleInfo);

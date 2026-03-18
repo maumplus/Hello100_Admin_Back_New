@@ -34,26 +34,12 @@
         public required string HospNo { get; set; }
         public required string HospKey { get; set; }
         public required string EmplNo { get; set; }
-        public string DoctNo { get; set; }
-        public string DoctNm { get; set; }
-        public string DeptCd { get; set; }
-        public string DeptNm { get; set; }
-        public int ViewRole { get; set; }
-        public string ViewMinTime { get; set; }
-        public string ViewMinCnt { get; set; }
         public List<PatchDoctorUntactWeeksScheduleInfo> DoctorScheduleList { get; set; }
     }
 
     public class PatchMyDoctorUntactWeeksScheduleRequest
     {
         public required string EmplNo { get; set; }
-        public string DoctNo { get; set; }
-        public string DoctNm { get; set; }
-        public string DeptCd { get; set; }
-        public string DeptNm { get; set; }
-        public int ViewRole { get; set; }
-        public string ViewMinTime { get; set; }
-        public string ViewMinCnt { get; set; }
         public List<PatchDoctorUntactWeeksScheduleInfo> DoctorScheduleList { get; set; }
     }
 }
