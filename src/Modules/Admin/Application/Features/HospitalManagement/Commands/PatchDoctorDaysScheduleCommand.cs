@@ -3,6 +3,7 @@ using Hello100Admin.BuildingBlocks.Common.Definition.Enums;
 using Hello100Admin.BuildingBlocks.Common.Errors;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Security;
+using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Hospital;
 using Hello100Admin.Modules.Admin.Application.Common.Definitions.Enums;
 using Hello100Admin.Modules.Admin.Application.Common.Errors;
 using Hello100Admin.Modules.Admin.Application.Common.Extensions;
@@ -19,10 +20,6 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
         public string HospKey { get; set; }
         public string EmplNo { get; set; }
         public string ClinicYmd { get; set; }
-        public string DoctNo { get; set; }
-        public string DoctNm { get; set; }
-        public string DeptCd { get; set; }
-        public string DeptNm { get; set; }
         public int WeekNum { get; set; }
         public int StartHour { get; set; }
         public int StartMinute { get; set; }
@@ -36,9 +33,6 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
         public string? Message { get; set; }
         public int Hello100Role { get; set; }
         public int Ridx { get; set; }
-        public int ViewRole { get; set; }
-        public string ViewMinTime { get; set; }
-        public string ViewMinCnt { get; set; }
         public string UseYn { get; set; }
     }
 
@@ -47,13 +41,6 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
         public string HospNo { get; set; }
         public string HospKey { get; set; }
         public string EmplNo { get; set; }
-        public string DoctNo { get; set; }
-        public string DoctNm { get; set; }
-        public string DeptCd { get; set; }
-        public string DeptNm { get; set; }
-        public int ViewRole { get; set; }
-        public string ViewMinTime { get; set; }
-        public string ViewMinCnt { get; set; }
         public List<PatchDoctorDaysScheduleInfo> DoctorScheduleList { get; set; }
     }
 
@@ -61,17 +48,20 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
     {
         private readonly ILogger<PatchDoctorDaysScheduleCommandHandler> _logger;
         private readonly IHospitalManagementRepository _hospitalManagementRepository;
+        private readonly IHospitalManagementStore _hospitalManagementStore;
         private readonly ICryptoService _cryptoService;
         private readonly IDbSessionRunner _db;
 
         public PatchDoctorDaysScheduleCommandHandler(
             ILogger<PatchDoctorDaysScheduleCommandHandler> logger,
             IHospitalManagementRepository hospitalManagementRepository,
+            IHospitalManagementStore hospitalManagementStore,
             ICryptoService cryptoService,
             IDbSessionRunner db)
         {
             _logger = logger;
             _hospitalManagementRepository = hospitalManagementRepository;
+            _hospitalManagementStore = hospitalManagementStore;
             _cryptoService = cryptoService;
             _db = db;
         }
@@ -80,8 +70,19 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
         {
             _logger.LogInformation("Handling PatchDoctorDaysScheduleCommand HospNo:{HospNo}", request.HospNo);
 
+            var doctorList = await _hospitalManagementStore.GetDoctorList(request.HospNo, request.EmplNo, cancellationToken);
+
+            if (doctorList.Count == 0)
+            {
+                return Result.Success().WithError(AdminErrorCode.NotFoundDoctorInfo.ToError());
+            }
+
+            var doctorInfo = doctorList[0];
+
             var eghisDoctInfoList = new List<EghisDoctInfoEntity>();
 
+            EghisDoctInfoEntity? eghisDoctInfoEntity = null;
+            
             await _db.RunInTransactionAsync(DataSource.Hello100, async (session, token) =>
             {
                 for (int i = 0; i < request.DoctorScheduleList.Count; i++)
@@ -97,15 +98,15 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
                         await _hospitalManagementRepository.RemoveEghisDoctRsrvAsync(session, doctorSchedule.Ridx, "RS", token);
                     }
 
-                    var eghisDoctInfoEntity = new EghisDoctInfoEntity()
+                    eghisDoctInfoEntity = new EghisDoctInfoEntity()
                     {
                         HospNo = doctorSchedule.HospNo,
                         HospKey = doctorSchedule.HospKey,
                         EmplNo = doctorSchedule.EmplNo,
-                        DoctNo = _cryptoService.EncryptWithNoVector(doctorSchedule.DoctNo),
-                        DoctNm = doctorSchedule.DoctNm,
-                        DeptCd = doctorSchedule.DeptCd,
-                        DeptNm = doctorSchedule.DeptNm,
+                        DoctNo = doctorInfo.DoctNo,
+                        DoctNm = doctorInfo.DoctNm,
+                        DeptCd = doctorInfo.DeptCd,
+                        DeptNm = doctorInfo.DeptNm,
                         ClinicYmd = doctorSchedule.ClinicYmd,
                         WeekNum = doctorSchedule.WeekNum,
                         StartHour = doctorSchedule.StartHour,
@@ -120,9 +121,9 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
                         Message = doctorSchedule.Message,
                         Hello100Role = doctorSchedule.Hello100Role,
                         Ridx = ridx,
-                        ViewRole = doctorSchedule.ViewRole,
-                        ViewMinTime = doctorSchedule.ViewMinTime,
-                        ViewMinCnt = doctorSchedule.ViewMinCnt,
+                        ViewRole = doctorInfo.ViewRole,
+                        ViewMinTime = doctorInfo.ViewMinTime,
+                        ViewMinCnt = doctorInfo.ViewMinCnt,
                         UseYn = doctorSchedule.UseYn
                     };
 
@@ -147,6 +148,21 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
 
                     await _hospitalManagementRepository.UpdateDoctorInfoScheduleAsync(session, eghisDoctInfoList, token);
                 }
+
+                eghisDoctInfoEntity = new EghisDoctInfoEntity
+                {
+                    HospNo = request.HospNo,
+                    HospKey = request.HospKey,
+                    EmplNo = request.EmplNo,
+                    DoctNm = doctorInfo.DoctNm,
+                    DeptCd = doctorInfo.DeptCd,
+                    DeptNm = doctorInfo.DeptNm,
+                    ViewRole = doctorInfo.ViewRole,
+                    ViewMinCnt = doctorInfo.ViewMinCnt,
+                    ViewMinTime = doctorInfo.ViewMinTime
+                };
+
+                await _hospitalManagementRepository.UpdateDoctorInfoAsync(session, eghisDoctInfoEntity, token);
             },
             cancellationToken);
 
