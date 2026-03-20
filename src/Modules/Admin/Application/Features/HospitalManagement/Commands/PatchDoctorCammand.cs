@@ -24,9 +24,9 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
         public string? DeptCd { get; set; }
         public string? DeptNm { get; set; }
         public string ViewMinCntYn { get; set; } = default!;
-        public string ViewMinCnt { get; set; }
+        public string? ViewMinCnt { get; set; }
         public string ViewMinTimeYn { get; set; } = default!;
-        public string ViewMinTime { get; set; }
+        public string? ViewMinTime { get; set; }
         public FileUploadPayload? Image { get; set; }
     }
 
@@ -94,8 +94,8 @@ namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Co
                 DeptCd = request.DeptCd,
                 DeptNm = request.DeptNm,
                 ViewRole = viewRole,
-                ViewMinCnt = request.ViewMinCnt,
-                ViewMinTime = request.ViewMinTime
+                ViewMinCnt = request.ViewMinCnt ?? "",
+                ViewMinTime = request.ViewMinTime ?? ""
             };
 
             await _db.RunInTransactionAsync(DataSource.Hello100, async (session, token) =>
