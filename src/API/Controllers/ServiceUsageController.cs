@@ -1,6 +1,7 @@
 ﻿using Hello100Admin.API.Constracts.Admin.ServiceUsage;
 using Hello100Admin.API.Extensions;
 using Hello100Admin.API.Infrastructure.Attributes;
+using Hello100Admin.BuildingBlocks.Common.Definition.Enums;
 using Hello100Admin.BuildingBlocks.Common.Errors;
 using Hello100Admin.Modules.Admin.Application.Common.Exports;
 using Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Commands.SubmitAlimtalkApplication;
@@ -94,6 +95,7 @@ namespace Hello100Admin.API.Controllers
         /// <summary>
         /// 진단검사결과 알림톡 발송 내역
         /// </summary>
+        [ChartTypeAuth(ChartType.EghisChart)]
         [HttpPost("examination-results/alimtalk/histories/search")]
         [ProducesResponseType(typeof(ApiResponse<SearchExaminationResultAlimtalkHistoriesResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> SearchMyExaminationResultAlimtalkHistories(SearchMyExaminationResultAlimtalkHistoriesRequest req, CancellationToken cancellationToken = default)
@@ -115,6 +117,7 @@ namespace Hello100Admin.API.Controllers
         /// <summary>
         /// 진단검사결과 알림톡 발송 내역 Excel 출력
         /// </summary>
+        [ChartTypeAuth(ChartType.EghisChart)]
         [HttpPost("examination-results/alimtalk/histories/export/excel")]
         [ProducesResponseType(typeof(ExcelFile), StatusCodes.Status200OK)]
         public async Task<IActionResult> ExportMyExaminationResultAlimtalkHistoriesExcel(ExportMyExaminationResultAlimtalkHistoriesExcelRequest req, CancellationToken cancellationToken = default)
@@ -154,6 +157,7 @@ namespace Hello100Admin.API.Controllers
         /// <summary>
         /// 알림톡 발송 서비스 신청(검사결과) 조회
         /// </summary>
+        [ChartTypeAuth(ChartType.EghisChart)]
         [HttpGet("alimtalk-service/examination-results/application-info")]
         [ProducesResponseType(typeof(ApiResponse<GetExaminationResultAlimtalkApplicationInfoResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetExaminationResultAlimtalkApplicationInfo(CancellationToken cancellationToken = default)
