@@ -137,9 +137,19 @@ namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.Login
                 }
             }
 
-            var roles = new[] { GetRoleNameByGrade(adminInfo.Grade) };
+            // 병원관리자 한정 병원정보 조회
+            CurrentHospitalInfo? hospInfo = null;
+            if (adminInfo.Grade == GlobalConstant.AdminRoles.HospitalAdmin && string.IsNullOrWhiteSpace(adminInfo.HospNo) == false)
+            {
+                hospInfo = await _db.RunAsync(DataSource.Hello100,
+                    (session, token) => _authStore.GetHospitalInfoByHospNoAsync(session, adminInfo.HospNo, token),
+                ct);
+            }
 
-            var accessToken = _tokenService.GenerateAccessToken(adminInfo, roles);
+            var roles = new[] { GetRoleNameByGrade(adminInfo.Grade) };
+            var chartTypes = new[] { GetChartTypeToEnum(adminInfo.Grade, hospInfo?.ChartType) };
+
+            var accessToken = _tokenService.GenerateAccessToken(adminInfo, roles, chartTypes);
             var refreshToken = _tokenService.GenerateRefreshToken(adminInfo.Aid, req.IpAddress);
 
             adminEntity.AccessToken = accessToken;
@@ -155,15 +165,6 @@ namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.Login
             };
 
             await _authRepository.InsertAdminLogAsync(adminLog, ct);
-
-            // 병원관리자 한정 병원정보 조회
-            CurrentHospitalInfo? hospInfo = null;
-            if (adminInfo.Grade == GlobalConstant.AdminRoles.HospitalAdmin && string.IsNullOrWhiteSpace(adminInfo.HospNo) == false)
-            {
-                hospInfo = await _db.RunAsync(DataSource.Hello100,
-                    (session, token) => _authStore.GetHospitalInfoByHospNoAsync(session, adminInfo.HospNo, token),
-                ct);
-            }
 
             var config = this.GetMapsterConfig();
 
@@ -192,6 +193,16 @@ namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.Login
             GlobalConstant.AdminRoles.GeneralAdmin => nameof(GlobalConstant.AdminRoles.GeneralAdmin),
             _ => nameof(GlobalConstant.AdminRoles.GeneralAdmin)
         };
+
+        private ChartType GetChartTypeToEnum(string role, string? chartType) => 
+            (role == GlobalConstant.AdminRoles.SuperAdmin || role == GlobalConstant.AdminRoles.GeneralAdmin)
+            ? ChartType.All 
+            : chartType switch
+            {
+                GlobalConstant.ChartTypes.EghisChart => ChartType.EghisChart,
+                GlobalConstant.ChartTypes.NixChart => ChartType.NixChart,
+                _ => ChartType.EghisChart
+            };
 
         private TypeAdapterConfig GetMapsterConfig()
         {

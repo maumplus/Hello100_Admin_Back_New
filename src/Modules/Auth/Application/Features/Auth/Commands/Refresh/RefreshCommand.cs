@@ -10,6 +10,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Extensions;
 using Hello100Admin.BuildingBlocks.Common.Definition.Enums;
+using Hello100Admin.Modules.Auth.Application.Common.Models;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 
 namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.Refresh
 {
@@ -35,14 +37,16 @@ namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.Refresh
         private readonly IAuthRepository _authRepository;
         private readonly IAuthStore _authStore;
         private readonly IConfiguration _config;
+        private readonly IDbSessionRunner _db;
 
-        public RefreshCommandHandler(ILogger<RefreshCommandHandler> logger, ITokenService tokenService, IAuthRepository authRepository, IAuthStore authStore, IConfiguration config)
+        public RefreshCommandHandler(ILogger<RefreshCommandHandler> logger, ITokenService tokenService, IAuthRepository authRepository, IAuthStore authStore, IConfiguration config, IDbSessionRunner db)
         {
             _logger = logger;
             _tokenService = tokenService;
             _authRepository = authRepository;
             _authStore = authStore;
             _config = config;
+            _db = db;
         }
 
         public async Task<Result<RefreshResponse>> Handle(RefreshCommand request, CancellationToken ct)
@@ -66,9 +70,19 @@ namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.Refresh
                 LoginFailCount = adminInfo.LoginFailCount
             };
 
-            var roles = new[] { GetRoleNameByGrade(adminInfo.Grade) };
+            // 병원관리자 한정 병원정보 조회
+            CurrentHospitalInfo? hospInfo = null;
+            if (adminInfo.Grade == GlobalConstant.AdminRoles.HospitalAdmin && string.IsNullOrWhiteSpace(adminInfo.HospNo) == false)
+            {
+                hospInfo = await _db.RunAsync(DataSource.Hello100,
+                    (session, token) => _authStore.GetHospitalInfoByHospNoAsync(session, adminInfo.HospNo, token),
+                ct);
+            }
 
-            var accessToken = _tokenService.GenerateAccessToken(adminInfo, roles);
+            var roles = new[] { GetRoleNameByGrade(adminInfo.Grade) };
+            var chartTypes = new[] { GetChartTypeToEnum(adminInfo.Grade, hospInfo?.ChartType) };
+
+            var accessToken = _tokenService.GenerateAccessToken(adminInfo, roles, chartTypes);
 
             adminEntity.AccessToken = accessToken;
 
@@ -89,5 +103,15 @@ namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.Refresh
             GlobalConstant.AdminRoles.GeneralAdmin => nameof(GlobalConstant.AdminRoles.GeneralAdmin),
             _ => nameof(GlobalConstant.AdminRoles.GeneralAdmin)
         };
+
+        private ChartType GetChartTypeToEnum(string role, string? chartType) =>
+            (role == GlobalConstant.AdminRoles.SuperAdmin || role == GlobalConstant.AdminRoles.GeneralAdmin)
+            ? ChartType.All
+            : chartType switch
+            {
+                GlobalConstant.ChartTypes.EghisChart => ChartType.EghisChart,
+                GlobalConstant.ChartTypes.NixChart => ChartType.NixChart,
+                _ => ChartType.EghisChart
+            };
     }
 }

@@ -8,6 +8,7 @@ using Hello100Admin.Modules.Auth.Application.Common.Abstractions.Persistence.Aut
 using Hello100Admin.Modules.Auth.Application.Features.Auth.ReadModels;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Security;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
+using Hello100Admin.BuildingBlocks.Common.Definition.Enums;
 
 namespace Hello100Admin.Modules.Auth.Application.UnitTests.Commands
 {
@@ -33,7 +34,7 @@ namespace Hello100Admin.Modules.Auth.Application.UnitTests.Commands
 			var mockPasswordHasher = new Mock<IPasswordHasher>();
 			mockPasswordHasher.Setup(h => h.VerifyPassword(user.AccPwd, "password", user.Aid)).Returns(true);
 			var mockTokenService = new Mock<ITokenService>();
-            mockTokenService.Setup(t => t.GenerateAccessToken(user, It.IsAny<string[]>())).Returns("access-token");
+            mockTokenService.Setup(t => t.GenerateAccessToken(user, It.IsAny<string[]>(), It.IsAny<ChartType[]>())).Returns("access-token");
             mockTokenService.Setup(t => t.GenerateRefreshToken(user.Aid, It.IsAny<string>())).Returns(new Hello100Admin.Modules.Auth.Domain.Entities.RefreshTokenEntity(user.Aid, "refresh-token", DateTime.UtcNow.AddMinutes(10)));
             var authRepo = new Mock<IAuthRepository>();
 			var mockLogger = new Mock<ILogger<LoginCommandHandler>>();

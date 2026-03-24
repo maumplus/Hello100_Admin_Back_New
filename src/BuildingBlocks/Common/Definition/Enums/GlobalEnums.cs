@@ -48,4 +48,23 @@
         /// </summary>
         tel = 1
     }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public enum ChartType
+    {
+        /// <summary>
+        /// All의 경우 Attribute로 사용하지 말 것 (단순 전체 관리자 구분 토큰용)
+        /// </summary>
+        All = 1,
+        /// <summary>
+        /// 
+        /// </summary>
+        EghisChart = 2,
+        /// <summary>
+        /// 
+        /// </summary>
+        NixChart = 3
+    }
 }

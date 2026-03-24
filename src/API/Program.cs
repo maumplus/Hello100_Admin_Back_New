@@ -19,6 +19,8 @@ using Hello100Admin.Modules.Admin.Application.Features.Member.Queries.GetMember;
 using Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.Login;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 using Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.SsoLogin;
+using Microsoft.AspNetCore.Authorization;
+using Hello100Admin.API.Infrastructure.Authorization.Handlers;
 
 // Dapper snake_case <-> PascalCase 자동 매핑 설정
 Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
@@ -125,6 +127,8 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddAuthorization();
+
+builder.Services.AddSingleton<IAuthorizationHandler, ChartTypeAuthorizationHandler>();
 
 // MediatR 등록
 builder.Services.AddMediatR(cfg =>

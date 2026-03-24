@@ -1,3 +1,4 @@
+using Hello100Admin.BuildingBlocks.Common.Definition.Enums;
 using Hello100Admin.Modules.Auth.Application.Common.Abstractions.Persistence.Auth;
 using Hello100Admin.Modules.Auth.Application.Common.Abstractions.Services;
 using Hello100Admin.Modules.Auth.Application.Features.Auth.ReadModels;
@@ -44,7 +45,7 @@ public class JwtTokenService : ITokenService
         _refreshTokenExpirationDays = int.Parse(_configuration["Jwt:RefreshTokenExpirationDays"] ?? "1");
     }
 
-    public string GenerateAccessToken(AdminModel adminInfo, IEnumerable<string> roles)
+    public string GenerateAccessToken(AdminModel adminInfo, IEnumerable<string> roles, IEnumerable<ChartType> chartTypes)
     {
         if (_secretKey == null)
         {
@@ -67,7 +68,13 @@ public class JwtTokenService : ITokenService
         {
             claims.Add(new Claim(ClaimTypes.Role, role));
         }
-            
+
+        // 차트 타입 추가
+        foreach (var type in chartTypes)
+        {
+            claims.Add(new Claim("chartType", type.ToString()));
+        }
+
         if (!string.IsNullOrEmpty(adminInfo.HospNo) && !string.IsNullOrEmpty(adminInfo.HospKey))
         {
             claims.Add(new Claim("hospNo", adminInfo.HospNo));

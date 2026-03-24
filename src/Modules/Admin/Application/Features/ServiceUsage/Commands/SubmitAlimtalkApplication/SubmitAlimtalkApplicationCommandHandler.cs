@@ -1,5 +1,6 @@
 ﻿using Hello100Admin.BuildingBlocks.Common.Application;
 using Hello100Admin.BuildingBlocks.Common.Definition.Enums;
+using Hello100Admin.BuildingBlocks.Common.Errors;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.External;
 using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Common;
@@ -8,6 +9,7 @@ using Hello100Admin.Modules.Admin.Application.Common.Errors;
 using Hello100Admin.Modules.Admin.Application.Common.Extensions;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Extensions;
 
 namespace Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Commands.SubmitAlimtalkApplication
 {
@@ -42,6 +44,10 @@ namespace Hello100Admin.Modules.Admin.Application.Features.ServiceUsage.Commands
 
             if (hospInfo == null)
                 return Result.Success().WithError(AdminErrorCode.NotFoundCurrentHospital.ToError());
+
+            // 닉스 차트는 알림톡 발송 서비스 신청(검사결과) 요청 권한 없음
+            if (hospInfo.ChartType == GlobalConstant.ChartTypes.NixChart && command.TmpType == "KakaoJoinTestResult")
+                return Result.Success().WithError(GlobalErrorCode.UnauthorizedError.ToError());
 
             try
             {
