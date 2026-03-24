@@ -1,3 +1,4 @@
+using Hello100Admin.BuildingBlocks.Common.Definition.Enums;
 using Hello100Admin.Modules.Auth.Application.Features.Auth.ReadModels;
 using Hello100Admin.Modules.Auth.Domain.Entities;
 
@@ -11,7 +12,7 @@ public interface ITokenService
     /// <summary>
     /// Access Token 생성
     /// </summary>
-    string GenerateAccessToken(AdminModel adminInfo, IEnumerable<string> roles);
+    string GenerateAccessToken(AdminModel adminInfo, IEnumerable<string> roles, IEnumerable<ChartType> chartTypes);
 
     /// <summary>
     /// Refresh Token 생성

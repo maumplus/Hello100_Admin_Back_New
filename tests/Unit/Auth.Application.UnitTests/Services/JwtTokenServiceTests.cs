@@ -6,6 +6,7 @@ using Hello100Admin.Modules.Auth.Domain.Entities;
 using Hello100Admin.Modules.Auth.Application.Common.Services;
 using Hello100Admin.Modules.Auth.Application.Common.Abstractions.Persistence.Auth;
 using Hello100Admin.Modules.Auth.Application.Features.Auth.ReadModels;
+using Hello100Admin.BuildingBlocks.Common.Definition.Enums;
 
 namespace Hello100Admin.Modules.Auth.Application.UnitTests.Services
 {
@@ -49,9 +50,10 @@ namespace Hello100Admin.Modules.Auth.Application.UnitTests.Services
             };
 
             var roles = new[] { "SuperAdmin" };
+            var chartTypes = new ChartType[] { ChartType.All };
 
             // Act
-            var token = service.GenerateAccessToken(user, roles);
+            var token = service.GenerateAccessToken(user, roles, chartTypes);
 
             // Assert
             token.Should().NotBeNullOrEmpty();

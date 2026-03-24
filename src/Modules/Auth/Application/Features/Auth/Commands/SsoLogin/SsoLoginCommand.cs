@@ -16,7 +16,6 @@ using Hello100Admin.Modules.Auth.Domain.Entities;
 using Mapster;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using static Hello100Admin.BuildingBlocks.Common.Definition.Enums.GlobalConstant;
 
 namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.SsoLogin
 {
@@ -34,7 +33,8 @@ namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.SsoLogin
         public SsoLoginCommandValidator()
         {
             RuleFor(x => x.ChartType)
-                .Must(x => string.IsNullOrWhiteSpace(x) || new string[] { ChartTypes.EghisChart, ChartTypes .NixChart }.Contains(x)).WithMessage("차트구분이 유효하지 않습니다.");
+                .Must(x => string.IsNullOrWhiteSpace(x) || new string[] { GlobalConstant.ChartTypes.EghisChart, GlobalConstant.ChartTypes.NixChart }.Contains(x))
+                .WithMessage("차트구분이 유효하지 않습니다.");
             RuleFor(x => x.Id)
                 .Must(x => !string.IsNullOrWhiteSpace(x)).WithMessage("요양기관번호는 필수입니다.");
             RuleFor(x => x.Key)
@@ -105,25 +105,6 @@ namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.SsoLogin
                 LoginFailCount = adminInfo.LoginFailCount
             };
 
-            var roles = new[] { GetRoleNameByGrade(adminInfo.Grade) };
-
-            var accessToken = _tokenService.GenerateAccessToken(adminInfo, roles);
-            var refreshToken = _tokenService.GenerateRefreshToken(adminInfo.Aid, request.IpAddress);
-
-            adminEntity.AccessToken = accessToken;
-            adminEntity.RefreshToken = refreshToken.Token;
-
-            await _authRepository.UpdateTokensAsync(adminEntity, cancellationToken);
-
-            var adminLog = new AdminLogEntity()
-            {
-                Aid = adminInfo.Aid,
-                UserAgent = request.UserAgent!,
-                IP = request.IpAddress!
-            };
-
-            await _authRepository.InsertAdminLogAsync(adminLog, cancellationToken);
-
             // 병원관리자 한정 병원정보 조회
             CurrentHospitalInfo? hospInfo = null;
 
@@ -141,6 +122,28 @@ namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.SsoLogin
                     }
                 }
             }
+
+            var roles = new[] { GetRoleNameByGrade(adminInfo.Grade) };
+            var chartTypes = new[] { GetChartTypeToEnum(adminInfo.Grade, hospInfo?.ChartType) };
+
+            var accessToken = _tokenService.GenerateAccessToken(adminInfo, roles, chartTypes);
+            var refreshToken = _tokenService.GenerateRefreshToken(adminInfo.Aid, request.IpAddress);
+
+            adminEntity.AccessToken = accessToken;
+            adminEntity.RefreshToken = refreshToken.Token;
+
+            await _authRepository.UpdateTokensAsync(adminEntity, cancellationToken);
+
+            var adminLog = new AdminLogEntity()
+            {
+                Aid = adminInfo.Aid,
+                UserAgent = request.UserAgent!,
+                IP = request.IpAddress!
+            };
+
+            await _authRepository.InsertAdminLogAsync(adminLog, cancellationToken);
+
+
 
             var config = this.GetMapsterConfig();
 
@@ -169,6 +172,16 @@ namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.SsoLogin
             GlobalConstant.AdminRoles.GeneralAdmin => nameof(GlobalConstant.AdminRoles.GeneralAdmin),
             _ => nameof(GlobalConstant.AdminRoles.GeneralAdmin)
         };
+
+        private ChartType GetChartTypeToEnum(string role, string? chartType) =>
+            (role == GlobalConstant.AdminRoles.SuperAdmin || role == GlobalConstant.AdminRoles.GeneralAdmin)
+            ? ChartType.All
+            : chartType switch
+            {
+                GlobalConstant.ChartTypes.EghisChart => ChartType.EghisChart,
+                GlobalConstant.ChartTypes.NixChart => ChartType.NixChart,
+                _ => ChartType.EghisChart
+            };
 
         private TypeAdapterConfig GetMapsterConfig()
         {
