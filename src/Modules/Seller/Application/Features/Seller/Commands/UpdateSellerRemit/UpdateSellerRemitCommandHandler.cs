@@ -43,8 +43,6 @@ namespace Hello100Admin.Modules.Seller.Application.Features.Seller.Commands.Upda
         {
             _logger.LogDebug("Processing update seller remit [{Id}]", req.Id);
 
-            var hashedPwd = this.GetHashedPassword(req.AId, req.Password);
-
             var adminInfo = await _db.RunAsync(DataSource.Hello100, 
                 (session, token) => _sellerStore.GetAdminByAIdAsync(session, req.AId, token), 
             ct);
@@ -131,23 +129,6 @@ namespace Hello100Admin.Modules.Seller.Application.Features.Seller.Commands.Upda
             };
 
             return Result.Success(result);
-        }
-
-        private string GetHashedPassword(string aId, string pwd)
-        {
-            var hashedPwd = string.Empty;
-
-            try
-            {
-                hashedPwd = _hasher.HashWithSalt(pwd, aId);
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "Password hash generation failed during SHA256 computation.");
-                throw new BizException(SellerErrorCode.PasswordHashGenerationError.ToError());
-            }
-
-            return hashedPwd;
         }
     }
 }

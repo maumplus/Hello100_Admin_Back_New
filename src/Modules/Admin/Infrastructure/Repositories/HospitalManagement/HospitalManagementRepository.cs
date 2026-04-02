@@ -670,12 +670,12 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             return await db.ExecuteAsync(query, parameters, ct, _logger);
         }
 
-        public async Task<int> RemoveDoctorInfoScheduleAsync(DbSession db, EghisDoctInfoEntity eghisDoctInfoEntity, CancellationToken ct)
+        public async Task<int> RemoveDoctorInfoScheduleAsync(DbSession db, string hospNo, string emplNo, int weekNum, CancellationToken ct)
         {
             DynamicParameters parameters = new DynamicParameters();
-            parameters.Add("HospNo", eghisDoctInfoEntity.HospNo, DbType.String);
-            parameters.Add("EmplNo", eghisDoctInfoEntity.EmplNo, DbType.String);
-            parameters.Add("WeekNum", eghisDoctInfoEntity.WeekNum, DbType.Int32);
+            parameters.Add("HospNo", hospNo, DbType.String);
+            parameters.Add("EmplNo", emplNo, DbType.String);
+            parameters.Add("WeekNum", weekNum, DbType.Int32);
             
             var query = $@"
                     DELETE FROM hello100_api.eghis_doct_info
@@ -689,22 +689,16 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
         // 트랜잭션 간 DROP/CREATE TABLE이 진행되면 암묵적 커밋 발생으로, Exception 발생 시 ROLLBACK이 되지 않음.
         public async Task<int> UpdateDoctorInfoScheduleAsync(DbSession db, List<EghisDoctInfoEntity> eghisDoctInfoList, CancellationToken ct)
         {
-            var hospNo = eghisDoctInfoList[0].HospNo;
-            var hospKey = eghisDoctInfoList[0].HospKey;
-            var emplNo = eghisDoctInfoList[0].EmplNo;
-            var doctNo = eghisDoctInfoList[0].DoctNo;
-            var doctNm = eghisDoctInfoList[0].DoctNm;
-            var deptCd = eghisDoctInfoList[0].DeptCd;
-            var deptNm = eghisDoctInfoList[0].DeptNm;
+            var doctInfo = eghisDoctInfoList.First() ?? new EghisDoctInfoEntity();
 
             DynamicParameters parameters = new DynamicParameters();
-            parameters.Add("HospNo", hospNo, DbType.String);
-            parameters.Add("HospKey", hospKey, DbType.String);
-            parameters.Add("EmplNo", emplNo, DbType.String);
-            parameters.Add("DoctNo", doctNo, DbType.String);
-            parameters.Add("DoctNm", doctNm, DbType.String);
-            parameters.Add("DeptCd", deptCd, DbType.String);
-            parameters.Add("DeptNm", deptNm, DbType.String);
+            parameters.Add("HospNo", doctInfo.HospNo, DbType.String);
+            parameters.Add("HospKey", doctInfo.HospKey, DbType.String);
+            parameters.Add("EmplNo", doctInfo.EmplNo, DbType.String);
+            parameters.Add("DoctNo", doctInfo.DoctNo, DbType.String);
+            parameters.Add("DoctNm", doctInfo.DoctNm, DbType.String);
+            parameters.Add("DeptCd", doctInfo.DeptCd, DbType.String);
+            parameters.Add("DeptNm", doctInfo.DeptNm, DbType.String);
 
             var queries = new List<string>();
             var query = string.Empty;
@@ -802,11 +796,6 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
                        z.message, z.hello100_role, z.ridx, z.view_role, z.view_min_time, z.view_min_cnt, z.use_yn, z.reg_dt
                   FROM hello100_api.tmp_doct_sche z
                 ON DUPLICATE KEY UPDATE
-                  doct_no = VALUES(doct_no),
-                  doct_nm = VALUES(doct_nm),
-                  dept_cd = VALUES(dept_cd),
-                  dept_nm = VALUES(dept_nm),
-                  week_num = VALUES(week_num),
                   start_hour = VALUES(start_hour),
                   start_minute = VALUES(start_minute),
                   end_hour = VALUES(end_hour),
@@ -816,12 +805,8 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
                   break_end_hour = VALUES(break_end_hour),
                   break_end_minute = VALUES(break_end_minute),
                   interval_time = VALUES(interval_time),
-                  message = VALUES(message),
                   hello100_role = VALUES(hello100_role),
                   ridx = VALUES(ridx),
-                  view_role = VALUES(view_role),
-                  view_min_time = VALUES(view_min_time),
-                  view_min_cnt = VALUES(view_min_cnt),
                   use_yn = VALUES(use_yn),
                   reg_dt = VALUES(reg_dt);
             ";
@@ -858,7 +843,6 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
                   `untact_start_minute` INT(11) NOT NULL DEFAULT '0' COMMENT '비대면 진료시작분',
                   `untact_end_hour` INT(11) NOT NULL DEFAULT '0' COMMENT '비대면 진료종료시간',
                   `untact_end_minute` INT(11) NOT NULL DEFAULT '0' COMMENT '비대면 진료종료분',
-                  `untact_interval_time` INT(11) NOT NULL DEFAULT '0' COMMENT '비대면 소요시간',
                   `untact_use_yn` VARCHAR(1) NOT NULL DEFAULT 'N' COMMENT '사용유무',
                   `untact_break_start_hour` INT(11) NOT NULL DEFAULT '0' COMMENT '비대면 점심시작시간',
                   `untact_break_start_minute` INT(11) NOT NULL DEFAULT '0' COMMENT '비대면 점심시작분',
@@ -882,7 +866,6 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
                 parameters.Add($"Insert_UntactStartMinute{i}", eghisDoctInfo.UntactStartMinute, DbType.Int32);
                 parameters.Add($"Insert_UntactEndHour{i}", eghisDoctInfo.UntactEndHour, DbType.Int32);
                 parameters.Add($"Insert_UntactEndMinute{i}", eghisDoctInfo.UntactEndMinute, DbType.Int32);
-                parameters.Add($"Insert_UntactIntervalTime{i}", eghisDoctInfo.UntactIntervalTime, DbType.Int32);
                 parameters.Add($"Insert_UntactUseYn{i}", eghisDoctInfo.UntactUseYn, DbType.String);
                 parameters.Add($"Insert_UntactBreakStartHour{i}", eghisDoctInfo.UntactBreakStartHour, DbType.Int32);
                 parameters.Add($"Insert_UntactBreakStartMinute{i}", eghisDoctInfo.UntactBreakStartMinute, DbType.Int32);
@@ -896,7 +879,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
 
                 values += $@"
                     ( @HospNo, @HospKey, @EmplNo,
-                      @Insert_WeekNum{i}, @Insert_UntactStartHour{i}, @Insert_UntactStartMinute{i}, @Insert_UntactEndHour{i}, @Insert_UntactEndMinute{i}, @Insert_UntactIntervalTime{i}, @Insert_UntactUseYn{i},
+                      @Insert_WeekNum{i}, @Insert_UntactStartHour{i}, @Insert_UntactStartMinute{i}, @Insert_UntactEndHour{i}, @Insert_UntactEndMinute{i}, @Insert_UntactUseYn{i},
                       @Insert_UntactBreakStartHour{i}, @Insert_UntactBreakStartMinute{i}, @Insert_UntactBreakEndHour{i}, @Insert_UntactBreakEndMinute{i} )"; 
             }
 
@@ -905,7 +888,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             query = $@"
                 INSERT INTO hello100_api.tmp_doct_sche_untact
                   ( hosp_no, hosp_key, empl_no,
-                    week_num, untact_start_hour, untact_start_minute, untact_end_hour, untact_end_minute, untact_interval_time, untact_use_yn,
+                    week_num, untact_start_hour, untact_start_minute, untact_end_hour, untact_end_minute, untact_use_yn,
                     untact_break_start_hour, untact_break_start_minute, untact_break_end_hour, untact_break_end_minute )
                 VALUES {values};
             ";
@@ -915,7 +898,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
             query = @"
                 UPDATE hello100_api.eghis_doct_info a
                  INNER JOIN ( SELECT a.hosp_no, a.hosp_key, a.empl_no,
-                                     a.week_num, a.untact_start_hour, a.untact_start_minute, a.untact_end_hour, a.untact_end_minute, a.untact_interval_time, a.untact_use_yn,
+                                     a.week_num, a.untact_start_hour, a.untact_start_minute, a.untact_end_hour, a.untact_end_minute, a.untact_use_yn,
                                      a.untact_break_start_hour, a.untact_break_start_minute, a.untact_break_end_hour, a.untact_break_end_minute
                                 FROM hello100_api.tmp_doct_sche_untact a
                                WHERE a.hosp_no = @HospNo
@@ -929,7 +912,6 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
                        a.untact_break_start_minute  = b.untact_break_start_minute,
                        a.untact_break_end_hour = b.untact_break_end_hour,
                        a.untact_break_end_minute = b.untact_break_end_minute,
-                       a.untact_interval_time = b.untact_interval_time,
                        a.untact_use_yn = b.untact_use_yn;
             ";
 

@@ -213,29 +213,11 @@ namespace Hello100Admin.API.Controllers
         [HttpPatch("admin/doctor/weeks-schedule")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> PatchDoctorWeeksSchedule(PatchDoctorWeeksScheduleRequest request, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> PatchDoctorWeeksSchedule(PatchDoctorWeeksScheduleRequest req, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("PATCH /api/hospital-management/admin/doctor/weeks-schedule");
 
-            var command = new PatchDoctorWeeksScheduleCommand()
-            {
-                HospNo = request.HospNo,
-                HospKey = request.HospKey,
-                EmplNo = request.EmplNo,
-                DoctorScheduleList = new List<Modules.Admin.Application.Features.HospitalManagement.Commands.PatchDoctorWeeksScheduleInfo>()
-            };
-
-            foreach (var info in request.DoctorScheduleList)
-            {
-                var doctorScheduleInfo = info.Adapt<Modules.Admin.Application.Features.HospitalManagement.Commands.PatchDoctorWeeksScheduleInfo>() with
-                {
-                    HospNo = request.HospNo,
-                    HospKey = request.HospKey,
-                    EmplNo = request.EmplNo
-                };
-
-                command.DoctorScheduleList.Add(doctorScheduleInfo);
-            }
+            var command = req.Adapt<PatchDoctorWeeksScheduleCommand>();
 
             var result = await _mediator.Send(command, cancellationToken);
 
@@ -248,29 +230,11 @@ namespace Hello100Admin.API.Controllers
         [HttpPatch("admin/doctor/days-schedule")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> PatchDoctorDaysSchedule(PatchDoctorDaysScheduleRequest request, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> PatchDoctorDaysSchedule(PatchDoctorDaysScheduleRequest req, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("PATCH /api/hospital-management/admin/doctor/days-schedule");
 
-            var command = new PatchDoctorDaysScheduleCommand()
-            {
-                HospNo = request.HospNo,
-                HospKey = request.HospKey,
-                EmplNo = request.EmplNo,
-                DoctorScheduleList = new List<Modules.Admin.Application.Features.HospitalManagement.Commands.PatchDoctorDaysScheduleInfo>()
-            };
-
-            foreach (var info in request.DoctorScheduleList)
-            {
-                var doctorScheduleInfo = info.Adapt<Modules.Admin.Application.Features.HospitalManagement.Commands.PatchDoctorDaysScheduleInfo>() with
-                {
-                    HospNo = request.HospNo,
-                    HospKey = request.HospKey,
-                    EmplNo = request.EmplNo
-                };
-
-                command.DoctorScheduleList.Add(doctorScheduleInfo);
-            }
+            var command = req.Adapt<PatchDoctorDaysScheduleCommand>();
 
             var result = await _mediator.Send(command, cancellationToken);
 
@@ -287,25 +251,7 @@ namespace Hello100Admin.API.Controllers
         {
             _logger.LogInformation("PATCH /api/hospital-management/admin/doctor/untact-weeks-schedule");
 
-            var command = new PatchDoctorUntactWeeksScheduleCommand()
-            {
-                HospNo = request.HospNo,
-                HospKey = request.HospKey,
-                EmplNo = request.EmplNo,
-                DoctorScheduleList = new List<Modules.Admin.Application.Features.HospitalManagement.Commands.PatchDoctorUntactWeeksScheduleInfo>()
-            };
-
-            foreach (var info in request.DoctorScheduleList)
-            {
-                var doctorScheduleInfo = info.Adapt<Modules.Admin.Application.Features.HospitalManagement.Commands.PatchDoctorUntactWeeksScheduleInfo>() with
-                {
-                    HospNo = request.HospNo,
-                    HospKey = request.HospKey,
-                    EmplNo = request.EmplNo
-                };
-
-                command.DoctorScheduleList.Add(doctorScheduleInfo);
-            }
+            var command = request.Adapt<PatchDoctorUntactWeeksScheduleCommand>();
 
             var result = await _mediator.Send(command, cancellationToken);
 
@@ -945,29 +891,15 @@ namespace Hello100Admin.API.Controllers
         [HttpPatch("doctor/weeks-schedule")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> PatchMyDoctorWeeksSchedule(PatchMyDoctorWeeksScheduleRequest request, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> PatchMyDoctorWeeksSchedule(PatchMyDoctorWeeksScheduleRequest req, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("PATCH /api/hospital-management/doctor/weeks-schedule");
 
-            var command = new PatchDoctorWeeksScheduleCommand()
+            var command = req.Adapt<PatchDoctorWeeksScheduleCommand>() with
             {
                 HospNo = base.HospNo,
-                HospKey = base.HospKey,
-                EmplNo = request.EmplNo,
-                DoctorScheduleList = new List<Modules.Admin.Application.Features.HospitalManagement.Commands.PatchDoctorWeeksScheduleInfo>()
+                HospKey = base.HospKey
             };
-
-            foreach (var info in request.DoctorScheduleList)
-            {
-                var doctorScheduleInfo = info.Adapt<Modules.Admin.Application.Features.HospitalManagement.Commands.PatchDoctorWeeksScheduleInfo>() with
-                {
-                    HospNo = base.HospNo,
-                    HospKey = base.HospKey,
-                    EmplNo = request.EmplNo
-                };
-
-                command.DoctorScheduleList.Add(doctorScheduleInfo);
-            }
 
             var result = await _mediator.Send(command, cancellationToken);
 
@@ -980,29 +912,15 @@ namespace Hello100Admin.API.Controllers
         [HttpPatch("doctor/days-schedule")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> PatchMyDoctorDaysSchedule(PatchMyDoctorDaysScheduleRequest request, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> PatchMyDoctorDaysSchedule(PatchMyDoctorDaysScheduleRequest req, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("PATCH /api/hospital-management/doctor/days-schedule");
 
-            var command = new PatchDoctorDaysScheduleCommand()
+            var command = req.Adapt<PatchDoctorDaysScheduleCommand>() with
             {
                 HospNo = base.HospNo,
-                HospKey = base.HospKey,
-                EmplNo = request.EmplNo,
-                DoctorScheduleList = new List<Modules.Admin.Application.Features.HospitalManagement.Commands.PatchDoctorDaysScheduleInfo>()
+                HospKey = base.HospKey
             };
-
-            foreach (var info in request.DoctorScheduleList)
-            {
-                var doctorScheduleInfo = info.Adapt<Modules.Admin.Application.Features.HospitalManagement.Commands.PatchDoctorDaysScheduleInfo>() with
-                {
-                    HospNo = base.HospNo,
-                    HospKey = base.HospKey,
-                    EmplNo = request.EmplNo
-                };
-
-                command.DoctorScheduleList.Add(doctorScheduleInfo);
-            }
 
             var result = await _mediator.Send(command, cancellationToken);
 
@@ -1015,29 +933,15 @@ namespace Hello100Admin.API.Controllers
         [HttpPatch("doctor/untact-weeks-schedule")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> PatchMyDoctorUntactWeeksSchedule(PatchMyDoctorUntactWeeksScheduleRequest request, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> PatchMyDoctorUntactWeeksSchedule(PatchMyDoctorUntactWeeksScheduleRequest req, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("PATCH /api/hospital-management/doctor/untact-weeks-schedule");
 
-            var command = new PatchDoctorUntactWeeksScheduleCommand()
+            var command = req.Adapt<PatchDoctorUntactWeeksScheduleCommand>() with
             {
                 HospNo = base.HospNo,
-                HospKey = base.HospKey,
-                EmplNo = request.EmplNo,
-                DoctorScheduleList = new List<Modules.Admin.Application.Features.HospitalManagement.Commands.PatchDoctorUntactWeeksScheduleInfo>()
+                HospKey = base.HospKey
             };
-
-            foreach (var info in request.DoctorScheduleList)
-            {
-                var doctorScheduleInfo = info.Adapt<Modules.Admin.Application.Features.HospitalManagement.Commands.PatchDoctorUntactWeeksScheduleInfo>() with
-                {
-                    HospNo = base.HospNo,
-                    HospKey = base.HospKey,
-                    EmplNo = request.EmplNo
-                };
-
-                command.DoctorScheduleList.Add(doctorScheduleInfo);
-            }
 
             var result = await _mediator.Send(command, cancellationToken);
 
