@@ -1,187 +1,147 @@
 ﻿using Hello100Admin.BuildingBlocks.Common.Application;
 using Hello100Admin.BuildingBlocks.Common.Definition.Enums;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
-using Hello100Admin.BuildingBlocks.Common.Infrastructure.Security;
-using Hello100Admin.Modules.Admin.Application.Common.Abstractions.Persistence.Hospital;
-using Hello100Admin.Modules.Admin.Application.Common.Definitions.Enums;
-using Hello100Admin.Modules.Admin.Application.Common.Errors;
-using Hello100Admin.Modules.Admin.Application.Common.Extensions;
 using Hello100Admin.Modules.Admin.Domain.Entities;
 using Hello100Admin.Modules.Admin.Domain.Repositories;
+using Mapster;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Hello100Admin.Modules.Admin.Application.Features.HospitalManagement.Commands
 {
-    public record PatchDoctorUntactWeeksScheduleInfo
+    public record PatchDoctorUntactWeeksScheduleCommandItem
     {
-        public string HospNo { get; set; }
-        public string HospKey { get; set; }
-        public string EmplNo { get; set; }
-        public string ClinicYmd { get; set; }
-        public int WeekNum { get; set; }
-        public int StartHour { get; set; }
-        public int StartMinute { get; set; }
-        public int EndHour { get; set; }
-        public int EndMinute { get; set; }
-        public int BreakStartHour { get; set; }
-        public int BreakStartMinute { get; set; }
-        public int BreakEndHour { get; set; }
-        public int BreakEndMinute { get; set; }
-        public int IntervalTime { get; set; }
-        public string? Message { get; set; }
-        public int Hello100Role { get; set; }
-        public int Ridx { get; set; }
-        public string UseYn { get; set; }
-        public int UntactStartHour { get; set; }
-        public int UntactStartMinute { get; set; }
-        public int UntactEndHour { get; set; }
-        public int UntactEndMinute { get; set; }
-        public int UntactIntervalTime { get; set; }
-        public string UntactUseYn { get; set; }
-        public int UntactBreakStartHour { get; set; }
-        public int UntactBreakStartMinute { get; set; }
-        public int UntactBreakEndHour { get; set; }
-        public int UntactBreakEndMinute { get; set; }
+        /// <summary>
+        /// 요일순번
+        /// </summary>
+        public int WeekNum { get; init; }
+        /// <summary>
+        /// 예약번호
+        /// </summary>
+        public int Ridx { get; init; }
+        /// <summary>
+        /// 비대면진료시작(시)
+        /// </summary>
+        public int UntactStartHour { get; init; }
+        /// <summary>
+        /// 비대면진료시작(분)
+        /// </summary>
+        public int UntactStartMinute { get; init; }
+        /// <summary>
+        /// 비대면진료종료(시)
+        /// </summary>
+        public int UntactEndHour { get; init; }
+        /// <summary>
+        /// 비대면진료종료(분)
+        /// </summary>
+        public int UntactEndMinute { get; init; }
+        /// <summary>
+        /// 비대면점심시작시간(시)
+        /// </summary>
+        public int UntactBreakStartHour { get; init; }
+        /// <summary>
+        /// 비대면점심시작시간(분)
+        /// </summary>
+        public int UntactBreakStartMinute { get; init; }
+        /// <summary>
+        /// 비대면점심종료시간(시)
+        /// </summary>
+        public int UntactBreakEndHour { get; init; }
+        /// <summary>
+        /// 비대면점심종료시간(분)
+        /// </summary>
+        public int UntactBreakEndMinute { get; init; }
+        /// <summary>
+        /// 비대면진료 사용여부
+        /// </summary>
+        public string UntactUseYn { get; init; } = default!;
     }
 
     public record PatchDoctorUntactWeeksScheduleCommand : IQuery<Result>
     {
-        public string HospNo { get; set; }
-        public string HospKey { get; set; }
-        public string EmplNo { get; set; }
-        public List<PatchDoctorUntactWeeksScheduleInfo> DoctorScheduleList { get; set; }
+        /// <summary>
+        /// 요양기관번호
+        /// </summary>
+        public string HospNo { get; init; } = default!;
+        /// <summary>
+        /// 요양기관키
+        /// </summary>
+        public string HospKey { get; init; } = default!;
+        /// <summary>
+        /// 의사사번
+        /// </summary>
+        public string EmplNo { get; init; } = default!;
+        /// <summary>
+        /// 의사 면허번호
+        /// </summary>
+        public string DoctNo { get; init; } = default!;
+        /// <summary>
+        /// 의사명
+        /// </summary>
+        public string DoctNm { get; init; } = default!;
+        /// <summary>
+        /// 진료과코드
+        /// </summary>
+        public string? DeptCd { get; init; }
+        /// <summary>
+        /// 진료과명
+        /// </summary>
+        public string? DeptNm { get; init; }
+        /// <summary>
+        /// 화면 대기인원 표시[0:사용안함, 1:인원수, 2:시간, 3: 인원수, 시간 모두표시]
+        /// </summary>
+        public int ViewRole { get; init; }
+        /// <summary>
+        /// 대기 시간표시에 따른 최소시간
+        /// </summary>
+        public string ViewMinTime { get; init; } = default!;
+        /// <summary>
+        /// 대기 인원표시에 따른 최소인원
+        /// </summary>
+        public string ViewMinCnt { get; init; } = default!;
+        /// <summary>
+        /// 비대면 진료 스케줄 목록
+        /// </summary>
+        public List<PatchDoctorUntactWeeksScheduleCommandItem> DoctorScheduleList { get; init; } = default!;
     }
 
     public class PatchDoctorUntactWeeksScheduleCommandHandler : IRequestHandler<PatchDoctorUntactWeeksScheduleCommand, Result>
     {
         private readonly ILogger<PatchDoctorUntactWeeksScheduleCommandHandler> _logger;
         private readonly IHospitalManagementRepository _hospitalManagementRepository;
-        private readonly IHospitalManagementStore _hospitalManagementStore;
-        private readonly ICryptoService _cryptoService;
         private readonly IDbSessionRunner _db;
 
         public PatchDoctorUntactWeeksScheduleCommandHandler(
             ILogger<PatchDoctorUntactWeeksScheduleCommandHandler> logger,
             IHospitalManagementRepository hospitalManagementRepository,
-            IHospitalManagementStore hospitalManagementStore,
-            ICryptoService cryptoService,
             IDbSessionRunner db)
         {
             _logger = logger;
             _hospitalManagementRepository = hospitalManagementRepository;
-            _hospitalManagementStore = hospitalManagementStore;
-            _cryptoService = cryptoService;
             _db = db;
         }
 
-        public async Task<Result> Handle(PatchDoctorUntactWeeksScheduleCommand request, CancellationToken cancellationToken)
+        public async Task<Result> Handle(PatchDoctorUntactWeeksScheduleCommand req, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Handling PatchDoctorWeeksScheduleCommand HospNo:{HospNo}", request.HospNo);
+            _logger.LogInformation("Handling PatchDoctorWeeksScheduleCommand HospNo:{HospNo}", req.HospNo);
 
-            var doctorList = await _hospitalManagementStore.GetDoctorList(request.HospNo, request.EmplNo, cancellationToken);
-
-            if (doctorList.Count == 0)
-            {
-                return Result.Success().WithError(AdminErrorCode.NotFoundDoctorInfo.ToError());
-            }
-
-            var doctorInfo = doctorList[0];
-
-            var eghisDoctInfoList = new List<EghisDoctInfoEntity>();
             var eghisDoctInfoUntactList = new List<EghisDoctInfoEntity>();
 
-            EghisDoctInfoEntity? eghisDoctInfoEntity = null; 
+            for (int i = 0; i < req.DoctorScheduleList.Count; i++)
+            {
+                var doctorSchedule = req.DoctorScheduleList[i];
+
+                var eghisDoctInfoUntactEntity = doctorSchedule.Adapt<EghisDoctInfoEntity>();
+                eghisDoctInfoUntactEntity.HospNo = req.HospNo;
+                eghisDoctInfoUntactEntity.HospKey = req.HospKey;
+                eghisDoctInfoUntactEntity.EmplNo = req.EmplNo;
+
+                eghisDoctInfoUntactList.Add(eghisDoctInfoUntactEntity);
+            }
 
             await _db.RunInTransactionAsync(DataSource.Hello100, async (session, token) =>
             {
-                for (int i = 0; i < request.DoctorScheduleList.Count; i++)
-                {
-                    var doctorSchedule = request.DoctorScheduleList[i];
-
-                    Hello100RoleType hello100Role = (Hello100RoleType)doctorSchedule.Hello100Role;
-
-                    int ridx = 0;
-
-                    if ((hello100Role & Hello100RoleType.Rsrv) == 0)
-                    {
-                        await _hospitalManagementRepository.RemoveEghisDoctRsrvAsync(session, doctorSchedule.Ridx, "NR", token);
-                    }
-
-                    eghisDoctInfoEntity = new EghisDoctInfoEntity()
-                    {
-                        HospNo = doctorSchedule.HospNo,
-                        HospKey = doctorSchedule.HospKey,
-                        EmplNo = doctorSchedule.EmplNo,
-                        DoctNo = doctorInfo.DoctNo,
-                        DoctNm = doctorInfo.DoctNm,
-                        DeptCd = doctorInfo.DeptCd,
-                        DeptNm = doctorInfo.DeptNm,
-                        ClinicYmd = doctorSchedule.ClinicYmd,
-                        WeekNum = doctorSchedule.WeekNum,
-                        StartHour = doctorSchedule.StartHour,
-                        StartMinute = doctorSchedule.StartMinute,
-                        EndHour = doctorSchedule.EndHour,
-                        EndMinute = doctorSchedule.EndMinute,
-                        BreakStartHour = doctorSchedule.BreakStartHour,
-                        BreakStartMinute = doctorSchedule.BreakStartMinute,
-                        BreakEndHour = doctorSchedule.BreakEndHour,
-                        BreakEndMinute = doctorSchedule.BreakEndMinute,
-                        IntervalTime = doctorSchedule.IntervalTime,
-                        Message = doctorSchedule.Message,
-                        Hello100Role = doctorSchedule.Hello100Role,
-                        Ridx = ridx,
-                        ViewRole = doctorInfo.ViewRole,
-                        ViewMinTime = doctorInfo.ViewMinTime,
-                        ViewMinCnt = doctorInfo.ViewMinCnt,
-                        UseYn = doctorSchedule.UseYn
-                    };
-
-                    eghisDoctInfoList.Add(eghisDoctInfoEntity);
-
-                    var eghisDoctInfoUntactEntity = new EghisDoctInfoEntity()
-                    {
-                        HospNo = doctorSchedule.HospNo,
-                        HospKey = doctorSchedule.HospKey,
-                        EmplNo = doctorSchedule.EmplNo,
-                        WeekNum = doctorSchedule.WeekNum,
-                        UntactStartHour = doctorSchedule.UntactStartHour,
-                        UntactStartMinute = doctorSchedule.UntactStartMinute,
-                        UntactEndHour = doctorSchedule.UntactEndHour,
-                        UntactEndMinute = doctorSchedule.UntactEndMinute,
-                        UntactIntervalTime = doctorSchedule.UntactIntervalTime,
-                        UntactUseYn = doctorSchedule.UntactUseYn,
-                        UntactBreakStartHour = doctorSchedule.UntactBreakStartHour,
-                        UntactBreakStartMinute = doctorSchedule.UntactBreakStartMinute,
-                        UntactBreakEndHour = doctorSchedule.UntactBreakEndHour,
-                        UntactBreakEndMinute = doctorSchedule.UntactBreakEndMinute
-                    };
-
-                    eghisDoctInfoUntactList.Add(eghisDoctInfoUntactEntity);
-                }
-
-                await _hospitalManagementRepository.UpdateDoctorInfoScheduleAsync(session, eghisDoctInfoList, token);
                 await _hospitalManagementRepository.UpdateDoctorInfoUntactScheduleAsync(session, eghisDoctInfoUntactList, token);
-
-                eghisDoctInfoEntity = new EghisDoctInfoEntity
-                {
-                    HospNo = request.HospNo,
-                    HospKey = request.HospKey,
-                    EmplNo = request.EmplNo,
-                    DoctNm = doctorInfo.DoctNm,
-                    DeptCd = doctorInfo.DeptCd,
-                    DeptNm = doctorInfo.DeptNm,
-                    ViewRole = doctorInfo.ViewRole,
-                    ViewMinCnt = doctorInfo.ViewMinCnt,
-                    ViewMinTime = doctorInfo.ViewMinTime
-                };
-
-                await _hospitalManagementRepository.UpdateDoctorInfoAsync(session, eghisDoctInfoEntity, token);
             },
             cancellationToken);
 
