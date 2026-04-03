@@ -709,7 +709,7 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
 
             var sql = $@"
                 SELECT a.hosp_no                    AS HospNo,
-                       a.hosp_key                   AS HospKey,
+                       c.hosp_key                   AS HospKey,
                        a.empl_no                    AS EmplNo,
                        IFNULL(a.clinic_ymd, '')     AS ClinicYmd,
                        ( SELECT CASE WHEN COUNT(1) > 0 THEN 'Y' ELSE 'N' END 
@@ -792,6 +792,8 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.HospitalManage
                  FROM hello100_api.eghis_doct_info a                                                              
                  LEFT JOIN hello100.tb_eghis_doct_info_file b
                    ON a.hosp_no = b.hosp_no AND a.hosp_key = b.hosp_key AND a.empl_no = b.empl_no 
+                 LEFT JOIN hello100.tb_eghis_hosp_info c
+                   ON c.del_yn = 'N' AND a.hosp_no = c.hosp_no
                 WHERE a.hosp_no = @HospNo                                                            
                   AND a.empl_no = @EmplNo                                                            
                   AND (IFNULL(a.clinic_ymd, '') = '' OR a.clinic_ymd >= DATE_FORMAT(NOW(), '%Y%m%d')) 

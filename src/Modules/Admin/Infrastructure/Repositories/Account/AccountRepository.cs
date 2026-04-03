@@ -66,6 +66,21 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Account
             return await db.ExecuteAsync(query, parameters, cancellationToken);
         }
 
+        public async Task<int> UpdateEghisDoctInfoAsync(DbSession db, EghisDoctInfoEntity entity, CancellationToken cancellationToken)
+        {
+            DynamicParameters parameters = new DynamicParameters();
+            parameters.Add("HospNo", entity.HospNo, DbType.String);
+            parameters.Add("HospKey", entity.HospKey, DbType.String);
+
+            string query = @"
+                UPDATE hello100_api.eghis_doct_info
+                   SET hosp_key = @HospKey
+                 WHERE hosp_no = @HospNo;
+            ";
+
+            return await db.ExecuteAsync(query, parameters, cancellationToken);
+        }
+
         public async Task<int> UpdateEghisHospQrInfoAsync(DbSession db, TbEghisHospQrInfoEntity entity, CancellationToken cancellationToken)
         {
             DynamicParameters parameters = new DynamicParameters();
