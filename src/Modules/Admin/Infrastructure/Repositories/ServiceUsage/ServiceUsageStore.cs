@@ -279,13 +279,13 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.ServiceUsage
                                FROM hello100.tb_common tc 
                               WHERE tc.cls_cd = '28' 
                                 AND tc.cm_cd = nkp.process_status )           AS ProcessStatusNm,
-                           Failed_msg                                         AS FailedMsg,
-                           res_cd                                             AS ResCd,
-                           res_msg                                            AS ResMsg,
+                           nkp.failed_msg                                     AS FailedMsg,
+                           nkp.res_cd                                         AS ResCd,
+                           nkp.res_msg                                        AS ResMsg,
                            tnkbk.card_cd                                      AS CardCd,
                            tnkbk.card_name                                    AS CardName,
                            tnkbk.card_mask_no                                 AS CardNo,
-                           DATE_FORMAT(FROM_UNIXTIME(tnkbk.reg_dt), '%Y%m%d') AS AppTime,
+                           DATE_FORMAT(FROM_UNIXTIME(nkp.reg_dt), '%Y%m%d')   AS AppTime,
                            nkp.acqu_name                                      AS AcQuname
                       FROM hello100_api.nhn_kcp_payment nkp 
                       LEFT JOIN hello100.tb_nhn_kcp_batch_key tnkbk 

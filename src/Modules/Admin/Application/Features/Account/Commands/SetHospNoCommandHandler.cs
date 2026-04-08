@@ -43,278 +43,275 @@ namespace Hello100Admin.Modules.Admin.Application.Features.Account.Commands
 
             try
             {
-                var admin = new TbAdminEntity()
+                await _db.RunInTransactionAsync(DataSource.Hello100, async (session, token) =>
                 {
-                    Aid = request.Aid,
-                    HospNo = request.HospNo
-                };
+                    var admin = new TbAdminEntity()
+                    {
+                        Aid = request.Aid,
+                        HospNo = request.HospNo
+                    };
 
-                await _db.RunAsync(DataSource.Hello100,
-                    (dbSession, ct) => _accountRepository.UpdateAdminAsync(dbSession, admin, ct),
-                cancellationToken);
+                    await _accountRepository.UpdateAdminAsync(session, admin, token);
 
-                var eghisHospInfo = new TbEghisHospInfoEntity()
-                {
-                    HospKey = request.HospKey,
-                    HospNo = request.HospNo,
-                    ChartType = request.ChartType
-                };
-
-                await _db.RunAsync(DataSource.Hello100,
-                    (dbSession, ct) => _accountRepository.UpdateEghisHospInfoAsync(dbSession, eghisHospInfo, ct),
-                cancellationToken);
-
-                var eghisHospQrInfo = new TbEghisHospQrInfoEntity()
-                {
-                    Aid = request.Aid,
-                    HospKey = request.HospKey
-                };
-
-                await _db.RunAsync(DataSource.Hello100,
-                    (dbSession, ct) => _accountRepository.UpdateEghisHospQrInfoAsync(dbSession, eghisHospQrInfo, ct),
-                cancellationToken);
-
-                var eghisRecertDocInfo = new TbEghisRecertDocInfoEntity()
-                {
-                    HospKey = request.HospKey
-                };
-
-                await _db.RunAsync(DataSource.Hello100,
-                    (dbSession, ct) => _accountRepository.UpdateEghisRecertDocInfoAsync(dbSession, eghisRecertDocInfo, ct),
-                cancellationToken);
-
-                var eghisHospVisitPurposeInfoList = new List<TbEghisHospVisitPurposeInfoEntity>();
-
-                if (request.ChartType == "E")
-                {
-                    eghisHospVisitPurposeInfoList.Add(
-                        new TbEghisHospVisitPurposeInfoEntity()
-                        {
-                            VpCd = "01",
-                            ParentCd = "0",
-                            HospKey = request.HospKey,
-                            InpuiryUrl = _paperCheckUrl,
-                            InpuiryIdx = -1,
-                            InpuirySkipYn = "Y",
-                            Name = "공단검진",
-                            ShowYn = "Y",
-                            SortNo = 1,
-                            DelYn = "N",
-                            Role = 1
-                        }
-                    );
-
-                    eghisHospVisitPurposeInfoList.Add(
-                        new TbEghisHospVisitPurposeInfoEntity()
-                        {
-                            VpCd = "0101",
-                            ParentCd = "0",
-                            HospKey = request.HospKey,
-                            InpuiryUrl = "",
-                            InpuiryIdx = -1,
-                            InpuirySkipYn = "Y",
-                            Name = "일반검진",
-                            ShowYn = "Y",
-                            SortNo = 1,
-                            DelYn = "N",
-                            Role = 1
-                        }
-                    );
-
-                    eghisHospVisitPurposeInfoList.Add(
-                        new TbEghisHospVisitPurposeInfoEntity()
-                        {
-                            VpCd = "0102",
-                            ParentCd = "0",
-                            HospKey = request.HospKey,
-                            InpuiryUrl = "",
-                            InpuiryIdx = -1,
-                            InpuirySkipYn = "Y",
-                            Name = "암검진",
-                            ShowYn = "Y",
-                            SortNo = 2,
-                            DelYn = "N",
-                            Role = 1
-                        }
-                    );
-
-                    eghisHospVisitPurposeInfoList.Add(
-                        new TbEghisHospVisitPurposeInfoEntity()
-                        {
-                            VpCd = "02",
-                            ParentCd = "0",
-                            HospKey = request.HospKey,
-                            InpuiryUrl = _paperCheckUrl,
-                            InpuiryIdx = -1,
-                            InpuirySkipYn = "Y",
-                            Name = "일반진료",
-                            ShowYn = "Y",
-                            SortNo = 2,
-                            DelYn = "N",
-                            Role = 1
-                        }
-                    );
-                }
-                else
-                {
-                    eghisHospVisitPurposeInfoList.Add(
-                        new TbEghisHospVisitPurposeInfoEntity()
-                        {
-                            VpCd = "02",
-                            ParentCd = "0",
-                            HospKey = request.HospKey,
-                            InpuiryUrl = _paperCheckUrl,
-                            InpuiryIdx = -1,
-                            InpuirySkipYn = "Y",
-                            Name = "일반진료",
-                            ShowYn = "Y",
-                            SortNo = 1,
-                            DelYn = "N",
-                            Role = 1
-                        }
-                    );
-                }
-
-                await _db.RunAsync(DataSource.Hello100,
-                    (dbSession, ct) => _accountRepository.InsertEghisHospVisitPurposeInfoAsync(dbSession, eghisHospVisitPurposeInfoList, ct),
-                cancellationToken);
-
-                var eghisHospSettingsInfo = new TbEghisHospSettingsInfoEntity()
-                {
-                    HospKey = request.HospKey
-                };
-
-                await _db.RunAsync(DataSource.Hello100,
-                    (dbSession, ct) => _accountRepository.InsertEghisHospSettingsInfoAsync(dbSession, eghisHospSettingsInfo, ct),
-                cancellationToken);
-
-                var eghisHospMedicalTimeNewList = new List<TbEghisHospMedicalTimeNewEntity>()
-                {
-                    new TbEghisHospMedicalTimeNewEntity()
+                    var eghisHospInfo = new TbEghisHospInfoEntity()
                     {
                         HospKey = request.HospKey,
                         HospNo = request.HospNo,
-                        WeekNum = 1,
-                        StartHour = 9,
-                        StartMinute = 0,
-                        EndHour = 18,
-                        EndMinute = 0,
-                        BreakStartHour = 13,
-                        BreakStartMinute = 0,
-                        BreakEndHour = 14,
-                        BreakEndMinute = 0,
-                        UseYn = "Y"
-                    },
-                    new TbEghisHospMedicalTimeNewEntity()
+                        ChartType = request.ChartType
+                    };
+
+                    await _accountRepository.UpdateEghisHospInfoAsync(session, eghisHospInfo, token);
+
+                    var eghisDoctInfo = new EghisDoctInfoEntity()
                     {
-                        HospKey = request.HospKey,
                         HospNo = request.HospNo,
-                        WeekNum = 2,
-                        StartHour = 9,
-                        StartMinute = 0,
-                        EndHour = 18,
-                        EndMinute = 0,
-                        BreakStartHour = 13,
-                        BreakStartMinute = 0,
-                        BreakEndHour = 14,
-                        BreakEndMinute = 0,
-                        UseYn = "Y"
-                    },
-                    new TbEghisHospMedicalTimeNewEntity()
+                        HospKey = request.HospKey
+                    };
+
+                    await _accountRepository.UpdateEghisDoctInfoAsync(session, eghisDoctInfo, token);
+
+                    var eghisHospQrInfo = new TbEghisHospQrInfoEntity()
                     {
-                        HospKey = request.HospKey,
-                        HospNo = request.HospNo,
-                        WeekNum = 3,
-                        StartHour = 9,
-                        StartMinute = 0,
-                        EndHour = 18,
-                        EndMinute = 0,
-                        BreakStartHour = 13,
-                        BreakStartMinute = 0,
-                        BreakEndHour = 14,
-                        BreakEndMinute = 0,
-                        UseYn = "Y"
-                    },
-                    new TbEghisHospMedicalTimeNewEntity()
+                        Aid = request.Aid,
+                        HospKey = request.HospKey
+                    };
+
+                    await _accountRepository.UpdateEghisHospQrInfoAsync(session, eghisHospQrInfo, token);
+
+                    var eghisRecertDocInfo = new TbEghisRecertDocInfoEntity()
                     {
-                        HospKey = request.HospKey,
-                        HospNo = request.HospNo,
-                        WeekNum = 4,
-                        StartHour = 9,
-                        StartMinute = 0,
-                        EndHour = 18,
-                        EndMinute = 0,
-                        BreakStartHour = 13,
-                        BreakStartMinute = 0,
-                        BreakEndHour = 14,
-                        BreakEndMinute = 0,
-                        UseYn = "Y"
-                    },
-                    new TbEghisHospMedicalTimeNewEntity()
+                        HospKey = request.HospKey
+                    };
+
+                    await _accountRepository.UpdateEghisRecertDocInfoAsync(session, eghisRecertDocInfo, token);
+
+                    var eghisHospVisitPurposeInfoList = new List<TbEghisHospVisitPurposeInfoEntity>();
+
+                    if (request.ChartType == "E")
                     {
-                        HospKey = request.HospKey,
-                        HospNo = request.HospNo,
-                        WeekNum = 5,
-                        StartHour = 9,
-                        StartMinute = 0,
-                        EndHour = 18,
-                        EndMinute = 0,
-                        BreakStartHour = 13,
-                        BreakStartMinute = 0,
-                        BreakEndHour = 14,
-                        BreakEndMinute = 0,
-                        UseYn = "Y"
-                    },
-                    new TbEghisHospMedicalTimeNewEntity()
-                    {
-                        HospKey = request.HospKey,
-                        HospNo = request.HospNo,
-                        WeekNum = 6,
-                        StartHour = 9,
-                        StartMinute = 0,
-                        EndHour = 18,
-                        EndMinute = 0,
-                        BreakStartHour = 13,
-                        BreakStartMinute = 0,
-                        BreakEndHour = 14,
-                        BreakEndMinute = 0,
-                        UseYn = "Y"
-                    },
-                    new TbEghisHospMedicalTimeNewEntity()
-                    {
-                        HospKey = request.HospKey,
-                        HospNo = request.HospNo,
-                        WeekNum = 7,
-                        StartHour = 9,
-                        StartMinute = 0,
-                        EndHour = 18,
-                        EndMinute = 0,
-                        BreakStartHour = 13,
-                        BreakStartMinute = 0,
-                        BreakEndHour = 14,
-                        BreakEndMinute = 0,
-                        UseYn = "Y"
-                    },
-                    new TbEghisHospMedicalTimeNewEntity()
-                    {
-                        HospKey = request.HospKey,
-                        HospNo = request.HospNo,
-                        WeekNum = 8,
-                        StartHour = 9,
-                        StartMinute = 0,
-                        EndHour = 18,
-                        EndMinute = 0,
-                        BreakStartHour = 13,
-                        BreakStartMinute = 0,
-                        BreakEndHour = 14,
-                        BreakEndMinute = 0,
-                        UseYn = "Y"
+                        eghisHospVisitPurposeInfoList.Add(
+                            new TbEghisHospVisitPurposeInfoEntity()
+                            {
+                                VpCd = "01",
+                                ParentCd = "0",
+                                HospKey = request.HospKey,
+                                InpuiryUrl = _paperCheckUrl,
+                                InpuiryIdx = -1,
+                                InpuirySkipYn = "Y",
+                                Name = "공단검진",
+                                ShowYn = "Y",
+                                SortNo = 1,
+                                DelYn = "N",
+                                Role = 1
+                            }
+                        );
+
+                        eghisHospVisitPurposeInfoList.Add(
+                            new TbEghisHospVisitPurposeInfoEntity()
+                            {
+                                VpCd = "0101",
+                                ParentCd = "0",
+                                HospKey = request.HospKey,
+                                InpuiryUrl = "",
+                                InpuiryIdx = -1,
+                                InpuirySkipYn = "Y",
+                                Name = "일반검진",
+                                ShowYn = "Y",
+                                SortNo = 1,
+                                DelYn = "N",
+                                Role = 1
+                            }
+                        );
+
+                        eghisHospVisitPurposeInfoList.Add(
+                            new TbEghisHospVisitPurposeInfoEntity()
+                            {
+                                VpCd = "0102",
+                                ParentCd = "0",
+                                HospKey = request.HospKey,
+                                InpuiryUrl = "",
+                                InpuiryIdx = -1,
+                                InpuirySkipYn = "Y",
+                                Name = "암검진",
+                                ShowYn = "Y",
+                                SortNo = 2,
+                                DelYn = "N",
+                                Role = 1
+                            }
+                        );
+
+                        eghisHospVisitPurposeInfoList.Add(
+                            new TbEghisHospVisitPurposeInfoEntity()
+                            {
+                                VpCd = "02",
+                                ParentCd = "0",
+                                HospKey = request.HospKey,
+                                InpuiryUrl = _paperCheckUrl,
+                                InpuiryIdx = -1,
+                                InpuirySkipYn = "Y",
+                                Name = "일반진료",
+                                ShowYn = "Y",
+                                SortNo = 2,
+                                DelYn = "N",
+                                Role = 1
+                            }
+                        );
                     }
-                };
+                    else
+                    {
+                        eghisHospVisitPurposeInfoList.Add(
+                            new TbEghisHospVisitPurposeInfoEntity()
+                            {
+                                VpCd = "02",
+                                ParentCd = "0",
+                                HospKey = request.HospKey,
+                                InpuiryUrl = _paperCheckUrl,
+                                InpuiryIdx = -1,
+                                InpuirySkipYn = "Y",
+                                Name = "일반진료",
+                                ShowYn = "Y",
+                                SortNo = 1,
+                                DelYn = "N",
+                                Role = 1
+                            }
+                        );
+                    }
 
-                await _db.RunAsync(DataSource.Hello100,
-                   (dbSession, ct) => _accountRepository.InsertTbEghisHospMedicalTimeNewAsync(dbSession, eghisHospMedicalTimeNewList, ct),
-                cancellationToken);
+                    await _accountRepository.InsertEghisHospVisitPurposeInfoAsync(session, eghisHospVisitPurposeInfoList, token);
+
+                    var eghisHospSettingsInfo = new TbEghisHospSettingsInfoEntity()
+                    {
+                        HospKey = request.HospKey
+                    };
+
+                    await _accountRepository.InsertEghisHospSettingsInfoAsync(session, eghisHospSettingsInfo, token);
+
+                    var eghisHospMedicalTimeNewList = new List<TbEghisHospMedicalTimeNewEntity>()
+                    {
+                        new TbEghisHospMedicalTimeNewEntity()
+                        {
+                            HospKey = request.HospKey,
+                            HospNo = request.HospNo,
+                            WeekNum = 1,
+                            StartHour = 9,
+                            StartMinute = 0,
+                            EndHour = 18,
+                            EndMinute = 0,
+                            BreakStartHour = 13,
+                            BreakStartMinute = 0,
+                            BreakEndHour = 14,
+                            BreakEndMinute = 0,
+                            UseYn = "Y"
+                        },
+                        new TbEghisHospMedicalTimeNewEntity()
+                        {
+                            HospKey = request.HospKey,
+                            HospNo = request.HospNo,
+                            WeekNum = 2,
+                            StartHour = 9,
+                            StartMinute = 0,
+                            EndHour = 18,
+                            EndMinute = 0,
+                            BreakStartHour = 13,
+                            BreakStartMinute = 0,
+                            BreakEndHour = 14,
+                            BreakEndMinute = 0,
+                            UseYn = "Y"
+                        },
+                        new TbEghisHospMedicalTimeNewEntity()
+                        {
+                            HospKey = request.HospKey,
+                            HospNo = request.HospNo,
+                            WeekNum = 3,
+                            StartHour = 9,
+                            StartMinute = 0,
+                            EndHour = 18,
+                            EndMinute = 0,
+                            BreakStartHour = 13,
+                            BreakStartMinute = 0,
+                            BreakEndHour = 14,
+                            BreakEndMinute = 0,
+                            UseYn = "Y"
+                        },
+                        new TbEghisHospMedicalTimeNewEntity()
+                        {
+                            HospKey = request.HospKey,
+                            HospNo = request.HospNo,
+                            WeekNum = 4,
+                            StartHour = 9,
+                            StartMinute = 0,
+                            EndHour = 18,
+                            EndMinute = 0,
+                            BreakStartHour = 13,
+                            BreakStartMinute = 0,
+                            BreakEndHour = 14,
+                            BreakEndMinute = 0,
+                            UseYn = "Y"
+                        },
+                        new TbEghisHospMedicalTimeNewEntity()
+                        {
+                            HospKey = request.HospKey,
+                            HospNo = request.HospNo,
+                            WeekNum = 5,
+                            StartHour = 9,
+                            StartMinute = 0,
+                            EndHour = 18,
+                            EndMinute = 0,
+                            BreakStartHour = 13,
+                            BreakStartMinute = 0,
+                            BreakEndHour = 14,
+                            BreakEndMinute = 0,
+                            UseYn = "Y"
+                        },
+                        new TbEghisHospMedicalTimeNewEntity()
+                        {
+                            HospKey = request.HospKey,
+                            HospNo = request.HospNo,
+                            WeekNum = 6,
+                            StartHour = 9,
+                            StartMinute = 0,
+                            EndHour = 18,
+                            EndMinute = 0,
+                            BreakStartHour = 13,
+                            BreakStartMinute = 0,
+                            BreakEndHour = 14,
+                            BreakEndMinute = 0,
+                            UseYn = "Y"
+                        },
+                        new TbEghisHospMedicalTimeNewEntity()
+                        {
+                            HospKey = request.HospKey,
+                            HospNo = request.HospNo,
+                            WeekNum = 7,
+                            StartHour = 9,
+                            StartMinute = 0,
+                            EndHour = 18,
+                            EndMinute = 0,
+                            BreakStartHour = 13,
+                            BreakStartMinute = 0,
+                            BreakEndHour = 14,
+                            BreakEndMinute = 0,
+                            UseYn = "Y"
+                        },
+                        new TbEghisHospMedicalTimeNewEntity()
+                        {
+                            HospKey = request.HospKey,
+                            HospNo = request.HospNo,
+                            WeekNum = 8,
+                            StartHour = 9,
+                            StartMinute = 0,
+                            EndHour = 18,
+                            EndMinute = 0,
+                            BreakStartHour = 13,
+                            BreakStartMinute = 0,
+                            BreakEndHour = 14,
+                            BreakEndMinute = 0,
+                            UseYn = "Y"
+                        }
+                    };
+
+                    await _accountRepository.InsertTbEghisHospMedicalTimeNewAsync(session, eghisHospMedicalTimeNewList, token);
+                }, cancellationToken);
 
                 return Result.Success();
             }
