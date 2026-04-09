@@ -17,7 +17,7 @@ namespace Hello100Admin.Modules.Seller.Application.Features.Seller.Queries.GetSe
 
         public GetSellerDetailQueryHandler(IConfiguration config, ISellerStore sellerStore)
         {
-            _imagePath = config["ApiImageUrl"];
+            _imagePath = config["AdminImageUrl"];
             _sellerStore = sellerStore;
         }
 
@@ -29,7 +29,7 @@ namespace Hello100Admin.Modules.Seller.Application.Features.Seller.Queries.GetSe
             if (hospSeller == null) 
                 return Result.Success<GetSellerDetailResponse>().WithError(SellerErrorCode.NotFoundSeller.ToError());
 
-            hospSeller.BankImgPath = $"{_imagePath}{hospSeller.BankImgPath}";
+            hospSeller.BankImgPath = string.IsNullOrWhiteSpace(hospSeller.BankImgPath) == false ? $"{_imagePath}Upload{hospSeller.BankImgPath}" : "";
 
             // 추후 필요 시 Global setting으로 뺄 예정
             var config = new TypeAdapterConfig();

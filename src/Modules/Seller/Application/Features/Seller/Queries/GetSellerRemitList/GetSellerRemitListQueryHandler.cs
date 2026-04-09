@@ -1,7 +1,5 @@
 ﻿using Hello100Admin.BuildingBlocks.Common.Application;
 using Hello100Admin.Modules.Seller.Application.Common.Abstractions.Persistence.Seller;
-using Hello100Admin.Modules.Seller.Application.Common.Errors;
-using Hello100Admin.Modules.Seller.Application.Common.Extensions;
 using Hello100Admin.Modules.Seller.Application.Features.Seller.Responses.GetSellerRemitList;
 using Hello100Admin.Modules.Seller.Application.Features.Seller.Responses.Shared;
 using Mapster;
@@ -19,7 +17,7 @@ namespace Hello100Admin.Modules.Seller.Application.Features.Seller.Queries.GetSe
 
         public GetSellerRemitListQueryHandler(IConfiguration config, ILogger<GetSellerRemitListQueryHandler> logger, ISellerStore sellerStore)
         {
-            _imagePath = config["ApiImageUrl"];
+            _imagePath = config["AdminImageUrl"];
             _sellerStore = sellerStore;
             _logger = logger;
         }
@@ -46,7 +44,7 @@ namespace Hello100Admin.Modules.Seller.Application.Features.Seller.Queries.GetSe
 
             foreach (var item in remitList)
             {
-                item.BankImgPath = $"{_imagePath}{item.BankImgPath}";
+                item.BankImgPath = string.IsNullOrWhiteSpace(item.BankImgPath) == false ? $"{_imagePath}Upload{item.BankImgPath}" : "";
             }
 
             var dtos = remitList.Adapt<List<GetSellerRemitListResponse>>();
