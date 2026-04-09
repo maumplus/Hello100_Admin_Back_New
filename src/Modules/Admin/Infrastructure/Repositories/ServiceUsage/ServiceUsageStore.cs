@@ -775,6 +775,43 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.ServiceUsage
             }
 
             StringBuilder sb = new StringBuilder();
+            sb.AppendLine(" SET @total_count := ( SELECT COUNT(cnt)                                     ");
+            sb.AppendLine("                         FROM ( SELECT COUNT(1) AS cnt                       ");
+            sb.AppendLine("                                  FROM tb_eghis_hosp_receipt_info ti         ");
+            sb.AppendLine("                                 INNER JOIN hello100.tb_eghis_hosp_info tehi ");
+            sb.AppendLine("                                    ON ti.hosp_no = tehi.hosp_no             ");
+            sb.AppendLine("                                 WHERE 1 = 1                                 ");
+
+            if (string.IsNullOrWhiteSpace(fromDt) == false)
+            {
+                sb.AppendLine("            AND ti.req_date BETWEEN @FromDt AND @ToDt");
+            }
+
+            if (serviceChkList.Count > 0)
+            {
+                sb.AppendLine("                                   AND ti.recept_type IN (" + inClause + ")");
+            }
+
+            if (string.IsNullOrWhiteSpace(searchKeyword) == false)
+            {
+                //병원명 검색
+                if (searchType == 1)
+                {
+                    sb.AppendLine("            AND ti.hosp_no IN ( SELECT hosp_no FROM hello100.vm_eghis_hospitals vh WHERE vh.name LIKE CONCAT('%', @SearchKeyword, '%') )");
+                }
+                else
+                {
+                    //요양기관 검색
+                    sb.AppendLine("            AND ti.hosp_no LIKE CONCAT('%', @SearchKeyword, '%')");
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(searchChartType) == false)
+            {
+                sb.AppendLine("                          AND tehi.chart_type = '" + searchChartType + "'");
+            }
+
+            sb.AppendLine("                                GROUP BY ti.hosp_no ) a );");
             sb.AppendLine("SELECT cn.hosp_no AS HospNo,");
             sb.AppendLine("       MAX(vh.name) AS HospName,");
             sb.AppendLine("       SUM(CASE WHEN ptnt_state IN (3, 2) THEN cnt ELSE 0 END) AS WaitingCount, 	");
@@ -836,12 +873,14 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.ServiceUsage
             sb.AppendLine("ORDER BY HospNo                                            ");
             sb.AppendLine("LIMIT @OffSet, @Limit;                                     ");
 
-            var queryResult = (await db.QueryAsync<GetHospitalServiceUsageStatusResultItemByHospitalUnit>(sb.ToString(), parameters, ct, _logger)).ToList();
+            sb.AppendLine("SELECT @total_count;                                       ");
+
+            var multi = await db.QueryMultipleAsync(sb.ToString(), parameters, ct: ct, logger: _logger);
 
             var result = new ListResult<GetHospitalServiceUsageStatusResultItemByHospitalUnit>();
 
-            result.Items = queryResult;
-            result.TotalCount = queryResult.Count;
+            result.Items = (await multi.ReadAsync<GetHospitalServiceUsageStatusResultItemByHospitalUnit>()).ToList();
+            result.TotalCount = await multi.ReadSingleAsync<int>();
 
             return result;
         }
