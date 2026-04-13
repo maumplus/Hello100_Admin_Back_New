@@ -1,4 +1,5 @@
 using Hello100Admin.BuildingBlocks.Common.Application;
+using Hello100Admin.BuildingBlocks.Common.Infrastructure.Extensions;
 using Hello100Admin.Modules.Auth.Application.Common.Abstractions.Persistence.Auth;
 using Hello100Admin.Modules.Auth.Application.Features.Auth.Responses.GetUser;
 using MediatR;
@@ -33,9 +34,9 @@ public class GetUserQueryHandler : IRequestHandler<GetUserQuery, Result<UserResp
             AccountId = user.AccId,
             Name = user.Name,
             Grade = user.Grade,
-            HospNo = user.HospNo,
+            HospNo = user.HospNo!,
             AccountLocked = user.AccountLocked,
-            LastLoginDt = user.LastLoginDt,
+            LastLoginDt = user.LastLoginDt.ToKstDateTimeString(),
             Use2fa = user.Use2fa
         };
 

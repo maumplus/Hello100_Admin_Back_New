@@ -1,12 +1,9 @@
 ﻿using Dapper;
-using Hello100Admin.BuildingBlocks.Common.Errors;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Dapper;
 using Hello100Admin.Modules.Auth.Application.Common.Abstractions.Persistence.Auth;
-using Hello100Admin.Modules.Auth.Application.Common.Errors;
-using Hello100Admin.Modules.Auth.Application.Common.Extensions;
 using Hello100Admin.Modules.Auth.Application.Common.Models;
-using Hello100Admin.Modules.Auth.Application.Features.Auth.ReadModels;
+using Hello100Admin.Modules.Auth.Application.Common.Views;
 using Hello100Admin.Modules.Auth.Domain.Entities;
 using Microsoft.Extensions.Logging;
 using System.Data;
@@ -24,7 +21,7 @@ namespace Hello100Admin.Modules.Auth.Infrastructure.Repositories
             _logger = logger;
         }
 
-        public async Task<AdminModel?> GetAdminByAidAsync(string aid, CancellationToken cancellationToken = default)
+        public async Task<TbAdminView?> GetAdminByAidAsync(string aid, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -43,12 +40,12 @@ namespace Hello100Admin.Modules.Auth.Infrastructure.Repositories
                            a.name                                                               AS Name,
                            a.tel                                                                AS Tel,
                            a.email                                                              AS Email,
-                           DATE_FORMAT(FROM_UNIXTIME(a.last_login_dt), '%Y-%m-%d %H:%i:%s')     AS LastLoginDt,
+                           a.last_login_dt                                                      AS LastLoginDt,
                            a.use_2fa                                                            AS Use2fa,
                            a.account_locked                                                     AS AccountLocked,
                            a.login_fail_count                                                   AS LoginFailCount,
                            a.access_token                                                       AS AccessToken,
-                           a.refresh_token                                                      AS RefresgToken
+                           a.refresh_token                                                      AS RefreshToken
                       FROM tb_admin a
                       LEFT JOIN tb_eghis_hosp_info b
                              ON a.hosp_no = b.hosp_no
@@ -58,7 +55,7 @@ namespace Hello100Admin.Modules.Auth.Infrastructure.Repositories
 
                 using var connection = _connectionFactory.CreateConnection();
 
-                return await connection.QueryFirstOrDefaultAsync<AdminModel>(sql, parameters);
+                return await connection.QueryFirstOrDefaultAsync<TbAdminView>(sql, parameters);
             }
             catch (Exception ex)
             {
@@ -67,7 +64,7 @@ namespace Hello100Admin.Modules.Auth.Infrastructure.Repositories
             }
         }
 
-        public async Task<AdminModel?> GetAdminByAccIdAsync(string accId, CancellationToken cancellationToken = default)
+        public async Task<TbAdminView?> GetAdminByAccIdAsync(string accId, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -86,12 +83,13 @@ namespace Hello100Admin.Modules.Auth.Infrastructure.Repositories
                            a.name                                                               AS Name,
                            a.tel                                                                AS Tel,
                            a.email                                                              AS Email,
-                           DATE_FORMAT(FROM_UNIXTIME(a.last_login_dt), '%Y-%m-%d %H:%i:%s')     AS LastLoginDt,
+                           a.last_login_dt                                                      AS LastLoginDt,
                            a.use_2fa                                                            AS Use2fa,
                            a.account_locked                                                     AS AccountLocked,
                            a.login_fail_count                                                   AS LoginFailCount,
+                           a.last_pwd_change_dt                                                 AS LastPwdChangeDt,
                            a.access_token                                                       AS AccessToken,
-                           a.refresh_token                                                      AS RefresgToken
+                           a.refresh_token                                                      AS RefreshToken
                       FROM tb_admin a
                       LEFT JOIN tb_eghis_hosp_info b
                              ON a.hosp_no = b.hosp_no
@@ -101,7 +99,7 @@ namespace Hello100Admin.Modules.Auth.Infrastructure.Repositories
 
                 using var connection = _connectionFactory.CreateConnection();
 
-                return await connection.QueryFirstOrDefaultAsync<AdminModel>(sql, parameters);
+                return await connection.QueryFirstOrDefaultAsync<TbAdminView>(sql, parameters);
             }
             catch (Exception ex)
             {
@@ -110,7 +108,7 @@ namespace Hello100Admin.Modules.Auth.Infrastructure.Repositories
             }
         }
 
-        public async Task<AdminModel?> GetAdminByHospNoAsync(string hospNo, CancellationToken cancellationToken = default)
+        public async Task<TbAdminView?> GetAdminByHospNoAsync(string hospNo, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -129,12 +127,12 @@ namespace Hello100Admin.Modules.Auth.Infrastructure.Repositories
                            a.name                                                               AS Name,
                            a.tel                                                                AS Tel,
                            a.email                                                              AS Email,
-                           DATE_FORMAT(FROM_UNIXTIME(a.last_login_dt), '%Y-%m-%d %H:%i:%s')     AS LastLoginDt,
+                           a.last_login_dt                                                      AS LastLoginDt,
                            a.use_2fa                                                            AS Use2fa,
                            a.account_locked                                                     AS AccountLocked,
                            a.login_fail_count                                                   AS LoginFailCount,
                            a.access_token                                                       AS AccessToken,
-                           a.refresh_token                                                      AS RefresgToken
+                           a.refresh_token                                                      AS RefreshToken
                       FROM tb_admin a
                       LEFT JOIN tb_eghis_hosp_info b
                              ON a.hosp_no = b.hosp_no
@@ -144,7 +142,7 @@ namespace Hello100Admin.Modules.Auth.Infrastructure.Repositories
 
                 using var connection = _connectionFactory.CreateConnection();
 
-                return await connection.QueryFirstOrDefaultAsync<AdminModel>(sql, parameters);
+                return await connection.QueryFirstOrDefaultAsync<TbAdminView>(sql, parameters);
             }
             catch (Exception ex)
             {

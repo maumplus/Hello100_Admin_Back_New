@@ -1,15 +1,15 @@
 ﻿using Hello100Admin.BuildingBlocks.Common.Infrastructure.Persistence.Core;
 using Hello100Admin.Modules.Auth.Application.Common.Models;
-using Hello100Admin.Modules.Auth.Application.Features.Auth.ReadModels;
+using Hello100Admin.Modules.Auth.Application.Common.Views;
 using Hello100Admin.Modules.Auth.Domain.Entities;
 
 namespace Hello100Admin.Modules.Auth.Application.Common.Abstractions.Persistence.Auth
 {
     public interface IAuthStore
     {
-        Task<AdminModel?> GetAdminByAidAsync(string aid, CancellationToken cancellationToken = default);
-        Task<AdminModel?> GetAdminByAccIdAsync(string accId, CancellationToken cancellationToken = default);
-        Task<AdminModel?> GetAdminByHospNoAsync(string hospNo, CancellationToken cancellationToken = default);
+        Task<TbAdminView?> GetAdminByAidAsync(string aid, CancellationToken cancellationToken = default);
+        Task<TbAdminView?> GetAdminByAccIdAsync(string accId, CancellationToken cancellationToken = default);
+        Task<TbAdminView?> GetAdminByHospNoAsync(string hospNo, CancellationToken cancellationToken = default);
         Task<RefreshTokenEntity?> GetByTokenAsync(string token, CancellationToken cancellationToken = default);
         Task<AppAuthNumberInfoEntity?> GetAppAuthNumberInfoAsync(int authId, CancellationToken cancellationToken = default);
         /// <summary>

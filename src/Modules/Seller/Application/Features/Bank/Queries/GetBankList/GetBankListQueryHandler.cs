@@ -1,7 +1,5 @@
 ﻿using Hello100Admin.BuildingBlocks.Common.Application;
 using Hello100Admin.Modules.Seller.Application.Common.Abstractions.Persistence.Bank;
-using Hello100Admin.Modules.Seller.Application.Common.Errors;
-using Hello100Admin.Modules.Seller.Application.Common.Extensions;
 using Hello100Admin.Modules.Seller.Application.Features.Bank.Responses.GetBankList;
 using MediatR;
 using Microsoft.Extensions.Configuration;
@@ -17,7 +15,7 @@ namespace Hello100Admin.Modules.Seller.Application.Features.Bank.Queries.GetBank
 
         public GetBankListQueryHandler(IConfiguration config, ILogger<GetBankListQueryHandler> logger, IBankStore bankStore)
         {
-            _imagePath = config["ApiImageUrl"];
+            _imagePath = config["AdminImageUrl"];
             _logger = logger;
             _bankStore = bankStore;
         }
@@ -43,7 +41,7 @@ namespace Hello100Admin.Modules.Seller.Application.Features.Bank.Queries.GetBank
                     Type = b.Type,
                     Name = b.Name,
                     Code = b.Code,
-                    Path = $"{_imagePath}{b.ImgPath}"
+                    Path = string.IsNullOrWhiteSpace(b.ImgPath) == false ? $"{_imagePath}Upload{b.ImgPath}" : ""
                 }).ToList()
             };
 

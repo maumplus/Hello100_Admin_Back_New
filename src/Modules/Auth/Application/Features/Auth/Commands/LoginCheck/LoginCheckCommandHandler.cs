@@ -6,7 +6,7 @@ using Hello100Admin.Modules.Auth.Application.Common.Abstractions.Persistence.Aut
 using Hello100Admin.Modules.Auth.Application.Common.Abstractions.Services;
 using Hello100Admin.Modules.Auth.Application.Common.Errors;
 using Hello100Admin.Modules.Auth.Application.Common.Extensions;
-using Hello100Admin.Modules.Auth.Application.Features.Auth.ReadModels;
+using Hello100Admin.Modules.Auth.Application.Common.Views;
 using Hello100Admin.Modules.Auth.Application.Features.Auth.Responses.GetUser;
 using Hello100Admin.Modules.Auth.Application.Features.Auth.Responses.LoginCheck;
 using Hello100Admin.Modules.Auth.Domain.Entities;
@@ -23,14 +23,12 @@ namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.LoginChe
     {
         private readonly IAuthRepository _authRepository;
         private readonly IPasswordHasher _passwordHasher;
-        private readonly ITokenService _tokenService;
         private readonly IAuthStore _authStore;
         private readonly ILogger<LoginCheckCommandHandler> _logger;
         private readonly ICryptoService _cryptoService;
 
         public LoginCheckCommandHandler(
             IPasswordHasher passwordHasher,
-            ITokenService tokenService,
             IAuthRepository authRepository,
             IAuthStore authStore,
             ILogger<LoginCheckCommandHandler> logger,
@@ -39,7 +37,6 @@ namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.LoginChe
             _authRepository = authRepository;
             _authStore = authStore;
             _passwordHasher = passwordHasher;
-            _tokenService = tokenService;
             _logger = logger;
             _cryptoService = cryptoService;
         }
@@ -105,9 +102,10 @@ namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.LoginChe
         {
             var config = new TypeAdapterConfig();
 
-            config.NewConfig<AdminModel, UserResponse>()
+            config.NewConfig<TbAdminView, UserResponse>()
                 .Map(d => d.Id, s => s.Aid)
-                .Map(d => d.AccountId, s => s.AccId);
+                .Map(d => d.AccountId, s => s.AccId)
+                .Map(d => d.LastLoginDt, s => s.LastLoginDt.ToKstDateTimeString());
 
             return config;
         }

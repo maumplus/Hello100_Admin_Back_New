@@ -1,7 +1,7 @@
 using Hello100Admin.BuildingBlocks.Common.Definition.Enums;
 using Hello100Admin.Modules.Auth.Application.Common.Abstractions.Persistence.Auth;
 using Hello100Admin.Modules.Auth.Application.Common.Abstractions.Services;
-using Hello100Admin.Modules.Auth.Application.Features.Auth.ReadModels;
+using Hello100Admin.Modules.Auth.Application.Common.Views;
 using Hello100Admin.Modules.Auth.Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -45,7 +45,7 @@ public class JwtTokenService : ITokenService
         _refreshTokenExpirationDays = int.Parse(_configuration["Jwt:RefreshTokenExpirationDays"] ?? "1");
     }
 
-    public string GenerateAccessToken(AdminModel adminInfo, IEnumerable<string> roles, IEnumerable<ChartType> chartTypes)
+    public string GenerateAccessToken(TbAdminView adminInfo, IEnumerable<string> roles, IEnumerable<ChartType> chartTypes)
     {
         if (_secretKey == null)
         {
@@ -139,67 +139,55 @@ public class JwtTokenService : ITokenService
         return true;
     }
 
-    public async Task<AdminModel?> GetUserByRefreshTokenAsync(string token, CancellationToken cancellationToken = default)
-    {
-        var refreshToken = await _authStore.GetByTokenAsync(token, cancellationToken);
-        
-        if (refreshToken == null || refreshToken.IsExpired || refreshToken.IsRevoked)
-        {
-            return null;
-        }
+    //public ClaimsPrincipal? ValidateToken(string token)
+    //{
+    //    try
+    //    {
+    //        var tokenHandler = new JwtSecurityTokenHandler();
+    //        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey!));
 
-        return await _authStore.GetAdminByAidAsync(refreshToken.Aid, cancellationToken);
-    }
+    //        var validationParameters = new TokenValidationParameters
+    //        {
+    //            ValidateIssuerSigningKey = true,
+    //            IssuerSigningKey = securityKey,
+    //            ValidateIssuer = true,
+    //            ValidIssuer = _issuer,
+    //            ValidateAudience = true,
+    //            ValidAudience = _audience,
+    //            ValidateLifetime = true,
+    //            ClockSkew = TimeSpan.Zero
+    //        };
 
-    public ClaimsPrincipal? ValidateToken(string token)
-    {
-        try
-        {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey));
+    //        var principal = tokenHandler.ValidateToken(token, validationParameters, out SecurityToken validatedToken);
 
-            var validationParameters = new TokenValidationParameters
-            {
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = securityKey,
-                ValidateIssuer = true,
-                ValidIssuer = _issuer,
-                ValidateAudience = true,
-                ValidAudience = _audience,
-                ValidateLifetime = true,
-                ClockSkew = TimeSpan.Zero
-            };
+    //        if (validatedToken is not JwtSecurityToken jwtToken || 
+    //            !jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+    //        {
+    //            return null;
+    //        }
 
-            var principal = tokenHandler.ValidateToken(token, validationParameters, out SecurityToken validatedToken);
+    //        return principal;
+    //    }
+    //    catch
+    //    {
+    //        return null;
+    //    }
+    //}
 
-            if (validatedToken is not JwtSecurityToken jwtToken || 
-                !jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
-            {
-                return null;
-            }
+    //public Guid? GetUserIdFromToken(string token)
+    //{
+    //    var principal = ValidateToken(token);
+    //    if (principal == null)
+    //    {
+    //        return null;
+    //    }
 
-            return principal;
-        }
-        catch
-        {
-            return null;
-        }
-    }
+    //    var userIdClaim = principal.FindFirst(JwtRegisteredClaimNames.Sub);
+    //    if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+    //    {
+    //        return null;
+    //    }
 
-    public Guid? GetUserIdFromToken(string token)
-    {
-        var principal = ValidateToken(token);
-        if (principal == null)
-        {
-            return null;
-        }
-
-        var userIdClaim = principal.FindFirst(JwtRegisteredClaimNames.Sub);
-        if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
-        {
-            return null;
-        }
-
-        return userId;
-    }
+    //    return userId;
+    //}
 }

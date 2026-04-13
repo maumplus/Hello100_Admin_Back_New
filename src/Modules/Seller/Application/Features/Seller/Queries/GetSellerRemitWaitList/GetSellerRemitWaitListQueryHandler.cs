@@ -18,7 +18,7 @@ namespace Hello100Admin.Modules.Seller.Application.Features.Seller.Queries.GetSe
                                                   ILogger<GetSellerRemitWaitListQueryHandler> logger,
                                                   ISellerStore sellerStore)
         {
-            _imagePath = config["ApiImageUrl"];
+            _imagePath = config["AdminImageUrl"];
             _logger = logger;
             _sellerStore = sellerStore;
         }
@@ -31,7 +31,7 @@ namespace Hello100Admin.Modules.Seller.Application.Features.Seller.Queries.GetSe
             
             foreach (var item in remitWaitList)
             {
-                item.BankImgPath = $"{_imagePath}{item.BankImgPath}";
+                item.BankImgPath = string.IsNullOrWhiteSpace(item.BankImgPath) == false ? $"{_imagePath}Upload{item.BankImgPath}" : "";
             }
 
             var result = remitWaitList.Adapt<List<GetSellerRemitWaitListInfo>>();

@@ -9,7 +9,7 @@ using Hello100Admin.Modules.Auth.Application.Common.Abstractions.Persistence.Aut
 using Hello100Admin.Modules.Auth.Application.Common.Abstractions.Services;
 using Hello100Admin.Modules.Auth.Application.Common.Extensions;
 using Hello100Admin.Modules.Auth.Application.Common.Models;
-using Hello100Admin.Modules.Auth.Application.Features.Auth.ReadModels;
+using Hello100Admin.Modules.Auth.Application.Common.Views;
 using Hello100Admin.Modules.Auth.Application.Features.Auth.Responses.GetUser;
 using Hello100Admin.Modules.Auth.Application.Features.Auth.Responses.Login;
 using Hello100Admin.Modules.Auth.Domain.Entities;
@@ -143,8 +143,6 @@ namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.SsoLogin
 
             await _authRepository.InsertAdminLogAsync(adminLog, cancellationToken);
 
-
-
             var config = this.GetMapsterConfig();
 
             var response = new LoginResponse()
@@ -187,9 +185,10 @@ namespace Hello100Admin.Modules.Auth.Application.Features.Auth.Commands.SsoLogin
         {
             var config = new TypeAdapterConfig();
 
-            config.NewConfig<AdminModel, UserResponse>()
+            config.NewConfig<TbAdminView, UserResponse>()
                 .Map(d => d.Id, s => s.Aid)
-                .Map(d => d.AccountId, s => s.AccId);
+                .Map(d => d.AccountId, s => s.AccId)
+                .Map(d => d.LastLoginDt, s => s.LastLoginDt.ToKstDateTimeString());
 
             return config;
         }
