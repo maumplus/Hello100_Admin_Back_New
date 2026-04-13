@@ -1,4 +1,4 @@
-﻿namespace Hello100Admin.Modules.Admin.Domain.Entities
+﻿namespace Hello100Admin.Modules.Auth.Domain.Entities
 {
     /// <summary>
     /// 관리자정보

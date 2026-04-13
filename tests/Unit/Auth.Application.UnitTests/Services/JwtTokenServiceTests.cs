@@ -5,8 +5,8 @@ using Moq;
 using Hello100Admin.Modules.Auth.Domain.Entities;
 using Hello100Admin.Modules.Auth.Application.Common.Services;
 using Hello100Admin.Modules.Auth.Application.Common.Abstractions.Persistence.Auth;
-using Hello100Admin.Modules.Auth.Application.Features.Auth.ReadModels;
 using Hello100Admin.BuildingBlocks.Common.Definition.Enums;
+using Hello100Admin.Modules.Auth.Application.Common.Views;
 
 namespace Hello100Admin.Modules.Auth.Application.UnitTests.Services
 {
@@ -38,7 +38,7 @@ namespace Hello100Admin.Modules.Auth.Application.UnitTests.Services
         {
             // Arrange
             var service = CreateService();
-            var user = new AdminModel
+            var user = new TbAdminView
             {
                 Aid = "A0000001",
                 AccId = "testuser",

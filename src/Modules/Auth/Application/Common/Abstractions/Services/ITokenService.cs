@@ -1,5 +1,5 @@
 using Hello100Admin.BuildingBlocks.Common.Definition.Enums;
-using Hello100Admin.Modules.Auth.Application.Features.Auth.ReadModels;
+using Hello100Admin.Modules.Auth.Application.Common.Views;
 using Hello100Admin.Modules.Auth.Domain.Entities;
 
 namespace Hello100Admin.Modules.Auth.Application.Common.Abstractions.Services;
@@ -12,7 +12,7 @@ public interface ITokenService
     /// <summary>
     /// Access Token 생성
     /// </summary>
-    string GenerateAccessToken(AdminModel adminInfo, IEnumerable<string> roles, IEnumerable<ChartType> chartTypes);
+    string GenerateAccessToken(TbAdminView adminInfo, IEnumerable<string> roles, IEnumerable<ChartType> chartTypes);
 
     /// <summary>
     /// Refresh Token 생성
@@ -23,9 +23,4 @@ public interface ITokenService
     /// Refresh Token 검증
     /// </summary>
     Task<bool> ValidateRefreshTokenAsync(string token, CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Refresh Token으로 사용자 조회
-    /// </summary>
-    Task<AdminModel?> GetUserByRefreshTokenAsync(string token, CancellationToken cancellationToken = default);
 }
