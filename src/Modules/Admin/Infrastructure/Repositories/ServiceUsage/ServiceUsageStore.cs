@@ -780,6 +780,14 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.ServiceUsage
             sb.AppendLine("                                  FROM tb_eghis_hosp_receipt_info ti         ");
             sb.AppendLine("                                 INNER JOIN hello100.tb_eghis_hosp_info tehi ");
             sb.AppendLine("                                    ON ti.hosp_no = tehi.hosp_no             ");
+            sb.AppendLine("                            INNER JOIN hello100.tb_hospital_info thi                    ");
+            sb.AppendLine("                                    ON tehi.hosp_key = thi.hosp_key                          ");
+
+            if (excludeTestHospitalsYn == AdminBizConstant.StringYn.YES)
+            {
+                sb.AppendLine("                           AND thi.is_test = 0                                       ");
+            }
+
             sb.AppendLine("                                 WHERE 1 = 1                                 ");
 
             if (string.IsNullOrWhiteSpace(fromDt) == false)
