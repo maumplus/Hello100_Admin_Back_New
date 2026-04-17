@@ -165,10 +165,11 @@ namespace Hello100Admin.Modules.Admin.Infrastructure.Repositories.Hospitals
 
             #region == Query ==
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine(" DELETE FROM tb_hospital_info");
+            sb.AppendLine(" DELETE FROM tb_hospital_medical_info");
             sb.AppendLine("  WHERE hosp_key = @HospKey ;");
 
-            // tb_hospital_medical_info 삭제도 필요할 것으로 보임
+            sb.AppendLine(" DELETE FROM tb_hospital_info");
+            sb.AppendLine("  WHERE hosp_key = @HospKey ;");
 
             if (string.IsNullOrWhiteSpace(hospNo) == false)
             {
