@@ -1,0 +1,15 @@
+<Project>
+  <PropertyGroup>
+	<!--버전 관리-->
+    <AssemblyVersion>2.0.0.0</AssemblyVersion>
+    <FileVersion>2.26.0.0</FileVersion>
+    <InformationalVersion>$(FileVersion)$(SourceRevisionId)</InformationalVersion>
+	
+	<!--빌드 공통 설정-->
+	<Nullable>enable</Nullable>
+	<ImplicitUsings>enable</ImplicitUsings>
+
+	<!-- 경고 설정 -->
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+</Project>
